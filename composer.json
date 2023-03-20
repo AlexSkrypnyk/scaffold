@@ -1,0 +1,24 @@
+{
+    "name": "alexskrypnyk/scaffold",
+    "type": "library",
+    "description": "Provides scaffold functionality.",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Alex Skrypnyk",
+            "email": "alex@drevops.com",
+            "homepage": "https://alexskrypnyk.com",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "https://github.com/alexskrypnyk/scaffold",
+    "support": {
+        "issues": "https://github.com/alexskrypnyk/scaffold/issues",
+        "source": "https://github.com/alexskrypnyk/scaffold"
+    },
+    "require": {},
+    "scripts": {
+        "lint": "echo Would run code lint",
+        "test": "echo Would run tests"
+    }
+}

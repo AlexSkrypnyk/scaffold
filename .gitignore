@@ -1,0 +1,5 @@
+/vendor
+/node_modules
+/composer.lock
+/package-json.lock
+/yarn.lock
