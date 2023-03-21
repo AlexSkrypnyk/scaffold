@@ -34,28 +34,40 @@ Generic project scaffold template
 
 ## Installation
 [//]: # (#;< COMPOSER)
+    
     composer require alexskrypnyk/scaffold
+    
 [//]: # (#;> COMPOSER)
 [//]: # (#;< NODEJS)
+    
     npm install @alexskrypnyk/scaffold
+    
 [//]: # (#;> NODEJS)
 
 ## Usage
 [//]: # (#;< COMPOSER)
+
     vendor/bin/scaffold
+    
 [//]: # (#;> COMPOSER)
 [//]: # (#;< NODEJS)
+
     node_modules/.bin/scaffold
+    
 [//]: # (#;> NODEJS)
 
 ## Maintenance
 [//]: # (#;< COMPOSER)
+
     composer install
     composer lint
     composer test
+    
 [//]: # (#;> COMPOSER)
 [//]: # (#;< NODEJS)
+
     npm install
     npm run lint
     npm run test
+    
 [//]: # (#;> NODEJS)
