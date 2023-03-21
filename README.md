@@ -1,24 +1,15 @@
 # Scaffold
 
-Generic project scaffold template
+Generic project yourproject template
 
 [//]: # (#;< META)
+<br>
 
-<table>
-  <tr>
-    <td colspan="5" align="center"><strong>META: How to use this scaffold repository</strong></td>
-  </tr>
-  <tr>
-    <td>1. Click on <strong>Use this template</strong> > <strong>Create a new repository</strong></td>
-    <td> → </td>
-    <td>2. Checkout locally and run <code>./init.sh</code></td> 
-    <td> → </td>
-    <td>3. Adjust this <code>README.md</code> as required</td>
-  </tr>
-  <tr>
-    <td colspan="5">The content of this <code>README.md</code> file will be a part of your repository.</td>
-  </tr>
-</table>
+| **META: How to use this scaffold repository**                                                                                                                                                                                      |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1. Click on **Use this template** > **Create a new repository**<br>2. Checkout locally <br>3. Run `./init.sh` to replace `yournamespace`, `yourproject`, `Your Name` strings with your own |
+| The contents below will be a part of your repository.                                                                                                                                                                              |
+<br>
 
 [//]: # (#;> META)
 
@@ -33,41 +24,47 @@ Generic project scaffold template
 - Your third feature as a list item
 
 ## Installation
+
 [//]: # (#;< COMPOSER)
-    
-    composer require alexskrypnyk/scaffold
-    
+
+    composer require yournamespace/yourproject
+
 [//]: # (#;> COMPOSER)
+
 [//]: # (#;< NODEJS)
-    
-    npm install @alexskrypnyk/scaffold
-    
+
+    npm install @yournamespace/yourproject
+
 [//]: # (#;> NODEJS)
 
 ## Usage
+
 [//]: # (#;< COMPOSER)
 
-    vendor/bin/scaffold
-    
+    vendor/bin/yourproject
+
 [//]: # (#;> COMPOSER)
+
 [//]: # (#;< NODEJS)
 
-    node_modules/.bin/scaffold
-    
+    node_modules/.bin/yourproject
+
 [//]: # (#;> NODEJS)
 
 ## Maintenance
+
 [//]: # (#;< COMPOSER)
 
     composer install
     composer lint
     composer test
-    
+
 [//]: # (#;> COMPOSER)
+
 [//]: # (#;< NODEJS)
 
     npm install
     npm run lint
     npm run test
-    
+
 [//]: # (#;> NODEJS)
