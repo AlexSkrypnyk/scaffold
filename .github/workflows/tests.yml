@@ -11,4 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - run: echo "Would run tests"
+    #;< COMPOSER
+    - uses: actions/cache@v3
+      with:
+        path: /tmp/composer-cache
+        key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+    - uses: php-actions/composer@v6
+    - run: composer lint
+    - run: composer test
+    #;> COMPOSER
+    #;< NODEJS
+    - uses: actions/setup-node@v3
+    - run: npm install
+    - run: npm run lint
+    - run: npm run test
+    #;> NODEJS

@@ -51,26 +51,25 @@ remove_tokens_with_content() {
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "${dir}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
 }
 
-remove_composer() {
-  rm composer.json >/dev/null
-  replace_string_content "composer require alexskrypnyk/scaffold" ""
-  replace_string_content "vendor/bin/scaffold" ""
-  replace_string_content "composer install" ""
-  replace_string_content "composer lint" ""
-  replace_string_content "composer test" ""
+remove_special_comments() {
+  local token="#;"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8  xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
-remove_node() {
+remove_composer() {
+  rm composer.json >/dev/null
+  remove_tokens_with_content "COMPOSER"
+}
+
+remove_nodejs() {
   rm package.json >/dev/null
-  replace_string_content "npm install @alexskrypnyk/scaffold" ""
-  replace_string_content "node_modules/.bin/scaffold" ""
-  replace_string_content "npm install" ""
-  replace_string_content "npm run lint" ""
-  replace_string_content "npm run test" ""
+  remove_tokens_with_content "NODEJS"
 }
 
 [ "$usecomposer" != "y" ] && remove_composer
-[ "$usenodejs" != "y" ] && remove_node
+[ "$usenodejs" != "y" ] && remove_nodejs
 
 replace_string_content "alexskrypnyk" "$namespace"
 replace_string_content "AlexSkrypnyk" "$namespace"
@@ -78,5 +77,6 @@ replace_string_content "scaffold" "$project"
 replace_string_content "Alex Skrypnyk" "$author"
 
 remove_tokens_with_content "META"
+remove_special_comments
 
 [ "$removeself" != "n" ] && rm -- "$0"
