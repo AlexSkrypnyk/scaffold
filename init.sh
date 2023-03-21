@@ -7,7 +7,7 @@
 # ./init
 #
 # Silent:
-# ./init yournamespace yourproject "your name"
+# ./init yournamespace yourproject "Your Name"
 #
 # shellcheck disable=SC2162
 
@@ -71,10 +71,11 @@ remove_nodejs() {
 [ "$usecomposer" != "y" ] && remove_composer
 [ "$usenodejs" != "y" ] && remove_nodejs
 
-replace_string_content "alexskrypnyk" "$namespace"
+replace_string_content "yournamespace" "$namespace"
+replace_string_content "yournamespace" "$namespace"
 replace_string_content "AlexSkrypnyk" "$namespace"
-replace_string_content "scaffold" "$project"
-replace_string_content "Alex Skrypnyk" "$author"
+replace_string_content "yourproject" "$project"
+replace_string_content "Your Name" "$author"
 
 remove_tokens_with_content "META"
 remove_special_comments

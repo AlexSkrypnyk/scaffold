@@ -1,20 +1,20 @@
 {
-    "name": "alexskrypnyk/scaffold",
+    "name": "yournamespace/yourproject",
     "type": "library",
-    "description": "Provides scaffold functionality.",
+    "description": "Provides yourproject functionality.",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Alex Skrypnyk",
-            "email": "alex@drevops.com",
-            "homepage": "https://alexskrypnyk.com",
+            "name": "Your Name",
+            "email": "yourproject@yournamespace.com",
+            "homepage": "https://yournamespace.com",
             "role": "Maintainer"
         }
     ],
-    "homepage": "https://github.com/alexskrypnyk/scaffold",
+    "homepage": "https://github.com/yournamespace/yourproject",
     "support": {
-        "issues": "https://github.com/alexskrypnyk/scaffold/issues",
-        "source": "https://github.com/alexskrypnyk/scaffold"
+        "issues": "https://github.com/yournamespace/yourproject/issues",
+        "source": "https://github.com/yournamespace/yourproject"
     },
     "require": {},
     "scripts": {
