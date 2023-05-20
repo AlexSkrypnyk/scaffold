@@ -13,7 +13,7 @@ Generic project scaffold template
 
 [//]: # (#;> META)
 
-[![Tests](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/tests.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/tests.yml)
+[![Test](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test.yml)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/scaffold)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/scaffold)
 
