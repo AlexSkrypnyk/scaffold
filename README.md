@@ -1,6 +1,6 @@
 # Scaffold
 
-Generic project yourproject template
+Generic project scaffold template
 
 [//]: # (#;< META)
 <br>

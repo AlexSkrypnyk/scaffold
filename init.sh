@@ -48,6 +48,13 @@ replace_string_content() {
   set -e
 }
 
+remove_string_content() {
+  local token="${1}"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+}
+
 remove_tokens_with_content() {
   local token="${1}"
   local dir="${2-$(pwd)}"
@@ -81,6 +88,10 @@ replace_string_content "yournamespace" "${namespace}"
 replace_string_content "AlexSkrypnyk" "${namespace}"
 replace_string_content "yourproject" "${project}"
 replace_string_content "Your Name" "${author}"
+
+remove_string_content "Generic project scaffold template"
+replace_string_content "Scaffold" "${project}"
+replace_string_content "scaffold" "${project}"
 
 remove_tokens_with_content "META"
 remove_special_comments
