@@ -86,6 +86,8 @@ remove_special_comments() {
 }
 
 remove_php() {
+  rm -f template-simple-script.php || true
+  rm -Rf src || true
 	rm -f composer.json >/dev/null || true
 	rm -f composer.lock >/dev/null || true
 	rm -Rf vendor >/dev/null || true
@@ -93,6 +95,7 @@ remove_php() {
 	rm -f phpcs.xml || true
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
+  rm -f box.json || true
 	remove_tokens_with_content "PHP"
 }
 

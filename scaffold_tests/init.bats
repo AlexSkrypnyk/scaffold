@@ -9,7 +9,7 @@ load _helper.bash
 # The name of the script to run.
 export SCRIPT_FILE="init.sh"
 
-@test "Variables" {
+@test "Smoke" {
   assert_contains "scaffold" "${BUILD_DIR}"
 }
 
@@ -178,6 +178,7 @@ assert_files_present_common() {
   assert_file_exists ".editorconfig"
   assert_file_exists ".gitattributes"
   assert_file_exists ".gitignore"
+  assert_file_contains ".gitignore" ".build"
   assert_file_exists "README.md"
   assert_file_not_exists "LICENSE"
   assert_file_not_exists ".github/workflows/scaffold_test.yml"
@@ -208,6 +209,8 @@ assert_files_present_php() {
 
   pushd "${dir}" >/dev/null || exit 1
 
+  assert_file_exists template-simple-script.php
+  assert_dir_exists src
   assert_file_contains "composer.json" '"name": "lucasfilm/star-wars"'
   assert_file_contains "composer.json" '"description": "Provides star-wars functionality."'
   assert_file_contains "composer.json" '"name": "Jane Doe"'
@@ -221,6 +224,7 @@ assert_files_present_php() {
   assert_file_exists "phpcs.xml"
   assert_file_exists "phpmd.xml"
   assert_file_exists "phpstan.neon"
+  assert_file_exists "box.json"
 
   popd >/dev/null || exit 1
 }
@@ -230,6 +234,8 @@ assert_files_absent_php() {
 
   pushd "${dir}" >/dev/null || exit 1
 
+  assert_file_not_exists template-simple-script.php
+  assert_dir_not_exists src
   assert_file_not_exists "composer.json"
   assert_file_not_exists "composer.json"
   assert_file_not_contains ".gitignore" "/vendor"
@@ -239,6 +245,7 @@ assert_files_absent_php() {
   assert_file_not_exists "phpcs.xml"
   assert_file_not_exists "phpmd.xml"
   assert_file_not_exists "phpstan.neon"
+  assert_file_not_exists "box.json"
 
   popd >/dev/null || exit 1
 }
