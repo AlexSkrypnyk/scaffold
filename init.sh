@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ##
-# Init repository by replacing string tokens.
+# Adjust project repository based on user input.
 #
 # @usage:
 # Interactive prompt:
@@ -17,6 +17,9 @@ set -e
 namespace=${1:-}
 project=${2:-}
 author=${3:-}
+
+echo "Please follow the prompts to adjust your project configuration"
+echo
 
 [ -z "${namespace}" ] && read -p 'Namespace: ' namespace
 [ -z "${project}" ] && read -p 'Project: ' project
@@ -115,3 +118,6 @@ remove_tokens_with_content "META"
 remove_special_comments
 
 [ "${remove_self}" != "n" ] && rm -- "$0" || true
+
+echo
+echo "Initialization complete."
