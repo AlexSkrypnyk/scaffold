@@ -7,11 +7,11 @@ on:
       - 'feature/**'
 
 jobs:
-  test:
+  #;< COMPOSER
+  test-php:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    #;< COMPOSER
     - uses: actions/cache@v3
       with:
         path: /tmp/composer-cache
@@ -19,10 +19,14 @@ jobs:
     - uses: php-actions/composer@v6
     - run: composer lint
     - run: composer test
-    #;> COMPOSER
-    #;< NODEJS
-    - uses: actions/setup-node@v3
-    - run: npm install
-    - run: npm run lint
-    - run: npm run test
-    #;> NODEJS
+  #;> COMPOSER
+  #;< NODEJS
+  test-nodejs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run lint
+      - run: npm run test
+  #;> NODEJS
