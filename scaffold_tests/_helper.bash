@@ -34,7 +34,7 @@ setup() {
   copy_code "${BUILD_DIR}" >/dev/null
 
   # Print debug information if "--verbose-run" is passed.
-  [ "$BATS_VERBOSE_RUN" = "1" ] && echo "BUILD_DIR: ${BUILD_DIR}">&3
+  [ "$BATS_VERBOSE_RUN" = "1" ] && echo "BUILD_DIR: ${BUILD_DIR}" >&3
 
   # Change directory to the current project directory for each test. Tests
   # requiring to operate outside of BUILD_DIR (like deployment tests)
