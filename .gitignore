@@ -1,5 +1,9 @@
+#;< COMPOSER
 /vendor
-/node_modules
 /composer.lock
+#;> COMPOSER
+#;< NODEJS
+/node_modules
 /package-json.lock
 /yarn.lock
+#;> NODEJS
