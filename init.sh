@@ -171,16 +171,16 @@ uncomment_line ".gitattributes" ".github"
 uncomment_line ".gitattributes" ".gitignore"
 uncomment_line ".gitattributes" "tests"
 
-remove_tokens_with_content "META"
-remove_special_comments
-
 rm -f LICENSE >/dev/null || true
 rm -f ".github/workflows/scaffold_test.yml" >/dev/null || true
 
-[ "${use_release_drafter}" != "y" ] && rm -f .github/release-drafter.yml && rm -f .github/workflows/draft-release.yml || true
+[ "${use_release_drafter}" != "y" ] && rm -f .github/release-drafter.yml && remove_tokens_with_content "RELEASEDRAFTER" || true
 [ "${use_pr_autoassign}" != "y" ] && rm -f .github/workflows/auto-assign-pr-author.yml || true
 [ "${use_funding}" != "y" ] && rm -f .github/FUNDING.yml || true
 [ "${use_pr_template}" != "y" ] && rm -f .github/PULL_REQUEST_TEMPLATE.md || true
+
+remove_tokens_with_content "META"
+remove_special_comments
 
 [ "${remove_self}" != "n" ] && rm -- "$0" || true
 

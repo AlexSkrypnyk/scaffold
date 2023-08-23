@@ -215,7 +215,7 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_file_not_exists ".github/release-drafter.yml"
-  assert_file_not_exists ".github/workflows/draft-release.yml"
+  assert_file_not_contains ".github/workflows/release.yml" "release-drafter"
 
   assert_output_contains "Initialization complete."
 }
