@@ -19,6 +19,8 @@ export SCRIPT_FILE="init.sh"
     "star-wars" # project
     "Jane Doe"  # author
     "nothing"   # use PHP
+    "nothing"   # use PHP Command
+    "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -32,6 +34,99 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_common "${BUILD_DIR}"
 
   assert_files_present_php "${BUILD_DIR}"
+  assert_files_present_php_command "${BUILD_DIR}"
+  assert_files_present_php_command_build "${BUILD_DIR}"
+  assert_files_absent_php_script "${BUILD_DIR}"
+
+  assert_files_present_nodejs "${BUILD_DIR}"
+
+  assert_output_contains "Initialization complete."
+}
+
+@test "Init, php command, no build" {
+  answers=(
+    "lucasfilm" # organisation
+    "star-wars" # project
+    "Jane Doe"  # author
+    "nothing"   # use PHP
+    "nothing"   # use PHP Command
+    "n"         # use PHP Command Build
+    "nothing"   # use NodeJS
+    "nothing"   # use GitHub release drafter
+    "nothing"   # use GitHub pr auto-assign
+    "nothing"   # use GitHub funding
+    "nothing"   # remove init script
+  )
+  output=$(run_script_interactive "${answers[@]}")
+
+  assert_output_contains "Please follow the prompts to adjust your project configuration"
+
+  assert_files_present_common "${BUILD_DIR}"
+
+  assert_files_present_php "${BUILD_DIR}"
+  assert_files_present_php_command "${BUILD_DIR}"
+  assert_files_absent_php_command_build "${BUILD_DIR}"
+  assert_files_absent_php_script "${BUILD_DIR}"
+
+  assert_files_present_nodejs "${BUILD_DIR}"
+
+  assert_output_contains "Initialization complete."
+}
+
+@test "Init, php script" {
+  answers=(
+    "lucasfilm" # organisation
+    "star-wars" # project
+    "Jane Doe"  # author
+    "nothing"   # use PHP
+    "n"         # use PHP Command
+    "nothing"   # use PHP Script
+    "nothing"   # use NodeJS
+    "nothing"   # use GitHub release drafter
+    "nothing"   # use GitHub pr auto-assign
+    "nothing"   # use GitHub funding
+    "nothing"   # remove init script
+  )
+  output=$(run_script_interactive "${answers[@]}")
+
+  assert_output_contains "Please follow the prompts to adjust your project configuration"
+
+  assert_files_present_common "${BUILD_DIR}"
+
+  assert_files_present_php "${BUILD_DIR}"
+  assert_files_absent_php_command "${BUILD_DIR}"
+  assert_files_absent_php_command_build "${BUILD_DIR}"
+  assert_files_present_php_script "${BUILD_DIR}"
+
+  assert_files_present_nodejs "${BUILD_DIR}"
+
+  assert_output_contains "Initialization complete."
+}
+
+@test "Init, neither php script nor php command" {
+  answers=(
+    "lucasfilm" # organisation
+    "star-wars" # project
+    "Jane Doe"  # author
+    "nothing"   # use PHP
+    "n"         # use PHP Command
+    "n"         # use PHP Script
+    "nothing"   # use NodeJS
+    "nothing"   # use GitHub release drafter
+    "nothing"   # use GitHub pr auto-assign
+    "nothing"   # use GitHub funding
+    "nothing"   # remove init script
+  )
+  output=$(run_script_interactive "${answers[@]}")
+
+  assert_output_contains "Please follow the prompts to adjust your project configuration"
+
+  assert_files_present_common "${BUILD_DIR}"
+
+  assert_files_present_php "${BUILD_DIR}"
+  assert_files_absent_php_command "${BUILD_DIR}"
+  assert_files_absent_php_command_build "${BUILD_DIR}"
+  assert_files_absent_php_script "${BUILD_DIR}"
 
   assert_files_present_nodejs "${BUILD_DIR}"
 
@@ -69,6 +164,8 @@ export SCRIPT_FILE="init.sh"
     "star-wars" # project
     "Jane Doe"  # author
     "nothing"   # use PHP
+    "nothing"   # use PHP Command
+    "nothing"   # use PHP Command Build
     "n"         # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -94,6 +191,8 @@ export SCRIPT_FILE="init.sh"
     "star-wars" # project
     "Jane Doe"  # author
     "nothing"   # use PHP
+    "nothing"   # use PHP Command
+    "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "n"         # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -120,6 +219,8 @@ export SCRIPT_FILE="init.sh"
     "star-wars" # project
     "Jane Doe"  # author
     "nothing"   # use PHP
+    "nothing"   # use PHP Command
+    "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "n"         # use GitHub pr auto-assign
@@ -145,6 +246,8 @@ export SCRIPT_FILE="init.sh"
     "star-wars" # project
     "Jane Doe"  # author
     "nothing"   # use PHP
+    "nothing"   # use PHP Command
+    "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -209,8 +312,6 @@ assert_files_present_php() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_exists template-simple-script.php
-  assert_dir_exists src
   assert_file_contains "composer.json" '"name": "lucasfilm/star-wars"'
   assert_file_contains "composer.json" '"description": "Provides star-wars functionality."'
   assert_file_contains "composer.json" '"name": "Jane Doe"'
@@ -225,7 +326,74 @@ assert_files_present_php() {
   assert_file_exists "phpcs.xml"
   assert_file_exists "phpmd.xml"
   assert_file_exists "phpstan.neon"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_present_php_command() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_dir_exists src
+
+  assert_dir_exists tests/phpunit/unit/Command
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_absent_php_command() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_dir_not_exists src
+  assert_dir_not_exists bin
+  assert_dir_not_exists tests/phpunit/unit/Command
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_present_php_command_build() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
   assert_file_exists "box.json"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_absent_php_command_build() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_file_not_exists "box.json"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_present_php_script() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_file_exists template-simple-script.php
+  assert_file_exists tests/phpunit/unit/ExampleScriptUnitTest.php
+  assert_file_exists tests/phpunit/unit/ScriptUnitTestBase.php
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_absent_php_script() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_file_not_exists template-simple-script.php
+  assert_file_not_exists tests/phpunit/unit/ExampleScriptUnitTest.php
+  assert_file_not_exists tests/phpunit/unit/ScriptUnitTestBase.php
 
   popd >/dev/null || exit 1
 }
@@ -235,8 +403,6 @@ assert_files_absent_php() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_not_exists template-simple-script.php
-  assert_dir_not_exists src
   assert_file_not_exists "composer.json"
   assert_file_not_exists "composer.json"
   assert_file_not_contains ".gitignore" "/vendor"
@@ -247,7 +413,10 @@ assert_files_absent_php() {
   assert_file_not_exists "phpcs.xml"
   assert_file_not_exists "phpmd.xml"
   assert_file_not_exists "phpstan.neon"
-  assert_file_not_exists "box.json"
+
+  assert_files_absent_php_command "${dir}"
+  assert_files_absent_php_command_build "${dir}"
+  assert_files_absent_php_script "${dir}"
 
   popd >/dev/null || exit 1
 }
