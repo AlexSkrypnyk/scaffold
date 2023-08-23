@@ -51,7 +51,7 @@ remove_string_content() {
   local token="${1}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
 }
 
 remove_tokens_with_content() {
@@ -59,6 +59,14 @@ remove_tokens_with_content() {
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
+}
+
+uncomment_line() {
+  local file_name="${1}"
+  local start_string="${2}"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  LC_ALL=C.UTF-8 sed "${sed_opts[@]}" -e "s/^# ${start_string}/${start_string}/" "${file_name}"
 }
 
 remove_special_comments() {
@@ -69,17 +77,17 @@ remove_special_comments() {
 }
 
 remove_composer() {
-  rm composer.json >/dev/null
-  rm composer.lock >/dev/null
-  rm -Rf vendor >/dev/null
+  rm -f omposer.json >/dev/null || true
+  rm -f composer.lock >/dev/null || true
+  rm -Rf vendor >/dev/null || true
   remove_tokens_with_content "COMPOSER"
 }
 
 remove_nodejs() {
-  rm package.json >/dev/null
-  rm package.lock >/dev/null
-  rm yarn.lock >/dev/null
-  rm -Rf node_modules >/dev/null
+  rm -f package.json >/dev/null || true
+  rm -f package.lock >/dev/null || true
+  rm -f yarn.lock >/dev/null || true
+  rm -Rf node_modules >/dev/null || true
   remove_tokens_with_content "NODEJS"
 }
 
@@ -96,7 +104,14 @@ remove_string_content "Generic project scaffold template"
 replace_string_content "Scaffold" "${project}"
 replace_string_content "scaffold" "${project}"
 
+remove_string_content "# Uncomment the lines below"
+uncomment_line ".gitattributes" ".editorconfig"
+uncomment_line ".gitattributes" ".gitattributes"
+uncomment_line ".gitattributes" ".github"
+uncomment_line ".gitattributes" ".gitignore"
+uncomment_line ".gitattributes" "tests"
+
 remove_tokens_with_content "META"
 remove_special_comments
 
-[ "${remove_self}" != "n" ] && rm -- "$0"
+[ "${remove_self}" != "n" ] && rm -- "$0" || true
