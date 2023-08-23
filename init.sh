@@ -14,9 +14,9 @@
 set -u
 set -e
 
-namespace=${1:-}
-project=${2:-}
-author=${3:-}
+namespace=${1-}
+project=${2-}
+author=${3-}
 
 echo "Please follow the prompts to adjust your project configuration"
 echo
@@ -24,12 +24,12 @@ echo
 [ -z "${namespace}" ] && read -p 'Namespace: ' namespace
 [ -z "${project}" ] && read -p 'Project: ' project
 [ -z "${author}" ] && read -p 'Author: ' author
-[ -z "${1:-}" ] && read -p 'Use PHP [Y/n]: ' use_php
-[ -z "${1:-}" ] && read -p 'Use NodeJS [Y/n]:' use_nodejs
-[ -z "${1:-}" ] && read -p 'Use GitHub release drafter [Y/n]:' use_release_drafter
-[ -z "${1:-}" ] && read -p 'Use GitHub PR author auto-assign [Y/n]:' use_pr_autoassign
-[ -z "${1:-}" ] && read -p 'Use GitHub funding [Y/n]:' use_funding
-[ -z "${1:-}" ] && read -p 'Remove this script [Y/n]: ' remove_self
+[ -z "${1-}" ] && read -p 'Use PHP [Y/n]: ' use_php
+[ -z "${1-}" ] && read -p 'Use NodeJS [Y/n]:' use_nodejs
+[ -z "${1-}" ] && read -p 'Use GitHub release drafter [Y/n]:' use_release_drafter
+[ -z "${1-}" ] && read -p 'Use GitHub PR author auto-assign [Y/n]:' use_pr_autoassign
+[ -z "${1-}" ] && read -p 'Use GitHub funding [Y/n]:' use_funding
+[ -z "${1-}" ] && read -p 'Remove this script [Y/n]: ' remove_self
 
 : "${namespace:?Namespace is required}"
 : "${project:?Project is required}"
