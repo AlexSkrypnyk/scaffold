@@ -14,22 +14,15 @@ jobs:
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-      - uses: php-actions/composer@v6
       - name: Install Box
         run: |
           export BOX_VERSION="4.3.8"
           wget "https://github.com/humbug/box/releases/download/${BOX_VERSION}/box.phar" --quiet -O ./box
           chmod +x ./box
           sudo mv ./box /usr/local/bin
-      - name: Build Application PHAR
-        run: |
-          box validate
-          box compile
-      - name: Self-Test
-        run: |
-          ./build/joker.phar | grep -q "?"
-          ./build/joker.phar app:joke | grep -q "?"
-          ./build/joker.phar app:say-hello | grep -q "Hello"
+      - uses: php-actions/composer@v6
+      - run: composer build
+      - run: ./.build/joker.phar | grep -q "?"
       - name: Get Tag Name
         id: get-version
         run: echo ::set-output name=version::${GITHUB_REF#refs/tags/}

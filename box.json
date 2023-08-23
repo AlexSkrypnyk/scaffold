@@ -1,0 +1,10 @@
+{
+  "output": ".build/joker.phar",
+  "compression": "GZ",
+  "finder": [
+    {
+      "in": "./",
+      "exclude": ["tests", "template-simple-script.php"]
+    }
+  ]
+}

@@ -52,7 +52,11 @@
             "phpstan"
         ],
         "lint:fix": "phpcbf",
-        "test": "phpunit --do-not-cache-result tests/phpunit/unit"
+        "test": "phpunit --do-not-cache-result tests/phpunit/unit",
+        "build": [
+            "box validate",
+            "box compile"
+        ]
     },
     "bin": ["bin/joker"]
 }
