@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="custom">
-    <description>Custom PHPCS Standard.</description>
+    <description>Custom PHPCS standard.</description>
 
     <!-- Coding standard. -->
     <rule ref="Drupal"/>

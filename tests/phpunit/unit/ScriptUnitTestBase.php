@@ -34,7 +34,7 @@ abstract class ScriptUnitTestBase extends TestCase {
     putenv('SCRIPT_RUN_SKIP=1');
     putenv('SCRIPT_QUIET=1');
     if (!is_readable($this->script)) {
-      throw new \RuntimeException(sprintf('Unable to include script file %s.', $this->script));
+      throw new \RuntimeException(\sprintf('Unable to include script file %s.', $this->script));
     }
     require_once $this->script;
 
@@ -107,7 +107,7 @@ abstract class ScriptUnitTestBase extends TestCase {
    * Print the contents of the temporary directory.
    */
   protected function printTempDir() {
-    $it = new RecursiveTreeIterator(new RecursiveDirectoryIterator($this->tmpDir, RecursiveDirectoryIterator::SKIP_DOTS));
+    $it = new \RecursiveTreeIterator(new \RecursiveDirectoryIterator($this->tmpDir, \RecursiveDirectoryIterator::SKIP_DOTS));
     print PHP_EOL;
     foreach ($it as $value) {
       print $value . PHP_EOL;

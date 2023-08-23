@@ -50,7 +50,6 @@ define('ERROR_LEVEL', E_USER_WARNING);
 function main(array $argv, $argc) {
   if (in_array($argv[1] ?? NULL, ['--help', '-help', '-h', '-?'])) {
     print_help();
-
     return EXIT_SUCCESS;
   }
 
