@@ -5,10 +5,12 @@ Generic project scaffold template
 [//]: # (#;< META)
 <br>
 
-| **META: How to use this scaffold repository**                                                                                                                                                                                      |
-|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **META: How to use this scaffold repository**                                                                                                                                              |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1. Click on **Use this template** > **Create a new repository**<br>2. Checkout locally <br>3. Run `./init.sh` to replace `yournamespace`, `yourproject`, `Your Name` strings with your own |
-| The contents below will be a part of your repository.                                                                                                                                                                              |
+| The contents below will be a part of your repository.                                                                                                                                      |
+| [![Scaffold test](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold_test.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold_test.yml)   |
+
 <br>
 
 [//]: # (#;> META)

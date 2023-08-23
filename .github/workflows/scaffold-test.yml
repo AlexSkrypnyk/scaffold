@@ -1,0 +1,35 @@
+name: Scaffold test
+
+# Workflow to **validate** the **integrity** of the scaffold template itself.
+# This workflow will be automatically removed from the scaffolded project
+# after running init.sh script.
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+
+jobs:
+  scaffold-shfmt:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: reviewdog/action-shfmt@v1
+
+  scaffold-shellcheck:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ludeeus/action-shellcheck@2.0.0
+
+  scaffold-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        cache: 'npm'
+        cache-dependency-path: scaffold_tests/package-lock.json
+    - run: npm --prefix=scaffold_tests ci
+    - run: ./scaffold_tests/node_modules/.bin/bats --print-output-on-failure --formatter tap scaffold_tests
