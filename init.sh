@@ -4,10 +4,10 @@
 #
 # @usage:
 # Interactive prompt:
-# ./init
+# ./init.sh
 #
 # Silent:
-# ./init yournamespace yourproject "Your Name"
+# ./init.sh yournamespace yourproject "Your Name"
 #
 # shellcheck disable=SC2162
 
@@ -40,11 +40,10 @@ remove_self="$(echo "${remove_self}" | tr '[:upper:]' '[:lower:]')"
 replace_string_content() {
   local needle="${1}"
   local replacement="${2}"
-  local dir="${3:-$(pwd)}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   set +e
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "${dir}" | xargs sed "${sed_opts[@]}" "s!$needle!$replacement!g" || true
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "$(pwd)" | xargs sed "${sed_opts[@]}" "s!$needle!$replacement!g" || true
   set -e
 }
 
@@ -57,10 +56,9 @@ remove_string_content() {
 
 remove_tokens_with_content() {
   local token="${1}"
-  local dir="${2-$(pwd)}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "${dir}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
 }
 
 remove_special_comments() {
@@ -72,11 +70,16 @@ remove_special_comments() {
 
 remove_composer() {
   rm composer.json >/dev/null
+  rm composer.lock >/dev/null
+  rm -Rf vendor >/dev/null
   remove_tokens_with_content "COMPOSER"
 }
 
 remove_nodejs() {
   rm package.json >/dev/null
+  rm package.lock >/dev/null
+  rm yarn.lock >/dev/null
+  rm -Rf node_modules >/dev/null
   remove_tokens_with_content "NODEJS"
 }
 
