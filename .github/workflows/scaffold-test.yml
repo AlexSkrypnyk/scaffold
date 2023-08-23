@@ -11,22 +11,13 @@ on:
       - 'feature/**'
 
 jobs:
-  scaffold-shfmt:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: reviewdog/action-shfmt@v1
-
-  scaffold-shellcheck:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ludeeus/action-shellcheck@2.0.0
 
   scaffold-test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: reviewdog/action-shfmt@v1
+    - uses: ludeeus/action-shellcheck@2.0.0
     - uses: actions/setup-node@v3
       with:
         cache: 'npm'
