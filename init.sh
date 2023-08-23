@@ -29,6 +29,7 @@ echo
 [ -z "${1-}" ] && read -p 'Use GitHub release drafter [Y/n]:' use_release_drafter
 [ -z "${1-}" ] && read -p 'Use GitHub PR author auto-assign [Y/n]:' use_pr_autoassign
 [ -z "${1-}" ] && read -p 'Use GitHub funding [Y/n]:' use_funding
+[ -z "${1-}" ] && read -p 'Use GitHub PR template [Y/n]:' use_pr_template
 [ -z "${1-}" ] && read -p 'Remove this script [Y/n]: ' remove_self
 
 : "${namespace:?Namespace is required}"
@@ -40,6 +41,7 @@ use_nodejs="${use_nodejs:-y}"
 use_release_drafter="${use_release_drafter:-y}"
 use_pr_autoassign="${use_pr_autoassign:-y}"
 use_funding="${use_funding:-y}"
+use_pr_template="${use_pr_template:-y}"
 remove_self="${remove_self:-y}"
 
 use_php="$(echo "${use_php}" | tr '[:upper:]' '[:lower:]')"
@@ -133,9 +135,10 @@ remove_special_comments
 rm -f LICENSE >/dev/null || true
 rm -f ".github/workflows/scaffold_test.yml" >/dev/null || true
 
-[ "${use_release_drafter}" = "n" ] && rm -f .github/release-drafter.yml && rm -f .github/workflows/draft-release.yml || true
-[ "${use_pr_autoassign}" = "n" ] && rm -f .github/workflows/auto-assign-pr-author.yml || true
-[ "${use_funding}" = "n" ] && rm -f .github/FUNDING.yml || true
+[ "${use_release_drafter}" != "y" ] && rm -f .github/release-drafter.yml && rm -f .github/workflows/draft-release.yml || true
+[ "${use_pr_autoassign}" != "y" ] && rm -f .github/workflows/auto-assign-pr-author.yml || true
+[ "${use_funding}" != "y" ] && rm -f .github/FUNDING.yml || true
+[ "${use_pr_template}" != "y" ] && rm -f .github/PULL_REQUEST_TEMPLATE.md || true
 
 [ "${remove_self}" != "n" ] && rm -- "$0" || true
 
