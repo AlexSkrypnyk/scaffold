@@ -28,11 +28,11 @@ Generic project scaffold template
 
 ## Installation
 
-[//]: # (#;< COMPOSER)
+[//]: # (#;< PHP)
 
     composer require yournamespace/yourproject
 
-[//]: # (#;> COMPOSER)
+[//]: # (#;> PHP)
 
 [//]: # (#;< NODEJS)
 
@@ -42,11 +42,11 @@ Generic project scaffold template
 
 ## Usage
 
-[//]: # (#;< COMPOSER)
+[//]: # (#;< PHP)
 
     vendor/bin/yourproject
 
-[//]: # (#;> COMPOSER)
+[//]: # (#;> PHP)
 
 [//]: # (#;< NODEJS)
 
@@ -56,13 +56,13 @@ Generic project scaffold template
 
 ## Maintenance
 
-[//]: # (#;< COMPOSER)
+[//]: # (#;< PHP)
 
     composer install
     composer lint
     composer test
 
-[//]: # (#;> COMPOSER)
+[//]: # (#;> PHP)
 
 [//]: # (#;< NODEJS)
 

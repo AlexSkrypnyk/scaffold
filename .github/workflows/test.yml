@@ -7,7 +7,7 @@ on:
       - 'feature/**'
 
 jobs:
-  #;< COMPOSER
+  #;< PHP
   test-php:
     runs-on: ubuntu-latest
     steps:
@@ -19,7 +19,7 @@ jobs:
     - uses: php-actions/composer@v6
     - run: composer lint
     - run: composer test
-  #;> COMPOSER
+  #;> PHP
   #;< NODEJS
   test-nodejs:
     runs-on: ubuntu-latest

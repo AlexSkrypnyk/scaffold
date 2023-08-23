@@ -1,7 +1,7 @@
-#;< COMPOSER
+#;< PHP
 /vendor
 /composer.lock
-#;> COMPOSER
+#;> PHP
 #;< NODEJS
 /node_modules
 /package-lock.json
