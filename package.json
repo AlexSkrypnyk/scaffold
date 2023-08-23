@@ -16,7 +16,8 @@
     },
     "scripts": {
         "lint": "echo Would run code lint",
-        "test": "echo Would run tests"
+        "test": "echo Would run tests",
+        "build": "echo Would run build"
     },
     "dependencies": {}
 }

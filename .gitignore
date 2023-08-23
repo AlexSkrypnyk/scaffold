@@ -1,3 +1,4 @@
+.build
 #;< PHP
 /vendor
 /composer.lock

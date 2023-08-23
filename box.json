@@ -1,0 +1,10 @@
+{
+  "output": ".build/template-command-script.phar",
+  "compression": "GZ",
+  "finder": [
+    {
+      "in": "./",
+      "exclude": ["tests", "template-simple-script.php"]
+    }
+  ]
+}

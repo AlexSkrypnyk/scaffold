@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  #;< PHP
+  release-php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+      - name: Install Box
+        run: |
+          export BOX_VERSION="4.3.8"
+          wget "https://github.com/humbug/box/releases/download/${BOX_VERSION}/box.phar" --quiet -O ./box
+          chmod +x ./box
+          sudo mv ./box /usr/local/bin
+      - uses: php-actions/composer@v6
+      - run: composer build
+      - run: ./.build/template-command-script.phar | grep -q "?"
+      - name: Get Tag Name
+        id: get-version
+        run: echo ::set-output name=version::${GITHUB_REF#refs/tags/}
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          # This token is provided by GitHub Actions.
+          # You DO NOT need to create your own token.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ steps.get-version.outputs.version }}
+          tag: ${{ steps.get-version.outputs.version }}
+          body: 'Next stable release.'
+          # This will update existing tags if any
+          allowUpdates: true
+          artifacts: build/template-command-script.phar
+          artifactContentType: application/x-php
+  #;> PHP
+  #;< NODEJS
+  release-nodejs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run build
+  #;> NODEJS
