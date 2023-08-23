@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  php-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/cache@v3
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+      - uses: php-actions/composer@v6
+      - name: Install Box
+        run: |
+          export BOX_VERSION="4.3.8"
+          wget "https://github.com/humbug/box/releases/download/${BOX_VERSION}/box.phar" --quiet -O ./box
+          chmod +x ./box
+          sudo mv ./box /usr/local/bin
+      - name: Build Application PHAR
+        run: |
+          box validate
+          box compile
+      - name: Self-Test
+        run: |
+          ./build/joker.phar | grep -q "?"
+          ./build/joker.phar app:joke | grep -q "?"
+          ./build/joker.phar app:say-hello | grep -q "Hello"
+      - name: Get Tag Name
+        id: get-version
+        run: echo ::set-output name=version::${GITHUB_REF#refs/tags/}
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          # This token is provided by GitHub Actions.
+          # You DO NOT need to create your own token.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ steps.get-version.outputs.version }}
+          tag: ${{ steps.get-version.outputs.version }}
+          body: 'Next stable release.'
+          # This will update existing tags if any
+          allowUpdates: true
+          artifacts: build/joker.phar
+          artifactContentType: application/x-php
