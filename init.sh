@@ -9,7 +9,7 @@
 # Silent:
 # ./init.sh yournamespace yourproject "Your Name"
 #
-# shellcheck disable=SC2162
+# shellcheck disable=SC2162,SC2015
 
 set -u
 set -e
@@ -26,6 +26,9 @@ echo
 [ -z "${author}" ] && read -p 'Author: ' author
 [ -z "${1:-}" ] && read -p 'Use Composer [Y/n]: ' use_composer
 [ -z "${1:-}" ] && read -p 'Use NodeJS [Y/n]:' use_nodejs
+[ -z "${1:-}" ] && read -p 'Use GitHub release drafter [Y/n]:' use_release_drafter
+[ -z "${1:-}" ] && read -p 'Use GitHub PR author auto-assign [Y/n]:' use_pr_autoassign
+[ -z "${1:-}" ] && read -p 'Use GitHub funding [Y/n]:' use_funding
 [ -z "${1:-}" ] && read -p 'Remove this script [Y/n]: ' remove_self
 
 : "${namespace:?Namespace is required}"
@@ -34,6 +37,9 @@ echo
 
 use_composer="${use_composer:-y}"
 use_nodejs="${use_nodejs:-y}"
+use_release_drafter="${use_release_drafter:-y}"
+use_pr_autoassign="${use_pr_autoassign:-y}"
+use_funding="${use_funding:-y}"
 remove_self="${remove_self:-y}"
 
 use_composer="$(echo "${use_composer}" | tr '[:upper:]' '[:lower:]')"
@@ -80,7 +86,7 @@ remove_special_comments() {
 }
 
 remove_composer() {
-  rm -f omposer.json >/dev/null || true
+  rm -f composer.json >/dev/null || true
   rm -f composer.lock >/dev/null || true
   rm -Rf vendor >/dev/null || true
   remove_tokens_with_content "COMPOSER"
@@ -116,6 +122,12 @@ uncomment_line ".gitattributes" "tests"
 
 remove_tokens_with_content "META"
 remove_special_comments
+
+rm -f LICENSE >/dev/null || true
+
+[ "${use_release_drafter}" = "n" ] && rm -f .github/release-drafter.yml && rm -f .github/workflows/draft-release.yml || true
+[ "${use_pr_autoassign}" = "n" ] && rm -f .github/workflows/auto-assign-pr-author.yml || true
+[ "${use_funding}" = "n" ] && rm -f .github/FUNDING.yml || true
 
 [ "${remove_self}" != "n" ] && rm -- "$0" || true
 
