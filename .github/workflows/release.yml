@@ -22,7 +22,7 @@ jobs:
           sudo mv ./box /usr/local/bin
       - uses: php-actions/composer@v6
       - run: composer build
-      - run: ./.build/joker.phar | grep -q "?"
+      - run: ./.build/template-command-script.phar | grep -q "?"
       - name: Get Tag Name
         id: get-version
         run: echo ::set-output name=version::${GITHUB_REF#refs/tags/}
@@ -37,5 +37,5 @@ jobs:
           body: 'Next stable release.'
           # This will update existing tags if any
           allowUpdates: true
-          artifacts: build/joker.phar
+          artifacts: build/template-command-script.phar
           artifactContentType: application/x-php

@@ -1,5 +1,5 @@
 {
-  "output": ".build/joker.phar",
+  "output": ".build/template-command-script.phar",
   "compression": "GZ",
   "finder": [
     {

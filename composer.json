@@ -58,5 +58,5 @@
             "box compile"
         ]
     },
-    "bin": ["bin/joker"]
+    "bin": ["bin/template-command-script"]
 }
