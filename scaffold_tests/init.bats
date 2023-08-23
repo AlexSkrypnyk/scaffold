@@ -218,6 +218,9 @@ assert_files_present_composer() {
   assert_file_contains ".gitignore" "/composer.lock"
   assert_file_contains ".github/workflows/test.yml" "composer"
   assert_file_contains "README.md" "composer"
+  assert_file_exists "phpcs.xml"
+  assert_file_exists "phpmd.xml"
+  assert_file_exists "phpstan.neon"
 
   popd >/dev/null || exit 1
 }
@@ -228,10 +231,14 @@ assert_files_absent_composer() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_file_not_exists "composer.json"
+  assert_file_not_exists "composer.json"
   assert_file_not_contains ".gitignore" "/vendor"
   assert_file_not_contains ".gitignore" "/composer.lock"
   assert_file_not_contains ".github/workflows/test.yml" "composer"
   assert_file_not_contains "README.md" "composer"
+  assert_file_not_exists "phpcs.xml"
+  assert_file_not_exists "phpmd.xml"
+  assert_file_not_exists "phpstan.neon"
 
   popd >/dev/null || exit 1
 }

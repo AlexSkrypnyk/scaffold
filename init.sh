@@ -89,6 +89,10 @@ remove_composer() {
 	rm -f composer.json >/dev/null || true
 	rm -f composer.lock >/dev/null || true
 	rm -Rf vendor >/dev/null || true
+	rm -Rf vendor >/dev/null || true
+	rm -f phpcs.xml || true
+  rm -f phpmd.xml || true
+  rm -f phpstan.neon || true
 	remove_tokens_with_content "COMPOSER"
 }
 
