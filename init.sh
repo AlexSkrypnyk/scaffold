@@ -47,64 +47,64 @@ use_nodejs="$(echo "${use_nodejs}" | tr '[:upper:]' '[:lower:]')"
 remove_self="$(echo "${remove_self}" | tr '[:upper:]' '[:lower:]')"
 
 replace_string_content() {
-	local needle="${1}"
-	local replacement="${2}"
-	local sed_opts
-	sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-	set +e
-	grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "$(pwd)" | xargs sed "${sed_opts[@]}" "s!$needle!$replacement!g" || true
-	set -e
+  local needle="${1}"
+  local replacement="${2}"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+  set +e
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "$(pwd)" | xargs sed "${sed_opts[@]}" "s!$needle!$replacement!g" || true
+  set -e
 }
 
 remove_string_content() {
-	local token="${1}"
-	local sed_opts
-	sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-	grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
+  local token="${1}"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
 }
 
 remove_tokens_with_content() {
-	local token="${1}"
-	local sed_opts
-	sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-	grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
+  local token="${1}"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
 }
 
 uncomment_line() {
-	local file_name="${1}"
-	local start_string="${2}"
-	local sed_opts
-	sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-	LC_ALL=C.UTF-8 sed "${sed_opts[@]}" -e "s/^# ${start_string}/${start_string}/" "${file_name}"
+  local file_name="${1}"
+  local start_string="${2}"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  LC_ALL=C.UTF-8 sed "${sed_opts[@]}" -e "s/^# ${start_string}/${start_string}/" "${file_name}"
 }
 
 remove_special_comments() {
-	local token="#;"
-	local sed_opts
-	sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-	grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+  local token="#;"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
 remove_php() {
   rm -f template-simple-script.php || true
   rm -Rf src || true
-	rm -f composer.json >/dev/null || true
-	rm -f composer.lock >/dev/null || true
-	rm -Rf vendor >/dev/null || true
-	rm -Rf vendor >/dev/null || true
-	rm -f phpcs.xml || true
+  rm -f composer.json >/dev/null || true
+  rm -f composer.lock >/dev/null || true
+  rm -Rf vendor >/dev/null || true
+  rm -Rf vendor >/dev/null || true
+  rm -f phpcs.xml || true
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
   rm -f box.json || true
-	remove_tokens_with_content "PHP"
+  remove_tokens_with_content "PHP"
 }
 
 remove_nodejs() {
-	rm -f package.json >/dev/null || true
-	rm -f package.lock >/dev/null || true
-	rm -f yarn.lock >/dev/null || true
-	rm -Rf node_modules >/dev/null || true
-	remove_tokens_with_content "NODEJS"
+  rm -f package.json >/dev/null || true
+  rm -f package.lock >/dev/null || true
+  rm -f yarn.lock >/dev/null || true
+  rm -Rf node_modules >/dev/null || true
+  remove_tokens_with_content "NODEJS"
 }
 
 [ "${use_php}" != "y" ] && remove_php
