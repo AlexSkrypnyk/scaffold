@@ -24,29 +24,43 @@ echo
 [ -z "${namespace}" ] && read -p 'Namespace: ' namespace
 [ -z "${project}" ] && read -p 'Project: ' project
 [ -z "${author}" ] && read -p 'Author: ' author
+
 [ -z "${1-}" ] && read -p 'Use PHP [Y/n]: ' use_php
+use_php="$(echo "${use_php:-y}" | tr '[:upper:]' '[:lower:]')"
+
+if [ "${use_php}" = "y" ]; then
+  [ -z "${1-}" ] && read -p '  Use CLI command app [Y/n]: ' use_php_command
+  use_php_command="$(echo "${use_php_command:-y}" | tr '[:upper:]' '[:lower:]')"
+  if [ "${use_php_command}" = "y" ]; then
+    [ -z "${1-}" ] && read -p '    Build PHAR [Y/n]: ' use_php_command_build
+    use_php_command_build="$(echo "${use_php_command_build:-y}" | tr '[:upper:]' '[:lower:]')"
+  else
+    [ -z "${1-}" ] && read -p '  Use simple script [Y/n]: ' use_php_script
+    use_php_script="$(echo "${use_php_script:-y}" | tr '[:upper:]' '[:lower:]')"
+  fi
+fi
+
 [ -z "${1-}" ] && read -p 'Use NodeJS [Y/n]:' use_nodejs
+use_nodejs="$(echo "${use_nodejs:-y}" | tr '[:upper:]' '[:lower:]')"
+
 [ -z "${1-}" ] && read -p 'Use GitHub release drafter [Y/n]:' use_release_drafter
+use_release_drafter="${use_release_drafter:-y}"
+
 [ -z "${1-}" ] && read -p 'Use GitHub PR author auto-assign [Y/n]:' use_pr_autoassign
+use_pr_autoassign="${use_pr_autoassign:-y}"
+
 [ -z "${1-}" ] && read -p 'Use GitHub funding [Y/n]:' use_funding
+use_funding="${use_funding:-y}"
+
 [ -z "${1-}" ] && read -p 'Use GitHub PR template [Y/n]:' use_pr_template
+use_pr_template="${use_pr_template:-y}"
+
 [ -z "${1-}" ] && read -p 'Remove this script [Y/n]: ' remove_self
+remove_self="$(echo "${remove_self:-y}" | tr '[:upper:]' '[:lower:]')"
 
 : "${namespace:?Namespace is required}"
 : "${project:?Project is required}"
 : "${author:?Author is required}"
-
-use_php="${use_php:-y}"
-use_nodejs="${use_nodejs:-y}"
-use_release_drafter="${use_release_drafter:-y}"
-use_pr_autoassign="${use_pr_autoassign:-y}"
-use_funding="${use_funding:-y}"
-use_pr_template="${use_pr_template:-y}"
-remove_self="${remove_self:-y}"
-
-use_php="$(echo "${use_php}" | tr '[:upper:]' '[:lower:]')"
-use_nodejs="$(echo "${use_nodejs}" | tr '[:upper:]' '[:lower:]')"
-remove_self="$(echo "${remove_self}" | tr '[:upper:]' '[:lower:]')"
 
 replace_string_content() {
   local needle="${1}"
@@ -88,17 +102,34 @@ remove_special_comments() {
 }
 
 remove_php() {
-  rm -f template-simple-script.php || true
-  rm -Rf src || true
+  remove_php_command
+  remove_php_command_build
+  remove_php_script
+
   rm -f composer.json >/dev/null || true
   rm -f composer.lock >/dev/null || true
-  rm -Rf vendor >/dev/null || true
   rm -Rf vendor >/dev/null || true
   rm -f phpcs.xml || true
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
-  rm -f box.json || true
+
   remove_tokens_with_content "PHP"
+}
+
+remove_php_command() {
+  rm -Rf bin || true
+  rm -Rf src || true
+  rm -Rf tests/phpunit/unit/Command || true
+}
+
+remove_php_command_build() {
+  rm -Rf box.json || true
+}
+
+remove_php_script() {
+  rm -f template-simple-script.php || true
+  rm -f tests/phpunit/unit/ExampleScriptUnitTest.php || true
+  rm -f tests/phpunit/unit/ScriptUnitTestBase.php || true
 }
 
 remove_nodejs() {
@@ -109,7 +140,18 @@ remove_nodejs() {
   remove_tokens_with_content "NODEJS"
 }
 
-[ "${use_php}" != "y" ] && remove_php
+if [ "${use_php}" = "y" ]; then
+  if [ "${use_php_command}" = "y" ]; then
+    [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
+  else
+    remove_php_command
+    remove_php_command_build
+  fi
+  [ "${use_php_script:-n}" != "y" ] && remove_php_script
+else
+  remove_php
+fi
+
 [ "${use_nodejs}" != "y" ] && remove_nodejs
 
 replace_string_content "yournamespace" "${namespace}"
