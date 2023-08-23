@@ -6,7 +6,8 @@ on:
       - '*'
 
 jobs:
-  php-release:
+  #;< PHP
+  release-php:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -39,3 +40,13 @@ jobs:
           allowUpdates: true
           artifacts: build/template-command-script.phar
           artifactContentType: application/x-php
+  #;> PHP
+  #;< NODEJS
+  release-nodejs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run build
+  #;> NODEJS

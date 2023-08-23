@@ -220,6 +220,7 @@ assert_files_present_php() {
   assert_file_contains ".gitignore" "/vendor"
   assert_file_contains ".gitignore" "/composer.lock"
   assert_file_contains ".github/workflows/test.yml" "composer"
+  assert_file_contains ".github/workflows/release.yml" "composer"
   assert_file_contains "README.md" "composer"
   assert_file_exists "phpcs.xml"
   assert_file_exists "phpmd.xml"
@@ -241,6 +242,7 @@ assert_files_absent_php() {
   assert_file_not_contains ".gitignore" "/vendor"
   assert_file_not_contains ".gitignore" "/composer.lock"
   assert_file_not_contains ".github/workflows/test.yml" "composer"
+  assert_file_not_contains ".github/workflows/release.yml" "composer"
   assert_file_not_contains "README.md" "composer"
   assert_file_not_exists "phpcs.xml"
   assert_file_not_exists "phpmd.xml"
@@ -264,6 +266,7 @@ assert_files_present_nodejs() {
   assert_file_contains ".gitignore" "/package-lock.json"
   assert_file_contains ".gitignore" "/yarn.lock"
   assert_file_contains ".github/workflows/test.yml" "npm"
+  assert_file_contains ".github/workflows/release.yml" "npm"
   assert_file_contains "README.md" "npm"
 
   popd >/dev/null || exit 1
@@ -279,6 +282,7 @@ assert_files_absent_nodejs() {
   assert_file_not_contains ".gitignore" "/package-lock.json"
   assert_file_not_contains ".gitignore" "/yarn.lock"
   assert_file_not_contains ".github/workflows/test.yml" "npm"
+  assert_file_not_contains ".github/workflows/release.yml" "npm"
   assert_file_not_contains "README.md" "npm"
 
   popd >/dev/null || exit 1
