@@ -24,7 +24,7 @@ echo
 [ -z "${namespace}" ] && read -p 'Namespace: ' namespace
 [ -z "${project}" ] && read -p 'Project: ' project
 [ -z "${author}" ] && read -p 'Author: ' author
-[ -z "${1:-}" ] && read -p 'Use Composer [Y/n]: ' use_composer
+[ -z "${1:-}" ] && read -p 'Use PHP [Y/n]: ' use_php
 [ -z "${1:-}" ] && read -p 'Use NodeJS [Y/n]:' use_nodejs
 [ -z "${1:-}" ] && read -p 'Use GitHub release drafter [Y/n]:' use_release_drafter
 [ -z "${1:-}" ] && read -p 'Use GitHub PR author auto-assign [Y/n]:' use_pr_autoassign
@@ -35,14 +35,14 @@ echo
 : "${project:?Project is required}"
 : "${author:?Author is required}"
 
-use_composer="${use_composer:-y}"
+use_php="${use_php:-y}"
 use_nodejs="${use_nodejs:-y}"
 use_release_drafter="${use_release_drafter:-y}"
 use_pr_autoassign="${use_pr_autoassign:-y}"
 use_funding="${use_funding:-y}"
 remove_self="${remove_self:-y}"
 
-use_composer="$(echo "${use_composer}" | tr '[:upper:]' '[:lower:]')"
+use_php="$(echo "${use_php}" | tr '[:upper:]' '[:lower:]')"
 use_nodejs="$(echo "${use_nodejs}" | tr '[:upper:]' '[:lower:]')"
 remove_self="$(echo "${remove_self}" | tr '[:upper:]' '[:lower:]')"
 
@@ -85,7 +85,7 @@ remove_special_comments() {
 	grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
-remove_composer() {
+remove_php() {
 	rm -f composer.json >/dev/null || true
 	rm -f composer.lock >/dev/null || true
 	rm -Rf vendor >/dev/null || true
@@ -93,7 +93,7 @@ remove_composer() {
 	rm -f phpcs.xml || true
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
-	remove_tokens_with_content "COMPOSER"
+	remove_tokens_with_content "PHP"
 }
 
 remove_nodejs() {
@@ -104,7 +104,7 @@ remove_nodejs() {
 	remove_tokens_with_content "NODEJS"
 }
 
-[ "${use_composer}" != "y" ] && remove_composer
+[ "${use_php}" != "y" ] && remove_php
 [ "${use_nodejs}" != "y" ] && remove_nodejs
 
 replace_string_content "yournamespace" "${namespace}"

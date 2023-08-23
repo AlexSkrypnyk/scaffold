@@ -18,7 +18,7 @@ export SCRIPT_FILE="init.sh"
     "lucasfilm" # organisation
     "star-wars" # project
     "Jane Doe"  # author
-    "nothing"   # use Composer
+    "nothing"   # use PHP
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -31,19 +31,19 @@ export SCRIPT_FILE="init.sh"
 
   assert_files_present_common "${BUILD_DIR}"
 
-  assert_files_present_composer "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
 
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_output_contains "Initialization complete."
 }
 
-@test "Init, no composer" {
+@test "Init, no php" {
   answers=(
     "lucasfilm" # organisation
     "star-wars" # project
     "Jane Doe"  # author
-    "n"         # use Composer
+    "n"         # use PHP
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -56,7 +56,7 @@ export SCRIPT_FILE="init.sh"
 
   assert_files_present_common "${BUILD_DIR}"
 
-  assert_files_absent_composer "${BUILD_DIR}"
+  assert_files_absent_php "${BUILD_DIR}"
 
   assert_files_present_nodejs "${BUILD_DIR}"
 
@@ -68,7 +68,7 @@ export SCRIPT_FILE="init.sh"
     "lucasfilm" # organisation
     "star-wars" # project
     "Jane Doe"  # author
-    "nothing"   # use Composer
+    "nothing"   # use PHP
     "n"         # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -81,7 +81,7 @@ export SCRIPT_FILE="init.sh"
 
   assert_files_present_common "${BUILD_DIR}"
 
-  assert_files_present_composer "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
 
   assert_files_absent_nodejs "${BUILD_DIR}"
 
@@ -93,7 +93,7 @@ export SCRIPT_FILE="init.sh"
     "lucasfilm" # organisation
     "star-wars" # project
     "Jane Doe"  # author
-    "nothing"   # use Composer
+    "nothing"   # use PHP
     "nothing"   # use NodeJS
     "n"         # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -105,7 +105,7 @@ export SCRIPT_FILE="init.sh"
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
   assert_files_present_common "${BUILD_DIR}"
-  assert_files_present_composer "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_file_not_exists ".github/release-drafter.yml"
@@ -119,7 +119,7 @@ export SCRIPT_FILE="init.sh"
     "lucasfilm" # organisation
     "star-wars" # project
     "Jane Doe"  # author
-    "nothing"   # use Composer
+    "nothing"   # use PHP
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "n"         # use GitHub pr auto-assign
@@ -131,7 +131,7 @@ export SCRIPT_FILE="init.sh"
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
   assert_files_present_common "${BUILD_DIR}"
-  assert_files_present_composer "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_file_not_exists ".github/auto-assign-pr-author.yml"
@@ -144,7 +144,7 @@ export SCRIPT_FILE="init.sh"
     "lucasfilm" # organisation
     "star-wars" # project
     "Jane Doe"  # author
-    "nothing"   # use Composer
+    "nothing"   # use PHP
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
@@ -156,7 +156,7 @@ export SCRIPT_FILE="init.sh"
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
   assert_files_present_common "${BUILD_DIR}"
-  assert_files_present_composer "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_file_not_exists ".github/FUNDING.yml"
@@ -203,7 +203,7 @@ assert_files_present_common() {
   popd >/dev/null || exit 1
 }
 
-assert_files_present_composer() {
+assert_files_present_php() {
   local dir="${1:-$(pwd)}"
 
   pushd "${dir}" >/dev/null || exit 1
@@ -225,7 +225,7 @@ assert_files_present_composer() {
   popd >/dev/null || exit 1
 }
 
-assert_files_absent_composer() {
+assert_files_absent_php() {
   local dir="${1:-$(pwd)}"
 
   pushd "${dir}" >/dev/null || exit 1
