@@ -26,20 +26,12 @@ jobs:
       - run: ./.build/template-command-script.phar | grep -q "?"
       - name: Get Tag Name
         id: get-version
-        run: echo ::set-output name=version::${GITHUB_REF#refs/tags/}
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Create Release
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          # This token is provided by GitHub Actions.
-          # You DO NOT need to create your own token.
-          token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ steps.get-version.outputs.version }}
-          tag: ${{ steps.get-version.outputs.version }}
-          body: 'Next stable release.'
-          # This will update existing tags if any
-          allowUpdates: true
-          artifacts: build/template-command-script.phar
-          artifactContentType: application/x-php
+          files: ./.build/template-command-script.phar
   #;> PHP
   #;< NODEJS
   release-nodejs:
