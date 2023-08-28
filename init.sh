@@ -109,6 +109,7 @@ remove_php() {
   rm -f composer.json >/dev/null || true
   rm -f composer.lock >/dev/null || true
   rm -Rf vendor >/dev/null || true
+  rm -Rf tests/phpunit || true
   rm -f phpcs.xml || true
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
