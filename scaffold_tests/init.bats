@@ -401,6 +401,7 @@ assert_files_present_php_command() {
 
   pushd "${dir}" >/dev/null || exit 1
 
+  assert_file_exists template-command-script
   assert_dir_exists src
 
   assert_dir_exists tests/phpunit/unit/Command
@@ -413,8 +414,8 @@ assert_files_absent_php_command() {
 
   pushd "${dir}" >/dev/null || exit 1
 
+  assert_file_not_exists template-command-script
   assert_dir_not_exists src
-  assert_dir_not_exists bin
   assert_dir_not_exists tests/phpunit/unit/Command
 
   popd >/dev/null || exit 1
