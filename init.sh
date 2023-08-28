@@ -117,7 +117,7 @@ remove_php() {
 }
 
 remove_php_command() {
-  rm -Rf bin || true
+  rm -Rf template-command-script || true
   rm -Rf src || true
   rm -Rf tests/phpunit/unit/Command || true
 }

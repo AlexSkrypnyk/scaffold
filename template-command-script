@@ -9,4 +9,4 @@ foreach ([$GLOBALS['_composer_autoload_path'] ?? NULL, __DIR__ . '/../../autoloa
   }
 }
 
-require __DIR__ . '/../src/app.php';
+require __DIR__ . '/src/app.php';
