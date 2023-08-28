@@ -481,6 +481,7 @@ assert_files_absent_php() {
   assert_file_not_exists "phpcs.xml"
   assert_file_not_exists "phpmd.xml"
   assert_file_not_exists "phpstan.neon"
+  assert_dir_not_exists "tests/phpunit"
 
   assert_files_absent_php_command "${dir}"
   assert_files_absent_php_command_build "${dir}"
