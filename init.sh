@@ -172,7 +172,8 @@ uncomment_line ".gitattributes" ".gitignore"
 uncomment_line ".gitattributes" "tests"
 
 rm -f LICENSE >/dev/null || true
-rm -f ".github/workflows/scaffold_test.yml" >/dev/null || true
+rm -Rf "scaffold_tests" >/dev/null || true
+rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
 
 [ "${use_release_drafter}" != "y" ] && rm -f .github/release-drafter.yml && remove_tokens_with_content "RELEASEDRAFTER" || true
 [ "${use_pr_autoassign}" != "y" ] && rm -f .github/workflows/auto-assign-pr-author.yml || true
