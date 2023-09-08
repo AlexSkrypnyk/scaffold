@@ -13,7 +13,7 @@ jobs:
   test-php:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: actions/cache@v3
       with:
         path: /tmp/composer-cache
@@ -26,7 +26,7 @@ jobs:
   test-nodejs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v3
       - run: npm install
       - run: npm run lint

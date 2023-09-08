@@ -16,7 +16,7 @@ jobs:
   scaffold-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: luizm/action-sh-checker@v0.7.0
       env:
         SHFMT_OPTS: -i 2 -ci -s -d
