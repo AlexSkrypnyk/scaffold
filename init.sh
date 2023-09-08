@@ -125,12 +125,14 @@ remove_php_command() {
 
 remove_php_command_build() {
   rm -Rf box.json || true
+  remove_tokens_with_content "PHP_PHAR"
 }
 
 remove_php_script() {
   rm -f template-simple-script || true
   rm -f tests/phpunit/unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/unit/ScriptUnitTestBase.php || true
+  remove_tokens_with_content "!PHP_PHAR"
 }
 
 remove_nodejs() {

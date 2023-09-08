@@ -25,7 +25,8 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^1",
         "drupal/coder": "^8.3",
         "phpmd/phpmd": "^2.13",
-        "phpstan/phpstan": "^1.10"
+        "phpstan/phpstan": "^1.10",
+        "bamarni/composer-bin-plugin": "^1.8"
     },
     "autoload": {
         "psr-4": {
@@ -42,7 +43,8 @@
     },
     "config": {
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "bamarni/composer-bin-plugin": true
         }
     },
     "scripts": {
@@ -54,6 +56,7 @@
         "lint:fix": "phpcbf",
         "test": "phpunit --do-not-cache-result tests/phpunit/unit",
         "build": [
+            "@composer bin box require --dev humbug/box",
             "box validate",
             "box compile"
         ]

@@ -7,6 +7,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   #;< RELEASEDRAFTER
   release-drafter:
@@ -29,22 +32,24 @@ jobs:
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-      - name: Install Box
-        run: |
-          export BOX_VERSION="4.3.8"
-          wget "https://github.com/humbug/box/releases/download/${BOX_VERSION}/box.phar" --quiet -O ./box
-          chmod +x ./box
-          sudo mv ./box /usr/local/bin
       - uses: php-actions/composer@v6
-      - run: composer build
-      - run: ./.build/template-command-script.phar | grep -q "?"
+        #;< PHP_PHAR
+      - name: Build and test
+        run: composer build && ./.build/template-command-script.phar | grep -q "?"
+        #;> PHP_PHAR
       - name: Get Tag Name
         id: get-version
         run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./.build/template-command-script.phar
+          files: |
+            #;< PHP_PHAR
+            ./.build/template-command-script.phar
+            #;> PHP_PHAR
+            #;< !PHP_PHAR
+            template-simple-script
+            #;> !PHP_PHAR
   #;> PHP
   #;< NODEJS
   release-nodejs:

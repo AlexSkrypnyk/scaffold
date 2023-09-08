@@ -1,6 +1,7 @@
 .build
 #;< PHP
 /vendor
+/vendor-bin
 /composer.lock
 #;> PHP
 #;< NODEJS

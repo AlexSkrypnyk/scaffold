@@ -428,6 +428,8 @@ assert_files_present_php_command_build() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_file_exists "box.json"
+  assert_file_contains ".github/workflows/release.yml" "Build and test"
+  assert_file_contains ".github/workflows/release.yml" "template-command-script.phar"
 
   popd >/dev/null || exit 1
 }
@@ -438,6 +440,8 @@ assert_files_absent_php_command_build() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_file_not_exists "box.json"
+  assert_file_not_contains ".github/workflows/release.yml" "Build and test"
+  assert_file_not_contains ".github/workflows/release.yml" "template-command-script.phar"
 
   popd >/dev/null || exit 1
 }
@@ -451,6 +455,8 @@ assert_files_present_php_script() {
   assert_file_exists tests/phpunit/unit/ExampleScriptUnitTest.php
   assert_file_exists tests/phpunit/unit/ScriptUnitTestBase.php
 
+  assert_file_contains ".github/workflows/release.yml" "template-simple-script"
+
   popd >/dev/null || exit 1
 }
 
@@ -462,6 +468,8 @@ assert_files_absent_php_script() {
   assert_file_not_exists template-simple-script
   assert_file_not_exists tests/phpunit/unit/ExampleScriptUnitTest.php
   assert_file_not_exists tests/phpunit/unit/ScriptUnitTestBase.php
+
+  assert_not_contains ".github/workflows/release.yml" "template-simple-script"
 
   popd >/dev/null || exit 1
 }
