@@ -447,7 +447,7 @@ assert_files_present_php_script() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_exists template-simple-script.php
+  assert_file_exists template-simple-script
   assert_file_exists tests/phpunit/unit/ExampleScriptUnitTest.php
   assert_file_exists tests/phpunit/unit/ScriptUnitTestBase.php
 
@@ -459,7 +459,7 @@ assert_files_absent_php_script() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_not_exists template-simple-script.php
+  assert_file_not_exists template-simple-script
   assert_file_not_exists tests/phpunit/unit/ExampleScriptUnitTest.php
   assert_file_not_exists tests/phpunit/unit/ScriptUnitTestBase.php
 

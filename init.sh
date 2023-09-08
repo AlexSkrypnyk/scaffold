@@ -128,7 +128,7 @@ remove_php_command_build() {
 }
 
 remove_php_script() {
-  rm -f template-simple-script.php || true
+  rm -f template-simple-script || true
   rm -f tests/phpunit/unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/unit/ScriptUnitTestBase.php || true
 }
