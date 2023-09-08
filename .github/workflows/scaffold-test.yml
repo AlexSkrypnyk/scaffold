@@ -9,6 +9,8 @@ on:
     branches:
       - main
       - 'feature/**'
+      - 'renovate/**'
+      - 'deps/**'
 
 jobs:
   scaffold-test:
