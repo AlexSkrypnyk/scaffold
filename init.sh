@@ -18,51 +18,7 @@ namespace=${1-}
 project=${2-}
 author=${3-}
 
-echo "Please follow the prompts to adjust your project configuration"
-echo
-
-[ -z "${namespace}" ] && read -p 'Namespace: ' namespace
-[ -z "${project}" ] && read -p 'Project: ' project
-[ -z "${author}" ] && read -p 'Author: ' author
-
-[ -z "${1-}" ] && read -p 'Use PHP [Y/n]: ' use_php
-use_php="$(echo "${use_php:-y}" | tr '[:upper:]' '[:lower:]')"
-
-if [ "${use_php}" = "y" ]; then
-  [ -z "${1-}" ] && read -p '  Use CLI command app [Y/n]: ' use_php_command
-  use_php_command="$(echo "${use_php_command:-y}" | tr '[:upper:]' '[:lower:]')"
-  if [ "${use_php_command}" = "y" ]; then
-    read -p "    CLI command name [${project}]:" php_command_name
-    [ -z "${1-}" ] && read -p '    Build PHAR [Y/n]: ' use_php_command_build
-    use_php_command_build="$(echo "${use_php_command_build:-y}" | tr '[:upper:]' '[:lower:]')"
-  else
-    [ -z "${1-}" ] && read -p '  Use simple script [Y/n]: ' use_php_script
-    use_php_script="$(echo "${use_php_script:-y}" | tr '[:upper:]' '[:lower:]')"
-    read -p "    CLI command name [${project}]:" php_command_name
-  fi
-fi
-
-[ -z "${1-}" ] && read -p 'Use NodeJS [Y/n]:' use_nodejs
-use_nodejs="$(echo "${use_nodejs:-y}" | tr '[:upper:]' '[:lower:]')"
-
-[ -z "${1-}" ] && read -p 'Use GitHub release drafter [Y/n]:' use_release_drafter
-use_release_drafter="${use_release_drafter:-y}"
-
-[ -z "${1-}" ] && read -p 'Use GitHub PR author auto-assign [Y/n]:' use_pr_autoassign
-use_pr_autoassign="${use_pr_autoassign:-y}"
-
-[ -z "${1-}" ] && read -p 'Use GitHub funding [Y/n]:' use_funding
-use_funding="${use_funding:-y}"
-
-[ -z "${1-}" ] && read -p 'Use GitHub PR template [Y/n]:' use_pr_template
-use_pr_template="${use_pr_template:-y}"
-
-[ -z "${1-}" ] && read -p 'Remove this script [Y/n]: ' remove_self
-remove_self="$(echo "${remove_self:-y}" | tr '[:upper:]' '[:lower:]')"
-
-: "${namespace:?Namespace is required}"
-: "${project:?Project is required}"
-: "${author:?Author is required}"
+#-------------------------------------------------------------------------------
 
 replace_string_content() {
   local needle="${1}"
@@ -145,16 +101,116 @@ remove_nodejs() {
   remove_tokens_with_content "NODEJS"
 }
 
+ask() {
+  local prompt="$1"
+  local default="${2:-}"
+  local result=""
+
+  if [[ -n $default ]]; then
+    prompt="${prompt} [${default}]: "
+  else
+    prompt="${prompt}: "
+  fi
+
+  while [[ -z ${result} ]]; do
+    read -p "${prompt}" result
+    if [[ -n $default && -z ${result} ]]; then
+      result="${default}"
+    fi
+  done
+  echo "${result}"
+}
+
+ask_yesno() {
+  local prompt="${1}"
+  local default="${2:-Y}"
+  local result
+
+  read -p "${prompt} [$([ "${default}" = "Y" ] && echo "Y/n" || echo "y/N")]: " result
+  result="$(echo "${result:-${default}}" | tr '[:upper:]' '[:lower:]')"
+  echo "${result}"
+}
+
+#-------------------------------------------------------------------------------
+
+echo "Please follow the prompts to adjust your project configuration"
+echo
+
+[ -z "${namespace}" ] && namespace="$(ask "Namespace")"
+[ -z "${project}" ] && project="$(ask "Project")"
+[ -z "${author}" ] && author="$(ask "Author")"
+
+use_php="$(ask_yesno "Use PHP")"
+
+use_php_command="y"
+use_php_command_build="y"
+use_php_script="n"
+php_command_name="<unset>"
+if [ "${use_php}" = "y" ]; then
+  use_php_command="$(ask_yesno "  Use CLI command app")"
+  if [ "${use_php_command}" = "y" ]; then
+    php_command_name=$(ask "    CLI command name" "${project}")
+    use_php_command_build="$(ask_yesno "    Build PHAR")"
+  else
+    use_php_script="$(ask_yesno "  Use simple script")"
+    php_command_name=$(ask "    CLI command name" "${project}")
+  fi
+fi
+
+use_nodejs="$(ask_yesno "Use NodeJS")"
+
+use_release_drafter="$(ask_yesno "Use GitHub release drafter")"
+use_pr_autoassign="$(ask_yesno "Use GitHub PR author auto-assign")"
+use_funding="$(ask_yesno "Use GitHub funding")"
+use_pr_template="$(ask_yesno "Use GitHub PR template")"
+remove_self="$(ask_yesno "Remove this script")"
+
+echo
+echo "            Summary"
+echo "---------------------------------"
+echo "Namespace                        : ${namespace}"
+echo "Project                          : ${project}"
+echo "Author                           : ${author}"
+echo "Use PHP                          : ${use_php}"
+echo "  Use CLI command app            : ${use_php_command}"
+echo "    CLI command name             : ${php_command_name}"
+echo "    Build PHAR                   : ${use_php_command_build}"
+echo "  Use simple script              : ${use_php_script}"
+echo "Use NodeJS                       : ${use_nodejs}"
+echo "Use GitHub release drafter       : ${use_release_drafter}"
+echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
+echo "Use GitHub funding               : ${use_funding}"
+echo "Use GitHub PR template           : ${use_pr_template}"
+echo "Remove this script               : ${remove_self}"
+echo "----------------------------------------"
+echo
+
+should_proceed="$(ask_yesno "Proceed with project init")"
+
+if [ "${should_proceed}" != "y" ]; then
+  echo
+  echo "Aborting."
+  exit 1
+fi
+
+#
+# Processing.
+#
+
+: "${namespace:?Namespace is required}"
+: "${project:?Project is required}"
+: "${author:?Author is required}"
+
 if [ "${use_php}" = "y" ]; then
   if [ "${use_php_command}" = "y" ]; then
-    mv "template-command-script" "${php_command_name}"
+    mv "template-command-script" "${php_command_name}" >/dev/null 2>&1 || true
     [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
   else
     remove_php_command
     remove_php_command_build
   fi
   [ "${use_php_script:-n}" != "y" ] && remove_php_script
-  mv "template-simple-script" "${php_command_name}"
+  mv "template-simple-script" "${php_command_name}" >/dev/null 2>&1 || true
 else
   remove_php
 fi

@@ -20,6 +20,7 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
@@ -27,6 +28,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -51,6 +53,7 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "n"         # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
@@ -58,6 +61,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -83,12 +87,14 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use PHP
     "n"         # use PHP Command
     "nothing"   # use PHP Script
+    "nothing"   # CLI command name
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -120,6 +126,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -149,6 +156,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -170,6 +178,7 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "nothing"   # use PHP Command Build
     "n"         # use NodeJS
     "nothing"   # use GitHub release drafter
@@ -177,6 +186,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -198,6 +208,7 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "n"         # use GitHub release drafter
@@ -205,6 +216,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -227,6 +239,7 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
@@ -234,6 +247,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -255,6 +269,7 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
@@ -262,6 +277,7 @@ export SCRIPT_FILE="init.sh"
     "n"         # use GitHub funding
     "nothing"   # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -283,6 +299,7 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
@@ -290,6 +307,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"   # use GitHub funding
     "n"         # use GitHub PR template
     "nothing"   # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -311,14 +329,15 @@ export SCRIPT_FILE="init.sh"
     "Jane Doe"  # author
     "nothing"   # use PHP
     "nothing"   # use PHP Command
+    "nothing"   # CLI command name
     "nothing"   # use PHP Command Build
     "nothing"   # use NodeJS
     "nothing"   # use GitHub release drafter
     "nothing"   # use GitHub pr auto-assign
     "nothing"   # use GitHub funding
-    "nothing"   # use GitHub funding
     "nothing"   # use GitHub PR template
     "n"         # remove init script
+    "nothing"   # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -328,7 +347,7 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_php "${BUILD_DIR}"
   assert_files_present_nodejs "${BUILD_DIR}"
 
-  assert_file_not_exists "init.sh"
+  assert_file_exists "init.sh"
 
   assert_output_contains "Initialization complete."
 }
@@ -402,7 +421,7 @@ assert_files_present_php_command() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_exists template-command-script
+  assert_file_exists star-wars
   assert_dir_exists src
 
   assert_dir_exists tests/phpunit/unit/Command
@@ -451,7 +470,7 @@ assert_files_present_php_script() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_exists template-simple-script
+  assert_file_exists star-wars
   assert_file_exists tests/phpunit/unit/ExampleScriptUnitTest.php
   assert_file_exists tests/phpunit/unit/ScriptUnitTestBase.php
 
