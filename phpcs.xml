@@ -12,6 +12,6 @@
     <arg name="colors"/>
 
     <file>src</file>
-    <file>template-simple-script.php</file>
+    <file>template-simple-script</file>
     <file>tests/phpunit</file>
 </ruleset>

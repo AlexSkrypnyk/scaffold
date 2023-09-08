@@ -5,7 +5,7 @@ namespace YourNamespace\Tests\Unit;
 /**
  * Class ExampleScriptUnitTest.
  *
- * Unit tests for template-simple-script.php.
+ * Unit tests for template-simple-script.
  *
  * @group scripts
  */
@@ -14,7 +14,7 @@ class ExampleScriptUnitTest extends ScriptUnitTestBase {
   /**
    * {@inheritdoc}
    */
-  protected $script = 'template-simple-script.php';
+  protected $script = 'template-simple-script';
 
   /**
    * Test main() method.
