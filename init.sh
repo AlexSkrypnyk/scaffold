@@ -163,6 +163,7 @@ use_release_drafter="$(ask_yesno "Use GitHub release drafter")"
 use_pr_autoassign="$(ask_yesno "Use GitHub PR author auto-assign")"
 use_funding="$(ask_yesno "Use GitHub funding")"
 use_pr_template="$(ask_yesno "Use GitHub PR template")"
+use_renovate="$(ask_yesno "Use Renovate")"
 remove_self="$(ask_yesno "Remove this script")"
 
 echo
@@ -181,6 +182,7 @@ echo "Use GitHub release drafter       : ${use_release_drafter}"
 echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
 echo "Use GitHub funding               : ${use_funding}"
 echo "Use GitHub PR template           : ${use_pr_template}"
+echo "Use Renovate                     : ${use_renovate}"
 echo "Remove this script               : ${remove_self}"
 echo "----------------------------------------"
 echo
@@ -242,6 +244,7 @@ rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
 [ "${use_pr_autoassign}" != "y" ] && rm -f .github/workflows/auto-assign-pr-author.yml || true
 [ "${use_funding}" != "y" ] && rm -f .github/FUNDING.yml || true
 [ "${use_pr_template}" != "y" ] && rm -f .github/PULL_REQUEST_TEMPLATE.md || true
+[ "${use_renovate}" != "y" ] && rm -f renovate.json || true
 
 remove_tokens_with_content "META"
 remove_special_comments
