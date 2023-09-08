@@ -58,5 +58,8 @@
             "box compile"
         ]
     },
-    "bin": ["template-command-script"]
+    "bin": [
+        "template-command-script",
+        "template-simple-script"
+    ]
 }
