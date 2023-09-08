@@ -32,11 +32,13 @@ if [ "${use_php}" = "y" ]; then
   [ -z "${1-}" ] && read -p '  Use CLI command app [Y/n]: ' use_php_command
   use_php_command="$(echo "${use_php_command:-y}" | tr '[:upper:]' '[:lower:]')"
   if [ "${use_php_command}" = "y" ]; then
+    read -p "    CLI command name [${project}]:" php_command_name
     [ -z "${1-}" ] && read -p '    Build PHAR [Y/n]: ' use_php_command_build
     use_php_command_build="$(echo "${use_php_command_build:-y}" | tr '[:upper:]' '[:lower:]')"
   else
     [ -z "${1-}" ] && read -p '  Use simple script [Y/n]: ' use_php_script
     use_php_script="$(echo "${use_php_script:-y}" | tr '[:upper:]' '[:lower:]')"
+    read -p "    CLI command name [${project}]:" php_command_name
   fi
 fi
 
@@ -145,12 +147,14 @@ remove_nodejs() {
 
 if [ "${use_php}" = "y" ]; then
   if [ "${use_php_command}" = "y" ]; then
+    mv "template-command-script" "${php_command_name}"
     [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
   else
     remove_php_command
     remove_php_command_build
   fi
   [ "${use_php_script:-n}" != "y" ] && remove_php_script
+  mv "template-simple-script" "${php_command_name}"
 else
   remove_php
 fi
