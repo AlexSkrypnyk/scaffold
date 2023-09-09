@@ -2,6 +2,7 @@
 
 namespace YourNamespace\App\Tests\Unit\Command;
 
+use Symfony\Component\Console\Command\Command;
 use YourNamespace\App\Command\JokeCommand;
 
 /**
@@ -18,30 +19,53 @@ class JokeCommandTest extends CommandTestCase {
    *
    * @covers ::execute
    * @covers ::configure
+   * @covers ::getJoke
+   * @dataProvider dataProviderExecute
    * @group command
+   * @group wip1
    */
-  public function testExecute(): void {
-    $output = $this->runExecute(JokeCommand::class, ['--topic' => 'general']);
-    $this->assertArrayContainsString('Setup', $output);
-    $this->assertArrayContainsString('Punchline', $output);
+  public function testExecute(string $content, int $expected_code, array|string $expected_output = []): void {
+    /** @var \YourNamespace\App\Command\JokeCommand $mock */
+    $mock = $this->prepareMock(JokeCommand::class, [
+      'getContent' => $content,
+    ], TRUE);
+    $mock->setName('app:joke');
+
+    $output = $this->runExecute($mock);
+
+    $this->assertEquals($expected_code, $this->commandTester->getStatusCode());
+    $expected_output = is_array($expected_output) ? $expected_output : [$expected_output];
+    foreach ($expected_output as $expected_output_string) {
+      $this->assertArrayContainsString($expected_output_string, $output);
+    }
   }
 
-}
+  public static function dataProviderExecute(): array {
+    return [
+      [static::fixturePayload(['setup' => 'Test setup', 'punchline' => 'Test punchline']), Command::SUCCESS, ['Test setup', 'Test punchline']],
+      ['', Command::FAILURE, ['Unable to retrieve a joke.']],
+      ['non-json', Command::FAILURE, ['Unable to retrieve a joke.']],
+      [static::fixturePayload(['setup' => 'Test setup']), Command::FAILURE, ['Unable to retrieve a joke.']],
+    ];
+  }
 
-// Override the file_get_contents function in the JokeCommand namespace.
-namespace YourNamespace\App\Command;
+  /**
+   * Get a fixture payload.
+   *
+   * @param array<string, string> $data
+   *   Data to be encoded.
+   *
+   * @return string
+   *   Encoded data.
+   */
+  protected static function fixturePayload(array $data): string {
+    $json = json_encode([(object) $data]);
 
-/**
- * Fake file_get_contents function.
- *
- * @SuppressWarnings(PHPMD.UnusedFormalParameter)
- */
-function file_get_contents(string $url): string|false {
-  // Fake a successful joke response.
-  return json_encode([
-    [
-      'setup' => 'Setup',
-      'punchline' => 'Punchline',
-    ],
-  ]);
+    if ($json === FALSE) {
+      throw new \Exception('Unable to encode test data.');
+    }
+
+    return $json;
+  }
+
 }

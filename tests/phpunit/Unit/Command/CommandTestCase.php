@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use YourNamespace\App\Tests\Traits\AssertTrait;
+use YourNamespace\App\Tests\Traits\MockTrait;
 use YourNamespace\App\Tests\Traits\ReflectionTrait;
 
 /**
@@ -17,6 +18,7 @@ abstract class CommandTestCase extends TestCase {
 
   use AssertTrait;
   use ReflectionTrait;
+  use MockTrait;
 
   /**
    * CommandTester instance.
@@ -28,8 +30,8 @@ abstract class CommandTestCase extends TestCase {
   /**
    * Run main() with optional arguments.
    *
-   * @param string $class
-   *   Command class.
+   * @param string|object $object_or_class
+   *   Object or class name.
    * @param array<string> $input
    *   Optional array of input arguments.
    * @param array<string, string> $options
@@ -38,10 +40,10 @@ abstract class CommandTestCase extends TestCase {
    * @return array<string>
    *   Array of output lines.
    */
-  protected function runExecute(string $class, array $input = [], array $options = []): array {
+  protected function runExecute(string|object $object_or_class, array $input = [], array $options = []): array {
     $application = new Application();
     /** @var \Symfony\Component\Console\Command\Command $instance */
-    $instance = new $class();
+    $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
     $application->add($instance);
 
     /** @var string $name */

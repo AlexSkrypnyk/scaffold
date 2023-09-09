@@ -2,6 +2,9 @@
 
 namespace YourNamespace\App\Tests\Traits;
 
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub\Stub;
+
 /**
  * Trait MockTrait.
  *
@@ -14,32 +17,38 @@ trait MockTrait {
    *
    * @param string $class
    *   Class name to generate the mock.
-   * @param array $methodsMap
+   * @param array<string,mixed> $methodsMap
    *   Optional array of methods and values, keyed by method name.
-   * @param array $args
+   * @param array<string,mixed>|bool $args
    *   Optional array of constructor arguments. If omitted, a constructor will
-   *   not be called.
+   *   not be called. If TRUE, the original constructor will be called as-is.
    *
-   * @return object
-   *   Mocked class.
+   * @return \PHPUnit\Framework\MockObject\MockObject
+   *   An instance of the mock.
+   *
+   * @SuppressWarnings(PHPMD.CyclomaticComplexity)
    */
-  protected function prepareMock($class, array $methodsMap = [], array $args = []) {
+  protected function prepareMock(string $class, array $methodsMap = [], array|bool $args = []): MockObject {
     $methods = array_keys($methodsMap);
 
-    $reflectionClass = new \ReflectionClass($class);
+    if (!class_exists($class)) {
+      throw new \InvalidArgumentException("Class $class does not exist");
+    }
 
-    if ($reflectionClass->isAbstract()) {
+    $reflection_class = new \ReflectionClass($class);
+
+    if ($reflection_class->isAbstract()) {
       $mock = $this->getMockForAbstractClass(
-        $class, $args, '', !empty($args), TRUE, TRUE, $methods
+        $class, is_array($args) ? $args : [], '', !empty($args), TRUE, TRUE, $methods
       );
     }
     else {
       $mock = $this->getMockBuilder($class);
-      if (!empty($args)) {
+      if (is_array($args) && !empty($args)) {
         $mock = $mock->enableOriginalConstructor()
           ->setConstructorArgs($args);
       }
-      else {
+      elseif ($args === FALSE) {
         $mock = $mock->disableOriginalConstructor();
       }
       $mock = $mock->onlyMethods($methods)
@@ -48,7 +57,7 @@ trait MockTrait {
 
     foreach ($methodsMap as $method => $value) {
       // Handle callback values differently.
-      if (is_object($value) && !str_contains(get_class($value), 'Callback') && !str_contains(get_class($value), 'Closure')) {
+      if ($value instanceof Stub) {
         $mock->expects($this->any())
           ->method($method)
           ->will($value);
