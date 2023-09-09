@@ -11,8 +11,10 @@
     <arg value="p"/>
     <arg name="colors"/>
 
+    <!-- #;< PHP_COMMAND -->
     <file>src</file>
-    <file>tests/phpunit</file>
+    <!-- #;> PHP_COMMAND -->
+    <!-- #;< !PHP_COMMAND -->
     <!--
     PHP_CodeSniffer does not support scanning of files without extensions, so
     we have to use the ugly workaround to copy the file into a file with a 'php'
@@ -20,6 +22,8 @@
     @see https://github.com/squizlabs/PHP_CodeSniffer/issues/2916
     -->
     <file>template-simple-script.php</file>
+    <!-- #;> !PHP_COMMAND -->
+    <file>tests/phpunit</file>
 
     <!-- Allow long array lines in tests. -->
     <rule ref="Drupal.Arrays.Array.LongLineDeclaration">

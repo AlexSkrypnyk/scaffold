@@ -37,6 +37,13 @@ remove_string_content() {
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
 }
 
+remove_string_content_line() {
+  local token="${1}"
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+}
+
 remove_tokens_with_content() {
   local token="${1}"
   local sed_opts
@@ -79,6 +86,11 @@ remove_php_command() {
   rm -Rf template-command-script || true
   rm -Rf src || true
   rm -Rf tests/phpunit/Unit/Command || true
+
+  remove_tokens_with_content "PHP_COMMAND"
+
+  remove_string_content_line '"template-command-script"'
+  remove_string_content_line '"template-command-script",'
 }
 
 remove_php_command_build() {
@@ -87,10 +99,21 @@ remove_php_command_build() {
 }
 
 remove_php_script() {
+  local new_name="${1:-template-simple-script}"
   rm -f template-simple-script || true
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Unit/ScriptUnitTestCase.php || true
+  rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
+  rm -f tests/phpunit/Functional/ScriptFunctionalTestCase.php || true
+  rm -f tests/phpunit/Functional/ExampleScriptFunctionalTest.php || true
+  remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
+  remove_string_content_line '"cp template-simple-script template-simple-script.php",'
+  remove_string_content_line '"rm template-simple-script.php"'
+  replace_string_content '"phpstan",' '"phpstan"'
+  remove_string_content_line '"template-simple-script"'
+  replace_string_content '"template-command-script",' '"template-command-script"'
+  replace_string_content '"'"${new_name}"'",' '"'"${new_name}"'"'
 }
 
 remove_nodejs() {
@@ -205,14 +228,19 @@ fi
 
 if [ "${use_php}" = "y" ]; then
   if [ "${use_php_command}" = "y" ]; then
-    mv "template-command-script" "${php_command_name}" >/dev/null 2>&1 || true
     [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
+    replace_string_content "template-command-script" "${php_command_name}"
+    mv "template-command-script" "${php_command_name}" >/dev/null 2>&1 || true
   else
-    remove_php_command
+    remove_php_command "${php_command_name}"
     remove_php_command_build
   fi
-  [ "${use_php_script:-n}" != "y" ] && remove_php_script
-  mv "template-simple-script" "${php_command_name}" >/dev/null 2>&1 || true
+  if [ "${use_php_script:-n}" = "y" ] ; then
+    replace_string_content "template-simple-script" "${php_command_name}"
+    mv "template-simple-script" "${php_command_name}" >/dev/null 2>&1 || true
+  else
+    remove_php_script "${php_command_name}"
+  fi
 else
   remove_php
 fi

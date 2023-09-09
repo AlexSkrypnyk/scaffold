@@ -5,8 +5,8 @@
         {
             "in": "./",
             "exclude": [
-                "tests",
-                "template-simple-script"
+                "template-simple-script",
+                "tests"
             ]
         }
     ]

@@ -70,6 +70,13 @@ assert_files_present_php_command() {
 
   assert_dir_exists tests/phpunit/Unit/Command
 
+  assert_file_contains "phpcs.xml" "<file>src</file>"
+  assert_file_contains "phpstan.neon" "- src"
+  assert_file_contains "phpunit.xml" "<directory>src</directory>"
+  assert_dir_not_contains_string "${dir}" "template-command-script"
+
+  assert_file_contains "composer.json" '"star-wars"'
+
   popd >/dev/null || exit 1
 }
 
@@ -82,6 +89,13 @@ assert_files_absent_php_command() {
   assert_dir_not_exists src
   assert_dir_not_exists tests/phpunit/Unit/Command
 
+  assert_file_not_contains "phpcs.xml" "<file>src</file>"
+  assert_file_not_contains "phpstan.neon" "- src"
+  assert_file_not_contains "phpunit.xml" "<directory>src</directory>"
+
+  assert_file_not_contains "composer.json" "template-command-script"
+  assert_dir_not_contains_string "${dir}" "template-command-script"
+
   popd >/dev/null || exit 1
 }
 
@@ -91,8 +105,9 @@ assert_files_present_php_command_build() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_file_exists "box.json"
+  assert_file_contains "box.json" ".build/star-wars.phar"
   assert_file_contains ".github/workflows/release.yml" "Build and test"
-  assert_file_contains ".github/workflows/release.yml" "template-command-script.phar"
+  assert_file_contains ".github/workflows/release.yml" "star-wars.phar"
 
   popd >/dev/null || exit 1
 }
@@ -117,8 +132,22 @@ assert_files_present_php_script() {
   assert_file_exists star-wars
   assert_file_exists tests/phpunit/Unit/ExampleScriptUnitTest.php
   assert_file_exists tests/phpunit/Unit/ScriptUnitTestCase.php
+  assert_file_exists tests/phpunit/Functional/ScriptFunctionalTestCase.php
+  assert_file_exists tests/phpunit/Functional/ExampleScriptFunctionalTest.php
 
-  assert_file_contains ".github/workflows/release.yml" "template-simple-script"
+  assert_file_contains ".github/workflows/release.yml" "star-wars"
+
+  assert_file_contains "phpcs.xml" "star-wars.php"
+  assert_file_contains "phpstan.neon" "star-wars.php"
+  assert_file_contains "phpunit.xml" "star-wars"
+
+  assert_file_contains "composer.json" '"cp star-wars star-wars.php",'
+  assert_file_contains "composer.json" '"rm star-wars.php"'
+  assert_file_contains "composer.json" '"phpstan",'
+  assert_file_contains "composer.json" '"phpstan",'
+  assert_file_contains "composer.json" '"star-wars"'
+
+  assert_dir_not_contains_string "${dir}" "template-simple-script"
 
   popd >/dev/null || exit 1
 }
@@ -131,8 +160,21 @@ assert_files_absent_php_script() {
   assert_file_not_exists template-simple-script
   assert_file_not_exists tests/phpunit/Unit/ExampleScriptUnitTest.php
   assert_file_not_exists tests/phpunit/Unit/ScriptUnitTestCase.php
+  assert_file_not_exists tests/phpunit/Functional/ScriptFunctionalTestCase.php
+  assert_file_not_exists tests/phpunit/Functional/ExampleScriptFunctionalTest.php
+#@todo Update below to star-wars
+  assert_file_not_contains ".github/workflows/release.yml" "template-simple-script"
 
-  assert_not_contains ".github/workflows/release.yml" "template-simple-script"
+  assert_file_not_contains "phpcs.xml" "star-wars.php"
+  assert_file_not_contains "phpstan.neon" "star-wars.php"
+  assert_file_not_contains "phpunit.xml" "star-wars"
+
+  assert_file_not_contains "composer.json" '"cp star-wars star-wars.php",'
+  assert_file_not_contains "composer.json" '"rm star-wars.php"'
+  assert_file_not_contains "composer.json" '"phpstan",'
+  assert_file_not_contains "composer.json" '"star-wars",'
+
+  assert_dir_not_contains_string "${dir}" "template-simple-script"
 
   popd >/dev/null || exit 1
 }
@@ -193,6 +235,28 @@ assert_files_absent_nodejs() {
   assert_file_not_contains ".github/workflows/test.yml" "npm"
   assert_file_not_contains ".github/workflows/release.yml" "npm"
   assert_file_not_contains "README.md" "npm"
+
+  popd >/dev/null || exit 1
+}
+
+assert_workflow_php() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  composer install
+  composer lint
+  composer test
+
+  popd >/dev/null || exit 1
+}
+
+assert_workflow_php_command_build() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  composer build
 
   popd >/dev/null || exit 1
 }

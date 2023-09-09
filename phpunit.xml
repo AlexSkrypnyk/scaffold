@@ -21,8 +21,12 @@
 
     <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
+            <!-- #;< PHP_COMMAND -->
             <directory>src</directory>
+            <!-- #;> PHP_COMMAND -->
+            <!-- #;< !PHP_COMMAND -->
             <file>template-simple-script</file>
+            <!-- #;> !PHP_COMMAND -->
         </include>
     </source>
 

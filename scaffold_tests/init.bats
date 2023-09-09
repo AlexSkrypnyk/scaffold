@@ -46,6 +46,9 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_output_contains "Initialization complete."
+
+  assert_workflow_php "${BUILD_DIR}"
+  assert_workflow_php_command_build "${BUILD_DIR}"
 }
 
 @test "Init, php command, no build" {
@@ -114,6 +117,8 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_output_contains "Initialization complete."
+
+  assert_workflow_php "${BUILD_DIR}"
 }
 
 @test "Init, neither php script nor php command" {

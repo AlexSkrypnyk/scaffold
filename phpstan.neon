@@ -7,9 +7,12 @@ parameters:
   level: 9
 
   paths:
+    #;< PHP_COMMAND
     - src
-    - template-command-script
+    #;> PHP_COMMAND
+    #;< !PHP_COMMAND
     - template-simple-script.php
+    #;> !PHP_COMMAND
     - tests/phpunit
 
   excludePaths:
