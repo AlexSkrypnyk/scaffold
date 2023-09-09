@@ -78,7 +78,7 @@ remove_php() {
 remove_php_command() {
   rm -Rf template-command-script || true
   rm -Rf src || true
-  rm -Rf tests/phpunit/unit/Command || true
+  rm -Rf tests/phpunit/Unit/Command || true
 }
 
 remove_php_command_build() {
@@ -88,8 +88,8 @@ remove_php_command_build() {
 
 remove_php_script() {
   rm -f template-simple-script || true
-  rm -f tests/phpunit/unit/ExampleScriptUnitTest.php || true
-  rm -f tests/phpunit/unit/ScriptUnitTestBase.php || true
+  rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
+  rm -f tests/phpunit/Unit/ScriptUnitTestCase.php || true
   remove_tokens_with_content "!PHP_PHAR"
 }
 

@@ -1,10 +1,7 @@
 <?php
 
-namespace YourNamespace\App\Tests\Command;
+namespace YourNamespace\App\Tests\Unit\Command;
 
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Tester\CommandTester;
 use YourNamespace\App\Command\JokeCommand;
 
 /**
@@ -12,26 +9,21 @@ use YourNamespace\App\Command\JokeCommand;
  *
  * This is a unit test for the JokeCommand class.
  *
- * @package YourNamespace\App\Tests\Command
+ * @coversDefaultClass \YourNamespace\App\Command\JokeCommand
  */
-class JokeCommandTest extends TestCase {
+class JokeCommandTest extends CommandTestCase {
 
   /**
    * Test the execute method.
+   *
+   * @covers ::execute
+   * @covers ::configure
+   * @group command
    */
-  public function testExecute() {
-    $application = new Application();
-    $application->add(new JokeCommand());
-
-    $command = $application->find('app:joke');
-    $commandTester = new CommandTester($command);
-
-    $commandTester->execute(['--topic' => 'general']);
-
-    // The output of the command in the console.
-    $output = $commandTester->getDisplay();
-    $this->assertStringContainsString('Setup', $output);
-    $this->assertStringContainsString('Punchline', $output);
+  public function testExecute(): void {
+    $output = $this->runExecute(JokeCommand::class, ['--topic' => 'general']);
+    $this->assertArrayContainsString('Setup', $output);
+    $this->assertArrayContainsString('Punchline', $output);
   }
 
 }
@@ -44,7 +36,7 @@ namespace YourNamespace\App\Command;
  *
  * @SuppressWarnings(PHPMD.UnusedFormalParameter)
  */
-function file_get_contents($url) {
+function file_get_contents(string $url): string|false {
   // Fake a successful joke response.
   return json_encode([
     [
