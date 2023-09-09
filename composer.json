@@ -26,7 +26,9 @@
         "drupal/coder": "^8.3",
         "phpmd/phpmd": "^2.13",
         "phpstan/phpstan": "^1.10",
-        "bamarni/composer-bin-plugin": "^1.8"
+        "bamarni/composer-bin-plugin": "^1.8",
+        "mikey179/vfsstream": "^1.6",
+        "opis/closure": "^3.6"
     },
     "autoload": {
         "psr-4": {
@@ -49,12 +51,15 @@
     },
     "scripts": {
         "lint": [
+            "cp template-simple-script template-simple-script.php",
             "phpcs",
-            "phpmd --exclude vendor,node_modules . text phpmd.xml",
-            "phpstan"
+            "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
+            "phpstan",
+            "rm template-simple-script.php"
         ],
         "lint:fix": "phpcbf",
-        "test": "phpunit --do-not-cache-result tests/phpunit/unit",
+        "test": "phpunit --no-coverage",
+        "test:coverage": "XDEBUG_MODE=coverage phpunit",
         "build": [
             "@composer bin box require --dev humbug/box",
             "box validate",

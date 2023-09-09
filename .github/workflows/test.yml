@@ -20,7 +20,8 @@ jobs:
         key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
     - uses: php-actions/composer@v6
     - run: composer lint
-    - run: composer test
+    - run: composer test:coverage
+    - uses: insightsengineering/coverage-action@v2
   #;> PHP
   #;< NODEJS
   test-nodejs:
