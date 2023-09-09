@@ -22,7 +22,6 @@ class JokeCommandTest extends CommandTestCase {
    * @covers ::getJoke
    * @dataProvider dataProviderExecute
    * @group command
-   * @group wip1
    */
   public function testExecute(string $content, int $expected_code, array|string $expected_output = []): void {
     /** @var \YourNamespace\App\Command\JokeCommand $mock */
