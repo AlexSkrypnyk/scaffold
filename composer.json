@@ -35,10 +35,10 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "YourNamespace\\App\\Tests\\": "tests/phpunit/unit"
+            "YourNamespace\\App\\Tests\\": "tests/phpunit"
         },
         "classmap": [
-            "tests/phpunit/unit"
+            "tests/phpunit"
         ]
     },
     "config": {

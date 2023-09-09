@@ -1,6 +1,6 @@
 <?php
 
-namespace YourNamespace\Tests\Unit;
+namespace YourNamespace\App\Tests\Unit;
 
 /**
  * Class ExampleScriptUnitTest.
@@ -9,68 +9,39 @@ namespace YourNamespace\Tests\Unit;
  *
  * @group scripts
  */
-class ExampleScriptUnitTest extends ScriptUnitTestBase {
+class ExampleScriptUnitTest extends ScriptUnitTestCase {
 
   /**
-   * {@inheritdoc}
-   */
-  protected $script = 'template-simple-script';
-
-  /**
-   * Test main() method.
-   *
+   * @covers ::main
+   * @covers ::print_help
+   * @covers ::verbose
    * @dataProvider dataProviderMain
-   * @runInSeparateProcess
+   * @group script
    */
-  public function testMain($args, $expected_code, $expected_output) {
-    $args = is_array($args) ? $args : [$args];
-    $result = $this->runScript($args, TRUE);
-    $this->assertEquals($expected_code, $result['code']);
-    $this->assertStringContainsString($expected_output, $result['output']);
+  public function testMain(string|array $args = [], array|string $expected_output = [], string|null $expected_exception_message = NULL): void {
+    if ($expected_exception_message) {
+      $this->expectException(\Exception::class);
+      $this->expectExceptionMessage($expected_exception_message);
+    }
+
+    $output = $this->runMain($args);
+
+    $expected_output = is_array($expected_output) ? $expected_output : [$expected_output];
+    foreach ($expected_output as $expected_output_string) {
+      $this->assertArrayContainsString($expected_output_string, $output);
+    }
   }
 
-  /**
-   * Data provider for testMain().
-   */
-  public static function dataProviderMain() {
+  public static function dataProviderMain(): array {
     return [
-      [
-        '--help',
-        0,
-        'PHP CLI script template.',
-      ],
-      [
-        '-help',
-        0,
-        'PHP CLI script template.',
-      ],
-      [
-        '-h',
-        0,
-        'PHP CLI script template.',
-      ],
-      [
-        '-?',
-        0,
-        'PHP CLI script template.',
-      ],
-      [
-        [],
-        1,
-        'PHP CLI script template.',
-      ],
-      [
-        [1, 2],
-        1,
-        'PHP CLI script template.',
-      ],
-
-      // Validation of business logic.
-      [
-        'arg1value',
-        0,
-        'Would execute script business logic with argument arg1value.',
-      ],
+      ['help', 'PHP CLI script template.'],
+      ['--help', 'PHP CLI script template.'],
+      ['-h', 'PHP CLI script template.'],
+      ['-?', 'PHP CLI script template.'],
+      ['-help', 'Would execute script business logic with argument -help.'],
+      ['', [], 'Please provide a value of the first argument.'],
+      ['testarg1', 'Would execute script business logic with argument testarg1.'],
+      [['testarg1', 'testarg2'], [], 'Please provide a value of the first argument.'],
     ];
   }
 

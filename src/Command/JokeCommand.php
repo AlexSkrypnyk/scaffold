@@ -40,8 +40,26 @@ class JokeCommand extends Command {
    */
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $topic = $input->getOption('topic');
-    $jokeResponse = file_get_contents(sprintf(self::JOKE_API_ENDPOINT, $topic));
-    [$joke] = json_decode($jokeResponse);
+    $topic = is_string($topic) ? $topic : 'general';
+
+    $response = file_get_contents(sprintf(self::JOKE_API_ENDPOINT, $topic));
+
+    if (empty($response)) {
+      $output->writeln('<error>Unable to retrieve a joke payload.</error>');
+
+      return Command::FAILURE;
+    }
+
+    $json = json_decode($response);
+
+    if (empty($json)) {
+      $output->writeln('<error>Unable to retrieve a joke payload.</error>');
+
+      return Command::FAILURE;
+    }
+
+    /** @var \stdClass $joke */
+    [$joke] = (array) $json;
 
     $output->writeln($joke->setup);
     $output->writeln("<info>{$joke->punchline}</info>\n");

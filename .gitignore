@@ -1,8 +1,9 @@
 .build
 #;< PHP
+/.phpunit.cache
+/composer.lock
 /vendor
 /vendor-bin
-/composer.lock
 #;> PHP
 #;< NODEJS
 /node_modules

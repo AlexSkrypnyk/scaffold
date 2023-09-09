@@ -26,53 +26,39 @@
  *
  * Usage:
  * @code
- * php template-simple-script
+ * ./template-simple-script
  * @endcode
- *
- * phpcs:disable Drupal.Commenting.InlineComment.SpacingBefore
- * phpcs:disable Drupal.Commenting.InlineComment.SpacingAfter
- * phpcs:disable DrupalPractice.Commenting.CommentEmptyLine.SpacingAfter
  */
-
-/**
- * Defines exit codes.
- */
-define('EXIT_SUCCESS', 0);
-define('EXIT_ERROR', 1);
-
-/**
- * Defines error level to be reported as an error.
- */
-define('ERROR_LEVEL', E_USER_WARNING);
 
 /**
  * Main functionality.
+ *
+ * @param array<string> $argv
+ *   Array of arguments.
+ * @param int $argc
+ *   Number of arguments.
  */
-function main(array $argv, $argc) {
-  if (in_array($argv[1] ?? NULL, ['--help', '-help', '-h', '-?'])) {
+function main(array $argv, int $argc): void {
+  if (array_intersect(['help', '--help', '-h', '-?'], $argv)) {
     print_help();
-    return EXIT_SUCCESS;
+
+    return;
   }
 
-  // Show help if not enough or more than required arguments.
   if ($argc < 2 || $argc > 2) {
-    print_help();
-
-    return EXIT_ERROR;
+    throw new \Exception('Please provide a value of the first argument.');
   }
 
   // Add your logic here.
   verbose(sprintf('Would execute script business logic with argument %s.', $argv[1]));
-
-  return EXIT_SUCCESS;
 }
 
 /**
  * Print help.
  */
-function print_help() {
+function print_help(): void {
   $script_name = basename(__FILE__);
-  print <<<EOF
+  $out = <<<EOF
 PHP CLI script template.
 ------------------------
 
@@ -83,29 +69,40 @@ Options:
   --help                This help.
 
 Examples:
-  php $script_name path/to/file
+  php $script_name value/of/argument
 
 EOF;
-  print PHP_EOL;
+  verbose($out);
 }
-
-// ////////////////////////////////////////////////////////////////////////// //
-//                                UTILITIES                                   //
-// ////////////////////////////////////////////////////////////////////////// //
 
 /**
- * Show a verbose message.
+ * Show a verbose message and record messages into internal buffer.
+ *
+ * @param string $string
+ *   Message to print.
+ * @param bool|float|int|string|null ...$args
+ *   Arguments to sprintf() the message.
+ *
+ * @return array<string>
+ *   Array of messages.
  */
-function verbose() {
-  if (getenv('SCRIPT_QUIET') != '1') {
-    print call_user_func_array('sprintf', func_get_args()) . PHP_EOL;
+function verbose(string $string, ...$args): array {
+  $string = sprintf($string, ...$args);
+
+  static $buffer = [];
+  $buffer[] = $string;
+  if (empty(getenv('SCRIPT_QUIET'))) {
+    // @codeCoverageIgnoreStart
+    print end($buffer);
+    // @codeCoverageIgnoreEnd
   }
+
+  return $buffer;
 }
 
-// ////////////////////////////////////////////////////////////////////////// //
-//                                ENTRYPOINT                                  //
-// ////////////////////////////////////////////////////////////////////////// //
-
+// Entrypoint.
+//
+// @codeCoverageIgnoreStart
 ini_set('display_errors', 1);
 
 if (PHP_SAPI != 'cli' || !empty($_SERVER['REMOTE_ADDR'])) {
@@ -114,30 +111,28 @@ if (PHP_SAPI != 'cli' || !empty($_SERVER['REMOTE_ADDR'])) {
 
 // Allow to skip the script run.
 if (getenv('SCRIPT_RUN_SKIP') != 1) {
-  // Custom error handler to catch errors based on set ERROR_LEVEL.
-  set_error_handler(function ($severity, $message, $file, $line) {
+  set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
     if (!(error_reporting() & $severity)) {
-      // This error code is not included in error_reporting.
-      return;
+      // This error code is not included in error_reporting - continue
+      // execution with the normal error handler.
+      return FALSE;
     }
     throw new ErrorException($message, 0, $severity, $file, $line);
   });
 
   try {
-    $code = main($argv, $argc);
-    if (is_null($code)) {
-      throw new \Exception('Script exited without providing an exit code.');
-    }
-    exit($code);
+    // The function should not provide an exit code but rather throw exceptions.
+    main($argv, $argc);
   }
   catch (\ErrorException $exception) {
-    if ($exception->getSeverity() <= ERROR_LEVEL) {
-      print PHP_EOL . 'RUNTIME ERROR: ' . $exception->getMessage() . PHP_EOL;
-      exit($exception->getCode() == 0 ? EXIT_ERROR : $exception->getCode());
+    if ($exception->getSeverity() <= E_USER_WARNING) {
+      verbose(PHP_EOL . 'RUNTIME ERROR: ' . $exception->getMessage() . PHP_EOL);
+      exit($exception->getCode() == 0 ? 1 : $exception->getCode());
     }
   }
   catch (\Exception $exception) {
-    print PHP_EOL . 'ERROR: ' . $exception->getMessage() . PHP_EOL;
-    exit($exception->getCode() == 0 ? EXIT_ERROR : $exception->getCode());
+    verbose(PHP_EOL . 'ERROR: ' . $exception->getMessage() . PHP_EOL);
+    exit($exception->getCode() == 0 ? 1 : $exception->getCode());
   }
 }
+// @codeCoverageIgnoreEnd
