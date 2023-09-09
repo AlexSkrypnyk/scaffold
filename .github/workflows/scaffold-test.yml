@@ -5,12 +5,13 @@ name: Scaffold test
 # after running init.sh script.
 
 on:
-  push:
+  pull_request:
     branches:
       - main
       - 'feature/**'
-      - 'renovate/**'
-      - 'deps/**'
+  push:
+    branches:
+      - main
 
 jobs:
   scaffold-test:
