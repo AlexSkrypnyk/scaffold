@@ -184,7 +184,7 @@ echo "Use GitHub funding               : ${use_funding}"
 echo "Use GitHub PR template           : ${use_pr_template}"
 echo "Use Renovate                     : ${use_renovate}"
 echo "Remove this script               : ${remove_self}"
-echo "----------------------------------------"
+echo "---------------------------------"
 echo
 
 should_proceed="$(ask_yesno "Proceed with project init")"
