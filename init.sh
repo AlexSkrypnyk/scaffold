@@ -30,6 +30,10 @@ replace_string_content() {
   set -e
 }
 
+to_lowercase() {
+  echo "${1}" | tr '[:upper:]' '[:lower:]'
+}
+
 remove_string_content() {
   local token="${1}"
   local sed_opts
@@ -159,7 +163,7 @@ ask_yesno() {
 echo "Please follow the prompts to adjust your project configuration"
 echo
 
-[ -z "${namespace}" ] && namespace="$(ask "Namespace")"
+[ -z "${namespace}" ] && namespace="$(ask "Namespace (PascalCase)")"
 [ -z "${project}" ] && project="$(ask "Project")"
 [ -z "${author}" ] && author="$(ask "Author")"
 
@@ -235,7 +239,7 @@ if [ "${use_php}" = "y" ]; then
     remove_php_command "${php_command_name}"
     remove_php_command_build
   fi
-  if [ "${use_php_script:-n}" = "y" ] ; then
+  if [ "${use_php_script:-n}" = "y" ]; then
     replace_string_content "template-simple-script" "${php_command_name}"
     mv "template-simple-script" "${php_command_name}" >/dev/null 2>&1 || true
   else
@@ -247,9 +251,11 @@ fi
 
 [ "${use_nodejs}" != "y" ] && remove_nodejs
 
-replace_string_content "yournamespace" "${namespace}"
-replace_string_content "yournamespace" "${namespace}"
+namespaceLowercase="$(to_lowercase "${namespace}")"
+
+replace_string_content "YourNamespace" "${namespace}"
 replace_string_content "AlexSkrypnyk" "${namespace}"
+replace_string_content "yournamespace" "${namespaceLowercase}"
 replace_string_content "yourproject" "${project}"
 replace_string_content "Your Name" "${author}"
 
