@@ -1,6 +1,8 @@
 .build
 #;< PHP
+/.coverage-html
 /.phpunit.cache
+/coverage.xml
 /composer.lock
 /vendor
 /vendor-bin
