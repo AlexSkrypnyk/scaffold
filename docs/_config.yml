@@ -1,5 +1,42 @@
+# @see https://github.com/just-the-docs/just-the-docs/blob/main/_config.yml
 title: Scaffold
 description: Scaffold documentation
 theme: just-the-docs
-
+repository: AlexSkrypnyk/scafold
 url: https://alexskrypnyk.github.io/scaffold/
+
+layout: default
+
+# Aux links for the upper right navigation.
+aux_links:
+  "Scaffold":
+    - "//github.com/AlexSkrypnyk/scaffold"
+aux_links_new_tab: true
+
+back_to_top: true
+back_to_top_text: "Back to top"
+
+enable_copy_code_button: true
+
+heading_anchors: true
+
+footer_content: "Copyright &copy;2023 <a href=\"mailto:alex@drevops.com\">Alex Skrypnyk</a>"
+
+# Footer "Edit this page on GitHub" link text.
+gh_edit_link: true
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: "https://github.com/AlexSkrypnyk/scafold"
+gh_edit_branch: "main"
+gh_edit_source: docs
+gh_edit_view_mode: "tree"
+
+# Google Analytics Tracking (optional)
+# Supports a CSV of tracking ID strings (eg. "UA-1234567-89,G-1AB234CDE5")
+# Note: the main Just the Docs site does *not* use Google Analytics.
+# ga_tracking: UA-2709176-10,G-5FG1HLH3XQ
+# ga_tracking_anonymize_ip: true # Use GDPR compliant Google Analytics settings (true/nil by default)
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-include-cache
+  - jekyll_include_plugin
