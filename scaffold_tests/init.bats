@@ -16,21 +16,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, defaults" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -46,25 +46,28 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_output_contains "Initialization complete."
+
+  assert_workflow_php "${BUILD_DIR}"
+  assert_workflow_php_command_build "${BUILD_DIR}"
 }
 
 @test "Init, php command, no build" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "n"         # use PHP Command Build
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "n"             # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -84,21 +87,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, php script" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "n"         # use PHP Command
-    "nothing"   # use PHP Script
-    "nothing"   # CLI command name
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "n"             # use PHP Command
+    "nothing"       # use PHP Script
+    "nothing"       # CLI command name
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -114,24 +117,26 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_output_contains "Initialization complete."
+
+  assert_workflow_php "${BUILD_DIR}"
 }
 
 @test "Init, neither php script nor php command" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "n"         # use PHP Command
-    "n"         # use PHP Script
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "n"             # use PHP Command
+    "n"             # use PHP Script
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -151,18 +156,18 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, no php" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "n"         # use PHP
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "n"             # use PHP
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -179,21 +184,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, no nodejs" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "n"         # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "n"             # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -210,21 +215,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, no release drafter" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "nothing"   # use NodeJS
-    "n"         # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "n"             # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -242,21 +247,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, no PR auto-assign" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "n"         # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "n"             # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -273,21 +278,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, no funding" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "n"         # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "n"             # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -304,21 +309,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, no PR template" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "n"         # use GitHub PR template
-    "nothing"   # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "n"             # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -335,21 +340,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, no Renovate" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "n"         # use Renovate
-    "nothing"   # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "n"             # use Renovate
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
@@ -366,21 +371,21 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, do not remove script" {
   answers=(
-    "lucasfilm" # organisation
-    "star-wars" # project
-    "Jane Doe"  # author
-    "nothing"   # use PHP
-    "nothing"   # use PHP Command
-    "nothing"   # CLI command name
-    "nothing"   # use PHP Command Build
-    "nothing"   # use NodeJS
-    "nothing"   # use GitHub release drafter
-    "nothing"   # use GitHub pr auto-assign
-    "nothing"   # use GitHub funding
-    "nothing"   # use GitHub PR template
-    "nothing"   # use Renovate
-    "n"         # remove init script
-    "nothing"   # proceed with init
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "n"             # remove init script
+    "nothing"       # proceed with init
   )
   output=$(run_script_interactive "${answers[@]}")
 
