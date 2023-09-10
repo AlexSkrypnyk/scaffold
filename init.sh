@@ -83,6 +83,8 @@ remove_php() {
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
 
+  rm -Rf docs/php || true
+
   remove_tokens_with_content "PHP"
 }
 
@@ -90,6 +92,7 @@ remove_php_command() {
   rm -Rf template-command-script || true
   rm -Rf src || true
   rm -Rf tests/phpunit/Unit/Command || true
+  rm -f docs/php/cli-command.md || true
 
   remove_tokens_with_content "PHP_COMMAND"
 
@@ -99,6 +102,7 @@ remove_php_command() {
 
 remove_php_command_build() {
   rm -Rf box.json || true
+  rm -Rf docs/ci/php-packaging.md || true
   remove_tokens_with_content "PHP_PHAR"
 }
 
@@ -110,6 +114,7 @@ remove_php_script() {
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Functional/ScriptFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/ExampleScriptFunctionalTest.php || true
+  rm -f docs/php/cli-script.md || true
   remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
   remove_string_content_line '"cp template-simple-script template-simple-script.php",'
@@ -125,6 +130,7 @@ remove_nodejs() {
   rm -f package.lock >/dev/null || true
   rm -f yarn.lock >/dev/null || true
   rm -Rf node_modules >/dev/null || true
+  rm -Rf docs/nodejs || true
   remove_tokens_with_content "NODEJS"
 }
 
