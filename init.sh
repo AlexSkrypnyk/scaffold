@@ -251,13 +251,15 @@ fi
 
 [ "${use_nodejs}" != "y" ] && remove_nodejs
 
-namespaceLowercase="$(to_lowercase "${namespace}")"
+namespace_lowercase="$(to_lowercase "${namespace}")"
 
 replace_string_content "YourNamespace" "${namespace}"
 replace_string_content "AlexSkrypnyk" "${namespace}"
-replace_string_content "yournamespace" "${namespaceLowercase}"
+replace_string_content "yournamespace" "${namespace_lowercase}"
+replace_string_content "alexskrypnyk" "${namespace_lowercase}"
 replace_string_content "yourproject" "${project}"
 replace_string_content "Your Name" "${author}"
+replace_string_content "Alex Skrypnyk" "${author}"
 
 remove_string_content "Generic project scaffold template"
 replace_string_content "Scaffold" "${project}"
