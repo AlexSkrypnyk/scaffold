@@ -1,0 +1,45 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+          cache-version: 0
+          working-directory: '${{ github.workspace }}/docs'
+      - uses: actions/configure-pages@v3
+        id: pages
+      - run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        working-directory: '${{ github.workspace }}/docs'
+        env:
+          JEKYLL_ENV: production
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: "docs/_site/"
+      - uses: actions/deploy-pages@v2
