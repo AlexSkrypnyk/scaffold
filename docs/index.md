@@ -17,7 +17,7 @@ projects, so you can focus on the important stuff.
 
 ## Quickstart
 
-1. Download the latest release from [GitHub](https://github.com/AlexSkrypnyk/scaffold/releases/latest
+1. Download the latest release from [GitHub](https://github.com/AlexSkrypnyk/scaffold/releases/latest)
 2. Run `./init.sh` to replace `yournamespace`, `yourproject`, `Your Name` and
    other strings with your own and choose the features.
 3. Commit and push the changes to your repository.
