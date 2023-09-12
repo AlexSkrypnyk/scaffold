@@ -2,7 +2,7 @@
 title: Scaffold
 description: Scaffold documentation
 theme: just-the-docs
-repository: AlexSkrypnyk/scafold
+repository: AlexSkrypnyk/scaffold
 url: https://getscaffold.dev
 
 layout: default
@@ -25,7 +25,7 @@ footer_content: "Copyright &copy;2023 <a href=\"mailto:alex@drevops.com\">Alex S
 # Footer "Edit this page on GitHub" link text.
 gh_edit_link: true
 gh_edit_link_text: "Edit this page on GitHub"
-gh_edit_repository: "https://github.com/AlexSkrypnyk/scafold"
+gh_edit_repository: "https://github.com/AlexSkrypnyk/scaffold"
 gh_edit_branch: "main"
 gh_edit_source: docs
 gh_edit_view_mode: "tree"
