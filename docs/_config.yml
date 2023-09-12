@@ -9,7 +9,7 @@ layout: default
 
 # Aux links for the upper right navigation.
 aux_links:
-  "Scaffold":
+  "Scaffold on GitHub":
     - "//github.com/AlexSkrypnyk/scaffold"
 aux_links_new_tab: true
 
