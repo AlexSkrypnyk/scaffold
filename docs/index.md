@@ -6,7 +6,7 @@ nav_order: 1
 
 # Introduction
 
-Welcome to the official documentation for Scaffold, your go-to repository for
+Welcome to the documentation for Scaffold, your go-to repository for
 kick-starting your projects!
 
 If you're tired of setting up your project environment from scratch each time 
