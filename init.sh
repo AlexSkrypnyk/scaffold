@@ -121,15 +121,15 @@ remove_php() {
 }
 
 remove_php_command() {
-  rm -Rf template-command-script || true
+  rm -Rf php-command || true
   rm -Rf src || true
   rm -Rf tests/phpunit/Unit/Command || true
   rm -f docs/php/cli-command.md || true
 
   remove_tokens_with_content "PHP_COMMAND"
 
-  remove_string_content_line '"template-command-script"'
-  remove_string_content_line '"template-command-script",'
+  remove_string_content_line '"php-command"'
+  remove_string_content_line '"php-command",'
 }
 
 remove_php_command_build() {
@@ -139,8 +139,8 @@ remove_php_command_build() {
 }
 
 remove_php_script() {
-  local new_name="${1:-template-simple-script}"
-  rm -f template-simple-script || true
+  local new_name="${1:-php-script}"
+  rm -f php-script || true
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Unit/ScriptUnitTestCase.php || true
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
@@ -149,11 +149,11 @@ remove_php_script() {
   rm -f docs/php/cli-script.md || true
   remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
-  remove_string_content_line '"cp template-simple-script template-simple-script.php",'
-  remove_string_content_line '"rm template-simple-script.php"'
+  remove_string_content_line '"cp php-script php-script.php",'
+  remove_string_content_line '"rm php-script.php"'
   replace_string_content '"phpstan",' '"phpstan"'
-  remove_string_content_line '"template-simple-script"'
-  replace_string_content '"template-command-script",' '"template-command-script"'
+  remove_string_content_line '"php-script"'
+  replace_string_content '"php-command",' '"php-command"'
   replace_string_content '"'"${new_name}"'",' '"'"${new_name}"'"'
 }
 
@@ -308,15 +308,15 @@ fi
 if [ "${use_php}" = "y" ]; then
   if [ "${use_php_command}" = "y" ]; then
     [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
-    replace_string_content "template-command-script" "${php_command_name}"
-    mv "template-command-script" "${php_command_name}" >/dev/null 2>&1 || true
+    replace_string_content "php-command" "${php_command_name}"
+    mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
   else
     remove_php_command "${php_command_name}"
     remove_php_command_build
   fi
   if [ "${use_php_script:-n}" = "y" ]; then
-    replace_string_content "template-simple-script" "${php_command_name}"
-    mv "template-simple-script" "${php_command_name}" >/dev/null 2>&1 || true
+    replace_string_content "php-script" "${php_command_name}"
+    mv "php-script" "${php_command_name}" >/dev/null 2>&1 || true
   else
     remove_php_script "${php_command_name}"
   fi

@@ -35,7 +35,7 @@ jobs:
       - uses: php-actions/composer@v6
         #;< PHP_PHAR
       - name: Build and test
-        run: composer build && ./.build/template-command-script.phar | grep -q "?"
+        run: composer build && ./.build/php-command.phar | grep -q "?"
         #;> PHP_PHAR
       - name: Get Tag Name
         id: get-version
@@ -45,10 +45,10 @@ jobs:
         with:
           files: |
             #;< PHP_PHAR
-            ./.build/template-command-script.phar
+            ./.build/php-command.phar
             #;> PHP_PHAR
             #;< !PHP_PHAR
-            template-simple-script
+            php-script
             #;> !PHP_PHAR
   #;> PHP
   #;< NODEJS

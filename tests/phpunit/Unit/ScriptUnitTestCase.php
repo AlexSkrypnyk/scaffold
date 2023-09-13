@@ -21,7 +21,7 @@ abstract class ScriptUnitTestCase extends TestCase {
    *
    * @var string
    */
-  protected static $script = 'template-simple-script';
+  protected static $script = 'php-script';
 
   /**
    * {@inheritdoc}

@@ -5,7 +5,7 @@ namespace YourNamespace\App\Tests\Unit;
 /**
  * Class ExampleScriptUnitTest.
  *
- * Unit tests for template-simple-script.
+ * Unit tests for php-script.
  *
  * @group scripts
  */

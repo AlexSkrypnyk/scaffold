@@ -1,11 +1,11 @@
 {
-    "output": ".build/template-command-script.phar",
+    "output": ".build/php-command.phar",
     "compression": "GZ",
     "finder": [
         {
             "in": "./",
             "exclude": [
-                "template-simple-script",
+                "php-script",
                 "tests"
             ]
         }

@@ -7,7 +7,7 @@ nav_order: 2
 
 # CLI Command
 
-The [`template-command-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/template-command-script)
+The [`php-command`](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-command)
 serves as an advanced foundation for developing robust CLI applications.
 Leveraging the capabilities of
 the [Symfony Console component](https://symfony.com/doc/current/components/console.html),
@@ -80,7 +80,7 @@ This template provides a robust set of unit tests to get you started.
 In the CLI application, three key components build the overall structure:
 
 1. **Bootstrap file**: This
-   is [the script](https://github.com/AlexSkrypnyk/scaffold/blob/main/template-command-script)
+   is [the script](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-command)
    that initializes your application. It looks for Composer's autoload file to
    include all dependencies. Once it finds it, it then loads your application by
    requiring the [`app.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/src/app.php)
@@ -119,7 +119,7 @@ existing code with your own.
 Lastly, you can update unit tests in the `tests/phpunit/Command` directory.
 
 You can then run your script from the command line
-using `./template-command-script`.
+using `./php-command`.
 
 ## Authoring tests
 
