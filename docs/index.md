@@ -6,6 +6,8 @@ nav_order: 1
 
 # Introduction
 
+[//]: # (#;< META)
+
 Welcome to the documentation for Scaffold, your go-to repository for
 kick-starting your projects!
 
@@ -23,3 +25,5 @@ projects, so you can focus on the important stuff.
 3. Commit and push the changes to your repository.
 
 ![init](assets/init.gif)  
+
+[//]: # (#;> META)

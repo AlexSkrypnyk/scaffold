@@ -169,10 +169,12 @@ remove_nodejs() {
 remove_release_drafter() {
   rm -f .github/release-drafter.yml
   remove_tokens_with_content "RELEASEDRAFTER"
+  rm -Rf docs/ci/release-drafter.md || true
 }
 
 remove_pr_autoassign() {
   rm -f .github/workflows/auto-assign-pr-author.yml || true
+  rm -Rf docs/ci/auto-assign-pr.md || true
 }
 
 remove_funding() {
@@ -185,6 +187,11 @@ remove_pr_template() {
 
 remove_renovate() {
   rm -f renovate.json || true
+  rm -Rf docs/ci/renovate.md || true
+}
+
+remove_docs() {
+  rm -Rf docs || true
 }
 
 process_internal() {
@@ -217,6 +224,8 @@ process_internal() {
   rm -f LICENSE >/dev/null || true
   rm -Rf "tests/scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
+
+  rm -f "docs/assets/init.gif" >/dev/null || true
 
   remove_tokens_with_content "META"
   remove_special_comments
@@ -255,6 +264,7 @@ use_pr_autoassign="$(ask_yesno "Use GitHub PR author auto-assign")"
 use_funding="$(ask_yesno "Use GitHub funding")"
 use_pr_template="$(ask_yesno "Use GitHub PR template")"
 use_renovate="$(ask_yesno "Use Renovate")"
+use_docs="$(ask_yesno "Use docs")"
 remove_self="$(ask_yesno "Remove this script")"
 
 echo
@@ -274,6 +284,7 @@ echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
 echo "Use GitHub funding               : ${use_funding}"
 echo "Use GitHub PR template           : ${use_pr_template}"
 echo "Use Renovate                     : ${use_renovate}"
+echo "Use Docs                         : ${use_docs}"
 echo "Remove this script               : ${remove_self}"
 echo "---------------------------------"
 echo
@@ -319,6 +330,7 @@ fi
 [ "${use_funding}" != "y" ] && remove_funding
 [ "${use_pr_template}" != "y" ] && remove_pr_template
 [ "${use_renovate}" != "y" ] && remove_renovate
+[ "${use_docs}" != "y" ] && remove_docs
 
 process_internal "${namespace}" "${project}" "${author}"
 

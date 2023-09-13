@@ -34,6 +34,10 @@ assert_files_present_common() {
   assert_file_not_contains ".gitattributes" "# tests"
   assert_file_not_contains ".gitattributes" "# Uncomment the lines below in your project (or use init.sh script)."
 
+  assert_file_not_contains "docs/index.md" "Welcome to the documentation for"
+  assert_file_not_contains "docs/documentation.md" "You may re-use the configuration"
+  assert_file_not_exists "docs/assets/init.gif"
+
   popd >/dev/null || exit 1
 }
 
@@ -238,6 +242,33 @@ assert_files_absent_nodejs() {
   assert_file_not_contains ".github/workflows/test.yml" "npm"
   assert_file_not_contains ".github/workflows/release.yml" "npm"
   assert_file_not_contains "README.md" "npm"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_present_docs() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_file_exists "docs/.gitignore"
+  assert_file_exists "docs/_config.yml"
+  assert_file_exists "docs/Gemfile"
+  assert_file_exists "docs/Gemfile.lock"
+  assert_file_exists "docs/README.md"
+  assert_file_exists "docs/index.md"
+
+  assert_file_exists "docs/assets/README.md"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_absent_docs() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_dir_not_exists "docs"
 
   popd >/dev/null || exit 1
 }
