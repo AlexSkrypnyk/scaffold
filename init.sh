@@ -70,6 +70,38 @@ remove_special_comments() {
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
+ask() {
+  local prompt="$1"
+  local default="${2-}"
+  local result=""
+
+  if [[ -n $default ]]; then
+    prompt="${prompt} [${default}]: "
+  else
+    prompt="${prompt}: "
+  fi
+
+  while [[ -z ${result} ]]; do
+    read -p "${prompt}" result
+    if [[ -n $default && -z ${result} ]]; then
+      result="${default}"
+    fi
+  done
+  echo "${result}"
+}
+
+ask_yesno() {
+  local prompt="${1}"
+  local default="${2:-Y}"
+  local result
+
+  read -p "${prompt} [$([ "${default}" = "Y" ] && echo "Y/n" || echo "y/N")]: " result
+  result="$(echo "${result:-${default}}" | tr '[:upper:]' '[:lower:]')"
+  echo "${result}"
+}
+
+#-------------------------------------------------------------------------------
+
 remove_php() {
   remove_php_command
   remove_php_command_build
@@ -134,34 +166,60 @@ remove_nodejs() {
   remove_tokens_with_content "NODEJS"
 }
 
-ask() {
-  local prompt="$1"
-  local default="${2-}"
-  local result=""
-
-  if [[ -n $default ]]; then
-    prompt="${prompt} [${default}]: "
-  else
-    prompt="${prompt}: "
-  fi
-
-  while [[ -z ${result} ]]; do
-    read -p "${prompt}" result
-    if [[ -n $default && -z ${result} ]]; then
-      result="${default}"
-    fi
-  done
-  echo "${result}"
+remove_release_drafter() {
+  rm -f .github/release-drafter.yml
+  remove_tokens_with_content "RELEASEDRAFTER"
 }
 
-ask_yesno() {
-  local prompt="${1}"
-  local default="${2:-Y}"
-  local result
+remove_pr_autoassign() {
+  rm -f .github/workflows/auto-assign-pr-author.yml || true
+}
 
-  read -p "${prompt} [$([ "${default}" = "Y" ] && echo "Y/n" || echo "y/N")]: " result
-  result="$(echo "${result:-${default}}" | tr '[:upper:]' '[:lower:]')"
-  echo "${result}"
+remove_funding() {
+  rm -f .github/FUNDING.yml || true
+}
+
+remove_pr_template() {
+  rm -f .github/PULL_REQUEST_TEMPLATE.md || true
+}
+
+remove_renovate() {
+  rm -f renovate.json || true
+}
+
+process_internal() {
+  local namespace="${1}"
+  local project="${2}"
+  local author="${3}"
+  local namespace_lowercase
+
+  namespace_lowercase="$(to_lowercase "${namespace}")"
+
+  replace_string_content "YourNamespace" "${namespace}"
+  replace_string_content "AlexSkrypnyk" "${namespace}"
+  replace_string_content "yournamespace" "${namespace_lowercase}"
+  replace_string_content "alexskrypnyk" "${namespace_lowercase}"
+  replace_string_content "yourproject" "${project}"
+  replace_string_content "Your Name" "${author}"
+  replace_string_content "Alex Skrypnyk" "${author}"
+
+  remove_string_content "Generic project scaffold template"
+  replace_string_content "Scaffold" "${project}"
+  replace_string_content "scaffold" "${project}"
+
+  remove_string_content "# Uncomment the lines below"
+  uncomment_line ".gitattributes" ".editorconfig"
+  uncomment_line ".gitattributes" ".gitattributes"
+  uncomment_line ".gitattributes" ".github"
+  uncomment_line ".gitattributes" ".gitignore"
+  uncomment_line ".gitattributes" "tests"
+
+  rm -f LICENSE >/dev/null || true
+  rm -Rf "scaffold_tests" >/dev/null || true
+  rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
+
+  remove_tokens_with_content "META"
+  remove_special_comments
 }
 
 #-------------------------------------------------------------------------------
@@ -256,40 +314,13 @@ else
 fi
 
 [ "${use_nodejs}" != "y" ] && remove_nodejs
+[ "${use_release_drafter}" != "y" ] && remove_release_drafter
+[ "${use_pr_autoassign}" != "y" ] && remove_pr_autoassign
+[ "${use_funding}" != "y" ] && remove_funding
+[ "${use_pr_template}" != "y" ] && remove_pr_template
+[ "${use_renovate}" != "y" ] && remove_renovate
 
-namespace_lowercase="$(to_lowercase "${namespace}")"
-
-replace_string_content "YourNamespace" "${namespace}"
-replace_string_content "AlexSkrypnyk" "${namespace}"
-replace_string_content "yournamespace" "${namespace_lowercase}"
-replace_string_content "alexskrypnyk" "${namespace_lowercase}"
-replace_string_content "yourproject" "${project}"
-replace_string_content "Your Name" "${author}"
-replace_string_content "Alex Skrypnyk" "${author}"
-
-remove_string_content "Generic project scaffold template"
-replace_string_content "Scaffold" "${project}"
-replace_string_content "scaffold" "${project}"
-
-remove_string_content "# Uncomment the lines below"
-uncomment_line ".gitattributes" ".editorconfig"
-uncomment_line ".gitattributes" ".gitattributes"
-uncomment_line ".gitattributes" ".github"
-uncomment_line ".gitattributes" ".gitignore"
-uncomment_line ".gitattributes" "tests"
-
-rm -f LICENSE >/dev/null || true
-rm -Rf "scaffold_tests" >/dev/null || true
-rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
-
-[ "${use_release_drafter}" != "y" ] && rm -f .github/release-drafter.yml && remove_tokens_with_content "RELEASEDRAFTER" || true
-[ "${use_pr_autoassign}" != "y" ] && rm -f .github/workflows/auto-assign-pr-author.yml || true
-[ "${use_funding}" != "y" ] && rm -f .github/FUNDING.yml || true
-[ "${use_pr_template}" != "y" ] && rm -f .github/PULL_REQUEST_TEMPLATE.md || true
-[ "${use_renovate}" != "y" ] && rm -f renovate.json || true
-
-remove_tokens_with_content "META"
-remove_special_comments
+process_internal "${namespace}" "${project}" "${author}"
 
 [ "${remove_self}" != "n" ] && rm -- "$0" || true
 
