@@ -72,7 +72,7 @@ settings, and more.
 In the provided Box configuration, several settings are specified:
 
 - **Output**: Defines where the compiled PHAR file will be stored. In this case,
-  it's set to `.build/template-command-script.phar`. Whenever Box compiles the
+  it's set to `.build/php-command.phar`. Whenever Box compiles the
   PHAR, this is where the file will be output.
 
 - **Compression**: Specifies the compression algorithm to be used for the PHAR.

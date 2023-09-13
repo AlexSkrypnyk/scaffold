@@ -25,7 +25,7 @@
             <directory>src</directory>
             <!-- #;> PHP_COMMAND -->
             <!-- #;< !PHP_COMMAND -->
-            <file>template-simple-script</file>
+            <file>php-script</file>
             <!-- #;> !PHP_COMMAND -->
         </include>
     </source>

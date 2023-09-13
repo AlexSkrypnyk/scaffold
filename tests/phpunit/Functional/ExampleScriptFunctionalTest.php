@@ -5,7 +5,7 @@ namespace YourNamespace\App\Tests\Functional;
 /**
  * Class ExampleScriptFunctionalTest.
  *
- * Functional tests for template-simple-script.
+ * Functional tests for php-script.
  */
 class ExampleScriptFunctionalTest extends ScriptFunctionalTestCase {
 

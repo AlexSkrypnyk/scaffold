@@ -51,11 +51,11 @@
     },
     "scripts": {
         "lint": [
-            "cp template-simple-script template-simple-script.php",
+            "cp php-script php-script.php",
             "phpcs",
             "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
             "phpstan",
-            "rm template-simple-script.php"
+            "rm php-script.php"
         ],
         "lint:fix": "phpcbf",
         "test": "phpunit --no-coverage",
@@ -67,7 +67,7 @@
         ]
     },
     "bin": [
-        "template-command-script",
-        "template-simple-script"
+        "php-command",
+        "php-script"
     ]
 }

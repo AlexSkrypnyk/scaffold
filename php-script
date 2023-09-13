@@ -11,7 +11,7 @@
  *
  * To adopt script template:
  * - Replace "PHP CLI script template" with your script human name.
- * - Replace "template-simple-script" with your script file name.
+ * - Replace "php-script" with your script file name.
  * - Update arguments count check to suit your needs.
  * - Update print_help() function with your content.
  * - Copy '/tests' directory into your project and update
@@ -26,7 +26,7 @@
  *
  * Usage:
  * @code
- * ./template-simple-script
+ * ./php-script
  * @endcode
  */
 

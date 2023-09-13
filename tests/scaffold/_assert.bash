@@ -80,7 +80,7 @@ assert_files_present_php_command() {
   assert_file_contains "phpcs.xml" "<file>src</file>"
   assert_file_contains "phpstan.neon" "- src"
   assert_file_contains "phpunit.xml" "<directory>src</directory>"
-  assert_dir_not_contains_string "${dir}" "template-command-script"
+  assert_dir_not_contains_string "${dir}" "php-command"
 
   assert_file_contains "composer.json" '"force-crystal"'
 
@@ -92,7 +92,7 @@ assert_files_absent_php_command() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_not_exists template-command-script
+  assert_file_not_exists php-command
   assert_dir_not_exists src
   assert_dir_not_exists tests/phpunit/Unit/Command
 
@@ -100,8 +100,8 @@ assert_files_absent_php_command() {
   assert_file_not_contains "phpstan.neon" "- src"
   assert_file_not_contains "phpunit.xml" "<directory>src</directory>"
 
-  assert_file_not_contains "composer.json" "template-command-script"
-  assert_dir_not_contains_string "${dir}" "template-command-script"
+  assert_file_not_contains "composer.json" "php-command"
+  assert_dir_not_contains_string "${dir}" "php-command"
 
   popd >/dev/null || exit 1
 }
@@ -126,7 +126,7 @@ assert_files_absent_php_command_build() {
 
   assert_file_not_exists "box.json"
   assert_file_not_contains ".github/workflows/release.yml" "Build and test"
-  assert_file_not_contains ".github/workflows/release.yml" "template-command-script.phar"
+  assert_file_not_contains ".github/workflows/release.yml" "php-command.phar"
 
   popd >/dev/null || exit 1
 }
@@ -154,7 +154,7 @@ assert_files_present_php_script() {
   assert_file_contains "composer.json" '"phpstan",'
   assert_file_contains "composer.json" '"force-crystal"'
 
-  assert_dir_not_contains_string "${dir}" "template-simple-script"
+  assert_dir_not_contains_string "${dir}" "php-script"
 
   popd >/dev/null || exit 1
 }
@@ -164,13 +164,13 @@ assert_files_absent_php_script() {
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_not_exists template-simple-script
+  assert_file_not_exists php-script
   assert_file_not_exists tests/phpunit/Unit/ExampleScriptUnitTest.php
   assert_file_not_exists tests/phpunit/Unit/ScriptUnitTestCase.php
   assert_file_not_exists tests/phpunit/Functional/ScriptFunctionalTestCase.php
   assert_file_not_exists tests/phpunit/Functional/ExampleScriptFunctionalTest.php
 
-  assert_file_not_contains ".github/workflows/release.yml" "template-simple-script"
+  assert_file_not_contains ".github/workflows/release.yml" "php-script"
 
   assert_file_not_contains "phpcs.xml" "force-crystal.php"
   assert_file_not_contains "phpstan.neon" "force-crystal.php"
@@ -181,7 +181,7 @@ assert_files_absent_php_script() {
   assert_file_not_contains "composer.json" '"phpstan",'
   assert_file_not_contains "composer.json" '"force-crystal",'
 
-  assert_dir_not_contains_string "${dir}" "template-simple-script"
+  assert_dir_not_contains_string "${dir}" "php-script"
 
   popd >/dev/null || exit 1
 }

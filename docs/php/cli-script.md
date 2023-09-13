@@ -7,7 +7,7 @@ nav_order: 3
 
 # CLI Script
 
-[`template-simple-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/template-simple-script)
+[`php-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-script)
 is a PHP template for writing a single-file command-line interface (CLI)
 scripts. It's designed to be a single-file script without relying on any
 external packages, making it a self-contained program. 
@@ -65,7 +65,7 @@ task. If you're interested in testing the script before running it, you can use
 environment variables like `SCRIPT_QUIET` and `SCRIPT_RUN_SKIP` to modify its
 behavior.
 
-You can then run your script from the command line using `./template-simple-script`.
+You can then run your script from the command line using `./php-script`.
 
 ## Authoring tests
 
