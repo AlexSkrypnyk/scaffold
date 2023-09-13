@@ -14,7 +14,7 @@ assert_files_present_common() {
   assert_file_exists "README.md"
   assert_file_not_exists "LICENSE"
   assert_file_not_exists ".github/workflows/scaffold-test.yml"
-  assert_dir_not_exists "scaffold_tests"
+  assert_dir_not_exists "tests/scaffold"
   assert_dir_exists "tests"
 
   # Assert that documentation was processed correctly.

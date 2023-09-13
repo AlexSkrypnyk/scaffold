@@ -215,7 +215,7 @@ process_internal() {
   uncomment_line ".gitattributes" "tests"
 
   rm -f LICENSE >/dev/null || true
-  rm -Rf "scaffold_tests" >/dev/null || true
+  rm -Rf "tests/scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
 
   remove_tokens_with_content "META"

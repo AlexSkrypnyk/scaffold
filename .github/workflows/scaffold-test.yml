@@ -24,6 +24,6 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         cache: 'npm'
-        cache-dependency-path: scaffold_tests/package-lock.json
-    - run: npm --prefix=scaffold_tests ci
-    - run: ./scaffold_tests/node_modules/.bin/bats --print-output-on-failure --formatter tap scaffold_tests
+        cache-dependency-path: tests/scaffold/package-lock.json
+    - run: npm --prefix=tests/scaffold ci
+    - run: ./tests/scaffold/node_modules/.bin/bats --print-output-on-failure --formatter tap tests/scaffold
