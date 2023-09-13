@@ -29,6 +29,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -49,6 +50,8 @@ export SCRIPT_FILE="init.sh"
 
   assert_workflow_php "${BUILD_DIR}"
   assert_workflow_php_command_build "${BUILD_DIR}"
+
+  assert_files_present_docs "${BUILD_DIR}"
 }
 
 @test "Init, php command, no build" {
@@ -66,6 +69,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -100,6 +104,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -135,6 +140,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -166,6 +172,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -197,6 +204,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -228,6 +236,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -260,6 +269,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -322,6 +332,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "n"             # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -353,6 +364,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "n"             # use Renovate
+    "nothing"       # remove docs
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
@@ -365,6 +377,38 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_nodejs "${BUILD_DIR}"
 
   assert_file_not_exists "renovate.json"
+
+  assert_output_contains "Initialization complete."
+}
+
+@test "Init, no docs" {
+  answers=(
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "n"             # remove docs
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
+  )
+  output=$(run_script_interactive "${answers[@]}")
+
+  assert_output_contains "Please follow the prompts to adjust your project configuration"
+
+  assert_files_present_common "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
+  assert_files_present_nodejs "${BUILD_DIR}"
+
+  assert_files_absent_docs "${BUILD_DIR}"
 
   assert_output_contains "Initialization complete."
 }
@@ -384,6 +428,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # use GitHub funding
     "nothing"       # use GitHub PR template
     "nothing"       # use Renovate
+    "nothing"       # remove docs
     "n"             # remove init script
     "nothing"       # proceed with init
   )

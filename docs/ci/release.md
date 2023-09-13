@@ -33,6 +33,8 @@ releases, and Node.js releases.
 
 The workflow has write access to the repository content.
 
+[//]: # (#;< RELEASEDRAFTER)
+
 ## Release Drafter job
 
 - Runs on `ubuntu-latest`.
@@ -42,6 +44,10 @@ The workflow has write access to the repository content.
 - Requires write access to both contents and pull requests.
 
 See the [Release Drafter](release-drafter) page for more information.
+
+[//]: # (#;> RELEASEDRAFTER)
+
+[//]: # (#;< PHP)
 
 ## PHP Release job
 
@@ -55,9 +61,15 @@ See the [Release Drafter](release-drafter) page for more information.
 
 See the [PHP packaging](php-packaging) page for more information.
 
+[//]: # (#;> PHP)
+
+[//]: # (#;< NODEJS)
+
 ## Node.js Release job:
 
 - Activates if the workflow is triggered by a tag creation.
 - Runs on `ubuntu-latest`.
 - Checks out code and sets up a Node.js environment.
 - Installs npm dependencies and builds the project.
+
+[//]: # (#;> NODEJS)

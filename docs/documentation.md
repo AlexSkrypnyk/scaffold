@@ -9,8 +9,12 @@ nav_order: 8
 This documentation is built with [Just the Docs](https://just-the-docs.com/)
 Jekyll template and hosted on [GitHub Pages](https://pages.github.com/).
 
+[//]: # (#;< META)
+
 You may re-use the configuration and structure of this documentation for your
 own project.
+
+[//]: # (#;> META)
 
 The [configuration file](https://github.com/AlexSkrypnyk/scaffold/blob/main/docs/_config.yml)
 allows to adjust the documentation to your needs.
