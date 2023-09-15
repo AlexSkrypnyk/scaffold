@@ -15,6 +15,14 @@ aux_links:
     - "//github.com/AlexSkrypnyk/scaffold"
 aux_links_new_tab: true
 
+# Print the latest version of the project in the upper right navigation.
+# Set to false to disable.
+# Relies on jekyll-github-metadata plugin.
+# @see https://github.com/jekyll/github-metadata/blob/main/docs/authentication.md
+aux_links_latest_version_text: "v"
+# Link to the latest version zipball. If false - link to the latest release page.
+aux_links_latest_version_link_zipball: true
+
 back_to_top: true
 back_to_top_text: "Back to top"
 
@@ -41,3 +49,4 @@ plugins:
   - jekyll-seo-tag
   - jekyll-include-cache
   - jekyll_include_plugin
+  - jekyll-github-metadata
