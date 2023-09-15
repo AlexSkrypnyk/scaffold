@@ -25,8 +25,7 @@ Documentation is published to GitHub Pages using the [Deploy Docs to GitHub Page
 GitHub Action. 
 
 This GitHub Action is designed to automatically build and publish documentation
-to GitHub Pages. The workflow triggers on every `push` to the `main` branch,
-specifically when changes are made in the `docs` directory. 
+to GitHub Pages. The workflow triggers on every `push` to the `main` branch. 
 
 The Jekyll build command generates the static site.
 
