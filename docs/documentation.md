@@ -1,6 +1,6 @@
 ---
 title: Documentation
-layout: home
+layout: default
 nav_order: 8
 ---
 
@@ -21,11 +21,11 @@ allows to adjust the documentation to your needs.
 
 ## Publishing
 
-Documentation is published to GitHub Pages using the [Deploy Docs to GitHub Pages](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/docs.yml) 
-GitHub Action. 
+Documentation is published to GitHub Pages using the [Deploy Docs to GitHub Pages](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/docs.yml)
+GitHub Action.
 
 This GitHub Action is designed to automatically build and publish documentation
-to GitHub Pages. The workflow triggers on every `push` to the `main` branch. 
+to GitHub Pages. The workflow triggers on every `push` to the `main` branch.
 
 The Jekyll build command generates the static site.
 
