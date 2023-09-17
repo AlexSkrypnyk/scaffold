@@ -42,7 +42,10 @@ gh_edit_view_mode: "tree"
 
 # Google Analytics Tracking (optional)
 # Supports a CSV of tracking ID strings (eg. "UA-1234567-89,G-1AB234CDE5")
+#;< META
 ga_tracking: G-6TBPDE9SZY
+#;> META
+# ga_tracking: G-
 ga_tracking_anonymize_ip: true # Use GDPR compliant Google Analytics settings (true/nil by default)
 
 plugins:
