@@ -5,7 +5,7 @@
 #;< PHP
 /.coverage-html
 /.phpunit.cache
-/coverage.xml
+/cobertura.xml
 /composer.lock
 /vendor
 /vendor-bin

@@ -24,6 +24,7 @@ jobs:
     - run: composer test:coverage
     - uses: insightsengineering/coverage-action@v2
       with:
+        path: cobertura.xml
         publish: true
         diff: true
         threshold: 90
