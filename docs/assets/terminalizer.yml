@@ -63,13 +63,13 @@ config:
   # the image on your machine or a URL, and you can also
   # add your own CSS styles
   watermark: false
-#    imagePath: https://user-images.githubusercontent.com/378794/243635893-fd23dc13-71a2-446a-9fd0-1023372df0b6.png
-#    style:
-#      position: absolute
-#      right: 10px
-#      top: 10px
-#      width: 16px
-#      opacity: 0.5
+  # imagePath: https://user-images.githubusercontent.com/378794/243635893-fd23dc13-71a2-446a-9fd0-1023372df0b6.png
+  # style:
+  #   position: absolute
+  #   right: 10px
+  #   top: 10px
+  #   width: 16px
+  #   opacity: 0.5
 
   # Cursor style can be one of
   # `block`, `underline`, or `bar`
@@ -115,6 +115,7 @@ config:
 records:
   - delay: 100
     content: .
+#;< META
   - delay: 100
     content: /
   - delay: 100
@@ -251,3 +252,4 @@ records:
     content: "\r\n"
   - delay: 1000
     content: "\r\nInitialization complete."
+#;> META
