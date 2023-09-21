@@ -28,7 +28,7 @@ jobs:
         mkdir -p ${TMPDIR}
         ./tests/scaffold/node_modules/.bin/bats -t tests/scaffold
     - run: sudo apt-get install -y kcov
-    - run: BATS_COVERAGE_DIR=coverage ./tests/scaffold/node_modules/.bin/bats tests/scaffold
+    - run: BATS_COVERAGE_DIR=$(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats tests/scaffold
     - uses: actions/upload-artifact@v3
       with:
         name: code-coverage-report

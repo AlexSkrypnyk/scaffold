@@ -76,7 +76,7 @@ run_script() {
 
   [ -z "${SCRIPT_FILE}" ] && echo "ERROR: SCRIPT_FILE is not defined" >&3 && exit 1
 
-  run "./${SCRIPT_FILE}" "$@"
+  crun "./${SCRIPT_FILE}" "$@"
 
   popd >/dev/null || exit 1
 

@@ -4,6 +4,7 @@
 #
 # shellcheck disable=SC2030,SC2031,SC2129
 
+load _coverage.bash
 load _helper.bash
 load _assert.bash
 
