@@ -29,9 +29,3 @@ jobs:
         ./tests/scaffold/node_modules/.bin/bats -t tests/scaffold
     - run: sudo apt-get install -y kcov
     - run: kcov --include-pattern=.bash,.sh --bash-parse-files-in-dir=. --exclude-path=node_modules,vendor,coverage coverage ./tests/scaffold/node_modules/.bin/bats tests/scaffold
-    - uses: codecov/codecov-action@v3
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      with:
-        directory: ./coverage
-        fail_ci_if_error: true
