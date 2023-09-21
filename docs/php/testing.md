@@ -39,23 +39,23 @@ composer test
 
 To exacute a specific test tagged with a `@group wip`, use the following command:
 
-```bash 
+```bash
 composer test -- --group=wip
 ```
 
 ## Namespaces
 
 The tests are automatically loaded using Composer's autoloader by specifying
-the `YourNamespace\App\Tests\` namespace in the `autoload-dev` section of the 
+the `YourNamespace\App\Tests\` namespace in the `autoload-dev` section of the
 `composer.json` file.
 
-You would need to update the namespace in tests and `composer.json` to match 
+You would need to update the namespace in tests and `composer.json` to match
 your project's namespace.
 
 ## Coverage
 
-The template is configured to generate code coverage reports in the `coverage`
-directory. The reports are generated in HTML and Cobertura formats.
+The template is configured to generate code coverage reports in HTML and
+Cobertura formats (`cuberatura.xml`).
 
 Here are some of the coverage settings specified in the [phpunit.xml](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpunit.xml) file:
 - Requires coverage metadata but is not strict about it.
