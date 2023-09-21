@@ -25,5 +25,16 @@ jobs:
       with:
         cache: 'npm'
         cache-dependency-path: tests/scaffold/package-lock.json
+    - run: wget https://github.com/SimonKagstrom/kcov/releases/download/v42/kcov-amd64.tar.gz && tar -xf kcov-amd64.tar.gz && sudo mv ./usr/local/bin/kcov /usr/local/bin/kcov && kcov --version
     - run: npm --prefix=tests/scaffold ci
-    - run: ./tests/scaffold/node_modules/.bin/bats --print-output-on-failure --formatter tap tests/scaffold
+    - run: BATS_COVERAGE_DIR=$(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats --formatter tap tests/scaffold
+    - uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: ./coverage
+    - uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        directory: ./coverage
+        fail_ci_if_error: true

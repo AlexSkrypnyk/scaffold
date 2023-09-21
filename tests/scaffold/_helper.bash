@@ -76,14 +76,14 @@ run_script() {
 
   [ -z "${SCRIPT_FILE}" ] && echo "ERROR: SCRIPT_FILE is not defined" >&3 && exit 1
 
-  run "./${SCRIPT_FILE}" "$@"
+  crun "./${SCRIPT_FILE}" "$@"
 
   popd >/dev/null || exit 1
 
   # Print the output of the init script. This, however, makes error logs
   # harder to read.
   # shellcheck disable=SC2154
-  echo "${output}"
+  echo "${output-}"
 }
 
 #
@@ -108,7 +108,7 @@ run_script_interactive() {
   for i in "${answers[@]}"; do
     val="${i}"
     [ "${i}" = "nothing" ] && val='\n' || val="${val}"'\n'
-    input="${input}""${val}"
+    input="${input-}""${val}"
   done
 
   # shellcheck disable=SC2059,SC2119
@@ -116,4 +116,14 @@ run_script_interactive() {
   # answers for all tests will not work. Make sure that correct answers
   # provided for specific tests.
   printf "$input" | run_script
+}
+
+#
+# Prepare a directory for a fixture.
+#
+prepare_fixture_dir() {
+  local dir="${1:-$(pwd)}"
+  rm -Rf "${dir}" >/dev/null
+  mkdir -p "${dir}"
+  assert_dir_exists "${dir}"
 }
