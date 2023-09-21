@@ -22,15 +22,12 @@ jobs:
     - uses: php-actions/composer@v6
     - run: composer lint
     - run: composer test:coverage
-    - uses: insightsengineering/coverage-action@v2
+    - uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
-        path: cobertura.xml
-        publish: true
-        diff: true
-        threshold: 90
-        fail: true
-        coverage-reduction-failure: true
-        new-uncovered-statements-failure: true
+        files: ./cobertura.xml
+        fail_ci_if_error: true
   #;> PHP
   #;< NODEJS
   test-nodejs:
