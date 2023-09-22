@@ -238,110 +238,116 @@ process_internal() {
 
 #-------------------------------------------------------------------------------
 
-echo "Please follow the prompts to adjust your project configuration"
-echo
-
-[ -z "${namespace}" ] && namespace="$(ask "Namespace (PascalCase)")"
-[ -z "${project}" ] && project="$(ask "Project")"
-[ -z "${author}" ] && author="$(ask "Author")"
-
-use_php="$(ask_yesno "Use PHP")"
-
-use_php_command="y"
-use_php_command_build="y"
-use_php_script="n"
-php_command_name="<unset>"
-if [ "${use_php}" = "y" ]; then
-  use_php_command="$(ask_yesno "  Use CLI command app")"
-  if [ "${use_php_command}" = "y" ]; then
-    php_command_name=$(ask "    CLI command name" "${project}")
-    use_php_command_build="$(ask_yesno "    Build PHAR")"
-  else
-    use_php_script="$(ask_yesno "  Use simple script")"
-    php_command_name=$(ask "    CLI command name" "${project}")
-  fi
-fi
-
-use_nodejs="$(ask_yesno "Use NodeJS")"
-
-use_release_drafter="$(ask_yesno "Use GitHub release drafter")"
-use_pr_autoassign="$(ask_yesno "Use GitHub PR author auto-assign")"
-use_funding="$(ask_yesno "Use GitHub funding")"
-use_pr_template="$(ask_yesno "Use GitHub PR template")"
-use_renovate="$(ask_yesno "Use Renovate")"
-use_docs="$(ask_yesno "Use docs")"
-remove_self="$(ask_yesno "Remove this script")"
-
-echo
-echo "            Summary"
-echo "---------------------------------"
-echo "Namespace                        : ${namespace}"
-echo "Project                          : ${project}"
-echo "Author                           : ${author}"
-echo "Use PHP                          : ${use_php}"
-echo "  Use CLI command app            : ${use_php_command}"
-echo "    CLI command name             : ${php_command_name}"
-echo "    Build PHAR                   : ${use_php_command_build}"
-echo "  Use simple script              : ${use_php_script}"
-echo "Use NodeJS                       : ${use_nodejs}"
-echo "Use GitHub release drafter       : ${use_release_drafter}"
-echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
-echo "Use GitHub funding               : ${use_funding}"
-echo "Use GitHub PR template           : ${use_pr_template}"
-echo "Use Renovate                     : ${use_renovate}"
-echo "Use Docs                         : ${use_docs}"
-echo "Remove this script               : ${remove_self}"
-echo "---------------------------------"
-echo
-
-should_proceed="$(ask_yesno "Proceed with project init")"
-
-if [ "${should_proceed}" != "y" ]; then
+main(){
+  echo "Please follow the prompts to adjust your project configuration"
   echo
-  echo "Aborting."
-  exit 1
-fi
 
-#
-# Processing.
-#
+  [ -z "${namespace}" ] && namespace="$(ask "Namespace (PascalCase)")"
+  [ -z "${project}" ] && project="$(ask "Project")"
+  [ -z "${author}" ] && author="$(ask "Author")"
 
-: "${namespace:?Namespace is required}"
-: "${project:?Project is required}"
-: "${author:?Author is required}"
+  use_php="$(ask_yesno "Use PHP")"
 
-if [ "${use_php}" = "y" ]; then
-
-  if [ "${use_php_command}" = "y" ]; then
-    [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
-    replace_string_content "php-command" "${php_command_name}"
-    mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
-  else
-    remove_php_command "${php_command_name}"
-    remove_php_command_build
+  use_php_command="y"
+  use_php_command_build="y"
+  use_php_script="n"
+  php_command_name="<unset>"
+  if [ "${use_php}" = "y" ]; then
+    use_php_command="$(ask_yesno "  Use CLI command app")"
+    if [ "${use_php_command}" = "y" ]; then
+      php_command_name=$(ask "    CLI command name" "${project}")
+      use_php_command_build="$(ask_yesno "    Build PHAR")"
+    else
+      use_php_script="$(ask_yesno "  Use simple script")"
+      php_command_name=$(ask "    CLI command name" "${project}")
+    fi
   fi
 
-  if [ "${use_php_script:-n}" = "y" ]; then
-    replace_string_content "php-script" "${php_command_name}"
-    mv "php-script" "${php_command_name}" >/dev/null 2>&1 || true
-  else
-    remove_php_script "${php_command_name}"
+  use_nodejs="$(ask_yesno "Use NodeJS")"
+
+  use_release_drafter="$(ask_yesno "Use GitHub release drafter")"
+  use_pr_autoassign="$(ask_yesno "Use GitHub PR author auto-assign")"
+  use_funding="$(ask_yesno "Use GitHub funding")"
+  use_pr_template="$(ask_yesno "Use GitHub PR template")"
+  use_renovate="$(ask_yesno "Use Renovate")"
+  use_docs="$(ask_yesno "Use docs")"
+  remove_self="$(ask_yesno "Remove this script")"
+
+  echo
+  echo "            Summary"
+  echo "---------------------------------"
+  echo "Namespace                        : ${namespace}"
+  echo "Project                          : ${project}"
+  echo "Author                           : ${author}"
+  echo "Use PHP                          : ${use_php}"
+  echo "  Use CLI command app            : ${use_php_command}"
+  echo "    CLI command name             : ${php_command_name}"
+  echo "    Build PHAR                   : ${use_php_command_build}"
+  echo "  Use simple script              : ${use_php_script}"
+  echo "Use NodeJS                       : ${use_nodejs}"
+  echo "Use GitHub release drafter       : ${use_release_drafter}"
+  echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
+  echo "Use GitHub funding               : ${use_funding}"
+  echo "Use GitHub PR template           : ${use_pr_template}"
+  echo "Use Renovate                     : ${use_renovate}"
+  echo "Use Docs                         : ${use_docs}"
+  echo "Remove this script               : ${remove_self}"
+  echo "---------------------------------"
+  echo
+
+  should_proceed="$(ask_yesno "Proceed with project init")"
+
+  if [ "${should_proceed}" != "y" ]; then
+    echo
+    echo "Aborting."
+    exit 1
   fi
-else
-  remove_php
+
+  #
+  # Processing.
+  #
+
+  : "${namespace:?Namespace is required}"
+  : "${project:?Project is required}"
+  : "${author:?Author is required}"
+
+  if [ "${use_php}" = "y" ]; then
+
+    if [ "${use_php_command}" = "y" ]; then
+      [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
+      replace_string_content "php-command" "${php_command_name}"
+      mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
+    else
+      remove_php_command "${php_command_name}"
+      remove_php_command_build
+    fi
+
+    if [ "${use_php_script:-n}" = "y" ]; then
+      replace_string_content "php-script" "${php_command_name}"
+      mv "php-script" "${php_command_name}" >/dev/null 2>&1 || true
+    else
+      remove_php_script "${php_command_name}"
+    fi
+  else
+    remove_php
+  fi
+
+  [ "${use_nodejs}" != "y" ] && remove_nodejs
+  [ "${use_release_drafter}" != "y" ] && remove_release_drafter
+  [ "${use_pr_autoassign}" != "y" ] && remove_pr_autoassign
+  [ "${use_funding}" != "y" ] && remove_funding
+  [ "${use_pr_template}" != "y" ] && remove_pr_template
+  [ "${use_renovate}" != "y" ] && remove_renovate
+  [ "${use_docs}" != "y" ] && remove_docs
+
+  process_internal "${namespace}" "${project}" "${author}"
+
+  [ "${remove_self}" != "n" ] && rm -- "$0" || true
+
+  echo
+  echo "Initialization complete."
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  main "$@"
 fi
-
-[ "${use_nodejs}" != "y" ] && remove_nodejs
-[ "${use_release_drafter}" != "y" ] && remove_release_drafter
-[ "${use_pr_autoassign}" != "y" ] && remove_pr_autoassign
-[ "${use_funding}" != "y" ] && remove_funding
-[ "${use_pr_template}" != "y" ] && remove_pr_template
-[ "${use_renovate}" != "y" ] && remove_renovate
-[ "${use_docs}" != "y" ] && remove_docs
-
-process_internal "${namespace}" "${project}" "${author}"
-
-[ "${remove_self}" != "n" ] && rm -- "$0" || true
-
-echo
-echo "Initialization complete."
