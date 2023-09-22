@@ -10,7 +10,8 @@ assert_files_present_common() {
   assert_file_exists ".editorconfig"
   assert_file_exists ".gitattributes"
   assert_file_exists ".gitignore"
-  assert_file_contains ".gitignore" ".build"
+  assert_file_contains ".gitignore" "/.build"
+  assert_file_not_contains ".gitignore" "/coverage"
   assert_file_exists "README.md"
   assert_file_not_exists "LICENSE"
   assert_file_not_exists ".github/workflows/scaffold-test.yml"
@@ -22,16 +23,18 @@ assert_files_present_common() {
   assert_file_not_contains README.md "META"
 
   # Assert that .gitattributes were processed correctly.
-  assert_file_contains ".gitattributes" ".editorconfig"
-  assert_file_not_contains ".gitattributes" "# .editorconfig"
-  assert_file_contains ".gitattributes" ".gitattributes"
-  assert_file_not_contains ".gitattributes" "# .gitattributes"
-  assert_file_contains ".gitattributes" ".github"
-  assert_file_not_contains ".gitattributes" "# .github"
-  assert_file_contains ".gitattributes" ".gitignore"
-  assert_file_not_contains ".gitattributes" "# .gitignore"
-  assert_file_contains ".gitattributes" "tests"
-  assert_file_not_contains ".gitattributes" "# tests"
+  assert_file_contains ".gitattributes" "/.editorconfig"
+  assert_file_not_contains ".gitattributes" "# /.editorconfig"
+  assert_file_contains ".gitattributes" "/.gitattributes"
+  assert_file_not_contains ".gitattributes" "# /.gitattributes"
+  assert_file_contains ".gitattributes" "/.github"
+  assert_file_not_contains ".gitattributes" "# /.github"
+  assert_file_contains ".gitattributes" "/.gitignore"
+  assert_file_not_contains ".gitattributes" "# /.gitignore"
+  assert_file_contains ".gitattributes" "/docs"
+  assert_file_not_contains ".gitattributes" "# /docs"
+  assert_file_contains ".gitattributes" "/tests"
+  assert_file_not_contains ".gitattributes" "# /tests"
   assert_file_not_contains ".gitattributes" "# Uncomment the lines below in your project (or use init.sh script)."
 
   assert_file_not_contains "docs/index.md" "Welcome to the documentation for"
@@ -52,17 +55,66 @@ assert_files_present_php() {
   assert_file_contains "composer.json" '"homepage": "https://github.com/yodasHut/force-crystal"'
   assert_file_contains "composer.json" '"issues": "https://github.com/yodasHut/force-crystal/issues"'
   assert_file_contains "composer.json" '"source": "https://github.com/yodasHut/force-crystal"'
+
   assert_file_contains ".gitignore" "/vendor"
   assert_file_contains ".gitignore" "/composer.lock"
+
+  assert_file_contains ".gitattributes" "/phpcs.xml"
+  assert_file_contains ".gitattributes" "/phpmd.xml"
+  assert_file_contains ".gitattributes" "/phpstan.neon"
+  assert_file_contains ".gitattributes" "/phpunit.xml"
+
+  assert_file_not_contains ".gitattributes" "# /phpcs.xml"
+  assert_file_not_contains ".gitattributes" "# /phpmd.xml"
+  assert_file_not_contains ".gitattributes" "# /phpstan.neon"
+  assert_file_not_contains ".gitattributes" "# /phpunit.xml"
+
   assert_file_contains ".github/workflows/test.yml" "composer"
   assert_file_contains ".github/workflows/release.yml" "composer"
   assert_file_contains "README.md" "composer"
+
   assert_file_exists "phpcs.xml"
   assert_file_exists "phpmd.xml"
   assert_file_exists "phpstan.neon"
+  assert_file_exists "phpunit.xml"
+  assert_dir_exists "tests/phpunit"
 
   assert_dir_not_contains_string "${dir}" "YourNamespace"
   assert_dir_contains_string "${dir}" "YodasHut"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_absent_php() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_file_not_exists "composer.json"
+  assert_file_not_exists "composer.json"
+
+  assert_file_not_contains ".gitignore" "/vendor"
+  assert_file_not_contains ".gitignore" "/composer.lock"
+
+  assert_file_not_contains ".gitattributes" "/phpcs.xml"
+  assert_file_not_contains ".gitattributes" "/phpmd.xml"
+  assert_file_not_contains ".gitattributes" "/phpstan.neon"
+  assert_file_not_contains ".gitattributes" "/phpunit.xml"
+
+  assert_file_not_contains ".github/workflows/test.yml" "composer"
+  assert_file_not_contains ".github/workflows/release.yml" "composer"
+
+  assert_file_not_contains "README.md" "composer"
+
+  assert_file_not_exists "phpcs.xml"
+  assert_file_not_exists "phpmd.xml"
+  assert_file_not_exists "phpstan.neon"
+  assert_file_not_exists "phpunit.xml"
+  assert_dir_not_exists "tests/phpunit"
+
+  assert_files_absent_php_command "${dir}"
+  assert_files_absent_php_command_build "${dir}"
+  assert_files_absent_php_script "${dir}"
 
   popd >/dev/null || exit 1
 }
@@ -181,30 +233,6 @@ assert_files_absent_php_script() {
   popd >/dev/null || exit 1
 }
 
-assert_files_absent_php() {
-  local dir="${1:-$(pwd)}"
-
-  pushd "${dir}" >/dev/null || exit 1
-
-  assert_file_not_exists "composer.json"
-  assert_file_not_exists "composer.json"
-  assert_file_not_contains ".gitignore" "/vendor"
-  assert_file_not_contains ".gitignore" "/composer.lock"
-  assert_file_not_contains ".github/workflows/test.yml" "composer"
-  assert_file_not_contains ".github/workflows/release.yml" "composer"
-  assert_file_not_contains "README.md" "composer"
-  assert_file_not_exists "phpcs.xml"
-  assert_file_not_exists "phpmd.xml"
-  assert_file_not_exists "phpstan.neon"
-  assert_dir_not_exists "tests/phpunit"
-
-  assert_files_absent_php_command "${dir}"
-  assert_files_absent_php_command_build "${dir}"
-  assert_files_absent_php_script "${dir}"
-
-  popd >/dev/null || exit 1
-}
-
 assert_files_present_nodejs() {
   local dir="${1:-$(pwd)}"
 
@@ -215,9 +243,14 @@ assert_files_present_nodejs() {
   assert_file_contains "package.json" '"name": "Jane Doe"'
   assert_file_contains "package.json" '"bugs": "https://github.com/yodasHut/force-crystal/issues"'
   assert_file_contains "package.json" '"repository": "github:yodasHut/force-crystal"'
+
   assert_file_contains ".gitignore" "/node_modules"
   assert_file_contains ".gitignore" "/package-lock.json"
   assert_file_contains ".gitignore" "/yarn.lock"
+
+  assert_file_not_contains ".gitattributes" "# /.npmignore"
+  assert_file_contains ".gitattributes" "/.npmignore"
+
   assert_file_contains ".github/workflows/test.yml" "npm"
   assert_file_contains ".github/workflows/release.yml" "npm"
   assert_file_contains "README.md" "npm"
@@ -231,9 +264,13 @@ assert_files_absent_nodejs() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_file_not_exists "package.json"
+
   assert_file_not_contains ".gitignore" "/node_modules"
   assert_file_not_contains ".gitignore" "/package-lock.json"
   assert_file_not_contains ".gitignore" "/yarn.lock"
+
+  assert_file_not_contains ".gitattributes" "/.npmignore"
+
   assert_file_not_contains ".github/workflows/test.yml" "npm"
   assert_file_not_contains ".github/workflows/release.yml" "npm"
   assert_file_not_contains "README.md" "npm"

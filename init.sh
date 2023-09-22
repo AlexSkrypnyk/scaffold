@@ -52,7 +52,7 @@ remove_tokens_with_content() {
   local token="${1}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
+  grep -rI --include=".*" --include="*" --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
 }
 
 uncomment_line() {
@@ -114,6 +114,7 @@ remove_php() {
   rm -f phpcs.xml || true
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
+  rm -f phpunit.xml || true
 
   rm -Rf docs/php || true
 
@@ -213,11 +214,17 @@ process_internal() {
   replace_string_content "scaffold" "${project}"
 
   remove_string_content "# Uncomment the lines below"
-  uncomment_line ".gitattributes" ".editorconfig"
-  uncomment_line ".gitattributes" ".gitattributes"
-  uncomment_line ".gitattributes" ".github"
-  uncomment_line ".gitattributes" ".gitignore"
-  uncomment_line ".gitattributes" "tests"
+  uncomment_line ".gitattributes" "\/.editorconfig"
+  uncomment_line ".gitattributes" "\/.gitattributes"
+  uncomment_line ".gitattributes" "\/.github"
+  uncomment_line ".gitattributes" "\/.gitignore"
+  uncomment_line ".gitattributes" "\/docs"
+  uncomment_line ".gitattributes" "\/tests"
+  uncomment_line ".gitattributes" "\/phpcs.xml"
+  uncomment_line ".gitattributes" "\/phpmd.xml"
+  uncomment_line ".gitattributes" "\/phpstan.neon"
+  uncomment_line ".gitattributes" "\/phpunit.xml"
+  uncomment_line ".gitattributes" "\/.npmignore"
 
   rm -f LICENSE >/dev/null || true
   rm -Rf "tests/scaffold" >/dev/null || true
@@ -304,6 +311,7 @@ fi
 : "${author:?Author is required}"
 
 if [ "${use_php}" = "y" ]; then
+
   if [ "${use_php_command}" = "y" ]; then
     [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
     replace_string_content "php-command" "${php_command_name}"
@@ -312,6 +320,7 @@ if [ "${use_php}" = "y" ]; then
     remove_php_command "${php_command_name}"
     remove_php_command_build
   fi
+
   if [ "${use_php_script:-n}" = "y" ]; then
     replace_string_content "php-script" "${php_command_name}"
     mv "php-script" "${php_command_name}" >/dev/null 2>&1 || true

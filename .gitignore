@@ -1,7 +1,7 @@
 # To ignore OS temporary files use global .gitignore
 # https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer
 
-.build
+/.build
 #;< PHP
 /.coverage-html
 /.phpunit.cache
@@ -16,5 +16,5 @@
 /yarn.lock
 #;> NODEJS
 #;< META
-coverage
+/coverage
 #;> META
