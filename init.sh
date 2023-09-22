@@ -238,7 +238,7 @@ process_internal() {
 
 #-------------------------------------------------------------------------------
 
-main(){
+main() {
   echo "Please follow the prompts to adjust your project configuration"
   echo
 

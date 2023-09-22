@@ -4,6 +4,10 @@
 #
 
 crun() {
+  if [ "${BATS_COVERAGE_ENABLED-}" != "1" ]; then
+    return
+  fi
+
   local kcov_exists
   local is_bin
 

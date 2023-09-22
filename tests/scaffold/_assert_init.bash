@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# Scaffold template assertions.
+#
 
 # These files should exist in every project.
 assert_files_present_common() {
