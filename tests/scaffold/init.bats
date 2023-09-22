@@ -16,7 +16,7 @@ export SCRIPT_FILE="init.sh"
   assert_contains "scaffold" "${BUILD_DIR}"
 }
 
-# BATS_COVERAGE_DIR=$(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats --filter-tags smoke --formatter tap tests/scaffold
+# BATS_COVERAGE_DIR=$(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
 # bats test_tags=smoke
 @test "Init, defaults" {
   answers=(
