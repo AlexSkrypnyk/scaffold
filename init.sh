@@ -11,8 +11,8 @@
 #
 # shellcheck disable=SC2162,SC2015
 
-set -u
-set -e
+set -euo pipefail
+[ "${SCRIPT_DEBUG-}" = "1" ] && set -x
 
 namespace=${1-}
 project=${2-}
