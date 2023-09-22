@@ -4,17 +4,12 @@
 #
 # shellcheck disable=SC2030,SC2031,SC2129
 
-load _coverage.bash
-load _helper.bash
-load _assert.bash
+load _helper
+load _assert_init
 
-# The name of the script to run.
+export BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
+export BATS_TUI_RUN_COVERAGE_ENABLED=1
 export SCRIPT_FILE="init.sh"
-
-# bats test_tags=smoke
-@test "Smoke" {
-  assert_contains "scaffold" "${BUILD_DIR}"
-}
 
 # BATS_COVERAGE_DIR=$(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
 # bats test_tags=smoke
@@ -37,7 +32,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -74,7 +69,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -114,7 +109,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -149,7 +144,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -185,7 +180,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -217,7 +212,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -249,7 +244,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -281,7 +276,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -314,7 +309,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -345,7 +340,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -377,7 +372,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -409,7 +404,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -441,7 +436,7 @@ export SCRIPT_FILE="init.sh"
     "nothing"       # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
@@ -473,7 +468,7 @@ export SCRIPT_FILE="init.sh"
     "n"             # remove init script
     "nothing"       # proceed with init
   )
-  output=$(run_script_interactive "${answers[@]}")
+  output=$(tui_run_interactive "${answers[@]}")
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
