@@ -11,11 +11,51 @@ load _assert.bash
 # The name of the script to run.
 export SCRIPT_FILE="init.sh"
 
+# bats test_tags=smoke
 @test "Smoke" {
   assert_contains "scaffold" "${BUILD_DIR}"
 }
 
+# BATS_COVERAGE_DIR=$(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats --filter-tags smoke --formatter tap tests/scaffold
+# bats test_tags=smoke
 @test "Init, defaults" {
+  answers=(
+    "YodasHut"      # organisation
+    "force-crystal" # project
+    "Jane Doe"      # author
+    "nothing"       # use PHP
+    "nothing"       # use PHP Command
+    "nothing"       # CLI command name
+    "nothing"       # use PHP Command Build
+    "nothing"       # use NodeJS
+    "nothing"       # use GitHub release drafter
+    "nothing"       # use GitHub pr auto-assign
+    "nothing"       # use GitHub funding
+    "nothing"       # use GitHub PR template
+    "nothing"       # use Renovate
+    "nothing"       # remove docs
+    "nothing"       # remove init script
+    "nothing"       # proceed with init
+  )
+  output=$(run_script_interactive "${answers[@]}")
+
+  assert_output_contains "Please follow the prompts to adjust your project configuration"
+
+  assert_files_present_common "${BUILD_DIR}"
+
+  assert_files_present_php "${BUILD_DIR}"
+  assert_files_present_php_command "${BUILD_DIR}"
+  assert_files_present_php_command_build "${BUILD_DIR}"
+  assert_files_absent_php_script "${BUILD_DIR}"
+
+  assert_files_present_nodejs "${BUILD_DIR}"
+
+  assert_output_contains "Initialization complete."
+
+  assert_files_present_docs "${BUILD_DIR}"
+}
+
+@test "Init, defaults, workflows" {
   answers=(
     "YodasHut"      # organisation
     "force-crystal" # project
