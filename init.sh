@@ -149,11 +149,9 @@ remove_php_script() {
   rm -f docs/php/cli-script.md || true
   remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
-  remove_string_content_line '"cp php-script php-script.php",'
-  remove_string_content_line '"rm php-script.php"'
-  replace_string_content '"phpstan",' '"phpstan"'
+  replace_string_content 'cp php-script php-script.php && phpcs && rm php-script.php' 'phpcs'
   remove_string_content_line '"php-script"'
-  replace_string_content '"php-command",' '"php-command"'
+
   replace_string_content '"'"${new_name}"'",' '"'"${new_name}"'"'
 }
 
