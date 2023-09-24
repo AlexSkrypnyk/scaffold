@@ -7,18 +7,11 @@
 # Run the script.
 # shellcheck disable=SC2120
 tui_run() {
-  BATS_TUI_RUN_COVERAGE_ENABLED="${BATS_TUI_RUN_COVERAGE_ENABLED-}"
-
   [ -z "${SCRIPT_FILE}" ] && flunk "SCRIPT_FILE is not set." && exit 1
 
   pushd "${BUILD_DIR}" >/dev/null || exit 1
 
-  if [ "${BATS_TUI_RUN_COVERAGE_ENABLED}" = "1" ]; then
-    export BATS_COVERAGE_ENABLED=1
-    crun "./${SCRIPT_FILE}" "$@"
-  else
-    run "./${SCRIPT_FILE}" "$@"
-  fi
+  run "./${SCRIPT_FILE}" "$@"
 
   popd >/dev/null || exit 1
 

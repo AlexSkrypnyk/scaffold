@@ -10,6 +10,9 @@
 ################################################################################
 
 setup() {
+  # For a list of available variables see:
+  # @see https://bats-core.readthedocs.io/en/stable/writing-tests.html#special-variables
+
   # Register a path to libraries.
   export BATS_LIB_PATH="${BATS_TEST_DIRNAME}/node_modules"
 
@@ -19,8 +22,6 @@ setup() {
   # Load local libraries.
   # @see https://github.com/drevops/bats-helpers/issues/21
   load lib/_dataprovider
-  # @see https://github.com/drevops/bats-helpers/issues/20
-  load lib/_coverage
   # @see https://github.com/drevops/bats-helpers/issues/18
   load lib/_fixture
   # @see https://github.com/drevops/bats-helpers/issues/19
@@ -53,8 +54,8 @@ setup() {
   fi
 
   # Change directory to the current project directory for each test. Tests
-  # requiring to operate outside of BUILD_DIR (like deployment tests)
-  # should change directory explicitly within their tests.
+  # requiring to operate outside of BUILD_DIR should change directory explicitly
+  # within their tests.
   pushd "${BUILD_DIR}" >/dev/null || exit 1
 }
 

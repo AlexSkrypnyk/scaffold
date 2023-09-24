@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 #
-# Test initation into empty directory.
+# Functional tests for init.sh.
 #
 # shellcheck disable=SC2030,SC2031,SC2129
 
@@ -8,10 +8,9 @@ load _helper
 load _assert_init
 
 export BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
-export BATS_TUI_RUN_COVERAGE_ENABLED=1
 export SCRIPT_FILE="init.sh"
 
-# BATS_COVERAGE_DIR=$(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
+# ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
 # bats test_tags=smoke
 @test "Init, defaults" {
   answers=(

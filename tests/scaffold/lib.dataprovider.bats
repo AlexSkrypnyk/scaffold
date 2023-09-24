@@ -6,8 +6,6 @@
 
 load _helper
 
-export BATS_COVERAGE_ENABLED=1
-
 fixture_add() {
   local num1=$1
   local num2=$2

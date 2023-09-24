@@ -20,6 +20,35 @@ author=${3-}
 
 #-------------------------------------------------------------------------------
 
+convert_string() {
+  input_string="$1"
+  conversion_type="$2"
+
+  case "${conversion_type}" in
+    "file_name" | "route_path" | "deployment_id")
+      echo "${input_string}" | tr ' ' '_' | tr '[:upper:]' '[:lower:]'
+      ;;
+    "domain_name" | "package_namespace")
+      echo "${input_string}" | tr ' ' '_' | tr '[:upper:]' '[:lower:]' | tr -d '-'
+      ;;
+    "namespace" | "class_name")
+      echo "${input_string}" | awk -F" " '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));} 1' | tr -d ' -'
+      ;;
+    "package_name")
+      echo "${input_string}" | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
+      ;;
+    "function_name" | "ui_id" | "cli_command")
+      echo "${input_string}" | tr ' ' '_' | tr '[:upper:]' '[:lower:]'
+      ;;
+    "log_entry" | "code_comment_title")
+      echo "${input_string}"
+      ;;
+    *)
+      echo "Invalid conversion type"
+      ;;
+  esac
+}
+
 replace_string_content() {
   local needle="${1}"
   local replacement="${2}"
