@@ -19,20 +19,8 @@ setup() {
   # Load 'bats-helpers' library.
   bats_load_library bats-helpers
 
-  # Load local libraries.
-  # @see https://github.com/drevops/bats-helpers/issues/21
-  load lib/_dataprovider
-  # @see https://github.com/drevops/bats-helpers/issues/18
-  load lib/_fixture
-  # @see https://github.com/drevops/bats-helpers/issues/19
-  load lib/_tui
-
   # Setup command mocking.
-  # Remove when upstream implements support.
-  # @see https://github.com/drevops/bats-helpers/issues/17
-  if [ "${BATS_MOCK_ENABLED-}" = "1" ]; then
-    setup_mock
-  fi
+  setup_mock
 
   # Current directory where the test is run from.
   # shellcheck disable=SC2155
