@@ -37,9 +37,11 @@ setup() {
   fixture_export_codebase "${BUILD_DIR}" "${CUR_DIR}"
 
   # Print debug information if "--verbose-run" is passed.
+  # LCOV_EXCL_START
   if [ "${BATS_VERBOSE_RUN-}" = "1" ]; then
     echo "BUILD_DIR: ${BUILD_DIR}" >&3
   fi
+  # LCOV_EXCL_END
 
   # Change directory to the current project directory for each test. Tests
   # requiring to operate outside of BUILD_DIR should change directory explicitly
