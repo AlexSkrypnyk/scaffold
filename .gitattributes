@@ -6,12 +6,12 @@
 # /.github         export-ignore
 # /.gitignore      export-ignore
 # /docs            export-ignore
-# /tests           export-ignore
 #;< PHP
-# /phpcs.xml        export-ignore
-# /phpmd.xml        export-ignore
-# /phpstan.neon     export-ignore
-# /phpunit.xml      export-ignore
+# /tests           export-ignore
+# /phpcs.xml       export-ignore
+# /phpmd.xml       export-ignore
+# /phpstan.neon    export-ignore
+# /phpunit.xml     export-ignore
 #;> PHP
 #;< NODEJS
 # /.npmignore      export-ignore

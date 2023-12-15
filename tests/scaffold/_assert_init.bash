@@ -34,10 +34,6 @@ assert_files_present_common() {
   assert_file_not_contains ".gitattributes" "# /.github"
   assert_file_contains ".gitattributes" "/.gitignore"
   assert_file_not_contains ".gitattributes" "# /.gitignore"
-  assert_file_contains ".gitattributes" "/docs"
-  assert_file_not_contains ".gitattributes" "# /docs"
-  assert_file_contains ".gitattributes" "/tests"
-  assert_file_not_contains ".gitattributes" "# /tests"
   assert_file_not_contains ".gitattributes" "# Uncomment the lines below in your project (or use init.sh script)."
 
   assert_file_not_contains "docs/index.md" "Welcome to the documentation for"
@@ -62,11 +58,13 @@ assert_files_present_php() {
   assert_file_contains ".gitignore" "/vendor"
   assert_file_contains ".gitignore" "/composer.lock"
 
+  assert_file_contains ".gitattributes" "/tests"
   assert_file_contains ".gitattributes" "/phpcs.xml"
   assert_file_contains ".gitattributes" "/phpmd.xml"
   assert_file_contains ".gitattributes" "/phpstan.neon"
   assert_file_contains ".gitattributes" "/phpunit.xml"
 
+  assert_file_not_contains ".gitattributes" "# /tests"
   assert_file_not_contains ".gitattributes" "# /phpcs.xml"
   assert_file_not_contains ".gitattributes" "# /phpmd.xml"
   assert_file_not_contains ".gitattributes" "# /phpstan.neon"
@@ -295,6 +293,9 @@ assert_files_present_docs() {
 
   assert_file_exists "docs/assets/README.md"
 
+  assert_file_contains ".gitattributes" "/docs"
+  assert_file_not_contains ".gitattributes" "# /docs"
+
   popd >/dev/null || exit 1
 }
 
@@ -304,6 +305,9 @@ assert_files_absent_docs() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_dir_not_exists "docs"
+
+  assert_file_not_contains ".gitattributes" "/docs"
+  assert_file_not_contains ".gitattributes" "# /docs"
 
   popd >/dev/null || exit 1
 }
