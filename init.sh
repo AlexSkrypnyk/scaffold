@@ -72,9 +72,10 @@ remove_string_content() {
 
 remove_string_content_line() {
   local token="${1}"
+  local target="${2:-.}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)/${target}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
 remove_tokens_with_content() {
@@ -147,6 +148,12 @@ remove_php() {
 
   rm -Rf docs/php || true
 
+  remove_string_content_line "\/tests" ".gitattributes"
+  remove_string_content_line "\/phpcs.xml" ".gitattributes"
+  remove_string_content_line "\/phpmd.xml" ".gitattributes"
+  remove_string_content_line "\/phpstan.neon" ".gitattributes"
+  remove_string_content_line "\/phpunit.xml" ".gitattributes"
+
   remove_tokens_with_content "PHP"
 }
 
@@ -191,6 +198,9 @@ remove_nodejs() {
   rm -f yarn.lock >/dev/null || true
   rm -Rf node_modules >/dev/null || true
   rm -Rf docs/nodejs || true
+
+  remove_string_content_line "\/.npmignore" ".gitattributes"
+
   remove_tokens_with_content "NODEJS"
 }
 
@@ -220,6 +230,7 @@ remove_renovate() {
 
 remove_docs() {
   rm -Rf docs || true
+  remove_string_content_line "\/docs" ".gitattributes"
 }
 
 process_internal() {
