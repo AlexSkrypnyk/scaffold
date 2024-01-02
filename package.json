@@ -19,5 +19,9 @@
         "test": "echo Would run tests",
         "build": "echo Would run build"
     },
+    "engines" : {
+        "npm" : ">=8.0.0",
+        "node" : ">=16.0.0"
+    },
     "dependencies": {}
 }
