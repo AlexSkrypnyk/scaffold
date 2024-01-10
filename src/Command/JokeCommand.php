@@ -19,13 +19,9 @@ class JokeCommand extends Command {
   /**
    * {@inheritdoc}
    */
-  protected static $defaultName = 'app:joke';
-
-  /**
-   * {@inheritdoc}
-   */
   protected function configure(): void {
     $this
+      ->setName('joke')
       ->addOption(
         name: 'topic',
         mode: InputOption::VALUE_OPTIONAL,
