@@ -283,8 +283,8 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_php "${BUILD_DIR}"
   assert_files_present_nodejs "${BUILD_DIR}"
 
+  assert_file_not_exists ".github/workflows/draft-release-notes.yml"
   assert_file_not_exists ".github/release-drafter.yml"
-  assert_file_not_contains ".github/workflows/release.yml" "release-drafter"
 
   assert_output_contains "Initialization complete."
 }
@@ -316,7 +316,7 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_php "${BUILD_DIR}"
   assert_files_present_nodejs "${BUILD_DIR}"
 
-  assert_file_not_exists ".github/auto-assign-pr-author.yml"
+  assert_file_not_exists ".github/assign-author.yml"
 
   assert_output_contains "Initialization complete."
 }

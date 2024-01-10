@@ -1,0 +1,59 @@
+name: Test Scaffold
+
+# Workflow to **validate** the **integrity** of the scaffold template itself.
+# This workflow will be automatically removed from the scaffolded project
+# after running init.sh script.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+
+jobs:
+  test-scaffold:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+
+      - name: Check coding standards
+        uses: luizm/action-sh-checker@v0.8.0
+        env:
+          SHFMT_OPTS: -i 2 -ci -s -d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          cache-dependency-path: tests/scaffold/package-lock.json
+
+      - name: Setup kcov
+        run: wget https://github.com/SimonKagstrom/kcov/releases/download/v42/kcov-amd64.tar.gz && tar -xf kcov-amd64.tar.gz && sudo mv ./usr/local/bin/kcov /usr/local/bin/kcov && kcov --version
+
+      - name: Install dependencies
+        run: npm --prefix=tests/scaffold ci
+
+      - name: Run tests
+        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,coverage $(pwd)/coverage ./tests/scaffold/node_modules/.bin/bats tests/scaffold
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ./coverage
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          directory: ./coverage
+          fail_ci_if_error: true

@@ -3,21 +3,21 @@
 # Scaffold template assertions.
 #
 
-# These files should exist in every project.
+# This file structure should exist in every project type.
 assert_files_present_common() {
   local dir="${1:-$(pwd)}"
 
   pushd "${dir}" >/dev/null || exit 1
 
-  assert_file_exists ".github/workflows/test.yml"
   assert_file_exists ".editorconfig"
   assert_file_exists ".gitattributes"
   assert_file_exists ".gitignore"
   assert_file_contains ".gitignore" "/.build"
   assert_file_not_contains ".gitignore" "/coverage"
   assert_file_exists "README.md"
+
   assert_file_not_exists "LICENSE"
-  assert_file_not_exists ".github/workflows/scaffold-test.yml"
+  assert_file_not_exists ".github/workflows/test-scaffold.yml"
   assert_dir_not_exists "tests/scaffold"
   assert_dir_exists "tests"
 
@@ -70,8 +70,9 @@ assert_files_present_php() {
   assert_file_not_contains ".gitattributes" "# /phpstan.neon"
   assert_file_not_contains ".gitattributes" "# /phpunit.xml"
 
-  assert_file_contains ".github/workflows/test.yml" "composer"
-  assert_file_contains ".github/workflows/release.yml" "composer"
+  assert_file_exists ".github/workflows/test-php.yml"
+  assert_file_exists ".github/workflows/release-php.yml"
+
   assert_file_contains "README.md" "composer"
 
   assert_file_exists "phpcs.xml"
@@ -102,8 +103,8 @@ assert_files_absent_php() {
   assert_file_not_contains ".gitattributes" "/phpstan.neon"
   assert_file_not_contains ".gitattributes" "/phpunit.xml"
 
-  assert_file_not_contains ".github/workflows/test.yml" "composer"
-  assert_file_not_contains ".github/workflows/release.yml" "composer"
+  assert_file_not_exists ".github/workflows/test-php.yml"
+  assert_file_not_exists ".github/workflows/release-php.yml"
 
   assert_file_not_contains "README.md" "composer"
 
@@ -166,8 +167,10 @@ assert_files_present_php_command_build() {
 
   assert_file_exists "box.json"
   assert_file_contains "box.json" ".build/force-crystal.phar"
-  assert_file_contains ".github/workflows/release.yml" "Build and test"
-  assert_file_contains ".github/workflows/release.yml" "force-crystal.phar"
+
+  assert_file_contains ".github/workflows/release-php.yml" "Build PHAR"
+  assert_file_contains ".github/workflows/release-php.yml" "Test PHAR"
+  assert_file_contains ".github/workflows/release-php.yml" "force-crystal.phar"
 
   popd >/dev/null || exit 1
 }
@@ -178,8 +181,10 @@ assert_files_absent_php_command_build() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_file_not_exists "box.json"
-  assert_file_not_contains ".github/workflows/release.yml" "Build and test"
-  assert_file_not_contains ".github/workflows/release.yml" "php-command.phar"
+
+  assert_file_not_contains ".github/workflows/release-php.yml" "Build PHAR"
+  assert_file_not_contains ".github/workflows/release-php.yml" "Test PHAR"
+  assert_file_not_contains ".github/workflows/release-php.yml" "php-command.phar"
 
   popd >/dev/null || exit 1
 }
@@ -195,7 +200,7 @@ assert_files_present_php_script() {
   assert_file_exists tests/phpunit/Functional/ScriptFunctionalTestCase.php
   assert_file_exists tests/phpunit/Functional/ExampleScriptFunctionalTest.php
 
-  assert_file_contains ".github/workflows/release.yml" "force-crystal"
+  assert_file_contains ".github/workflows/release-php.yml" "force-crystal"
 
   assert_file_contains "phpcs.xml" "force-crystal.php"
   assert_file_contains "phpstan.neon" "force-crystal"
@@ -220,7 +225,7 @@ assert_files_absent_php_script() {
   assert_file_not_exists tests/phpunit/Functional/ScriptFunctionalTestCase.php
   assert_file_not_exists tests/phpunit/Functional/ExampleScriptFunctionalTest.php
 
-  assert_file_not_contains ".github/workflows/release.yml" "php-script"
+  assert_file_not_contains ".github/workflows/release-php.yml" "php-script"
 
   assert_file_not_contains "phpcs.xml" "force-crystal.php"
   assert_file_not_contains "phpstan.neon" "force-crystal"
@@ -252,8 +257,9 @@ assert_files_present_nodejs() {
   assert_file_not_contains ".gitattributes" "# /.npmignore"
   assert_file_contains ".gitattributes" "/.npmignore"
 
-  assert_file_contains ".github/workflows/test.yml" "npm"
-  assert_file_contains ".github/workflows/release.yml" "npm"
+  assert_file_contains ".github/workflows/test-nodejs.yml" "npm"
+  assert_file_contains ".github/workflows/release-nodejs.yml" "npm"
+
   assert_file_contains "README.md" "npm"
 
   popd >/dev/null || exit 1
@@ -272,8 +278,9 @@ assert_files_absent_nodejs() {
 
   assert_file_not_contains ".gitattributes" "/.npmignore"
 
-  assert_file_not_contains ".github/workflows/test.yml" "npm"
-  assert_file_not_contains ".github/workflows/release.yml" "npm"
+  assert_file_not_contains ".github/workflows/test-nodejs.yml" "npm"
+  assert_file_not_contains ".github/workflows/release-nodejs.yml" "npm"
+
   assert_file_not_contains "README.md" "npm"
 
   popd >/dev/null || exit 1
@@ -293,6 +300,8 @@ assert_files_present_docs() {
 
   assert_file_exists "docs/assets/README.md"
 
+  assert_file_exists ".github/workflows/publish-docs.yml"
+
   assert_file_contains ".gitattributes" "/docs"
   assert_file_not_contains ".gitattributes" "# /docs"
 
@@ -305,6 +314,8 @@ assert_files_absent_docs() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_dir_not_exists "docs"
+
+  assert_file_not_exists ".github/workflows/publish-docs.yml"
 
   assert_file_not_contains ".gitattributes" "/docs"
   assert_file_not_contains ".gitattributes" "# /docs"
