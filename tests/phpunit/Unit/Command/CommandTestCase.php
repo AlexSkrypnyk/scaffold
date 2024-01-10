@@ -46,8 +46,11 @@ abstract class CommandTestCase extends TestCase {
     $instance = is_object($object_or_class) ? $object_or_class : new $object_or_class();
     $application->add($instance);
 
-    /** @var string $name */
-    $name = $this->getProtectedValue($instance, 'defaultName');
+    $name = $instance->getName();
+    if (empty($name)) {
+      /** @var string $name */
+      $name = $this->getProtectedValue($instance, 'defaultName');
+    }
     $command = $application->find($name);
     $this->commandTester = new CommandTester($command);
 

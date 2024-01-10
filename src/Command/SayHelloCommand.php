@@ -18,13 +18,9 @@ class SayHelloCommand extends Command {
   /**
    * {@inheritdoc}
    */
-  protected static $defaultName = 'app:say-hello';
-
-  /**
-   * {@inheritdoc}
-   */
   protected function configure(): void {
     $this
+      ->setName('say-hello')
       ->setDescription('Says hello')
       ->setHelp('This command allows you to say hello...');
   }
