@@ -17,24 +17,40 @@ jobs:
       matrix:
         php-versions: ['8.1', '8.2', '8.3']
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/cache@v3
-      with:
-        path: /tmp/composer-cache
-        key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-    - uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ matrix.php-versions }}
-    - run: composer install
-    - run: composer lint
-    - run: composer test:coverage
-    - uses: codecov/codecov-action@v3
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      with:
-        files: ./cobertura.xml
-        fail_ci_if_error: true
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v3
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - run: composer install
+      - run: composer lint
+      - run: composer test:coverage
+      - uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: ./cobertura.xml
+          fail_ci_if_error: true
+  #;< PHP_PHAR
+  build-php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v3
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+      - run: composer install
+      - run: composer build && ./.build/php-command.phar | grep -q "?"
+  #;> PHP_PHAR
   #;> PHP
+
   #;< NODEJS
   test-nodejs:
     runs-on: ubuntu-latest
