@@ -32,7 +32,10 @@ jobs:
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-      - uses: php-actions/composer@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+      - run: composer install
         #;< PHP_PHAR
       - name: Build and test
         run: composer build && ./.build/php-command.phar | grep -q "?"
