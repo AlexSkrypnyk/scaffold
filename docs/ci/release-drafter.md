@@ -21,7 +21,7 @@ using a YAML configuration file stored in your repository.
 
 ## Workflow
 
-The Release Drafter job runs as a GitHub action on each push to the `main` 
+The Release Drafter job runs as a GitHub action on each push to the `main`
 branch. It drafts a new release based on the changes since the last release using
 the release notes template provided in the `.github/release-drafter.yml` file.
 
@@ -40,23 +40,24 @@ and configurations that Release Drafter uses to generate release notes.
 
 ---
 
-### `name-template: '$NEXT_MINOR_VERSION'`
+### `name-template: '$RESOLVED_VERSION'`
 
 - **What it does**: Specifies the template for the release name.
-- **Variables**: `$NEXT_MINOR_VERSION` is a placeholder for the next minor
-  version number.
-- **Example**: If the current latest version is `2.4.3`, the next minor version
-  would be `2.5.0`, and the draft release name would be set as `2.5.0`.
+- **Variables**: `$RESOLVED_VERSION` is a placeholder for the next version
+  number. It defaults to the next version provided by the `version-resolver`.
+- **Example**: If the current latest version is `2.4.3` and the
+  `version-resolver` returns `minor`, the next version would be `2.5.0`, and
+  the draft release name would be set as `2.5.0`.
 
 ---
 
-### `tag-template: '$NEXT_MINOR_VERSION'`
+### `tag-template: '$RESOLVED_VERSION'`
 
 - **What it does**: Specifies the template for the Git tag to associate with the
   release.
-- **Variables**: `$NEXT_MINOR_VERSION` is used here too.
-- **Example**: Similar to `name-template`, if the next minor version is `2.5.0`,
-  the Git tag would also be `2.5.0`.
+- **Variables**: `$RESOLVED_VERSION` is used here too.
+- **Example**: Similar to `name-template`, if the next version is `2.5.0` and
+  the `version-resolver` returns `minor`, the Git tag would also be `2.5.0`.
 
 ---
 
@@ -83,6 +84,18 @@ and configurations that Release Drafter uses to generate release notes.
 
 ---
 
+### `version-resolver.default: minor`
+
+- **What it does**: Provides the default value returned by the version resolver.
+  This allows to pass a version value via an environment variable, if required,
+  to override automatically resolved version. In this way, the same template
+  can be used to generate release notes by the Release Drafter action itself and
+  any external tools (e.g. external GitHub action that creates a new version and
+  passes it to the release drafter).
+- **Defaults**: `minor` sets the next resolved version to be a minor version.
+
+---
+
 ### `template: |`
 
 - **What it does**: Sets the overall structure and layout of the generated
@@ -104,11 +117,9 @@ and configurations that Release Drafter uses to generate release notes.
           - Add feature @Bob (#43)
           ```
 
-    -
-        *
-    *`**Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$NEXT_MINOR_VERSION`
-    **: Creates a link to a page comparing the changes between the previous
-    tag and the new version.
+    - **`**Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$NEXT_MINOR_VERSION`**:
+      Creates a link to a page comparing the changes between the previous tag
+      and the new version.
         - **Example**: The rendered URL might
           be `https://github.com/owner/repo/compare/2.4.3...2.5.0`.
 

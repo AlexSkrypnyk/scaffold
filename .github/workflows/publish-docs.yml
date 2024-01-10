@@ -1,4 +1,4 @@
-name: Deploy Docs to GitHub Pages
+name: Publish documentation to GitHub Pages
 
 on:
   push:
@@ -17,29 +17,43 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  docs:
+  publish-docs:
     environment:
       name: github-pages
       url: ${{ steps.pages.outputs.page_url }}
+
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: docs
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
           bundler-cache: true
           cache-version: 0
           working-directory: '${{ github.workspace }}/docs'
-      - uses: actions/configure-pages@v4
+
+      - name: Setup GitHub pages
+        uses: actions/configure-pages@v4
         id: pages
-      - run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+
+      - name: Build documentation site
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
         working-directory: '${{ github.workspace }}/docs'
         env:
           JEKYLL_ENV: production
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Upload documentation site
+        uses: actions/upload-pages-artifact@v3
         with:
           path: "docs/_site/"
-      - uses: actions/deploy-pages@v4
+
+      - name: Deploy documentation site
+        uses: actions/deploy-pages@v4

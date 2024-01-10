@@ -1,0 +1,84 @@
+name: Test PHP
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+
+jobs:
+  test-php:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-versions: ['8.1', '8.2', '8.3']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Check coding standards
+        run: composer lint
+
+      - name: Run tests
+        run: composer test:coverage
+
+      - name: Upload coverage report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ./coverage
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: ./cobertura.xml
+          fail_ci_if_error: true
+
+  #;< PHP_PHAR
+  build-php:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Build PHAR
+        run: composer build
+
+      - name: Test PHAR
+        run: ./.build/php-command.phar | grep -q "?"
+  #;> PHP_PHAR

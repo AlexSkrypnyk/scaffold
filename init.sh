@@ -154,6 +154,9 @@ remove_php() {
   remove_string_content_line "\/phpstan.neon" ".gitattributes"
   remove_string_content_line "\/phpunit.xml" ".gitattributes"
 
+  rm -f .github/workflows/test-php.yml || true
+  rm -f .github/workflows/release-php.yml || true
+
   remove_tokens_with_content "PHP"
 }
 
@@ -201,17 +204,21 @@ remove_nodejs() {
 
   remove_string_content_line "\/.npmignore" ".gitattributes"
 
+  rm -f .github/workflows/test-nodejs.yml || true
+  rm -f .github/workflows/release-nodejs.yml || true
+
   remove_tokens_with_content "NODEJS"
 }
 
 remove_release_drafter() {
+  rm -f .github/workflows/draft-release-notes.yml || true
   rm -f .github/release-drafter.yml
   remove_tokens_with_content "RELEASEDRAFTER"
   rm -Rf docs/ci/release-drafter.md || true
 }
 
 remove_pr_autoassign() {
-  rm -f .github/workflows/auto-assign-pr-author.yml || true
+  rm -f .github/workflows/assign-author.yml || true
   rm -Rf docs/ci/auto-assign-pr.md || true
 }
 
@@ -230,6 +237,7 @@ remove_renovate() {
 
 remove_docs() {
   rm -Rf docs || true
+  rm -f .github/workflows/publish-docs.yml || true
   remove_string_content_line "\/docs" ".gitattributes"
 }
 
@@ -268,7 +276,7 @@ process_internal() {
 
   rm -f LICENSE >/dev/null || true
   rm -Rf "tests/scaffold" >/dev/null || true
-  rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
+  rm -f ".github/workflows/test-scaffold.yml" >/dev/null || true
 
   rm -f "docs/assets/init.gif" >/dev/null || true
 

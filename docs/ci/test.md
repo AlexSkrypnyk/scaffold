@@ -7,11 +7,9 @@ nav_order: 1
 
 # Test
 
-The [`test.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test.yml)
-file configures GitHub Actions for your repository to automatically run tests on
-pull requests and pushes to specific branches. The workflow is set up for both
-PHP and Node.js environments, and it includes steps for linting, testing, and
-code coverage.
+The `Test` workflow configure GitHub Actions for your repository to
+automatically run tests on pull requests and pushes to specific branches.
+The workflow includes steps for linting, testing, and code coverage.
 
 ## Trigger conditions
 
@@ -28,6 +26,8 @@ code coverage.
   pull request. This action ensures that the `main` branch is continually in a
   deployable and stable state according to the defined tests and checks.
 
+[//]: # (#;< PHP)
+
 ## PHP job
 
 - Runs on `ubuntu-latest`.
@@ -37,6 +37,10 @@ code coverage.
 - Publishes coverage report with a 90% threshold to the associated pull
   request.
 
+[//]: # (#;> PHP)
+
+[//]: # (#;< NODEJS)
+
 ## Node.js job
 
 - Runs on `ubuntu-latest`.
@@ -44,6 +48,8 @@ code coverage.
 - Sets up Node.js environment.
 - Installs npm dependencies.
 - Runs linting and tests.
+
+[//]: # (#;> NODEJS)
 
 ## Code coverage
 

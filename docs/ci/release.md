@@ -7,11 +7,8 @@ nav_order: 2
 
 # Release
 
-The [`Release`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release.yml)
-workflow is designed to automate the release process for the
-repository. It is triggered on pushes to the `main` branch and when a new tag is
-created. This workflow has specific jobs for handling release drafting, PHP
-releases, and Node.js releases.
+The `Release` workflow automates the release process for the repository. It is
+triggered on pushes to the `main` branch and when a new tag is created.
 
 ## Trigger Conditions
 
