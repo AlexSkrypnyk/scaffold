@@ -39,7 +39,7 @@ class JokeCommand extends Command {
     try {
       $joke = $this->getJoke($topic);
     }
-    catch (\Exception $e) {
+    catch (\Exception) {
       $output->writeln('<error>Unable to retrieve a joke.</error>');
 
       return Command::FAILURE;

@@ -28,7 +28,8 @@
         "opis/closure": "^3.6",
         "phpmd/phpmd": "^2.13",
         "phpstan/phpstan": "^1.10",
-        "phpunit/phpunit": "^10"
+        "phpunit/phpunit": "^10",
+        "rector/rector": "^0.19.0"
     },
     "autoload": {
         "psr-4": {
@@ -53,9 +54,13 @@
         "lint": [
             "cp php-script php-script.php && phpcs && rm php-script.php",
             "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
-            "phpstan"
+            "phpstan",
+            "rector --dry-run"
         ],
-        "lint:fix": "phpcbf",
+        "lint:fix": [
+            "rector",
+            "cp php-script php-script.php && phpcbf && rm php-script.php"
+        ],
         "test": "phpunit --no-coverage",
         "test:coverage": "XDEBUG_MODE=coverage phpunit",
         "build": [

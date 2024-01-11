@@ -73,9 +73,7 @@ trait VfsTrait {
       $file->withContent($contents);
     }
 
-    $filepath = $file->url();
-
-    return $filepath;
+    return $file->url();
   }
 
   /**
