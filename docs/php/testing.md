@@ -72,5 +72,5 @@ Here are some of the coverage settings specified in the [phpunit.xml](https://gi
 To generate the coverage reports, run the following command:
 
 ```bash
-composer test:coverage
+XDEBUG_MODE=coverage composer test
 ```

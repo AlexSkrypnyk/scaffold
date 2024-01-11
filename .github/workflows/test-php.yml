@@ -39,7 +39,7 @@ jobs:
         run: composer lint
 
       - name: Run tests
-        run: composer test:coverage
+        run: XDEBUG_MODE=coverage composer test
 
       - name: Upload coverage report as artifact
         uses: actions/upload-artifact@v4
