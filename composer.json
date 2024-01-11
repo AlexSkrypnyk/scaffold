@@ -57,7 +57,7 @@
             "phpstan",
             "rector --dry-run"
         ],
-        "lint:fix": [
+        "lint-fix": [
             "rector",
             "cp php-script php-script.php && phpcbf && rm php-script.php"
         ],

@@ -26,7 +26,7 @@ The provided [`composer.json`](https://github.com/AlexSkrypnyk/scaffold/blob/mai
   `symfony/console` is provided as a dependency as well.
 
 - **Development Dependencies**:
-  Tools like [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer),[PHP Mess Detector](https://phpmd.org/) and [PHPStan](https://phpstan.org/) 
+  Tools like [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer),[PHP Mess Detector](https://phpmd.org/) and [PHPStan](https://phpstan.org/)
   for development are listed.
 
 - **Autoloading**:
@@ -38,7 +38,7 @@ The provided [`composer.json`](https://github.com/AlexSkrypnyk/scaffold/blob/mai
 
 - **Custom Scripts**:
   Defines CLI scripts for tasks:
-    - `lint` and `lint:fix` - to lint and fix code using [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer),
+    - `lint` and `lint-fix` - to lint and fix code using [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer),
       [PHP Mess Detector](https://phpmd.org/) and [PHPStan](https://phpstan.org/)
     - `test` and `test:coverage` - to run PHPUnit tests and generate coverage report
     - `build` - to build a PHAR file (if using as base for CLI command)

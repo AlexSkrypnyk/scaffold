@@ -20,7 +20,7 @@ the debugging process more efficient.
 
 To lint code, run `composer lint` command.
 
-To fix linting errors, run `composer lint:fix`.
+To fix linting errors, run `composer lint-fix`.
 
 ## PHP Code Sniffer
 
