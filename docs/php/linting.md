@@ -29,11 +29,11 @@ which analyzes PHP files and detects violations of a defined set of coding
 standards.
 
 This template adheres to Drupal coding standards, which are defined
-in [`drupal/coder`](https://www.drupal.org/project/coder) package. The package 
+in [`drupal/coder`](https://www.drupal.org/project/coder) package. The package
 is installed as a development dependency.
 
 The [`phpcs.xml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpcs.xml)
-file contains a template ruleset with minimal configuration, serving as an 
+file contains a template ruleset with minimal configuration, serving as an
 initial foundation for further customization of coding standards. For example,
 long arrays and missing method name descriptions are allowed in test files.
 
@@ -44,8 +44,8 @@ An example of annotated ruleset with all available options can be found on
 
 ## PHP Mess Detector
 
-This template provides integration with [PHP Mess Detector](https://phpmd.org/), 
-which takes a given PHP source code base and looks for several potential 
+This template provides integration with [PHP Mess Detector](https://phpmd.org/),
+which takes a given PHP source code base and looks for several potential
 problems within that source.
 
 These problems can be things like:
@@ -70,7 +70,7 @@ of the PHPMD website.
 
 ## PHPStan
 
-This template provides integration with [PHPStan](https://phpstan.org/), the 
+This template provides integration with [PHPStan](https://phpstan.org/), the
 PHP Static Analysis Tool.
 
 PHPStan focuses on finding errors in your code without actually running it.
@@ -90,3 +90,24 @@ to your needs.
 
 The full configuration reference is available on
 the [PHPStan website](https://phpstan.org/config-reference).
+
+## Rector
+
+This template provides integration with [Rector](https://getrector.com/), a tool
+that instantly upgrades and refactors the PHP code of your application.
+
+Rector now supports upgrades from PHP 5.3 to 8.2 and major open-source projects
+like Symfony, PHPUnit, and Doctrine.
+
+Rector helps with automated refactoring when you have code quality you need,
+but struggle to keep it with new developers in your team.
+
+Add Rector to your CI and let it continuously refactor your code and keep the
+code quality high.
+
+The [`rector.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/rector.php)
+file contains a template ruleset with minimal configuration, serving as an
+initial foundation for further customization of coding standards.
+
+The full configuration reference is available on
+the [Rector website](https://getrector.com/documentation/).
