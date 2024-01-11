@@ -44,8 +44,8 @@ jobs:
       - name: Upload coverage report as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage-report
-          path: ./coverage
+          name: ${{github.job}}-code-coverage-report-${{ matrix.php-versions }}
+          path: ./.coverage-html
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v3
