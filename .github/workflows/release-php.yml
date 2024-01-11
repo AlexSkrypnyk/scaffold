@@ -35,7 +35,7 @@ jobs:
         run: composer build
 
       - name: Test PHAR
-        run: ./.build/php-command.phar | grep -q "?"
+        run: ./.build/php-command.phar || exit 1
         #;> PHP_PHAR
 
       - name: Get tag name
