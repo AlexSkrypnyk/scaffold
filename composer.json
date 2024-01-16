@@ -46,8 +46,8 @@
     },
     "config": {
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true,
-            "bamarni/composer-bin-plugin": true
+            "bamarni/composer-bin-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     },
     "scripts": {
@@ -55,10 +55,10 @@
             "cp php-script php-script.php && phpcs && rm php-script.php",
             "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
             "phpstan",
-            "rector --dry-run"
+            "rector --clear-cache --dry-run"
         ],
         "lint-fix": [
-            "rector",
+            "rector --clear-cache",
             "cp php-script php-script.php && phpcbf && rm php-script.php"
         ],
         "test": "if [ \"${XDEBUG_MODE}\" = 'coverage' ]; then phpunit; else phpunit --no-coverage; fi",
