@@ -26,3 +26,4 @@ parameters:
       # this error.
       message: '#.*no value type specified in iterable type array.#'
       path: tests/phpunit/*
+      reportUnmatched: false
