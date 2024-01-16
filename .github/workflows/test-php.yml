@@ -41,7 +41,7 @@ jobs:
       - name: Run tests
         run: XDEBUG_MODE=coverage composer test
 
-      - name: Upload coverage report as artifact
+      - name: Upload coverage report as an artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{github.job}}-code-coverage-report-${{ matrix.php-versions }}
