@@ -261,7 +261,7 @@ assert_files_present_nodejs() {
   assert_file_contains ".github/workflows/test-nodejs.yml" "npm"
   assert_file_contains ".github/workflows/release-nodejs.yml" "npm"
 
-  assert_file_contains "README.md" "npm"
+  assert_file_contains "README.md" "npm install"
 
   popd >/dev/null || exit 1
 }
@@ -282,7 +282,33 @@ assert_files_absent_nodejs() {
   assert_file_not_contains ".github/workflows/test-nodejs.yml" "npm"
   assert_file_not_contains ".github/workflows/release-nodejs.yml" "npm"
 
-  assert_file_not_contains "README.md" "npm"
+  assert_file_not_contains "README.md" "npm install"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_present_shell() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_file_exists "force-crystal.sh"
+  assert_file_exists ".github/workflows/test-shell.yml"
+  assert_dir_exists "tests/bats"
+
+  assert_file_contains "README.md" "force-crystal"
+
+  popd >/dev/null || exit 1
+}
+
+assert_files_absent_shell() {
+  local dir="${1:-$(pwd)}"
+
+  pushd "${dir}" >/dev/null || exit 1
+
+  assert_file_not_exists "force-crystal.sh"
+  assert_file_not_exists ".github/workflows/test-shell.yml"
+  assert_dir_not_exists "tests/bats"
 
   popd >/dev/null || exit 1
 }

@@ -1,0 +1,71 @@
+name: Test shell
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+
+env:
+  BATS_LIB_PATH: "./node_modules"
+
+jobs:
+  test-shell:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - macos-11
+          - macos-12
+          - macos-13
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install current Bash on macOS
+        if: startsWith(matrix.os, 'macos-')
+        run: brew install bash
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup sh-checker
+        uses: luizm/action-sh-checker@v0.8.0
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          SHFMT_OPTS: -i 2 -ci -s -d
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: tests/bats
+
+      - name: Install Kcov
+        run: wget https://github.com/SimonKagstrom/kcov/releases/download/v42/kcov-amd64.tar.gz && tar -xf kcov-amd64.tar.gz && sudo mv ./usr/local/bin/kcov /usr/local/bin/kcov && kcov --version
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Run Tests and Code Coverage on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: kcov --clean --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-path=node_modules,vendor,.coverage-html .coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
+        shell: bash
+
+      - name: Upload coverage reports to Codecov
+        if: matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ./.coverage-html
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Run Tests on other OSes
+        if: matrix.os != 'ubuntu-latest'
+        run: ./tests/bats/node_modules/.bin/bats tests/bats
+        shell: bash

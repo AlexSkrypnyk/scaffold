@@ -26,6 +26,7 @@
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/AlexSkrypnyk/scaffold.svg)](https://github.com/AlexSkrypnyk/scaffold/pulls)
 [![Test PHP](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-php.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-php.yml)
 [![Test Node.js](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-nodejs.yml)
+[![Test Shell](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-shell.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-shell.yml)
 [![codecov](https://codecov.io/gh/AlexSkrypnyk/scaffold/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/scaffold)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/scaffold)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/scaffold)
@@ -59,6 +60,12 @@
 
 [//]: # (#;> NODEJS)
 
+[//]: # (#;< SHELL)
+
+Download the latest release from GitHub releases page.
+
+[//]: # (#;> SHELL)
+
 ## Usage
 
 [//]: # (#;< PHP)
@@ -72,6 +79,12 @@
     node_modules/.bin/yourproject
 
 [//]: # (#;> NODEJS)
+
+[//]: # (#;< SHELL)
+
+    ./shell-command.sh
+
+[//]: # (#;> SHELL)
 
 ## Maintenance
 
@@ -90,3 +103,13 @@
     npm run test
 
 [//]: # (#;> NODEJS)
+
+[//]: # (#;< SHELL)
+
+    shellcheck shell-command.sh tests/bats/*.bash tests/bats/*.bats
+    shfmt -i 2 -ci -s -d shell-command.sh tests/bats/*.bash tests/bats/*.bats
+
+    npm ci --prefix tests/bats
+    ./tests/bats/node_modules/.bin/bats tests/bats
+
+[//]: # (#;> SHELL)

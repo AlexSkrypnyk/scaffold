@@ -1,5 +1,5 @@
 ---
-title: CLI Command
+title: PHP CLI Command
 layout: default
 parent: PHP
 nav_order: 2
@@ -87,15 +87,15 @@ In the CLI application, three key components build the overall structure:
    file.
 
 2. **Application loader**: Defined in [`app.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/src/app.php),
-   this file is where you initialize the Symfony Console Application object. 
-   You add commands to it, like `JokeCommand` and `SayHelloCommand`, and finally 
+   this file is where you initialize the Symfony Console Application object.
+   You add commands to it, like `JokeCommand` and `SayHelloCommand`, and finally
    run the application.
    This acts as the heart of your CLI application, tying together all the
    commands you've created.
 
 3. **Command class(es)**: These are the actual commands your application will
    execute. Each [command class](https://github.com/AlexSkrypnyk/scaffold/tree/main/src/Command)
-   is responsible for a specific action like saying hello or telling a joke. 
+   is responsible for a specific action like saying hello or telling a joke.
    These classes extend Symfony's Command class and are
    where you define your business logic. Optionally, you may also include unit
    tests for your commands to verify they work as expected.

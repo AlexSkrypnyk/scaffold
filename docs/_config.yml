@@ -30,7 +30,7 @@ enable_copy_code_button: true
 
 heading_anchors: true
 
-footer_content: "Copyright &copy;2023 <a href=\"mailto:alex@drevops.com\">Alex Skrypnyk</a>"
+footer_content: "Copyright &copy;2024 <a href=\"mailto:alex@drevops.com\">Alex Skrypnyk</a>"
 
 # Footer "Edit this page on GitHub" link text.
 gh_edit_link: true

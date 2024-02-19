@@ -16,5 +16,5 @@
 /yarn.lock
 #;> NODEJS
 #;< META
-/coverage
+/.scaffold-coverage-html
 #;> META
