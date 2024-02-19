@@ -1,5 +1,5 @@
 ---
-title: CLI Script
+title: PHP CLI Script
 layout: default
 parent: PHP
 nav_order: 3
@@ -10,7 +10,7 @@ nav_order: 3
 [`php-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-script)
 is a PHP template for writing a single-file command-line interface (CLI)
 scripts. It's designed to be a single-file script without relying on any
-external packages, making it a self-contained program. 
+external packages, making it a self-contained program.
 
 Below are some of its main features:
 
@@ -55,8 +55,8 @@ PHP CLI scripts.
 Begin by updating the script name and file name in the script comments. This
 will clarify the script's functionality for anyone who reads the code.
 
-Next, adjust the `main` function to validate and handle the CLI arguments 
-specific to your script. You should also revise the `print_help` function to 
+Next, adjust the `main` function to validate and handle the CLI arguments
+specific to your script. You should also revise the `print_help` function to
 include relevant usage instructions.
 
 Your core logic will be housed in the `main` function. Simply replace the
@@ -70,21 +70,21 @@ You can then run your script from the command line using `./php-script`.
 ## Authoring tests
 
 This template includes a [`tests/phpunit`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/phpunit)
-directory with a sample Unit and Functional tests. 
+directory with a sample Unit and Functional tests.
 
 [`ScriptUnitTestCase.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Unit/ScriptUnitTestCase.php)
-is a base class for all Unit tests. It provides all required functionality for 
+is a base class for all Unit tests. It provides all required functionality for
 testing the script without actually running it. It also includes several traits.
 
 [`ExampleScriptUnitTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Unit/ExampleScriptUnitTest.php)
-is an example of a Unit test for running the script with different arguments and 
+is an example of a Unit test for running the script with different arguments and
 options.
 
 [`ScriptFunctionalTestCase.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/ScriptFunctionalTestCase.php)
-is a base class for all Functional tests. It provides all required functionality 
+is a base class for all Functional tests. It provides all required functionality
 for testing the script by running it as your script users would do. It also i
 ncludes several traits.
 
 [`ExampleScriptFunctionalTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/ExampleScriptFunctionalTest.php)
-is an example of a Functional test for running the script with different 
+is an example of a Functional test for running the script with different
 arguments and options.

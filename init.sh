@@ -164,7 +164,7 @@ remove_php_command() {
   rm -Rf php-command || true
   rm -Rf src || true
   rm -Rf tests/phpunit/Unit/Command || true
-  rm -f docs/php/cli-command.md || true
+  rm -f docs/php/php-command.md || true
 
   remove_tokens_with_content "PHP_COMMAND"
 
@@ -186,7 +186,7 @@ remove_php_script() {
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Functional/ScriptFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/ExampleScriptFunctionalTest.php || true
-  rm -f docs/php/cli-script.md || true
+  rm -f docs/php/php-script.md || true
   remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
   replace_string_content 'cp php-script php-script.php && phpcs && rm php-script.php' 'phpcs'
@@ -209,6 +209,16 @@ remove_nodejs() {
   rm -f .github/workflows/release-nodejs.yml || true
 
   remove_tokens_with_content "NODEJS"
+}
+
+remove_shell() {
+  rm -f shell-command.sh >/dev/null || true
+  rm -Rf tests/bats || true
+  rm -Rf docs/shell || true
+
+  rm -f .github/workflows/test-shell.yml || true
+
+  remove_tokens_with_content "SHELL"
 }
 
 remove_release_drafter() {
@@ -314,6 +324,11 @@ main() {
 
   use_nodejs="$(ask_yesno "Use NodeJS")"
 
+  use_shell="$(ask_yesno "Use Shell")"
+  if [ "${use_shell}" = "y" ]; then
+    shell_command_name=$(ask "  CLI command name" "${project}")
+  fi
+
   use_release_drafter="$(ask_yesno "Use GitHub release drafter")"
   use_pr_autoassign="$(ask_yesno "Use GitHub PR author auto-assign")"
   use_funding="$(ask_yesno "Use GitHub funding")"
@@ -334,6 +349,7 @@ main() {
   echo "    Build PHAR                   : ${use_php_command_build}"
   echo "  Use simple script              : ${use_php_script}"
   echo "Use NodeJS                       : ${use_nodejs}"
+  echo "Use Shell                        : ${use_shell}"
   echo "Use GitHub release drafter       : ${use_release_drafter}"
   echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
   echo "Use GitHub funding               : ${use_funding}"
@@ -382,6 +398,14 @@ main() {
   fi
 
   [ "${use_nodejs}" != "y" ] && remove_nodejs
+
+  if [ "${use_shell}" = "y" ]; then
+    replace_string_content "shell-command.sh" "${shell_command_name}.sh"
+    mv "shell-command.sh" "${shell_command_name}.sh" >/dev/null 2>&1 || true
+  else
+    remove_shell
+  fi
+
   [ "${use_release_drafter}" != "y" ] && remove_release_drafter
   [ "${use_pr_autoassign}" != "y" ] && remove_pr_autoassign
   [ "${use_funding}" != "y" ] && remove_funding

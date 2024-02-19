@@ -1,0 +1,42 @@
+---
+title: Linting
+layout: default
+parent: Shell
+nav_order: 4
+---
+
+# Linting
+
+Code linting is the automated checking of source code for programmatic and
+stylistic errors. This is done by running a program called a "linter" against
+the code base. Linters are used to identify common coding mistakes, enforce a
+coding standard, and offer simple suggestions for code optimization. They can be
+integrated into the development process as a step in automated build systems or
+as plugins for text editors and IDEs. By catching errors early in the
+development process, linting helps to improve the quality of code and can make
+the debugging process more efficient.
+
+## Usage
+
+To lint code, run:
+
+```bash
+shellcheck shell-command.sh tests/bats/*.bash tests/bats/*.bats
+shfmt -i 2 -ci -s -d shell-command.sh tests/bats/*.bash tests/bats/*.bats
+```
+
+To fix linting errors, run
+```bash
+shfmt -i 2 -ci -s -w shell-command.sh tests/bats/*.bash tests/bats/*.bats
+```
+
+## Shellcheck
+
+This template provides integration with [Shellcheck](https://github.com/koalaman/shellcheck),
+which  gives warnings and suggestions for bash/sh shell script.
+
+## Shfmt
+
+This template provides integration with [Shfmt](https://github.com/mvdan/sh),
+which is a shell parser, formatter, and interpreter. It  supports POSIX Shell,
+Bash, and mksh.
