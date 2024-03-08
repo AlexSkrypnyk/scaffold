@@ -34,8 +34,10 @@ The workflow includes steps for linting, testing, and code coverage.
 - Uses a matrix strategy to test against multiple PHP versions.
 - Checks out code and caches Composer dependencies.
 - Installs dependencies via Composer.
-- Runs code linting.
-- Runs tests with coverage.
+- Runs code linting. Add `CI_LINT_IGNORE_FAILURE` with a value of `1` to
+  your repository's variables to ignore linting failures.
+- Runs tests with coverage. Add `CI_TEST_IGNORE_FAILURE` with a value of `1` to
+  your repository's variables to ignore test failures.
 - Publishes coverage report with a 90% threshold to the associated pull
   request.
 
@@ -49,8 +51,10 @@ The workflow includes steps for linting, testing, and code coverage.
 - Uses a matrix strategy to test against multiple NodeJs versions.
 - Checks out code.
 - Sets up Node.js environment.
-- Runs code linting.
-- Runs tests with coverage.
+- Runs code linting. Add `CI_LINT_IGNORE_FAILURE` with a value of `1` to
+  your repository's variables to ignore linting failures
+- Runs tests with coverage. Add `CI_TEST_IGNORE_FAILURE` with a value of `1` to
+  your repository's variables to ignore test failures.
 
 [//]: # (#;> NODEJS)
 
@@ -62,8 +66,10 @@ The workflow includes steps for linting, testing, and code coverage.
 - Checks out code.
 - Sets up Node.js environment.
 - Installs BATS testing framework.
-- Runs code linting.
-- Runs tests with coverage.
+- Runs code linting. Add `CI_LINT_IGNORE_FAILURE` with a value of `1` to
+  your repository's variables to ignore linting failures
+- Runs tests with coverage. Add `CI_TEST_IGNORE_FAILURE` with a value of `1` to
+  your repository's variables to ignore test failures.
 
 [//]: # (#;> SHELL)
 

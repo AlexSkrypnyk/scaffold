@@ -43,6 +43,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         env:
           SHFMT_OPTS: -i 2 -ci -s -d
+        continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
       - name: Install dependencies
         run: npm ci
@@ -56,6 +57,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: kcov --clean --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-path=node_modules,vendor,.coverage-html .coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
         shell: bash
+        continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest'
