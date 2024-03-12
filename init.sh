@@ -252,6 +252,16 @@ remove_docs() {
   remove_string_content_line "\/docs" ".gitattributes"
 }
 
+process_readme() {
+  mv README.dist.md "README.md" >/dev/null 2>&1 || true
+
+  curl "https://placehold.jp/000000/ffffff/200x200.png?text=${1// /+}&css=%7B%22border-radius%22%3A%22%20100px%22%7D" >logo.tmp.png || true
+  if [ -s "logo.tmp.png" ]; then
+    mv logo.tmp.png "logo.png" >/dev/null 2>&1 || true
+  fi
+  rm logo.tmp.png >/dev/null 2>&1 || true
+}
+
 process_internal() {
   local namespace="${1}"
   local project="${2}"
@@ -413,7 +423,7 @@ main() {
   [ "${use_renovate}" != "y" ] && remove_renovate
   [ "${use_docs}" != "y" ] && remove_docs
 
-  mv README.dist.md "README.md" >/dev/null 2>&1 || true
+  process_readme "${project}"
 
   process_internal "${namespace}" "${project}" "${author}"
 

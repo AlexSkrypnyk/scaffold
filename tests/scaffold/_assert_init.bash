@@ -16,6 +16,8 @@ assert_files_present_common() {
   assert_file_not_contains ".gitignore" "/coverage"
   assert_file_exists "README.md"
   assert_file_not_exists "README.dist.md"
+  assert_file_exists "logo.png"
+  assert_file_not_exists "logo.tmp.png"
 
   assert_file_not_exists "LICENSE"
   assert_file_not_exists ".github/workflows/test-scaffold.yml"
