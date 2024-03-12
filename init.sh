@@ -413,6 +413,8 @@ main() {
   [ "${use_renovate}" != "y" ] && remove_renovate
   [ "${use_docs}" != "y" ] && remove_docs
 
+  mv README.dist.md "README.md" >/dev/null 2>&1 || true
+
   process_internal "${namespace}" "${project}" "${author}"
 
   [ "${remove_self}" != "n" ] && rm -- "$0" || true
