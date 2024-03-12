@@ -50,7 +50,7 @@
   - Release asset packaging and upload
   - [PR auto-assign](.github/workflows/assign-author.yml)
 - **Documentation**
-  - [Readme with badges](README.dist.md)
+  - [Readme with badges](README.dist.md) and [generated logo](logo.png)
   - [Scaffold](docs) for the documentation site
     using [Just the Docs theme](https://just-the-docs.com/)
   - [Terminalizer](assets/terminalizer.yml) configuration file
