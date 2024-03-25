@@ -1,4 +1,4 @@
-name: Publish documentation to GitHub Pages
+name: Release docs
 
 on:
   push:
@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  publish-docs:
+  release-docs:
     environment:
       name: github-pages
       url: ${{ steps.pages.outputs.page_url }}

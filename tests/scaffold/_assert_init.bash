@@ -331,7 +331,7 @@ assert_files_present_docs() {
   assert_file_exists "docs/static/README.md"
 
   assert_file_exists ".github/workflows/test-docs.yml"
-  assert_file_exists ".github/workflows/publish-docs.yml"
+  assert_file_exists ".github/workflows/release-docs.yml"
 
   assert_file_contains ".gitattributes" "/docs"
   assert_file_not_contains ".gitattributes" "# /docs"
@@ -347,7 +347,7 @@ assert_files_absent_docs() {
   assert_dir_not_exists "docs"
 
   assert_file_not_exists ".github/workflows/test-docs.yml"
-  assert_file_not_exists ".github/workflows/publish-docs.yml"
+  assert_file_not_exists ".github/workflows/release-docs.yml"
 
   assert_file_not_contains ".gitattributes" "/docs"
   assert_file_not_contains ".gitattributes" "# /docs"

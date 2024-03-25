@@ -249,7 +249,7 @@ remove_renovate() {
 remove_docs() {
   rm -Rf docs || true
   rm -f .github/workflows/test-docs.yml || true
-  rm -f .github/workflows/publish-docs.yml || true
+  rm -f .github/workflows/release-docs.yml || true
   remove_string_content_line "\/docs" ".gitattributes"
 }
 
