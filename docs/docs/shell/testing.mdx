@@ -1,0 +1,57 @@
+---
+title: Testing
+sidebar_position: 5
+---
+
+# Testing
+
+This template provides [BATS](https://github.com/bats-core/bats-core)
+configuration and example tests for your project.
+
+
+
+## Authoring tests
+
+This template includes
+a [`tests/bats`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/bats) directory with a sample Unit and Functional tests written in [BATS](https://github.com/bats-core/bats-core).
+
+The tests also include a `test_helpers.bash` file that provides a set of
+[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats)
+is an example of Unit and Functional tesst for running the script with different
+arguments.
+
+The CI supports running the tests with coverage reports uploaded to [Codecov](https://www.codecov.io/).
+
+
+## BATS
+
+[BATS](https://github.com/bats-core/bats-core) is a TAP-compliant testing
+framework for Bash. It provides a simple way to verify that the UNIX programs
+you write behave as expected.
+
+This template includes a [`package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/package.json) used to install BATS and [BATS Helpers](https://github.com/drevops/bats-helpers).
+In addition, it provides a helper loader script [`_helper.bash`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/_helper.bash)
+used to configure the BATS environment and load the BATS Helpers.
+
+Running the following command will execute all the tests:
+
+```bash
+./tests/bats/node_modules/.bin/bats tests/bats
+```
+
+## Coverage
+
+The template is configured to generate code coverage reports in HTML and
+Cobertura formats (`cuberatura.xml`).
+
+When [tests run in CI](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml),
+the reports are uploaded to [Codecov](https://codecov.io/).
+
+## BATS Helpers
+
+[BATS Helpers](https://bats-helpers.drevops.com/) is a collection of helpers and
+assertions for BATS testing. It provides a set of assertions, data providers,
+helpers, mocking, and step runners.
+
+The example test [`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats)
+demonstrates how to use BATS Helpers in your tests.

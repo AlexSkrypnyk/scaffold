@@ -31,29 +31,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1'
-          bundler-cache: true
-          cache-version: 0
-          working-directory: '${{ github.workspace }}/docs'
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: '${{ github.workspace }}/docs'
+
+      - name: Build documentation site
+        run: npm run build
+        working-directory: '${{ github.workspace }}/docs'
 
       - name: Setup GitHub pages
         uses: actions/configure-pages@v4
         id: pages
 
-      - name: Build documentation site
-        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
-        working-directory: '${{ github.workspace }}/docs'
-        env:
-          JEKYLL_ENV: production
-
       - name: Upload documentation site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "docs/_site/"
+          path: "docs/build"
 
       - name: Deploy documentation site
         uses: actions/deploy-pages@v4

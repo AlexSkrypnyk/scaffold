@@ -164,7 +164,7 @@ remove_php_command() {
   rm -Rf php-command || true
   rm -Rf src || true
   rm -Rf tests/phpunit/Unit/Command || true
-  rm -f docs/php/php-command.md || true
+  rm -f docs/docs/php/php-command.mdx || true
 
   remove_tokens_with_content "PHP_COMMAND"
 
@@ -174,7 +174,7 @@ remove_php_command() {
 
 remove_php_command_build() {
   rm -Rf box.json || true
-  rm -Rf docs/ci/php-packaging.md || true
+  rm -Rf docs/docs/ci/php-packaging.mdx || true
   remove_tokens_with_content "PHP_PHAR"
 }
 
@@ -186,7 +186,7 @@ remove_php_script() {
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Functional/ScriptFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/ExampleScriptFunctionalTest.php || true
-  rm -f docs/php/php-script.md || true
+  rm -f docs/docs/php/php-script.mdx || true
   remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
   replace_string_content 'cp php-script php-script.php && phpcs && rm php-script.php' 'phpcs'
@@ -225,12 +225,12 @@ remove_release_drafter() {
   rm -f .github/workflows/draft-release-notes.yml || true
   rm -f .github/release-drafter.yml
   remove_tokens_with_content "RELEASEDRAFTER"
-  rm -Rf docs/ci/release-drafter.md || true
+  rm -Rf docs/docs/ci/release-drafter.mdx || true
 }
 
 remove_pr_autoassign() {
   rm -f .github/workflows/assign-author.yml || true
-  rm -Rf docs/ci/auto-assign-pr.md || true
+  rm -Rf docs/docs/ci/auto-assign-pr.mdx || true
 }
 
 remove_funding() {
@@ -243,11 +243,12 @@ remove_pr_template() {
 
 remove_renovate() {
   rm -f renovate.json || true
-  rm -Rf docs/ci/renovate.md || true
+  rm -Rf docs/docs/ci/renovate.mdx || true
 }
 
 remove_docs() {
   rm -Rf docs || true
+  rm -f .github/workflows/test-docs.yml || true
   rm -f .github/workflows/publish-docs.yml || true
   remove_string_content_line "\/docs" ".gitattributes"
 }
@@ -299,7 +300,7 @@ process_internal() {
   rm -Rf "tests/scaffold" >/dev/null || true
   rm -f ".github/workflows/test-scaffold.yml" >/dev/null || true
 
-  rm -f "docs/assets/init.gif" >/dev/null || true
+  rm -f "docs/static/img/init.gif" >/dev/null || true
 
   remove_tokens_with_content "META"
   remove_special_comments

@@ -1,10 +1,25 @@
 # Scaffold documentation
 
-Copied from https://github.com/just-the-docs/just-the-docs-template
+This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
+### Installation
 
-## Building locally
+```
+$ npm install
+```
 
-    bundle install
+### Local Development
 
-    bundle exec jekyll serve
+```
+$ npm start
+```
+
+This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+
+### Build
+
+```
+$ npm run build
+```
+
+This command generates static content into the `build` directory and can be served using any static contents hosting service.
