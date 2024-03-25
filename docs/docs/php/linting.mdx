@@ -1,0 +1,111 @@
+---
+title: Linting
+sidebar_position: 4
+---
+
+# Linting
+
+Code linting is the automated checking of source code for programmatic and
+stylistic errors. This is done by running a program called a "linter" against
+the code base. Linters are used to identify common coding mistakes, enforce a
+coding standard, and offer simple suggestions for code optimization. They can be
+integrated into the development process as a step in automated build systems or
+as plugins for text editors and IDEs. By catching errors early in the
+development process, linting helps to improve the quality of code and can make
+the debugging process more efficient.
+
+## Usage
+
+To lint code, run `composer lint` command.
+
+To fix linting errors, run `composer lint-fix`.
+
+## PHP Code Sniffer
+
+This template provides integration with [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer),
+which analyzes PHP files and detects violations of a defined set of coding
+standards.
+
+This template adheres to Drupal coding standards, which are defined
+in [`drupal/coder`](https://www.drupal.org/project/coder) package. The package
+is installed as a development dependency.
+
+The [`phpcs.xml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpcs.xml)
+file contains a template ruleset with minimal configuration, serving as an
+initial foundation for further customization of coding standards. For example,
+long arrays and missing method name descriptions are allowed in test files.
+
+By default, the linter runs with showing sniff codes, progress and colors.
+
+An example of annotated ruleset with all available options can be found on
+[the Annotated Ruleset page](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-Ruleset).
+
+## PHP Mess Detector
+
+This template provides integration with [PHP Mess Detector](https://phpmd.org/),
+which takes a given PHP source code base and looks for several potential
+problems within that source.
+
+These problems can be things like:
+
+- Possible bugs
+- Suboptimal code
+- Overcomplicated expressions
+- Unused parameters, methods, properties
+
+The [`phpmd.xml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpmd.xml)
+file contains a template ruleset with minimal configuration, serving as an
+initial foundation for further customization of coding standards.
+
+The rules enabled by default
+are: [`unusedcode`](https://phpmd.org/rules/index.html#unused-code-rules),
+[`codesize`](https://phpmd.org/rules/index.html#code-size-rules),
+[`cleancode`](https://phpmd.org/rules/index.html#clean-code-rules)
+
+For a list of all available rules, visit
+the [Rules section](https://phpmd.org/rules/index.html)
+of the PHPMD website.
+
+## PHPStan
+
+This template provides integration with [PHPStan](https://phpstan.org/), the
+PHP Static Analysis Tool.
+
+PHPStan focuses on finding errors in your code without actually running it.
+It catches whole classes of bugs even before you write tests for the code.
+It moves PHP closer to compiled languages in the sense that the correctness of
+each line of the code can be checked before you run the actual line.
+
+The [`phpstan.neon`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpstan.neon)
+file contains a template ruleset with minimal configuration, serving as an
+initial foundation for further customization of coding standards.
+
+The rule configuration is set to the level `9` (the strictest).
+
+This template's source code files and tests were developed according to the
+standards, and they pass this check. In your project, you can adjust the level
+to your needs.
+
+The full configuration reference is available on
+the [PHPStan website](https://phpstan.org/config-reference).
+
+## Rector
+
+This template provides integration with [Rector](https://getrector.com/), a tool
+that instantly upgrades and refactors the PHP code of your application.
+
+Rector now supports upgrades from PHP 5.3 to 8.2 and major open-source projects
+like Symfony, PHPUnit, and Doctrine.
+
+Rector helps with automated refactoring when you have code quality you need,
+but struggle to keep it with new developers in your team.
+
+Add Rector to your CI and let it continuously refactor your code and keep the
+code quality high.
+
+The [`rector.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/rector.php)
+file contains a template ruleset with minimal configuration, serving as an
+initial foundation for further customization of coding standards.
+
+The full configuration reference is available on
+the [Rector website](https://getrector.com/documentation/).

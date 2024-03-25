@@ -41,7 +41,7 @@ assert_files_present_common() {
 
   assert_file_not_contains "docs/index.md" "Welcome to the documentation for"
   assert_file_not_contains "docs/documentation.md" "You may re-use the configuration"
-  assert_file_not_exists "docs/assets/init.gif"
+  assert_file_not_exists "docs/static/img/init.gif"
 
   popd >/dev/null || exit 1
 }
@@ -322,14 +322,15 @@ assert_files_present_docs() {
   pushd "${dir}" >/dev/null || exit 1
 
   assert_file_exists "docs/.gitignore"
-  assert_file_exists "docs/_config.yml"
-  assert_file_exists "docs/Gemfile"
-  assert_file_exists "docs/Gemfile.lock"
+  assert_file_exists "docs/docusaurus.config.js"
+  assert_file_exists "docs/package.json"
+  assert_file_exists "docs/package-lock.json"
   assert_file_exists "docs/README.md"
-  assert_file_exists "docs/index.md"
+  assert_file_exists "docs/docs/index.mdx"
 
-  assert_file_exists "docs/assets/README.md"
+  assert_file_exists "docs/static/README.md"
 
+  assert_file_exists ".github/workflows/test-docs.yml"
   assert_file_exists ".github/workflows/publish-docs.yml"
 
   assert_file_contains ".gitattributes" "/docs"
@@ -345,6 +346,7 @@ assert_files_absent_docs() {
 
   assert_dir_not_exists "docs"
 
+  assert_file_not_exists ".github/workflows/test-docs.yml"
   assert_file_not_exists ".github/workflows/publish-docs.yml"
 
   assert_file_not_contains ".gitattributes" "/docs"
