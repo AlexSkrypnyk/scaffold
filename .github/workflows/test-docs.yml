@@ -6,7 +6,7 @@ on:
       - 'feature/**'
 
 jobs:
-  test-nodejs:
+  test-docs:
     runs-on: ubuntu-latest
 
     steps:
