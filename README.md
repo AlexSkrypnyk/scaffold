@@ -51,8 +51,8 @@
   - [PR auto-assign](.github/workflows/assign-author.yml)
 - **Documentation**
   - [Readme with badges](README.dist.md) and [generated logo](logo.png)
-  - [Scaffold](docs) for the documentation site
-    using [Just the Docs theme](https://just-the-docs.com/)
+  - [Scaffold](docs) for the documentation site using [Docusaurus](https://docusaurus.io/)
+  - Spell check with [CSpell](https://cspell.org/)
   - [Terminalizer](assets/terminalizer.yml) configuration file
 - **Utility files**
   - [`.editorconfig`](.editorconfig), [`.gitignore`](.gitignore), [`.gitattributes`](.gitattributes)
