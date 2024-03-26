@@ -94,12 +94,19 @@ const config = {
         },
         items: [
           {
-            type: 'search',
-            position: 'left',
+            label: 'Download',
+            href: 'https://github.com/AlexSkrypnyk/scaffold/releases/latest',
+            position: 'right',
+            title: 'Download the latest version',
           },
           {
             href: 'https://github.com/AlexSkrypnyk/scaffold',
             label: 'GitHub',
+            position: 'right',
+            title: 'View source on GitHub',
+          },
+          {
+            type: 'search',
             position: 'right',
           },
         ],
