@@ -61,9 +61,13 @@ const config = {
     ],
   ],
 
+  markdown: {
+    mermaid: true,
+  },
+
   themes: [
     [
-      "@easyops-cn/docusaurus-search-local",
+      '@easyops-cn/docusaurus-search-local',
       /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
       ({
         // @see https://github.com/easyops-cn/docusaurus-search-local#theme-options
@@ -75,6 +79,7 @@ const config = {
         explicitSearchResultPath: true,
       }),
     ],
+    '@docusaurus/theme-mermaid',
   ],
 
   themeConfig:
