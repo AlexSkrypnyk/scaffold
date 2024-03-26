@@ -3,6 +3,7 @@ name: Test Docs
 on:
   pull_request:
     branches:
+      - 'main'
       - 'feature/**'
 
 jobs:
