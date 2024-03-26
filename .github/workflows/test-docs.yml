@@ -23,6 +23,10 @@ jobs:
         run: npm install
         working-directory: '${{ github.workspace }}/docs'
 
+      - name: Build documentation site
+        run: npm run build
+        working-directory: '${{ github.workspace }}/docs'
+
       - name: Run tests
         run: npm run test
         working-directory: '${{ github.workspace }}/docs'
