@@ -17,9 +17,25 @@ own project.
 The [configuration file](https://github.com/AlexSkrypnyk/scaffold/blob/main/docs/docusaurus.config.js)
 allows to adjust the documentation to your needs.
 
-## Publishing
+## Publishing to Netlify on pull requests
 
-Documentation is published to GitHub Pages using
+Documentation is published to Netlify on every pull request using
+the [Deploy Docs to GitHub Pages](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/docs.yml)
+GitHub Action.
+
+Deployed documentation link will be added to the pull request as a comment.
+
+### Netlify configuration
+
+Set up a new site on Netlify and add the following environment variables
+to the `Secrets and variables > Actions > Repository secrets` in GitHub settings:
+
+- `NETLIFY_SITE_ID` - `Site > Site configuration > General > Site details > Site information > Site ID`
+- `NETLIFY_AUTH_TOKEN` - `User settings > Applications > Personal access tokens > New access token`
+
+## Publishing to GitHub pages on release
+
+Documentation is published to GitHub Pages on release (tag) using
 the [Deploy Docs to GitHub Pages](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/docs.yml)
 GitHub Action.
 
