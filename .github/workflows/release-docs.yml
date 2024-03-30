@@ -44,7 +44,7 @@ jobs:
         working-directory: '${{ github.workspace }}/docs'
 
       - name: Setup GitHub pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
         id: pages
 
       - name: Upload documentation site
