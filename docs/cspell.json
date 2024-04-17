@@ -16,5 +16,22 @@
         "ruleset",
         "softprops",
         "toshimaru"
+    ],
+    "overrides": [
+        {
+            "filename": "**/*.mdx",
+            "languageId": [
+                "mdx",
+                "markdown"
+            ]
+        }
+    ],
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                "/^\\s*```(.|\\n)+?^\\s*```/gm"
+            ]
+        }
     ]
 }

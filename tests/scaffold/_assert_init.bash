@@ -326,7 +326,7 @@ assert_files_present_docs() {
   assert_file_exists "docs/package.json"
   assert_file_exists "docs/package-lock.json"
   assert_file_exists "docs/README.md"
-  assert_file_exists "docs/content/index.mdx"
+  assert_file_exists "docs/content/README.mdx"
 
   assert_file_exists "docs/static/README.md"
 
