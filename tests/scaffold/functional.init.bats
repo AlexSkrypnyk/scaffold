@@ -2,6 +2,9 @@
 #
 # Functional tests for init.sh.
 #
+# Example usage:
+# ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
+#
 # shellcheck disable=SC2030,SC2031,SC2129
 
 load _helper
@@ -10,7 +13,6 @@ load _assert_init
 export BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
 export SCRIPT_FILE="init.sh"
 
-# ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
 # bats test_tags=smoke
 @test "Init, defaults" {
   answers=(

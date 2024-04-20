@@ -8,6 +8,8 @@
 
 load _helper
 
+export BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
+
 # Script file for TUI testing.
 export SCRIPT_FILE=./shell-command.sh
 
