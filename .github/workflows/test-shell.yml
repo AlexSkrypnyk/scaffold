@@ -59,6 +59,14 @@ jobs:
         shell: bash
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
+      - name: Upload coverage report as an artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.job}}-code-coverage-report
+          path: ./.coverage-html
+          if-no-files-found: error
+
       - name: Upload coverage reports to Codecov
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v4
