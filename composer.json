@@ -62,7 +62,8 @@
             "rector --clear-cache",
             "cp php-script php-script.php && phpcbf && rm php-script.php"
         ],
-        "test": "if [ \"${XDEBUG_MODE}\" = 'coverage' ]; then phpunit; else phpunit --no-coverage; fi",
+        "test": "phpunit --no-coverage",
+        "test-coverage": "phpunit",
         "build": [
             "@composer bin box require --dev humbug/box",
             "box validate",

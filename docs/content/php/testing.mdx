@@ -70,5 +70,12 @@ Here are some of the coverage settings specified in the [phpunit.xml](https://gi
 To generate the coverage reports, run the following command:
 
 ```bash
-XDEBUG_MODE=coverage composer test
+XDEBUG_MODE=coverage composer test-coverage
+```
+
+To execute a specific test tagged with a `@group wip` and get the coverage
+report, use the following command:
+
+```bash
+XDEBUG_MODE=coverage composer test -- --group=wip
 ```
