@@ -40,7 +40,7 @@ jobs:
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
       - name: Run tests
-        run: XDEBUG_MODE=coverage composer test
+        run: XDEBUG_MODE=coverage composer test-coverage
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Upload coverage report as an artifact
