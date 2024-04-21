@@ -30,17 +30,17 @@ jobs:
       - name: Install dependencies
         run: composer install
 
-        #;< PHP_PHAR
+      # yamllint disable-line #;< PHP_PHAR
       - name: Build PHAR
         run: composer build
 
       - name: Test PHAR
         run: ./.build/php-command.phar || exit 1
-        #;> PHP_PHAR
+      # yamllint disable-line #;> PHP_PHAR
 
       - name: Get tag name
         id: get-version
-        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

@@ -57,7 +57,7 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  #;< PHP_PHAR
+  # yamllint disable-line #;< PHP_PHAR
   build-php:
     runs-on: ubuntu-latest
     steps:
@@ -83,4 +83,4 @@ jobs:
 
       - name: Test PHAR
         run: ./.build/php-command.phar || exit 1
-  #;> PHP_PHAR
+        # yamllint disable-line #;> PHP_PHAR
