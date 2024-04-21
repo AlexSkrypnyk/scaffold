@@ -58,7 +58,7 @@ The workflow includes steps for linting, testing, and code coverage.
 
 [//]: # (#;< SHELL)
 
-## Node.js job
+## Shell job
 
 - Runs on a matrix of several OSes.
 - Checks out code.
@@ -70,6 +70,17 @@ The workflow includes steps for linting, testing, and code coverage.
   your repository's variables to ignore test failures.
 
 [//]: # (#;> SHELL)
+
+## Actions job
+
+Used to validate the GitHub Actions workflow files in the repository.
+
+- Checks out code.
+- Runs code linting with [`yamllint`](https://github.com/adrienverge/yamllint) using [configuration](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/.yamllint-for-gha.yml) file.
+- Runs code linting with [`actionlint`](https://github.com/rhysd/actionlint).
+
+Add `CI_LINT_IGNORE_FAILURE` with a value of `1` to your repository's variables
+to ignore linting failures.
 
 ## Code coverage
 

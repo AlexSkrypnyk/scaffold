@@ -42,7 +42,7 @@ jobs:
         run: npm --prefix=tests/scaffold ci
 
       - name: Run tests
-        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.scaffold-coverage-html $(pwd)/.scaffold-coverage-html ./tests/scaffold/node_modules/.bin/bats tests/scaffold
+        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.scaffold-coverage-html "$(pwd)"/.scaffold-coverage-html ./tests/scaffold/node_modules/.bin/bats tests/scaffold
 
       - name: Upload coverage report as an artifact
         uses: actions/upload-artifact@v4
