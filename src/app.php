@@ -5,6 +5,8 @@
  * Main entry point for the application.
  */
 
+declare(strict_types=1);
+
 use Symfony\Component\Console\Application;
 use YourNamespace\App\Command\JokeCommand;
 use YourNamespace\App\Command\SayHelloCommand;

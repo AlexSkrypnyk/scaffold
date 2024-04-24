@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace YourNamespace\App\Tests\Functional;
 
 use YourNamespace\App\Tests\Unit\ScriptUnitTestCase;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace YourNamespace\App\Tests\Unit\Command;
 
 use YourNamespace\App\Command\SayHelloCommand;

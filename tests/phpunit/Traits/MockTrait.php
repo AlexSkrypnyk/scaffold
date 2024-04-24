@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace YourNamespace\App\Tests\Traits;
 
 use PHPUnit\Framework\MockObject\MockObject;
