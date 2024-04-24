@@ -23,6 +23,7 @@ use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\If_\RemoveAlwaysTrueIfConditionRector;
 use Rector\Set\ValueObject\SetList;
 use Rector\Strict\Rector\Empty_\DisallowedEmptyRuleFixerRector;
+use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 
 return static function (RectorConfig $rectorConfig): void {
   $rectorConfig->paths([
@@ -38,6 +39,8 @@ return static function (RectorConfig $rectorConfig): void {
     SetList::INSTANCEOF,
     SetList::TYPE_DECLARATION,
   ]);
+
+  $rectorConfig->rule(DeclareStrictTypesRector::class);
 
   $rectorConfig->skip([
     // Rules added by Rector's rule sets.
