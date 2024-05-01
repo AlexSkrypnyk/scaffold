@@ -67,13 +67,15 @@ jobs:
           path: ./.coverage-html
           if-no-files-found: error
 
-      - name: Upload coverage reports to Codecov
-        if: matrix.os == 'ubuntu-latest'
+      - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v4
+        if: ${{ env.CODECOV_TOKEN != '' && matrix.os == 'ubuntu-latest' }}
         with:
           directory: ./.coverage-html
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Run Tests on other OSes
         if: matrix.os != 'ubuntu-latest'
