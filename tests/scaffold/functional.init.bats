@@ -613,7 +613,7 @@ export SCRIPT_FILE="init.sh"
 
 @test "Init, Namespace invalid input - has hyphen" {
   answers=(
-    "Yodas-hut"     # organisation
+    "Yodas-Hut"     # organisation
     "force-crystal" # project
     "Jane Doe"      # author
     "nothing"       # use PHP
