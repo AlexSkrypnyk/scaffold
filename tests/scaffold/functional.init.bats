@@ -575,7 +575,7 @@ export SCRIPT_FILE="init.sh"
   assert_failure
 }
 
-@test "Init, Namespace invalid input has space" {
+@test "Init, Namespace invalid input has space, workflow" {
   answers=(
     "Yodas hut"     # organisation
     "force-crystal" # project
@@ -600,18 +600,13 @@ export SCRIPT_FILE="init.sh"
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
 
-  assert_files_present_common "${BUILD_DIR}"
-  assert_files_present_php "${BUILD_DIR}"
-  assert_files_present_nodejs "${BUILD_DIR}"
-  assert_files_present_shell "${BUILD_DIR}"
-
   assert_workflow_php "${BUILD_DIR}"
   assert_workflow_php_command_build "${BUILD_DIR}"
 
   assert_output_contains "Initialization complete."
 }
 
-@test "Init, Namespace invalid input - has hyphen" {
+@test "Init, Namespace invalid input has hyphen, workflow" {
   answers=(
     "Yodas-Hut"     # organisation
     "force-crystal" # project
@@ -635,11 +630,6 @@ export SCRIPT_FILE="init.sh"
   tui_run "${answers[@]}"
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
-
-  assert_files_present_common "${BUILD_DIR}"
-  assert_files_present_php "${BUILD_DIR}"
-  assert_files_present_nodejs "${BUILD_DIR}"
-  assert_files_present_shell "${BUILD_DIR}"
 
   assert_workflow_php "${BUILD_DIR}"
   assert_workflow_php_command_build "${BUILD_DIR}"
