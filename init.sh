@@ -316,6 +316,9 @@ main() {
   [ -z "${project}" ] && project="$(ask "Project")"
   [ -z "${author}" ] && author="$(ask "Author")"
 
+  # Make sure the input become valid value.
+  project="$(convert_string "${project}" "package_name")"
+
   use_php="$(ask_yesno "Use PHP")"
 
   use_php_command="y"
