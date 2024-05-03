@@ -55,7 +55,7 @@ jobs:
 
       - name: Run Tests and Code Coverage on Ubuntu
         if: matrix.os == 'ubuntu-latest'
-        run: kcov --clean --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-path=node_modules,vendor,.coverage-html,docs,tests .coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
+        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.coverage-html,docs,tests "$(pwd)"/.coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
         shell: bash
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 

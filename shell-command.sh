@@ -14,7 +14,7 @@ set -euo pipefail
 [ "${SCRIPT_DEBUG-}" = "1" ] && set -x
 
 # URL endpoint to fetch the data from.
-URL_ENDPOINT="${JOKE_URL_ENDPOINT:-https://official-joke-api.appspot.com/jokes/<<TOKEN>>/random}"
+URL_ENDPOINT="${JOKE_URL_ENDPOINT:-https://official-joke-api.appspot.com/jokes/__TOPIC__/random}"
 
 # Topic.
 topic="${1-}"
@@ -29,18 +29,23 @@ ask() {
   local default="${2-}"
   local result=""
 
-  if [[ -n $default ]]; then
+  if [[ -n ${default} ]]; then
     prompt="${prompt} [${default}]: "
   else
+    # LCOV_EXCL_START
     prompt="${prompt}: "
+    # LCOV_EXCL_END
   fi
 
   while [[ -z ${result} ]]; do
     read -p "${prompt}" result
-    if [[ -n $default && -z ${result} ]]; then
+    # LCOV_EXCL_START
+    if [[ -z ${result} && -n ${default} ]]; then
       result="${default}"
     fi
+    # LCOV_EXCL_END
   done
+
   echo "${result}"
 }
 
@@ -74,7 +79,14 @@ main() {
   echo "Fetching joke for topic: ${topic}..."
   echo
 
-  response="$(curl -sL "${URL_ENDPOINT//<<TOKEN>>/${topic}}")"
+  local url
+  url="${URL_ENDPOINT//__TOPIC__/${topic}}"
+
+  echo
+  echo "URL: ${url}"
+  echo
+
+  response="$(curl -sL "${url}")"
   # Extract 'setup'
   setup=$(echo "${response}" | sed -E 's/.*"setup":"([^"]+)".*/\1/')
   # Extract 'punchline'
