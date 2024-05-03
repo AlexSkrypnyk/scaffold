@@ -28,6 +28,10 @@
             <file>php-script</file>
             <!-- #;> !PHP_COMMAND -->
         </include>
+
+        <exclude>
+            <directory>tests</directory>
+        </exclude>
     </source>
 
     <coverage includeUncoveredFiles="true"
