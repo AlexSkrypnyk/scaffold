@@ -23,6 +23,10 @@ load "../../init.sh"
     "$input" "log_entry" "I am a_string-With spaces 13"
     "$input" "code_comment_title" "I am a_string-With spaces 13"
     "$input" "dummy_type" "Invalid conversion type"
+    "HelloWorld" "namespace" "HelloWorld"
+    "Hello World" "namespace" "HelloWorld"
+    "Hello world" "namespace" "HelloWorld"
+    "Hello-world" "namespace" "Helloworld"
   )
 
   dataprovider_run "convert_string" 3
