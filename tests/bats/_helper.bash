@@ -32,7 +32,7 @@ setup() {
   export ROOT_DIR="${CUR_DIR}"
 
   # Directory where the shell command script will be running in.
-  export BUILD_DIR="${BUILD_DIR:-"${BATS_TEST_TMPDIR//\/\//\/}/scaffold-$(date +%s)"}"
+  export BUILD_DIR="${BUILD_DIR:-"${BATS_TEST_TMPDIR//\/\//\/}/shell-$(date +%s)"}"
   fixture_prepare_dir "${BUILD_DIR}"
 
   # Copy codebase at the last commit into the BUILD_DIR.
