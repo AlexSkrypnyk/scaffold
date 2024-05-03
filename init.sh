@@ -269,6 +269,7 @@ process_internal() {
   local author="${3}"
   local namespace_lowercase
 
+  namespace="$(convert_string "${namespace}" "namespace")"
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
   replace_string_content "YourNamespace" "${namespace}"
