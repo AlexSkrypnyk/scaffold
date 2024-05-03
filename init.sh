@@ -269,7 +269,6 @@ process_internal() {
   local author="${3}"
   local namespace_lowercase
 
-  namespace="$(convert_string "${namespace}" "namespace")"
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
   replace_string_content "YourNamespace" "${namespace}"
@@ -316,6 +315,9 @@ main() {
   [ -z "${namespace}" ] && namespace="$(ask "Namespace (PascalCase)")"
   [ -z "${project}" ] && project="$(ask "Project")"
   [ -z "${author}" ] && author="$(ask "Author")"
+
+  # Make sure the input become valid value.
+  namespace="$(convert_string "${namespace}" "namespace")"
 
   use_php="$(ask_yesno "Use PHP")"
 
