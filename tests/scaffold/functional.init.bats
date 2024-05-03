@@ -599,7 +599,10 @@ export SCRIPT_FILE="init.sh"
   tui_run "${answers[@]}"
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
-
+  assert_files_present_common "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
+  assert_files_present_nodejs "${BUILD_DIR}"
+  assert_files_present_shell "${BUILD_DIR}"
   assert_workflow_php "${BUILD_DIR}"
   assert_workflow_php_command_build "${BUILD_DIR}"
 
@@ -630,7 +633,10 @@ export SCRIPT_FILE="init.sh"
   tui_run "${answers[@]}"
 
   assert_output_contains "Please follow the prompts to adjust your project configuration"
-
+  assert_files_present_common "${BUILD_DIR}"
+  assert_files_present_php "${BUILD_DIR}"
+  assert_files_present_nodejs "${BUILD_DIR}"
+  assert_files_present_shell "${BUILD_DIR}"
   assert_workflow_php "${BUILD_DIR}"
   assert_workflow_php_command_build "${BUILD_DIR}"
 
