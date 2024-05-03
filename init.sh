@@ -32,7 +32,7 @@ convert_string() {
       echo "${input_string}" | tr ' ' '_' | tr '[:upper:]' '[:lower:]' | tr -d '-'
       ;;
     "namespace" | "class_name")
-      echo "${input_string}" | awk -F" " '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) tolower(substr($i,2));} 1' | tr -d ' -'
+      echo "${input_string}" | awk -F" " '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); } 1' | tr -d ' -'
       ;;
     "package_name")
       echo "${input_string}" | tr ' ' '-' | tr '[:upper:]' '[:lower:]'
@@ -318,6 +318,7 @@ main() {
 
   # Make sure the input become valid value.
   project="$(convert_string "${project}" "package_name")"
+  namespace="$(convert_string "${namespace}" "namespace")"
 
   use_php="$(ask_yesno "Use PHP")"
 
