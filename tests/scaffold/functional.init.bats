@@ -575,7 +575,7 @@ export SCRIPT_FILE="init.sh"
   assert_failure
 }
 
-@test "Init, Namespace invalid input" {
+@test "Init, Namespace invalid input has space" {
   answers=(
     "Yodas hut"     # organisation
     "force-crystal" # project
@@ -611,7 +611,7 @@ export SCRIPT_FILE="init.sh"
   assert_output_contains "Initialization complete."
 }
 
-@test "Init, Namespace invalid input" {
+@test "Init, Namespace invalid input - has hyphen" {
   answers=(
     "Yodas-hut"     # organisation
     "force-crystal" # project
