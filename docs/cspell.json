@@ -12,10 +12,12 @@
         "autoloader",
         "cobertura",
         "daemonized",
+        "lhotari",
         "mksh",
         "ruleset",
         "softprops",
-        "toshimaru"
+        "toshimaru",
+        "upterm"
     ],
     "overrides": [
         {
