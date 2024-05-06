@@ -8,6 +8,12 @@ on:
     branches:
       - main
       - 'feature/**'
+  workflow_dispatch:
+    inputs:
+      enable_upterm:
+        description: 'Enable upterm session'
+        required: true
+        default: 'true'
 
 jobs:
   test-php:
@@ -20,9 +26,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
@@ -64,6 +67,12 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Setup upterm session
+        if: ${{ !cancelled() && github.event.inputs.enable_upterm == 'true' }}
+        uses: lhotari/action-upterm@v1
+        with:
+          wait-timeout-minutes: 5
 
   # yamllint disable-line #;< PHP_PHAR
   build-php:
