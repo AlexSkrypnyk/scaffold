@@ -280,8 +280,10 @@ process_internal() {
   replace_string_content "Alex Skrypnyk" "${author}"
 
   remove_string_content "Generic project scaffold template"
+  replace_string_content "https://getscaffold.dev/ project scaffold template" "__ATTRIBUTION__"
   replace_string_content "Scaffold" "${project}"
   replace_string_content "scaffold" "${project}"
+  replace_string_content "__ATTRIBUTION__" "https://getscaffold.dev/ project scaffold template"
 
   remove_string_content "# Uncomment the lines below"
   uncomment_line ".gitattributes" "\/.editorconfig"

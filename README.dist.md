@@ -106,3 +106,6 @@ Download the latest release from GitHub releases page.
     ./tests/bats/node_modules/.bin/bats tests/bats
 
 [//]: # (#;> SHELL)
+
+---
+Repository created using https://getscaffold.dev/ project scaffold template
