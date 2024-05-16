@@ -189,8 +189,8 @@ remove_php_script() {
   rm -f docs/content/php/php-script.mdx || true
   remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
-  replace_string_content 'cp php-script php-script.php && phpcs && rm php-script.php' 'phpcs'
-  replace_string_content 'cp php-script php-script.php && phpcbf && rm php-script.php' 'phpcbf'
+  replace_string_content 'cp php-script php-script.php && phpcs; rm php-script.php' 'phpcs'
+  replace_string_content 'cp php-script php-script.php && phpcbf; rm php-script.php' 'phpcbf'
   remove_string_content_line '"php-script"'
 
   replace_string_content '"'"${new_name}"'",' '"'"${new_name}"'"'

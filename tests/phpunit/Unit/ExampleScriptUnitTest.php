@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace YourNamespace\App\Tests\Unit;
 
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+
 /**
  * Class ExampleScriptUnitTest.
  *
  * Unit tests for php-script.
- *
- * @group scripts
  */
+#[CoversFunction('main')]
+#[CoversFunction('print_help')]
+#[CoversFunction('verbose')]
+#[Group('scripts')]
 class ExampleScriptUnitTest extends ScriptUnitTestCase {
 
-  /**
-   * @covers ::main
-   * @covers ::print_help
-   * @covers ::verbose
-   * @dataProvider dataProviderMain
-   * @group script
-   */
+  #[DataProvider('dataProviderMain')]
   public function testMain(string|array $args = [], array|string $expected_output = [], string|null $expected_exception_message = NULL): void {
     if ($expected_exception_message) {
       $this->expectException(\Exception::class);

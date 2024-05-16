@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.1/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          cacheDirectory=".phpunit.cache"
          executionOrder="depends,defects"
@@ -11,16 +11,15 @@
          failOnWarning="true"
          displayDetailsOnTestsThatTriggerWarnings="true"
          displayDetailsOnTestsThatTriggerErrors="true"
-         displayDetailsOnTestsThatTriggerNotices="true">
+         displayDetailsOnTestsThatTriggerNotices="true"
+>
     <testsuites>
         <testsuite name="default">
             <directory>tests/phpunit</directory>
         </testsuite>
     </testsuites>
 
-    <source restrictNotices="true"
-            restrictWarnings="true"
-            ignoreIndirectDeprecations="true">
+    <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">
         <include>
             <!-- #;< PHP_COMMAND -->
             <directory>src</directory>
@@ -29,6 +28,7 @@
             <file>php-script</file>
             <!-- #;> !PHP_COMMAND -->
         </include>
+
         <exclude>
             <directory>tests</directory>
         </exclude>

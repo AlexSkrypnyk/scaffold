@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace YourNamespace\App\Tests\Unit\Command;
 
+use PHPUnit\Framework\Attributes\CoversMethod;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use Symfony\Component\Console\Command\Command;
 use YourNamespace\App\Command\JokeCommand;
 
@@ -11,20 +14,14 @@ use YourNamespace\App\Command\JokeCommand;
  * Class JokeCommandTest.
  *
  * This is a unit test for the JokeCommand class.
- *
- * @coversDefaultClass \YourNamespace\App\Command\JokeCommand
  */
+#[CoversMethod(JokeCommand::class, 'execute')]
+#[CoversMethod(JokeCommand::class, 'configure')]
+#[CoversMethod(JokeCommand::class, 'getJoke')]
+#[Group('command')]
 class JokeCommandTest extends CommandTestCase {
 
-  /**
-   * Test the execute method.
-   *
-   * @covers ::execute
-   * @covers ::configure
-   * @covers ::getJoke
-   * @dataProvider dataProviderExecute
-   * @group command
-   */
+  #[DataProvider('dataProviderExecute')]
   public function testExecute(string $content, int $expected_code, array|string $expected_output = []): void {
     /** @var \YourNamespace\App\Command\JokeCommand $mock */
     $mock = $this->prepareMock(JokeCommand::class, [
