@@ -32,6 +32,8 @@
         "phpunit/phpunit": "^10",
         "rector/rector": "^1.0.0"
     },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "YourNamespace\\App\\": "src/"
