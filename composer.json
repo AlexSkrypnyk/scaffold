@@ -1,8 +1,8 @@
 {
     "name": "yournamespace/yourproject",
-    "type": "library",
     "description": "Provides yourproject functionality.",
     "license": "GPL-2.0-or-later",
+    "type": "library",
     "authors": [
         {
             "name": "Your Name",
@@ -24,6 +24,7 @@
         "bamarni/composer-bin-plugin": "^1.8",
         "dealerdirect/phpcodesniffer-composer-installer": "^1",
         "drupal/coder": "^8.3",
+        "ergebnis/composer-normalize": "^2.42",
         "mikey179/vfsstream": "^1.6",
         "opis/closure": "^3.6",
         "phpmd/phpmd": "^2.13",
@@ -44,14 +45,24 @@
             "tests/phpunit"
         ]
     },
+    "bin": [
+        "php-command",
+        "php-script"
+    ],
     "config": {
-        "sort-packages": true,
         "allow-plugins": {
             "bamarni/composer-bin-plugin": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ergebnis/composer-normalize": true
+        },
+        "sort-packages": true
     },
     "scripts": {
+        "build": [
+            "@composer bin box require --dev humbug/box",
+            "box validate",
+            "box compile"
+        ],
         "lint": [
             "cp php-script php-script.php && phpcs && rm php-script.php",
             "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
@@ -63,15 +74,6 @@
             "cp php-script php-script.php && phpcbf && rm php-script.php"
         ],
         "test": "phpunit --no-coverage",
-        "test-coverage": "phpunit",
-        "build": [
-            "@composer bin box require --dev humbug/box",
-            "box validate",
-            "box compile"
-        ]
-    },
-    "bin": [
-        "php-command",
-        "php-script"
-    ]
+        "test-coverage": "phpunit"
+    }
 }
