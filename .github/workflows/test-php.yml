@@ -42,6 +42,11 @@ jobs:
       - name: Install dependencies
         run: composer install
 
+      - name: Validate composer.json
+        run: |
+          composer --verbose validate
+          composer normalize --dry-run
+
       - name: Check coding standards
         run: composer lint
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
