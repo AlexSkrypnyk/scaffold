@@ -209,7 +209,7 @@ assert_files_present_php_script() {
   assert_file_contains "phpstan.neon" "force-crystal"
   assert_file_contains "phpunit.xml" "force-crystal"
 
-  assert_file_contains "composer.json" '"cp force-crystal force-crystal.php && phpcs && rm force-crystal.php",'
+  assert_file_contains "composer.json" '"cp force-crystal force-crystal.php && phpcs; rm force-crystal.php",'
   assert_file_contains "composer.json" '"force-crystal"'
 
   assert_dir_not_contains_string "${dir}" "php-script"
@@ -234,8 +234,8 @@ assert_files_absent_php_script() {
   assert_file_not_contains "phpstan.neon" "force-crystal"
   assert_file_not_contains "phpunit.xml" "force-crystal"
 
-  assert_file_not_contains "composer.json" '"cp force-crystal force-crystal.php && phpcs && rm force-crystal.php",'
-  assert_file_not_contains "composer.json" '"cp force-crystal force-crystal.php && phpcbf && rm force-crystal.php",'
+  assert_file_not_contains "composer.json" '"cp force-crystal force-crystal.php && phpcs; rm force-crystal.php",'
+  assert_file_not_contains "composer.json" '"cp force-crystal force-crystal.php && phpcbf; rm force-crystal.php",'
   assert_file_not_contains "composer.json" '"force-crystal",'
 
   assert_dir_not_contains_string "${dir}" "php-script"

@@ -4,19 +4,22 @@ declare(strict_types=1);
 
 namespace YourNamespace\App\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
+
 /**
  * Class ExampleScriptFunctionalTest.
  *
  * Functional tests for php-script.
  */
+#[CoversFunction('main')]
+#[Group('scripts')]
 class ExampleScriptFunctionalTest extends ScriptFunctionalTestCase {
 
-  /**
-   * @covers ::main
-   * @dataProvider dataProviderMain
-   * @runInSeparateProcess
-   * @group script
-   */
+  #[DataProvider('dataProviderMain')]
+  #[RunInSeparateProcess]
   public function testMain(array|string $args, int $expected_code, string $expected_output): void {
     $result = $this->runScript($args);
     $this->assertEquals($expected_code, $result['code']);
