@@ -57,6 +57,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "ergebnis/composer-normalize": true
         },
+        "discard-changes": true,
         "sort-packages": true
     },
     "scripts": {

@@ -14,33 +14,52 @@ linting and testing code.
 The provided [`composer.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/composer.json) file contains the following sections:
 
 - **Project Information**:
-  Metadata like name, description, and license.
+Metadata like name, description, and license.
 
 - **Author and Support**:
-  Includes maintainer details and URLs for issues and source code.
+Includes maintainer details and URLs for issues and source code.
 
 - **Dependencies**:
-  Requires PHP version `>= 8.2`. If using as base for CLI command -
-  `symfony/console` is provided as a dependency as well.
+Requires PHP version `>= 8.2`. If using as base for CLI command,
+`symfony/console` is provided as a dependency as well.
 
 - **Development Dependencies**:
-  Tools like [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer),[PHP Mess Detector](https://phpmd.org/) and [PHPStan](https://phpstan.org/)
-  for development are listed.
+Tools like [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHP Mess Detector](https://phpmd.org/), [PHPStan](https://phpstan.org/), and [PHPUnit](https://phpunit.de/) for development are listed.
 
 - **Auto-loading**:
-  If using as base for CLI command, PSR-4 standard is used for auto-loading
-  classes from `src` directory.
+PSR-4 standard is used for auto-loading classes from the `src` directory.
 
 - **Dev Auto-loading**:
-  Auto-loads classes for development from `tests/phpunit` directory.
+Auto-loads classes for development from `tests/phpunit` directory.
 
 - **Custom Scripts**:
-  Defines CLI scripts for tasks:
-    - `lint` and `lint-fix` - to lint and fix code using [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer),
-      [PHP Mess Detector](https://phpmd.org/) and [PHPStan](https://phpstan.org/)
-    - `test` - to run PHPUnit tests and generate coverage report
-    - `build` - to build a PHAR file (if using as base for CLI command)
+Defines CLI scripts for tasks:
+  - `lint` and `lint-fix` - to lint and fix code using [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHP Mess Detector](https://phpmd.org/), [PHPStan](https://phpstan.org/), and [Rector](https://getrector.org/).
+  - `test` - to run PHPUnit tests without generating coverage report.
+  - `test-coverage` - to run PHPUnit tests and generate coverage report.
+  - `build` - to build a PHAR file (if using as base for CLI command).
 
 - **Executable Binaries**:
-  Executable binaries are defined as executable scripts in `bin` directory,
-  which makes them easily accessible without cluttering the global scope.
+Executable binaries are defined as executable scripts in `bin` directory,
+which makes them easily accessible without cluttering the global scope.
+
+- **Configuration**:
+Composer is configured with the following settings:
+
+  - **Discard Changes**:
+  Automatically discards any changes to the `composer.lock` file that are not committed. This ensures a clean state for the dependency versions defined in `composer.json`.
+
+  - **Sort Packages**:
+  Ensures that the packages in `composer.json` are sorted, which helps in maintaining a consistent and organized structure. Run `composer normalize` to sort the packages.
+
+  - **Minimum Stability**:
+  Sets the minimum stability to `stable`, meaning that only stable versions of packages will be considered when resolving dependencies. You can change this to `dev` or `alpha` if you want to include unstable versions in your project.
+
+  - **Prefer Stable**:
+  Prefers stable versions of packages over unstable ones, providing more reliable and tested packages unless a specific unstable version is required.
+
+
+
+
+
+
