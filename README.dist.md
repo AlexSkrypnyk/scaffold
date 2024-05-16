@@ -3,7 +3,7 @@
   <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=Yourproject&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="Yourproject logo"></a>
 </p>
 
-<h1 align="center">yourproject</h1>
+<h1 align="center">Few lines describing your project</h1>
 
 <div align="center">
 
@@ -20,10 +20,6 @@
 </div>
 
 ---
-
-<p align="center"> Few lines describing your project.
-    <br>
-</p>
 
 ## Features
 
