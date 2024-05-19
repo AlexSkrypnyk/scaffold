@@ -104,10 +104,10 @@ jobs:
 
       - name: Test PHAR
         run: ./.build/php-command.phar || exit 1
-        # yamllint disable-line #;> PHP_PHAR
 
       - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_upterm == 'true' }}
         uses: lhotari/action-upterm@v1
         with:
           wait-timeout-minutes: 5
+          # yamllint disable-line #;> PHP_PHAR
