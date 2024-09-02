@@ -27,7 +27,7 @@ assert_files_present_common() {
   # Assert that documentation was processed correctly.
   assert_file_not_contains README.md "Generic project scaffold template"
   assert_file_not_contains README.md "META"
-  assert_file_contains README.md "Repository created using https://getscaffold.dev/ project scaffold template"
+  assert_file_contains README.md "_This repository was created using the [force-crystal](https://getforce-crystal.dev/) project template_"
 
   # Assert that .gitattributes were processed correctly.
   assert_file_contains ".gitattributes" "/.editorconfig"
