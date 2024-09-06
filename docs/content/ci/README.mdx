@@ -40,17 +40,14 @@ This project provides several GitHub Actions workflows to help you get started.
 ### SSHing into a GitHub Actions runner
 
 If you need to SSH into a GitHub Actions runner to debug your workflows, you can
-start an action manually using [lhotari/action-upterm](https://github.com/lhotari/action-upterm)
+start an action manually using [mxschmitt/action-tmate](https://github.com/mxschmitt/action-tmate)
 added to PHP, Node.js, and Shell workflows.
 
 This will post the SSH details into the Actions logs looking like:
 
 ```
-=== 7Z1MOWVQIAQFAG5OOORQ
-Command:                tmux new -s upterm -x 132 -y 43
-Force Command:          tmux attach -t upterm
-Host:                   ssh://uptermd.upterm.dev:22
-SSH Session:            ssh 7z1mowvqiAqFag5oOORQ:ZTc4NGUxMWRiMjI5MDgudm0udXB0ZXJtLmludGVybmFsOjIyMjI=@uptermd.upterm.dev
+SSH: ssh qdpBWKjyXTsEsaSQxR8EscUuH@nyc1.tmate.io
+or: ssh -i <path-to-private-SSH-key> qdpBWKjyXTsEsaSQxR8EscUuH@nyc1.tmate.io
 ```
 
 The SSH session will be available for 5 minutes and will continue the workflow

@@ -14,9 +14,11 @@ on:
       - 'feature/**'
   workflow_dispatch:
     inputs:
-      enable_upterm:
-        description: 'Set "true" to enable upterm session.'
-        required: true
+      enable_terminal:
+        type: boolean
+        description: 'Enable terminal session.'
+        required: false
+        default: false
 
 jobs:
   test-scaffold:
@@ -67,8 +69,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Setup upterm session
-        if: ${{ !cancelled() && github.event.inputs.enable_upterm == 'true' }}
-        uses: lhotari/action-upterm@v1
-        with:
-          wait-timeout-minutes: 5
+      - name: Setup tmate session
+        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 5
