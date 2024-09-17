@@ -1,7 +1,7 @@
 <p align="center">
   <a href="" rel="noopener"><img src="docs/static/img/logo.svg" alt="Scaffold logo" width=400px/></a>
 </p>
-
+CITEST
 <h1 align="center">Generic project scaffold template</h1>
 
 <div align="center">
