@@ -9,10 +9,20 @@ load _helper
 BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
 
 @test "Composer scripts - lint" {
-  composer install
+  assert_dir_not_exists "vendor"
+  assert_file_not_exists "composer.lock"
+  run composer install
+  assert_success
+  assert_dir_exists "vendor"
+  assert_file_exists "composer.lock"
 
   run composer lint
   assert_success
+
+  run composer reset
+  assert_success
+  assert_dir_not_exists "vendor"
+  assert_file_not_exists "composer.lock"
 }
 
 @test "Composer scripts - test" {

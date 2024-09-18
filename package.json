@@ -18,7 +18,8 @@
         "build": "echo Would run build",
         "lint": "echo Would run code lint",
         "lint-fix": "echo Would run code lint fix",
-        "test": "echo Would run tests"
+        "test": "echo Would run tests",
+        "reset": "rm -Rf node_modules package-lock.json"
     },
     "engines": {
         "npm": ">=8.0.0",
