@@ -76,6 +76,7 @@
             "rector --clear-cache",
             "cp php-script php-script.php && phpcbf; rm php-script.php"
         ],
+        "reset": "rm -Rf vendor vendor-bin composer.lock",
         "test": "phpunit --no-coverage",
         "test-coverage": "phpunit"
     }
