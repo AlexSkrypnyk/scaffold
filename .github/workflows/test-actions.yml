@@ -19,8 +19,8 @@ jobs:
 
       - name: Check coding standards with yamllint
         run: yamllint --config-file .github/.yamllint-for-gha.yml .github/workflows
-        continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
+        continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}
 
       - name: Check coding standards with actionlint
         run: docker run --rm -v "${GITHUB_WORKSPACE:-.}":/app --workdir /app rhysd/actionlint:1.6.27
-        continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
+        continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}
