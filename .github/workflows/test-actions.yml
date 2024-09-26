@@ -22,5 +22,5 @@ jobs:
         continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}
 
       - name: Check coding standards with actionlint
-        run: docker run --rm -v "${GITHUB_WORKSPACE:-.}":/app --workdir /app rhysd/actionlint:1.6.27
+        run: docker run --rm -v "${GITHUB_WORKSPACE:-.}":/app --workdir /app rhysd/actionlint:1.7.2
         continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}
