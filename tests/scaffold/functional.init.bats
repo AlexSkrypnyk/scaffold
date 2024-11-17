@@ -474,6 +474,7 @@ export SCRIPT_FILE="init.sh"
   assert_files_present_shell "${BUILD_DIR}"
 
   assert_file_not_exists "renovate.json"
+  assert_file_not_contains ".gitattributes" "renovate"
 
   assert_output_contains "Initialization complete."
 }
