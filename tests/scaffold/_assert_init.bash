@@ -73,6 +73,7 @@ assert_files_present_php() {
   assert_file_not_contains ".gitattributes" "# /phpmd.xml"
   assert_file_not_contains ".gitattributes" "# /phpstan.neon"
   assert_file_not_contains ".gitattributes" "# /phpunit.xml"
+  assert_file_not_contains ".gitattributes" "# /rector.php"
 
   assert_file_exists ".github/workflows/test-php.yml"
   assert_file_exists ".github/workflows/release-php.yml"
@@ -83,6 +84,7 @@ assert_files_present_php() {
   assert_file_exists "phpmd.xml"
   assert_file_exists "phpstan.neon"
   assert_file_exists "phpunit.xml"
+  assert_file_exists "rector.php"
   assert_dir_exists "tests/phpunit"
 
   assert_dir_not_contains_string "${dir}" "YourNamespace"
@@ -106,6 +108,7 @@ assert_files_absent_php() {
   assert_file_not_contains ".gitattributes" "/phpmd.xml"
   assert_file_not_contains ".gitattributes" "/phpstan.neon"
   assert_file_not_contains ".gitattributes" "/phpunit.xml"
+  assert_file_not_contains ".gitattributes" "/rector.php"
 
   assert_file_not_exists ".github/workflows/test-php.yml"
   assert_file_not_exists ".github/workflows/release-php.yml"
@@ -116,6 +119,7 @@ assert_files_absent_php() {
   assert_file_not_exists "phpmd.xml"
   assert_file_not_exists "phpstan.neon"
   assert_file_not_exists "phpunit.xml"
+  assert_file_not_exists "rector.php"
   assert_dir_not_exists "tests/phpunit"
 
   assert_files_absent_php_command "${dir}"

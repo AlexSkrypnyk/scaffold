@@ -12,7 +12,11 @@
 # /phpmd.xml       export-ignore
 # /phpstan.neon    export-ignore
 # /phpunit.xml     export-ignore
+# /rector.php      export-ignore
 #;> PHP
 #;< NODEJS
 # /.npmignore      export-ignore
 #;> NODEJS
+#;< RENOVATE
+# /renovate.json   export-ignore
+#;> RENOVATE

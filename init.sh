@@ -145,6 +145,7 @@ remove_php() {
   rm -f phpmd.xml || true
   rm -f phpstan.neon || true
   rm -f phpunit.xml || true
+  rm -f rector.php || true
 
   rm -Rf docs/php || true
 
@@ -153,6 +154,7 @@ remove_php() {
   remove_string_content_line "\/phpmd.xml" ".gitattributes"
   remove_string_content_line "\/phpstan.neon" ".gitattributes"
   remove_string_content_line "\/phpunit.xml" ".gitattributes"
+  remove_string_content_line "\/rector.php" ".gitattributes"
 
   rm -f .github/workflows/test-php.yml || true
   rm -f .github/workflows/release-php.yml || true
@@ -244,6 +246,7 @@ remove_pr_template() {
 remove_renovate() {
   rm -f renovate.json || true
   rm -Rf docs/content/ci/renovate.mdx || true
+  remove_tokens_with_content "RENOVATE"
 }
 
 remove_docs() {
@@ -296,6 +299,7 @@ process_internal() {
   uncomment_line ".gitattributes" "\/phpmd.xml"
   uncomment_line ".gitattributes" "\/phpstan.neon"
   uncomment_line ".gitattributes" "\/phpunit.xml"
+  uncomment_line ".gitattributes" "\/rector.php"
   uncomment_line ".gitattributes" "\/.npmignore"
 
   rm -f LICENSE >/dev/null || true
