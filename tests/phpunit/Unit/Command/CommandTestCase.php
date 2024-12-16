@@ -53,6 +53,7 @@ abstract class CommandTestCase extends TestCase {
       /** @var string $name */
       $name = $this->getProtectedValue($instance, 'defaultName');
     }
+
     $command = $application->find($name);
     $this->commandTester = new CommandTester($command);
 
