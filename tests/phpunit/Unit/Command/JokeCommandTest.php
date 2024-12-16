@@ -26,7 +26,7 @@ class JokeCommandTest extends CommandTestCase {
     /** @var \YourNamespace\App\Command\JokeCommand $mock */
     $mock = $this->prepareMock(JokeCommand::class, [
       'getContent' => $content,
-    ], TRUE);
+    ]);
     $mock->setName('joke');
 
     $output = $this->runExecute($mock);
