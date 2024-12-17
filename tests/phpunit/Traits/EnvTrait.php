@@ -8,6 +8,8 @@ namespace YourNamespace\App\Tests\Traits;
  * Trait EnvTrait.
  *
  * Trait for managing environment variables.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait EnvTrait {
 

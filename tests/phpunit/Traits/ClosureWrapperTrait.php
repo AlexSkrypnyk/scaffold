@@ -18,6 +18,8 @@ use Opis\Closure\SerializableClosure;
  * fnw() stands for "function wrap" and fnu() stands for "function unwrap".
  *
  * @see https://github.com/sebastianbergmann/phpunit/issues/2739
+ *
+ * @phpstan-ignore trait.unused
  */
 trait ClosureWrapperTrait {
 

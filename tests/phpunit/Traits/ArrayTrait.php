@@ -8,6 +8,8 @@ namespace YourNamespace\App\Tests\Traits;
  * Trait ArrayTrait.
  *
  * Provides methods for working with arrays.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait ArrayTrait {
 

@@ -8,6 +8,8 @@ namespace YourNamespace\App\Tests\Traits;
  * Trait AssertTrait.
  *
  * Provides custom assertions.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait AssertTrait {
 

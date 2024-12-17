@@ -10,6 +10,8 @@ use PHPUnit\Framework\MockObject\MockObject;
  * Trait MockTrait.
  *
  * This trait provides a method to prepare class mock.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait MockTrait {
 
@@ -32,7 +34,7 @@ trait MockTrait {
    * @SuppressWarnings("PHPMD.CyclomaticComplexity")
    */
   protected function prepareMock(string $class, array $methods = [], array|bool $args = []): MockObject {
-    $methods = array_filter($methods, fn($value, $key): bool => is_string($key), ARRAY_FILTER_USE_BOTH);
+    $methods = array_filter($methods, fn($value, $key): bool => !is_numeric($key), ARRAY_FILTER_USE_BOTH);
 
     if (!class_exists($class)) {
       throw new \InvalidArgumentException(sprintf('Class %s does not exist', $class));
@@ -47,8 +49,11 @@ trait MockTrait {
       $builder->disableOriginalConstructor();
     }
 
-    $method_names = array_filter(array_keys($methods), fn($method): bool => is_string($method) && !empty($method));
-    $mock = $builder->onlyMethods($method_names)->getMock();
+    $method_names = array_values(array_filter(array_keys($methods), fn($method): bool => !empty($method)));
+    if (!empty($method_names)) {
+      $builder->onlyMethods($method_names);
+    }
+    $mock = $builder->getMock();
 
     foreach ($methods as $method => $value) {
       // Handle callback value differently based on its type.

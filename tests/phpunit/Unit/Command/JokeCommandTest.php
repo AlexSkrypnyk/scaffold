@@ -24,6 +24,7 @@ class JokeCommandTest extends CommandTestCase {
   #[DataProvider('dataProviderExecute')]
   public function testExecute(string $content, int $expected_code, array|string $expected_output = []): void {
     /** @var \YourNamespace\App\Command\JokeCommand $mock */
+    // @phpstan-ignore varTag.nativeType
     $mock = $this->prepareMock(JokeCommand::class, [
       'getContent' => $content,
     ]);
