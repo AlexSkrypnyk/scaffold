@@ -8,6 +8,8 @@ namespace YourNamespace\App\Tests\Traits;
  * Trait ReflectionTrait.
  *
  * Provides methods to work with class reflection.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait ReflectionTrait {
 

@@ -10,6 +10,8 @@ use org\bovigo\vfs\vfsStream;
  * Trait VfsTrait.
  *
  * Provides methods for working with the virtual file system.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait VfsTrait {
 
