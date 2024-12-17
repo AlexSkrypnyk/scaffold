@@ -10,6 +10,8 @@ use Symfony\Component\Filesystem\Filesystem;
  * Trait FixtureTrait.
  *
  * Helpers to work with fixture files.
+ *
+ * @phpstan-ignore trait.unused
  */
 trait FixtureTrait {
 
