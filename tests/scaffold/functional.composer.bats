@@ -34,28 +34,28 @@ BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
 
   run composer test
   assert_success
-  assert_output_contains "OK (21 tests, 36 assertions)"
+  assert_output_contains "OK (21 tests, 32 assertions)"
   assert_dir_not_exists ".coverage-html"
 
   composer_reset_env
 
   run bash -c "XDEBUG_MODE=coverage composer test"
   assert_success
-  assert_output_contains "OK (21 tests, 36 assertions)"
+  assert_output_contains "OK (21 tests, 32 assertions)"
   assert_dir_not_exists ".coverage-html"
 
   composer_reset_env
 
   run composer test -- --group=command
   assert_success
-  assert_output_contains "OK (5 tests, 10 assertions)"
+  assert_output_contains "OK (5 tests, 6 assertions)"
   assert_dir_not_exists ".coverage-html"
 
   composer_reset_env
 
   run bash -c "XDEBUG_MODE=coverage composer test -- --group=command"
   assert_success
-  assert_output_contains "OK (5 tests, 10 assertions)"
+  assert_output_contains "OK (5 tests, 6 assertions)"
   assert_dir_not_exists ".coverage-html"
 }
 
@@ -76,7 +76,7 @@ BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
   run bash -c "XDEBUG_MODE=coverage composer test-coverage"
   assert_success
   assert_output_not_contains "WARNINGS!"
-  assert_output_contains "OK (21 tests, 36 assertions)"
+  assert_output_contains "OK (21 tests, 32 assertions)"
   assert_dir_exists ".coverage-html"
 
   composer_reset_env
@@ -91,7 +91,7 @@ BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
   run bash -c "XDEBUG_MODE=coverage composer test-coverage -- --group=command"
   assert_success
   assert_output_not_contains "WARNINGS!"
-  assert_output_contains "OK (5 tests, 10 assertions)"
+  assert_output_contains "OK (5 tests, 6 assertions)"
   assert_dir_exists ".coverage-html"
 }
 

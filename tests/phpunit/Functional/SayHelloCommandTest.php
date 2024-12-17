@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace YourNamespace\App\Tests\Unit\Command;
+namespace YourNamespace\App\Tests\Functional;
 
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Group;
 use YourNamespace\App\Command\SayHelloCommand;
+use YourNamespace\App\Tests\Traits\ConsoleTrait;
 
 /**
  * Class SayHelloCommandTest.
@@ -16,11 +17,15 @@ use YourNamespace\App\Command\SayHelloCommand;
 #[CoversMethod(SayHelloCommand::class, 'execute')]
 #[CoversMethod(SayHelloCommand::class, 'configure')]
 #[Group('command')]
-class SayHelloCommandTest extends CommandTestCase {
+class SayHelloCommandTest extends ApplicationFunctionalTestCase {
+
+  use ConsoleTrait;
 
   public function testExecute(): void {
-    $output = $this->runExecute(SayHelloCommand::class);
-    $this->assertArrayContainsString('Hello, Symfony console!', $output);
+    $this->consoleInitApplicationTester(SayHelloCommand::class);
+
+    $output = $this->consoleApplicationRun();
+    $this->assertStringContainsString('Hello, Symfony console!', $output);
   }
 
 }

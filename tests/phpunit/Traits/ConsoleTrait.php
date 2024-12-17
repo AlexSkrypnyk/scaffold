@@ -18,6 +18,8 @@ use Symfony\Component\Console\Tester\ApplicationTester;
  */
 trait ConsoleTrait {
 
+  use ReflectionTrait;
+
   /**
    * Application tester.
    */
@@ -54,9 +56,7 @@ trait ConsoleTrait {
 
     $application->setAutoExit(FALSE);
     $application->setCatchExceptions(FALSE);
-    if (method_exists($application, 'setCatchErrors')) {
-      $application->setCatchErrors(FALSE);
-    }
+    $application->setCatchErrors(FALSE);
 
     $this->appTester = new ApplicationTester($application);
   }
@@ -75,6 +75,8 @@ trait ConsoleTrait {
    *   Run output (stdout or stderr).
    */
   protected function consoleApplicationRun(array $input = [], array $options = [], bool $expect_fail = FALSE): string {
+    $output = '';
+
     $options += ['capture_stderr_separately' => TRUE];
 
     try {

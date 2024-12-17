@@ -137,7 +137,9 @@ assert_files_present_php_command() {
   assert_file_exists force-crystal
   assert_dir_exists src
 
-  assert_dir_exists tests/phpunit/Unit/Command
+  assert_file_exists tests/phpunit/Functional/ApplicationFunctionalTestCase.php
+  assert_file_exists tests/phpunit/Functional/JokeCommandTest.php
+  assert_file_exists tests/phpunit/Functional/SayHelloCommandTest.php
 
   assert_file_contains "phpcs.xml" "<file>src</file>"
   assert_file_contains "phpstan.neon" "- src"
@@ -156,7 +158,9 @@ assert_files_absent_php_command() {
 
   assert_file_not_exists php-command
   assert_dir_not_exists src
-  assert_dir_not_exists tests/phpunit/Unit/Command
+  assert_file_not_exists tests/phpunit/Functional/ApplicationFunctionalTestCase.php
+  assert_file_not_exists tests/phpunit/Functional/JokeCommandTest.php
+  assert_file_not_exists tests/phpunit/Functional/SayHelloCommandTest.php
 
   assert_file_not_contains "phpcs.xml" "<file>src</file>"
   assert_file_not_contains "phpstan.neon" "- src"
