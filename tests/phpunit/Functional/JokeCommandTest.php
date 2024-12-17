@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace YourNamespace\App\Tests\Unit\Command;
+namespace YourNamespace\App\Tests\Functional;
 
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
-use Symfony\Component\Console\Command\Command;
 use YourNamespace\App\Command\JokeCommand;
+use YourNamespace\App\Tests\Traits\ConsoleTrait;
+use YourNamespace\App\Tests\Traits\MockTrait;
 
 /**
  * Class JokeCommandTest.
@@ -19,10 +20,13 @@ use YourNamespace\App\Command\JokeCommand;
 #[CoversMethod(JokeCommand::class, 'configure')]
 #[CoversMethod(JokeCommand::class, 'getJoke')]
 #[Group('command')]
-class JokeCommandTest extends CommandTestCase {
+class JokeCommandTest extends ApplicationFunctionalTestCase {
+
+  use ConsoleTrait;
+  use MockTrait;
 
   #[DataProvider('dataProviderExecute')]
-  public function testExecute(string $content, int $expected_code, array|string $expected_output = []): void {
+  public function testExecute(string $content, array $expected_output, bool $expected_fail = FALSE): void {
     /** @var \YourNamespace\App\Command\JokeCommand $mock */
     // @phpstan-ignore varTag.nativeType
     $mock = $this->prepareMock(JokeCommand::class, [
@@ -30,21 +34,19 @@ class JokeCommandTest extends CommandTestCase {
     ]);
     $mock->setName('joke');
 
-    $output = $this->runExecute($mock);
-
-    $this->assertEquals($expected_code, $this->commandTester->getStatusCode());
-    $expected_output = is_array($expected_output) ? $expected_output : [$expected_output];
+    $this->consoleInitApplicationTester($mock);
+    $output = $this->consoleApplicationRun([], [], $expected_fail);
     foreach ($expected_output as $expected_output_string) {
-      $this->assertArrayContainsString($expected_output_string, $output);
+      $this->assertStringContainsString($expected_output_string, $output);
     }
   }
 
   public static function dataProviderExecute(): array {
     return [
-      [static::fixturePayload(['setup' => 'Test setup', 'punchline' => 'Test punchline']), Command::SUCCESS, ['Test setup', 'Test punchline']],
-      ['', Command::FAILURE, ['Unable to retrieve a joke.']],
-      ['non-json', Command::FAILURE, ['Unable to retrieve a joke.']],
-      [static::fixturePayload(['setup' => 'Test setup']), Command::FAILURE, ['Unable to retrieve a joke.']],
+      [static::fixturePayload(['setup' => 'Test setup', 'punchline' => 'Test punchline']), ['Test setup', 'Test punchline']],
+      ['', ['Unable to retrieve a joke.'], TRUE],
+      ['non-json', ['Unable to retrieve a joke.'], TRUE],
+      [static::fixturePayload(['setup' => 'Test setup']), ['Unable to retrieve a joke.'], TRUE],
     ];
   }
 

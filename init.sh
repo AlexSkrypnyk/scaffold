@@ -165,7 +165,9 @@ remove_php() {
 remove_php_command() {
   rm -Rf php-command || true
   rm -Rf src || true
-  rm -Rf tests/phpunit/Unit/Command || true
+  rm -Rf tests/phpunit/Functional/ApplicationFunctionalTestCase.php || true
+  rm -Rf tests/phpunit/Functional/JokeCommandTest.php || true
+  rm -Rf tests/phpunit/Functional/SayHelloCommandTest.php || true
   rm -f docs/content/php/php-command.mdx || true
 
   remove_tokens_with_content "PHP_COMMAND"
