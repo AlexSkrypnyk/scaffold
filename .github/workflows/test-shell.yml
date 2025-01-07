@@ -57,7 +57,13 @@ jobs:
         working-directory: tests/bats
 
       - name: Install Kcov
-        run: wget https://github.com/SimonKagstrom/kcov/releases/download/v42/kcov-amd64.tar.gz && tar -xf kcov-amd64.tar.gz && sudo mv ./usr/local/bin/kcov /usr/local/bin/kcov && kcov --version
+        run: |
+          KCOV_VERSION=v43 && \
+          sudo apt update && sudo apt install -y git cmake g++ libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev binutils-dev && \
+          git clone https://github.com/SimonKagstrom/kcov.git && \
+          cd kcov && git checkout ${KCOV_VERSION} && mkdir build && cd build && \
+          cmake .. && make && sudo make install && \
+          kcov --version
         if: matrix.os == 'ubuntu-latest'
 
       - name: Run Tests and Code Coverage on Ubuntu
