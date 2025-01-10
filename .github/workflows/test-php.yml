@@ -61,7 +61,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{github.job}}-code-coverage-report-${{ matrix.php-versions }}
-          path: ./.coverage-html
+          path: |
+            .coverage-html
+            cobertura.xml
           include-hidden-files: true
           if-no-files-found: error
 
@@ -69,7 +71,7 @@ jobs:
         uses: codecov/codecov-action@v5
         if: ${{ env.CODECOV_TOKEN != '' }}
         with:
-          files: ./cobertura.xml
+          files: cobertura.xml
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
         env:
