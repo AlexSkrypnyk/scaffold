@@ -22,7 +22,7 @@ jobs:
 
     strategy:
       matrix:
-        php-versions: ['8.2', '8.3', '8.4']
+        php-versions: ['8.3', '8.4', '8.5']
 
     steps:
       - name: Checkout code
@@ -42,7 +42,7 @@ jobs:
           ini-values: pcov.directory=.
 
       - name: Install dependencies
-        run: composer install
+        run: composer install ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
 
       - name: Validate composer.json
         run: |
@@ -96,7 +96,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
 
       - name: Install dependencies
         run: composer install
