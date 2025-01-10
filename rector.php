@@ -24,12 +24,12 @@ use Rector\Set\ValueObject\SetList;
 use Rector\Strict\Rector\Empty_\DisallowedEmptyRuleFixerRector;
 use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 
-return static function (RectorConfig $rectorConfig): void {
-  $rectorConfig->paths([
+return static function (RectorConfig $config): void {
+  $config->paths([
     __DIR__ . '/**',
   ]);
 
-  $rectorConfig->sets([
+  $config->sets([
     SetList::PHP_82,
     SetList::PHP_83,
     SetList::CODE_QUALITY,
@@ -40,9 +40,9 @@ return static function (RectorConfig $rectorConfig): void {
     PHPUnitSetList::PHPUNIT_100,
   ]);
 
-  $rectorConfig->rule(DeclareStrictTypesRector::class);
+  $config->rule(DeclareStrictTypesRector::class);
 
-  $rectorConfig->skip([
+  $config->skip([
     // Rules added by Rector's rule sets.
     CountArrayToEmptyArrayComparisonRector::class,
     DisallowedEmptyRuleFixerRector::class,
@@ -56,11 +56,11 @@ return static function (RectorConfig $rectorConfig): void {
     '*/node_modules/*',
   ]);
 
-  $rectorConfig->fileExtensions([
+  $config->fileExtensions([
     'php',
     'inc',
   ]);
 
-  $rectorConfig->importNames(TRUE, FALSE);
-  $rectorConfig->importShortClasses(FALSE);
+  $config->importNames(TRUE, FALSE);
+  $config->importShortClasses(FALSE);
 };
