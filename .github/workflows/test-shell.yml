@@ -78,14 +78,14 @@ jobs:
         with:
           name: ${{github.job}}-code-coverage-report
           include-hidden-files: true
-          path: ./.coverage-html
+          path: .coverage-html
           if-no-files-found: error
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v5
         if: ${{ env.CODECOV_TOKEN != '' && matrix.os == 'ubuntu-latest' }}
         with:
-          directory: ./.coverage-html
+          directory: .coverage-html
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
         env:
