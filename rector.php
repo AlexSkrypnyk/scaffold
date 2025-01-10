@@ -6,8 +6,6 @@
  *
  * Usage:
  * ./vendor/bin/rector process .
- *
- * @see https://github.com/palantirnet/drupal-rector/blob/main/rector.php
  */
 
 declare(strict_types=1);
