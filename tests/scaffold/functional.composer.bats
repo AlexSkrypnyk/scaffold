@@ -35,28 +35,28 @@ BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
   run composer test
   assert_success
   assert_output_contains "OK (21 tests, 32 assertions)"
-  assert_dir_not_exists ".coverage-html"
+  assert_dir_not_exists ".logs/.coverage-html"
 
   composer_reset_env
 
   run bash -c "XDEBUG_MODE=coverage composer test"
   assert_success
   assert_output_contains "OK (21 tests, 32 assertions)"
-  assert_dir_not_exists ".coverage-html"
+  assert_dir_not_exists ".logs/.coverage-html"
 
   composer_reset_env
 
   run composer test -- --group=command
   assert_success
   assert_output_contains "OK (5 tests, 6 assertions)"
-  assert_dir_not_exists ".coverage-html"
+  assert_dir_not_exists ".logs/.coverage-html"
 
   composer_reset_env
 
   run bash -c "XDEBUG_MODE=coverage composer test -- --group=command"
   assert_success
   assert_output_contains "OK (5 tests, 6 assertions)"
-  assert_dir_not_exists ".coverage-html"
+  assert_dir_not_exists ".logs/.coverage-html"
 }
 
 @test "Composer scripts - test-coverage" {
@@ -69,7 +69,7 @@ BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
   run composer test-coverage
   assert_failure
   assert_output_contains "WARNINGS!"
-  assert_dir_not_exists ".coverage-html"
+  assert_dir_not_exists ".logs/.coverage-html"
 
   composer_reset_env
 
@@ -77,14 +77,14 @@ BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
   assert_success
   assert_output_not_contains "WARNINGS!"
   assert_output_contains "OK (21 tests, 32 assertions)"
-  assert_dir_exists ".coverage-html"
+  assert_dir_exists ".logs/.coverage-html"
 
   composer_reset_env
 
   run composer test-coverage -- --group=command
   assert_failure
   assert_output_contains "WARNINGS!"
-  assert_dir_not_exists ".coverage-html"
+  assert_dir_not_exists ".logs/.coverage-html"
 
   composer_reset_env
 
@@ -92,11 +92,13 @@ BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
   assert_success
   assert_output_not_contains "WARNINGS!"
   assert_output_contains "OK (5 tests, 6 assertions)"
-  assert_dir_exists ".coverage-html"
+  assert_dir_exists ".logs/.coverage-html"
+  assert_file_exists ".logs/cobertura.xml"
+  assert_file_exists ".logs/junit.xml"
 }
 
 composer_reset_env() {
-  rm -rf .coverage-html >/dev/null
+  rm -rf .logs >/dev/null
   export XDEBUG_MODE=off
 }
 

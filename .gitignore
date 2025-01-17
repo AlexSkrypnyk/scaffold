@@ -3,9 +3,8 @@
 
 /.build
 #;< PHP
-/.coverage-html
+/.logs
 /.phpunit.cache
-/cobertura.xml
 /composer.lock
 /vendor
 /vendor-bin
