@@ -71,7 +71,6 @@ jobs:
         with:
           directory: .scaffold-coverage-html
           fail_ci_if_error: true
-          token: ${{ secrets.CODECOV_TOKEN }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
