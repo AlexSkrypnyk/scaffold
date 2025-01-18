@@ -86,7 +86,7 @@ jobs:
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
         uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 5
+        timeout-minutes: 30
 
   # yamllint disable-line #;< PHP_PHAR
   build-php:
@@ -118,5 +118,5 @@ jobs:
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
         uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 5
+        timeout-minutes: 30
   # yamllint disable-line #;> PHP_PHAR
