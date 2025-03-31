@@ -6,7 +6,7 @@
 
 load _helper
 
-# ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
+# ./.scaffold/tests/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke .scaffold/tests
 # bats test_tags=smoke
 @test "Smoke" {
   assert_contains "scaffold" "${BUILD_DIR}"

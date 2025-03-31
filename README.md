@@ -67,5 +67,5 @@
 2. Checkout locally
 3. Run [`./init.sh`](init.sh) to replace `yournamespace`, `yourproject`,
    `Your Name` strings with your own and choose the features.<br/>
-   ![init](docs/static/img/init.gif)
+   ![init](.scaffold/docs/static/img/init.gif)
 

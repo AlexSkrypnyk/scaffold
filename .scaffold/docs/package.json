@@ -1,5 +1,5 @@
 {
-  "name": "@yournamespace/yourproject-docs",
+  "name": "scaffold",
   "version": "1.0.0",
   "private": true,
   "scripts": {

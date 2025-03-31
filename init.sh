@@ -276,6 +276,13 @@ process_internal() {
 
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
+  rm -f LICENSE >/dev/null || true
+  rm -Rf ".scaffold" >/dev/null || true
+  rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
+  rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true
+
+  rm -f "docs/static/img/init.gif" >/dev/null || true
+
   replace_string_content "YourNamespace" "${namespace}"
   replace_string_content "AlexSkrypnyk" "${namespace}"
   replace_string_content "yournamespace" "${namespace_lowercase}"
@@ -303,12 +310,6 @@ process_internal() {
   uncomment_line ".gitattributes" "\/phpunit.xml"
   uncomment_line ".gitattributes" "\/rector.php"
   uncomment_line ".gitattributes" "\/.npmignore"
-
-  rm -f LICENSE >/dev/null || true
-  rm -Rf "tests/scaffold" >/dev/null || true
-  rm -f ".github/workflows/test-scaffold.yml" >/dev/null || true
-
-  rm -f "docs/static/img/init.gif" >/dev/null || true
 
   remove_tokens_with_content "META"
   remove_special_comments

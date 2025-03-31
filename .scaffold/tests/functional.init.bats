@@ -3,7 +3,7 @@
 # Functional tests for init.sh.
 #
 # Example usage:
-# ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/scaffold
+# ./.scaffold/tests/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke .scaffold/tests
 #
 # shellcheck disable=SC2030,SC2031,SC2129
 

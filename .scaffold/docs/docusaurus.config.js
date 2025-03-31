@@ -8,19 +8,19 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Yourproject',
-  tagline: 'Yourproject documentation',
+  title: 'Scaffold',
+  tagline: 'Scaffold documentation',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://yourproject.dev/',
+  url: 'https://getscaffold.dev/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   // GitHub pages deployment config.
-  organizationName: 'yourorganization',
-  projectName: 'yourproject',
+  organizationName: 'AlexSkrypnyk',
+  projectName: 'scaffold',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -44,7 +44,7 @@ const config = {
           path: 'content',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl: 'https://github.com/yournamespace/yourproject/tree/main/docs/',
+          editUrl: 'https://github.com/AlexSkrypnyk/scaffold/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -89,18 +89,18 @@ const config = {
       image: 'img/social-card.jpg',
       navbar: {
         logo: {
-          alt: 'yourproject Logo',
+          alt: 'Scaffold Logo',
           src: 'img/logo.svg',
         },
         items: [
           {
             label: 'Download',
-            href: 'https://github.com/yournamespace/yourproject/releases/latest',
+            href: 'https://github.com/AlexSkrypnyk/scaffold/releases/latest',
             position: 'right',
             title: 'Download the latest version',
           },
           {
-            href: 'https://github.com/yournamespace/yourproject',
+            href: 'https://github.com/AlexSkrypnyk/scaffold',
             label: 'GitHub',
             position: 'right',
             title: 'View source on GitHub',
@@ -116,7 +116,7 @@ const config = {
         links: [
           {
             label: 'GitHub',
-            href: 'https://github.com/yournamespace/yourproject',
+            href: 'https://github.com/AlexSkrypnyk/scaffold',
           },
         ],
         copyright: `Copyright ©${new Date().getFullYear()} Alex Skrypnyk. Built with Docusaurus.`,
