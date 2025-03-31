@@ -1,4 +1,4 @@
-name: Release docs
+name: Release Scaffold docs
 
 on:
   push:
@@ -37,21 +37,20 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: '${{ github.workspace }}/docs'
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
 
       - name: Build documentation site
         run: npm run build
-        working-directory: '${{ github.workspace }}/docs'
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
 
       - name: Setup GitHub pages
         uses: actions/configure-pages@v5
         id: pages
 
-      # Uncomment the following lines to deploy the documentation site.
-      # - name: Upload documentation site
-      #   uses: actions/upload-pages-artifact@v3
-      #   with:
-      #     path: "docs/build"
-      #
-      # - name: Deploy documentation site
-      #   uses: actions/deploy-pages@v4
+      - name: Upload documentation site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ".scaffold/docs/build"
+
+      - name: Deploy documentation site
+        uses: actions/deploy-pages@v4

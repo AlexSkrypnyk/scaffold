@@ -36,6 +36,7 @@ jobs:
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
+        if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-dir: 'docs/build'

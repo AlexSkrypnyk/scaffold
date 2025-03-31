@@ -3,7 +3,7 @@
 # Test shell-command.sh functionality.
 #
 # Example usage:
-# ./tests/scaffold/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/bats
+# ./.scaffold/tests/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/bats
 #
 # shellcheck disable=SC2030,SC2031,SC2034
 

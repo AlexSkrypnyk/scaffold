@@ -20,8 +20,9 @@ assert_files_present_common() {
   assert_file_not_exists "logo.tmp.png"
 
   assert_file_not_exists "LICENSE"
-  assert_file_not_exists ".github/workflows/test-scaffold.yml"
-  assert_dir_not_exists "tests/scaffold"
+  assert_file_not_exists ".github/workflows/scaffold-test.yml"
+  assert_file_not_exists ".github/workflows/scaffold-release-docs.yml"
+  assert_dir_not_exists ".scaffold"
   assert_dir_exists "tests"
 
   # Assert that documentation was processed correctly.

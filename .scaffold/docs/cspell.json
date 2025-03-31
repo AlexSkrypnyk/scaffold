@@ -1,0 +1,40 @@
+{
+    "dictionaries": [
+        "bash",
+        "misc",
+        "node",
+        "php",
+        "softwareTerms"
+    ],
+    "words": [
+        "Cobertura",
+        "Terminalizer",
+        "autoloader",
+        "cobertura",
+        "daemonized",
+        "lhotari",
+        "mksh",
+        "mxschmitt",
+        "ruleset",
+        "softprops",
+        "tmate",
+        "toshimaru"
+    ],
+    "overrides": [
+        {
+            "filename": "**/*.mdx",
+            "languageId": [
+                "mdx",
+                "markdown"
+            ]
+        }
+    ],
+    "languageSettings": [
+        {
+            "languageId": "markdown",
+            "ignoreRegExpList": [
+                "/^\\s*```(.|\\n)+?^\\s*```/gm"
+            ]
+        }
+    ]
+}

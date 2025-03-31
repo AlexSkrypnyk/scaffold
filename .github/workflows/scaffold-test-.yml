@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          cache-dependency-path: tests/scaffold/package-lock.json
+          cache-dependency-path: .scaffold/tests/package-lock.json
 
       - name: Install Kcov
         run: |
@@ -52,10 +52,10 @@ jobs:
           kcov --version
 
       - name: Install dependencies
-        run: npm --prefix=tests/scaffold ci
+        run: npm --prefix=.scaffold/tests ci
 
       - name: Run tests
-        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests "$(pwd)"/.scaffold-coverage-html ./tests/scaffold/node_modules/.bin/bats tests/scaffold
+        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/node_modules/.bin/bats .scaffold/tests
 
       - name: Upload coverage report as an artifact
         uses: actions/upload-artifact@v4
@@ -78,3 +78,42 @@ jobs:
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 30
+
+  test-scaffold-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Build documentation site
+        run: npm run build
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Run tests
+        run: npm run test
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          publish-dir: '.scaffold/docs/build'
+          production-branch: main
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.SCAFFOLD_NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.SCAFFOLD_NETLIFY_AUTH_TOKEN }}
+        timeout-minutes: 1
