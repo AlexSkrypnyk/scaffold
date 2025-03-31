@@ -25,12 +25,24 @@ trait EnvTrait {
    *
    * @param string $name
    *   The name of the environment variable.
-   * @param mixed $value
+   * @param string $value
    *   The value of the environment variable.
    */
-  public static function envSet(string $name, mixed $value): void {
+  public static function envSet(string $name, string $value): void {
     static::$env[$name] = $value;
     putenv($name . '=' . $value);
+  }
+
+  /**
+   * Set multiple environment variables.
+   *
+   * @param array $vars
+   *   An array of environment variables to set.
+   */
+  public static function envSetMultiple(array $vars): void {
+    foreach ($vars as $name => $value) {
+      static::envSet($name, $value);
+    }
   }
 
   /**
@@ -42,6 +54,26 @@ trait EnvTrait {
   public static function envUnset(string $name): void {
     unset(static::$env[$name]);
     putenv($name);
+  }
+
+  /**
+   * Unset an environment variable by prefix.
+   *
+   * @param string $prefix
+   *   The prefix of the environment variable.
+   */
+  public static function envUnsetPrefix(string $prefix): void {
+    foreach (array_keys(static::$env) as $name) {
+      if (str_starts_with($name, $prefix)) {
+        static::envUnset($name);
+      }
+    }
+
+    foreach (array_keys(getenv()) as $name) {
+      if (str_starts_with($name, $prefix)) {
+        static::envUnset($name);
+      }
+    }
   }
 
   /**
@@ -67,7 +99,7 @@ trait EnvTrait {
   /**
    * Check if an environment variable is not set.
    */
-  public static function envIsUnset($name): bool {
+  public static function envIsUnset(string $name): bool {
     return getenv($name) === FALSE;
   }
 
@@ -91,7 +123,7 @@ trait EnvTrait {
    * @param bool $remove
    *   Whether to remove the input variables.
    */
-  public static function envFromInput(array &$input, string $prefix, bool $remove = TRUE): void {
+  public static function envFromInput(array &$input, string $prefix = '', bool $remove = TRUE): void {
     foreach ($input as $name => $value) {
       if (str_starts_with($name, $prefix)) {
         static::envSet($name, $value);
