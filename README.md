@@ -8,7 +8,7 @@
 
 [![GitHub Issues](https://img.shields.io/github/issues/AlexSkrypnyk/scaffold.svg)](https://github.com/AlexSkrypnyk/scaffold/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/AlexSkrypnyk/scaffold.svg)](https://github.com/AlexSkrypnyk/scaffold/pulls)
-[![Test](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-scaffold.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-scaffold.yml)
+[![Test Scaffold](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold-test.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold-test.yml)
 [![codecov](https://codecov.io/gh/AlexSkrypnyk/scaffold/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/scaffold)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/scaffold?label=License)
 ![Release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/scaffold?label=Release)
