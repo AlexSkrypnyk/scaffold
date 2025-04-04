@@ -30,6 +30,21 @@ jobs:
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        with:
+          coverage: pcov
+          ini-values: pcov.directory=.
+
+      - name: Install PHP dependencies for PHPUnit tests
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+        working-directory: .scaffold/tests/phpunit
+
+      - name: Lint PHPUnit tests code
+        run: composer lint
+        working-directory: .scaffold/tests/phpunit
+
+      - name: Run PHPUnit tests
+        run: composer test-coverage
+        working-directory: .scaffold/tests/phpunit
 
       - name: Check coding standards
         uses: luizm/action-sh-checker@v0.9.0
@@ -39,6 +54,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: .scaffold/tests/package-lock.json
 
@@ -51,10 +67,10 @@ jobs:
           cmake .. && make && sudo make install && \
           kcov --version
 
-      - name: Install dependencies
+      - name: Install BATS dependencies
         run: npm --prefix=.scaffold/tests ci
 
-      - name: Run tests
+      - name: Run BATS tests
         run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/node_modules/.bin/bats .scaffold/tests
 
       - name: Upload coverage report as an artifact
