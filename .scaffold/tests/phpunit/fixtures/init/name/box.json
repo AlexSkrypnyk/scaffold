@@ -1,0 +1,7 @@
+@@ -1,5 +1,5 @@
+ {
+-    "output": ".build/force-crystal.phar",
++    "output": ".build/star-forge.phar",
+     "compression": "GZ",
+     "finder": [
+         {

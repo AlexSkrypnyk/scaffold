@@ -1,0 +1,19 @@
+@@ -30,12 +30,7 @@
+       - name: Install dependencies
+         run: composer install
+ 
+-      - name: Build PHAR
+-        run: composer build
+ 
+-      - name: Test PHAR
+-        run: ./.build/force-crystal.phar || exit 1
+-
+       - name: Get tag name
+         id: get-version
+         run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+@@ -44,4 +39,4 @@
+         uses: softprops/action-gh-release@__VERSION__
+         with:
+           files: |
+-            ./.build/force-crystal.phar
++            force-crystal

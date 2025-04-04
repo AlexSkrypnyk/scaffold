@@ -1,0 +1,61 @@
+{
+    "name": "alexskrypnyk/scaffold-tests",
+    "description": "Tests for Scaffold project functionality.",
+    "license": "GPL-2.0-or-later",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Alex Skrypnyk",
+            "email": "alex@drevops.com",
+            "homepage": "https://www.drevops.com",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "https://github.com/alexskrypnyk/scaffold",
+    "support": {
+        "issues": "https://github.com/alexskrypnyk/scaffold/issues",
+        "source": "https://github.com/alexskrypnyk/scaffold"
+    },
+    "require": {
+        "php": ">=8.2",
+        "alexskrypnyk/file": "^0.4.0",
+        "alexskrypnyk/phpunit-helpers": "^0.3.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1",
+        "drupal/coder": "^8.3",
+        "ergebnis/composer-normalize": "^2.45",
+        "phpstan/phpstan": "^2",
+        "phpunit/phpunit": "^11",
+        "rector/rector": "^2",
+        "symfony/filesystem": "^7.2",
+        "symfony/finder": "^7.2",
+        "symfony/process": "^7"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "AlexSkrypnyk\\Scaffold\\Tests\\": "src",
+            "AlexSkrypnyk\\File\\Tests\\": "vendor/alexskrypnyk/file/tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ergebnis/composer-normalize": true
+        },
+        "discard-changes": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "lint": [
+            "phpcs",
+            "phpstan",
+            "rector --clear-cache --dry-run"
+        ],
+        "lint-fix": [
+            "rector --clear-cache",
+            "phpcbf"
+        ],
+        "test": "phpunit"
+    }
+}

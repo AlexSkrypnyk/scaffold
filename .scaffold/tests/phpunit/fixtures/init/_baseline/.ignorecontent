@@ -1,0 +1,8 @@
+*.jpg
+*.png
+logo.png
+^*/yarn.lock
+^*/composer.lock
+node_modules
+scripts/vortex/*
+vendor

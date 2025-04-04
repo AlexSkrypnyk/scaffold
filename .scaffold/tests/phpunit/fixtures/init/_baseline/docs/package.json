@@ -1,0 +1,50 @@
+{
+  "name": "@yodashut/force-crystal-docs",
+  "version": "__VERSION__",
+  "private": true,
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "swizzle": "docusaurus swizzle",
+    "clear": "docusaurus clear",
+    "serve": "docusaurus serve",
+    "write-translations": "docusaurus write-translations",
+    "write-heading-ids": "docusaurus write-heading-ids",
+    "spellcheck": "cspell content/*.mdx content/**/*.mdx",
+    "test": "npm run spellcheck"
+  },
+  "dependencies": {
+    "@docusaurus/core": "__VERSION__",
+    "@docusaurus/plugin-google-gtag": "__VERSION__",
+    "@docusaurus/preset-classic": "__VERSION__",
+    "@docusaurus/theme-mermaid": "__VERSION__",
+    "@easyops-cn/docusaurus-search-local": "__VERSION__",
+    "@mdx-js/react": "__VERSION__",
+    "clsx": "__VERSION__",
+    "prism-react-renderer": "__VERSION__",
+    "raw-loader": "__VERSION__",
+    "react": "__VERSION__",
+    "react-dom": "__VERSION__"
+  },
+  "devDependencies": {
+    "@docusaurus/module-type-aliases": "__VERSION__",
+    "@docusaurus/types": "__VERSION__",
+    "cspell": "__VERSION__"
+  },
+  "browserslist": {
+    "production": [
+      ">0.5%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 3 chrome version",
+      "last 3 firefox version",
+      "last 5 safari version"
+    ]
+  },
+  "engines": {
+    "node": "__VERSION__"
+  }
+}

@@ -1,0 +1,82 @@
+{
+    "name": "yodashut/force-crystal",
+    "description": "Provides force-crystal functionality.",
+    "license": "GPL-2.0-or-later",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Luke Skywalker",
+            "email": "force-crystal@yodashut.com",
+            "homepage": "https://yodashut.com",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "https://github.com/yodashut/force-crystal",
+    "support": {
+        "issues": "https://github.com/yodashut/force-crystal/issues",
+        "source": "https://github.com/yodashut/force-crystal"
+    },
+    "require": {
+        "php": "__VERSION__",
+        "symfony/console": "__VERSION__"
+    },
+    "require-dev": {
+        "bamarni/composer-bin-plugin": "__VERSION__",
+        "dealerdirect/phpcodesniffer-composer-installer": "__VERSION__",
+        "drupal/coder": "__VERSION__",
+        "ergebnis/composer-normalize": "__VERSION__",
+        "mikey179/vfsstream": "__VERSION__",
+        "opis/closure": "__VERSION__",
+        "phpmd/phpmd": "__VERSION__",
+        "phpstan/phpstan": "__VERSION__",
+        "phpunit/phpunit": "__VERSION__",
+        "rector/rector": "__VERSION__"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "YodasHut\\App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "YodasHut\\App\\Tests\\": "tests/phpunit"
+        },
+        "classmap": [
+            "tests/phpunit"
+        ]
+    },
+    "bin": [
+        "force-crystal"
+    ],
+    "config": {
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "ergebnis/composer-normalize": true
+        },
+        "discard-changes": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "build": [
+            "@composer bin box require --dev humbug/box",
+            "box validate",
+            "box compile"
+        ],
+        "lint": [
+            "phpcs",
+            "phpstan",
+            "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
+            "rector --clear-cache --dry-run"
+        ],
+        "lint-fix": [
+            "rector --clear-cache",
+            "phpcbf"
+        ],
+        "reset": "rm -Rf vendor vendor-bin composer.lock",
+        "test": "phpunit --no-coverage",
+        "test-coverage": "phpunit"
+    }
+}

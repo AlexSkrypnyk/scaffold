@@ -1,0 +1,53 @@
+@@ -1,20 +1,20 @@
+ {
+-    "name": "yodashut/force-crystal",
+-    "description": "Provides force-crystal functionality.",
++    "name": "jeditemple/star-forge",
++    "description": "Provides star-forge functionality.",
+     "license": "GPL-2.0-or-later",
+     "type": "library",
+     "authors": [
+         {
+-            "name": "Luke Skywalker",
+-            "email": "force-crystal@yodashut.com",
+-            "homepage": "https://yodashut.com",
++            "name": "Obi-Wan Kenobi",
++            "email": "star-forge@jeditemple.com",
++            "homepage": "https://jeditemple.com",
+             "role": "Maintainer"
+         }
+     ],
+-    "homepage": "https://github.com/yodashut/force-crystal",
++    "homepage": "https://github.com/jeditemple/star-forge",
+     "support": {
+-        "issues": "https://github.com/yodashut/force-crystal/issues",
+-        "source": "https://github.com/yodashut/force-crystal"
++        "issues": "https://github.com/jeditemple/star-forge/issues",
++        "source": "https://github.com/jeditemple/star-forge"
+     },
+     "require": {
+         "php": "__VERSION__",
+@@ -36,12 +36,12 @@
+     "prefer-stable": true,
+     "autoload": {
+         "psr-4": {
+-            "YodasHut\\App\\": "src/"
++            "JediTemple\\App\\": "src/"
+         }
+     },
+     "autoload-dev": {
+         "psr-4": {
+-            "YodasHut\\App\\Tests\\": "tests/phpunit"
++            "JediTemple\\App\\Tests\\": "tests/phpunit"
+         },
+         "classmap": [
+             "tests/phpunit"
+@@ -48,7 +48,7 @@
+         ]
+     },
+     "bin": [
+-        "force-crystal"
++        "star-forge"
+     ],
+     "config": {
+         "allow-plugins": {

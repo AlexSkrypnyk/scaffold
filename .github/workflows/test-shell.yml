@@ -51,6 +51,10 @@ jobs:
         env:
           SHFMT_OPTS: -i 2 -ci -s -d
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
+        #;< META
+        with:
+          sh_checker_exclude: '.scaffold'
+        #;> META
 
       - name: Install dependencies
         run: npm ci

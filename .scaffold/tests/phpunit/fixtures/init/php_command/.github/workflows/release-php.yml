@@ -1,0 +1,15 @@
+@@ -34,7 +34,7 @@
+         run: composer build
+ 
+       - name: Test PHAR
+-        run: ./.build/force-crystal.phar || exit 1
++        run: ./.build/star-forge.phar || exit 1
+ 
+       - name: Get tag name
+         id: get-version
+@@ -44,4 +44,4 @@
+         uses: softprops/action-gh-release@__VERSION__
+         with:
+           files: |
+-            ./.build/force-crystal.phar
++            ./.build/star-forge.phar

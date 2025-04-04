@@ -30,9 +30,26 @@ jobs:
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
+        with:
+          coverage: pcov
+          ini-values: pcov.directory=.
+
+      - name: Install PHP dependencies for PHPUnit tests
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+        working-directory: .scaffold/tests/phpunit
+
+      - name: Lint PHPUnit tests code
+        run: composer lint
+        working-directory: .scaffold/tests/phpunit
+
+      - name: Run PHPUnit tests
+        run: composer test
+        working-directory: .scaffold/tests/phpunit
 
       - name: Check coding standards
         uses: luizm/action-sh-checker@v0.9.0
+        with:
+          sh_checker_exclude: '.scaffold/tests/phpunit'
         env:
           SHFMT_OPTS: -i 2 -ci -s -d
 
@@ -40,7 +57,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
-          cache-dependency-path: .scaffold/tests/package-lock.json
+          cache-dependency-path: .scaffold/tests/bats/package-lock.json
 
       - name: Install Kcov
         run: |
@@ -51,11 +68,16 @@ jobs:
           cmake .. && make && sudo make install && \
           kcov --version
 
-      - name: Install dependencies
-        run: npm --prefix=.scaffold/tests ci
+      - name: Install BATS dependencies
+        run: npm --prefix=.scaffold/tests/bats ci
 
-      - name: Run tests
-        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/node_modules/.bin/bats .scaffold/tests
+      - name: Run BATS tests
+        run: |
+          kcov \
+            --include-pattern=.sh,.bash \
+            --bash-parse-files-in-dir=. \
+            --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests \
+            "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/bats/node_modules/.bin/bats .scaffold/tests/bats
 
       - name: Upload coverage report as an artifact
         uses: actions/upload-artifact@v4
