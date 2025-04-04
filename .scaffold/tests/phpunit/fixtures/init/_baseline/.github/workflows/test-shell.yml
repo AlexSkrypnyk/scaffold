@@ -1,0 +1,103 @@
+name: Test shell
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+  workflow_dispatch:
+    inputs:
+      enable_terminal:
+        type: boolean
+        description: 'Enable terminal session.'
+        required: false
+        default: false
+
+env:
+  BATS_LIB_PATH: "./node_modules"
+
+jobs:
+  test-shell:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - macos-13
+          - macos-14
+          - macos-15
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Install current Bash on macOS
+        if: startsWith(matrix.os, 'macos-')
+        run: brew install bash
+
+      - name: Checkout code
+        uses: actions/checkout@__VERSION__
+
+      - name: Setup Node.js
+        uses: actions/setup-node@__VERSION__
+        with:
+          node-version: 20
+
+      - name: Setup sh-checker
+        uses: luizm/action-sh-checker@__VERSION__
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          SHFMT_OPTS: -i 2 -ci -s -d
+        continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: tests/bats
+
+      - name: Install Kcov
+        run: |
+          KCOV_VERSION=v43 && \
+          sudo apt update && sudo apt install -y git cmake g++ libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev binutils-dev && \
+          git clone https://github.com/SimonKagstrom/kcov.git && \
+          cd kcov && git checkout ${KCOV_VERSION} && mkdir build && cd build && \
+          cmake .. && make && sudo make install && \
+          kcov --version
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Run Tests and Code Coverage on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.coverage-html,docs,tests "$(pwd)"/.coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
+        shell: bash
+        continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
+
+      - name: Upload coverage report as an artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@__VERSION__
+        with:
+          name: ${{github.job}}-code-coverage-report
+          include-hidden-files: true
+          path: .coverage-html
+          if-no-files-found: error
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@__VERSION__
+        if: ${{ env.CODECOV_TOKEN != '' && matrix.os == 'ubuntu-latest' }}
+        with:
+          directory: .coverage-html
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Run Tests on other OSes
+        if: matrix.os != 'ubuntu-latest'
+        run: ./tests/bats/node_modules/.bin/bats tests/bats
+        shell: bash
+        continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
+
+      - name: Setup tmate session
+        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+        uses: mxschmitt/action-tmate@__VERSION__
+        timeout-minutes: 30

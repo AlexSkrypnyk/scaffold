@@ -1,0 +1,26 @@
+name: Test Actions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+
+jobs:
+  test-actions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@__VERSION__
+
+      - name: Check coding standards with yamllint
+        run: yamllint --config-file .github/.yamllint-for-gha.yml .github/workflows
+        continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}
+
+      - name: Check coding standards with actionlint
+        run: docker run --rm -v "${GITHUB_WORKSPACE:-.}":/app --workdir /app rhysd/actionlint:__VERSION__
+        continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}

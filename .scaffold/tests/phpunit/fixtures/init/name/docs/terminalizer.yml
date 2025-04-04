@@ -1,0 +1,9 @@
+@@ -52,7 +52,7 @@
+   # Don't forget to add a backgroundColor style with a null as type
+   frameBox:
+     type: floating
+-    title: force-crystal init
++    title: star-forge init
+     style:
+       border: 0px black solid
+       # boxShadow: none

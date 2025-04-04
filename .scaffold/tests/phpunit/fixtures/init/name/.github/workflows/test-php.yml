@@ -1,0 +1,9 @@
+@@ -112,7 +112,7 @@
+         run: composer build
+ 
+       - name: Test PHAR
+-        run: ./.build/force-crystal.phar || exit 1
++        run: ./.build/star-forge.phar || exit 1
+ 
+       - name: Setup tmate session
+         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}

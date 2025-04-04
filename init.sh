@@ -261,6 +261,10 @@ remove_docs() {
 process_readme() {
   mv README.dist.md "README.md" >/dev/null 2>&1 || true
 
+  # Update placeholder image URL and alt text in README.md
+  replace_string_content 'text=Yourproject' "text=${1// /+}"
+  replace_string_content 'alt="Yourproject logo"' "alt=\"${1} logo\""
+
   curl "https://placehold.jp/000000/ffffff/200x200.png?text=${1// /+}&css=%7B%22border-radius%22%3A%22%20100px%22%7D" >logo.tmp.png || true
   if [ -s "logo.tmp.png" ]; then
     mv logo.tmp.png "logo.png" >/dev/null 2>&1 || true
@@ -277,6 +281,7 @@ process_internal() {
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
   rm -f LICENSE >/dev/null || true
+  rm -f SECURITY.md >/dev/null || true
   rm -Rf ".scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
   rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true

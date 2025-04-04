@@ -1,0 +1,57 @@
+name: Release docs
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  release-docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.base_url }}
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: docs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@__VERSION__
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@__VERSION__
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: '${{ github.workspace }}/docs'
+
+      - name: Build documentation site
+        run: npm run build
+        working-directory: '${{ github.workspace }}/docs'
+
+      - name: Setup GitHub pages
+        uses: actions/configure-pages@__VERSION__
+        id: pages
+
+      # Uncomment the following lines to deploy the documentation site.
+      # - name: Upload documentation site
+      #   uses: actions/upload-pages-artifact@__VERSION__
+      #   with:
+      #     path: "docs/build"
+      #
+      # - name: Deploy documentation site
+      #   uses: actions/deploy-pages@__VERSION__

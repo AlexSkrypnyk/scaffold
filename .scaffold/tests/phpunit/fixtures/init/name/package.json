@@ -1,0 +1,24 @@
+@@ -1,16 +1,16 @@
+ {
+-    "name": "@yodashut/force-crystal",
++    "name": "@jeditemple/star-forge",
+     "version": "__VERSION__",
+-    "description": "Provides force-crystal functionality.",
++    "description": "Provides star-forge functionality.",
+     "license": "GPL-2.0-or-later",
+     "author": {
+-        "name": "Luke Skywalker",
+-        "email": "force-crystal@yodashut.com",
+-        "url": "https://yodashut.com"
++        "name": "Obi-Wan Kenobi",
++        "email": "star-forge@jeditemple.com",
++        "url": "https://jeditemple.com"
+     },
+     "contributors": [],
+-    "repository": "github:yodashut/force-crystal",
+-    "bugs": "https://github.com/yodashut/force-crystal/issues",
++    "repository": "github:jeditemple/star-forge",
++    "bugs": "https://github.com/jeditemple/star-forge/issues",
+     "directories": {
+         "test": "tests"
+     },
