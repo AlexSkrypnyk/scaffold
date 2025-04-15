@@ -7,14 +7,14 @@
 
 <div align="center">
 
-[![GitHub Issues](https://img.shields.io/github/issues/YodasHut/force-crystal.svg)](https://github.com/YodasHut/force-crystal/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/YodasHut/force-crystal.svg)](https://github.com/YodasHut/force-crystal/pulls)
-[![Test PHP](https://github.com/YodasHut/force-crystal/actions/workflows/test-php.yml/badge.svg)](https://github.com/YodasHut/force-crystal/actions/workflows/test-php.yml)
-[![Test Node.js](https://github.com/YodasHut/force-crystal/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/YodasHut/force-crystal/actions/workflows/test-nodejs.yml)
-[![Test Shell](https://github.com/YodasHut/force-crystal/actions/workflows/test-shell.yml/badge.svg)](https://github.com/YodasHut/force-crystal/actions/workflows/test-shell.yml)
-[![codecov](https://codecov.io/gh/YodasHut/force-crystal/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/YodasHut/force-crystal)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/YodasHut/force-crystal)
-![LICENSE](https://img.shields.io/github/license/YodasHut/force-crystal)
+[![GitHub Issues](https://img.shields.io/github/issues/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/pulls)
+[![Test PHP](https://github.com/yodashut/force-crystal/actions/workflows/test-php.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-php.yml)
+[![Test Node.js](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml)
+[![Test Shell](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml)
+[![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/yodashut/force-crystal)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
+![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
 
 </div>

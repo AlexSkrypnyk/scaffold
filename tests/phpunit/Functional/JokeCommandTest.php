@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace YourNamespace\App\Tests\Functional;
 
+use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\TestCase;
 use YourNamespace\App\Command\JokeCommand;
-use YourNamespace\App\Tests\Traits\ConsoleTrait;
-use YourNamespace\App\Tests\Traits\MockTrait;
 
 /**
  * Class JokeCommandTest.
@@ -20,22 +20,20 @@ use YourNamespace\App\Tests\Traits\MockTrait;
 #[CoversMethod(JokeCommand::class, 'configure')]
 #[CoversMethod(JokeCommand::class, 'getJoke')]
 #[Group('command')]
-class JokeCommandTest extends ApplicationFunctionalTestCase {
+class JokeCommandTest extends TestCase {
 
-  use ConsoleTrait;
-  use MockTrait;
+  use ApplicationTrait;
 
   #[DataProvider('dataProviderExecute')]
   public function testExecute(string $content, array $expected_output, bool $expected_fail = FALSE): void {
-    /** @var \YourNamespace\App\Command\JokeCommand $mock */
-    // @phpstan-ignore varTag.nativeType
-    $mock = $this->prepareMock(JokeCommand::class, [
-      'getContent' => $content,
-    ]);
+    $builder = $this->getMockBuilder(JokeCommand::class);
+    $builder->onlyMethods(['getContent']);
+    $mock = $builder->getMock();
+    $mock->expects($this->any())->method('getContent')->willReturn($content);
     $mock->setName('joke');
 
-    $this->consoleInitApplicationTester($mock);
-    $output = $this->consoleApplicationRun([], [], $expected_fail);
+    $this->applicationInitFromCommand($mock);
+    $output = $this->applicationRun([], [], $expected_fail);
     foreach ($expected_output as $expected_output_string) {
       $this->assertStringContainsString($expected_output_string, $output);
     }

@@ -288,10 +288,12 @@ process_internal() {
 
   rm -f "docs/static/img/init.gif" >/dev/null || true
 
+  # Replace any existing necessary placeholders using a real value with
+  # tokens used in further replacements.
+  replace_string_content "AlexSkrypnyk/scaffold" "yournamespace/yourproject"
+
   replace_string_content "YourNamespace" "${namespace}"
-  replace_string_content "AlexSkrypnyk" "${namespace}"
   replace_string_content "yournamespace" "${namespace_lowercase}"
-  replace_string_content "alexskrypnyk" "${namespace_lowercase}"
   replace_string_content "yourproject" "${project}"
   replace_string_content "Your Name" "${author}"
   replace_string_content "Alex Skrypnyk" "${author}"

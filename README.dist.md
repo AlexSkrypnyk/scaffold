@@ -7,14 +7,14 @@
 
 <div align="center">
 
-[![GitHub Issues](https://img.shields.io/github/issues/AlexSkrypnyk/scaffold.svg)](https://github.com/AlexSkrypnyk/scaffold/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/AlexSkrypnyk/scaffold.svg)](https://github.com/AlexSkrypnyk/scaffold/pulls)
-[![Test PHP](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-php.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-php.yml)
-[![Test Node.js](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-nodejs.yml)
-[![Test Shell](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-shell.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/test-shell.yml)
-[![codecov](https://codecov.io/gh/AlexSkrypnyk/scaffold/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/scaffold)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/scaffold)
-![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/scaffold)
+[![GitHub Issues](https://img.shields.io/github/issues/yournamespace/yourproject.svg)](https://github.com/yournamespace/yourproject/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yournamespace/yourproject.svg)](https://github.com/yournamespace/yourproject/pulls)
+[![Test PHP](https://github.com/yournamespace/yourproject/actions/workflows/test-php.yml/badge.svg)](https://github.com/yournamespace/yourproject/actions/workflows/test-php.yml)
+[![Test Node.js](https://github.com/yournamespace/yourproject/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/yournamespace/yourproject/actions/workflows/test-nodejs.yml)
+[![Test Shell](https://github.com/yournamespace/yourproject/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yournamespace/yourproject/actions/workflows/test-shell.yml)
+[![codecov](https://codecov.io/gh/yournamespace/yourproject/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/yournamespace/yourproject)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/yournamespace/yourproject)
+![LICENSE](https://img.shields.io/github/license/yournamespace/yourproject)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
 
 </div>
