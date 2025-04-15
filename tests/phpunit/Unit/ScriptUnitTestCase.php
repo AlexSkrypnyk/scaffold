@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace YourNamespace\App\Tests\Unit;
 
+use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use PHPUnit\Framework\TestCase;
-use YourNamespace\App\Tests\Traits\ArrayTrait;
-use YourNamespace\App\Tests\Traits\AssertTrait;
 
 /**
  * Class ScriptUnitTestCase.
@@ -15,8 +14,7 @@ use YourNamespace\App\Tests\Traits\AssertTrait;
  */
 abstract class ScriptUnitTestCase extends TestCase {
 
-  use ArrayTrait;
-  use AssertTrait;
+  use AssertArrayTrait;
 
   /**
    * Script to include.
