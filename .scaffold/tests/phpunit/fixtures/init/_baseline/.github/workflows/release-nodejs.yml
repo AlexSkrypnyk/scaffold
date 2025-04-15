@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   release-nodejs:
-
     runs-on: ubuntu-latest
 
     steps:
