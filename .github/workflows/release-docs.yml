@@ -16,11 +16,11 @@ concurrency:
 
 jobs:
   release-docs:
+    runs-on: ubuntu-latest
+
     environment:
       name: github-pages
       url: ${{ steps.pages.outputs.base_url }}
-
-    runs-on: ubuntu-latest
 
     defaults:
       run:

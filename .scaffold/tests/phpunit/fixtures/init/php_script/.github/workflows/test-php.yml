@@ -1,9 +1,10 @@
-@@ -88,33 +88,3 @@
+@@ -88,34 +88,3 @@
          uses: mxschmitt/action-tmate@__VERSION__
          timeout-minutes: 30
  
 -  build-php:
 -    runs-on: ubuntu-latest
+-
 -    steps:
 -      - name: Checkout code
 -        uses: actions/checkout@__VERSION__

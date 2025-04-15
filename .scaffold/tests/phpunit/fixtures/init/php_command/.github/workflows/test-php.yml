@@ -1,4 +1,4 @@
-@@ -112,7 +112,7 @@
+@@ -113,7 +113,7 @@
          run: composer build
  
        - name: Test PHAR

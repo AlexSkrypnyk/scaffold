@@ -42,9 +42,16 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
    * {@inheritdoc}
    */
   protected function tearDown(): void {
-    // Only run on failures related to the difference between directories.
-    // Only update the fixtures for the 'baseline' tests.
-    if (($this->status() instanceof Failure || $this->status() instanceof Error) && str_contains($this->status()->message(), 'Differences between directories') && (isset(self::$fixtures) && str_contains(self::$fixtures, DIRECTORY_SEPARATOR . 'init' . DIRECTORY_SEPARATOR) && getenv('UPDATE_FIXTURES'))) {
+    if (empty(self::$fixtures)) {
+      throw new \RuntimeException('Fixtures directory is not set.');
+    }
+
+    $is_failure = $this->status() instanceof Failure || $this->status() instanceof Error;
+    $has_message = str_contains($this->status()->message(), 'Differences between directories') || str_contains($this->status()->message(), 'Failed to apply patch');
+    $fixture_exists = str_contains(self::$fixtures, DIRECTORY_SEPARATOR . 'init' . DIRECTORY_SEPARATOR);
+    $update_requested = getenv('UPDATE_FIXTURES');
+
+    if ($is_failure && $has_message && $fixture_exists && $update_requested) {
       $baseline = File::dir(static::$fixtures . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . self::BASELINE_DIR);
       if (str_contains(self::$fixtures, 'baseline')) {
         File::copyIfExists($baseline . DIRECTORY_SEPARATOR . Index::IGNORECONTENT, self::$sut . DIRECTORY_SEPARATOR . Index::IGNORECONTENT);

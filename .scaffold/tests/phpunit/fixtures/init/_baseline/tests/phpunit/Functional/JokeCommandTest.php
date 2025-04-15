@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace YodasHut\App\Tests\Functional;
 
 use AlexSkrypnyk\PhpunitHelpers\Traits\ApplicationTrait;
+use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
@@ -23,6 +24,7 @@ use YodasHut\App\Command\JokeCommand;
 class JokeCommandTest extends TestCase {
 
   use ApplicationTrait;
+  use AssertArrayTrait;
 
   #[DataProvider('dataProviderExecute')]
   public function testExecute(string $content, array $expected_output, bool $expected_fail = FALSE): void {

@@ -91,6 +91,7 @@ jobs:
   # yamllint disable-line #;< PHP_PHAR
   build-php:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
