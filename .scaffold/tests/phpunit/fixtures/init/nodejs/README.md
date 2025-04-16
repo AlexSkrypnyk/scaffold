@@ -20,9 +20,19 @@
      node_modules/.bin/force-crystal
  
  
-@@ -64,11 +58,6 @@
- | `--option2` | None          | Option wihtout a value.            |
+@@ -56,21 +50,7 @@
  
+ 
+ 
+-### CLI options
+-
+-| Name        | Default value | Description                        |
+-|-------------|---------------|------------------------------------|
+-| `arg1`      |               | Description of the first argument. |
+-| `--option1` | `default1`    | Option with a default value.       |
+-| `--option2` | None          | Option wihtout a value.            |
+-
+-
  ## Maintenance
 -
 -

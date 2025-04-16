@@ -1,7 +1,8 @@
-@@ -2,11 +2,6 @@
+@@ -1,12 +1,6 @@
+ # To ignore OS temporary files use global .gitignore
  # https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer
  
- /.build
+-/.build
 -/.logs
 -/.phpunit.cache
 -/composer.lock

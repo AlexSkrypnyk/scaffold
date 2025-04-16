@@ -67,6 +67,8 @@ Download the latest release from GitHub releases page.
 
 [//]: # (#;> SHELL)
 
+[//]: # (#;< PHP)
+
 ### CLI options
 
 | Name        | Default value | Description                        |
@@ -74,6 +76,8 @@ Download the latest release from GitHub releases page.
 | `arg1`      |               | Description of the first argument. |
 | `--option1` | `default1`    | Option with a default value.       |
 | `--option2` | None          | Option wihtout a value.            |
+
+[//]: # (#;> PHP)
 
 ## Maintenance
 
