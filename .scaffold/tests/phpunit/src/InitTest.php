@@ -96,6 +96,17 @@ class InitTest extends UnitTestCase {
           'use_shell' => static::$tuiYes,
         ],
       ],
+      'no languages' => [
+        [
+          'use_php' => static::$tuiNo,
+          'use_php_command' => static::TUI_SKIP,
+          'php_command_name' => static::TUI_SKIP,
+          'use_php_command_build' => static::TUI_SKIP,
+          'use_php_script' => static::TUI_SKIP,
+          'use_nodejs' => static::$tuiNo,
+          'use_shell' => static::$tuiNo,
+        ],
+      ],
       'no release drafter' => [
         [
           'use_release_drafter' => static::$tuiNo,

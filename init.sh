@@ -190,7 +190,6 @@ remove_php_script() {
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Functional/ScriptFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/ExampleScriptFunctionalTest.php || true
-  rm -f docs/content/php/php-script.mdx || true
   remove_tokens_with_content "!PHP_COMMAND"
   remove_tokens_with_content "!PHP_PHAR"
   replace_string_content 'cp php-script php-script.php && phpcs; rm php-script.php' 'phpcs'
@@ -205,7 +204,6 @@ remove_nodejs() {
   rm -f package.lock >/dev/null || true
   rm -f yarn.lock >/dev/null || true
   rm -Rf node_modules >/dev/null || true
-  rm -Rf docs/nodejs || true
 
   remove_string_content_line "\/.npmignore" ".gitattributes"
 
@@ -218,7 +216,6 @@ remove_nodejs() {
 remove_shell() {
   rm -f shell-command.sh >/dev/null || true
   rm -Rf tests/bats || true
-  rm -Rf docs/shell || true
 
   rm -f .github/workflows/test-shell.yml || true
 
@@ -229,12 +226,10 @@ remove_release_drafter() {
   rm -f .github/workflows/draft-release-notes.yml || true
   rm -f .github/release-drafter.yml
   remove_tokens_with_content "RELEASEDRAFTER"
-  rm -Rf docs/content/ci/release-drafter.mdx || true
 }
 
 remove_pr_autoassign() {
   rm -f .github/workflows/assign-author.yml || true
-  rm -Rf docs/content/ci/auto-assign-pr.mdx || true
 }
 
 remove_funding() {
@@ -247,7 +242,6 @@ remove_pr_template() {
 
 remove_renovate() {
   rm -f renovate.json || true
-  rm -Rf docs/content/ci/renovate.mdx || true
   remove_tokens_with_content "RENOVATE"
 }
 
@@ -285,6 +279,8 @@ process_internal() {
   rm -Rf ".scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
   rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true
+  rm -f ".github/workflows/test-actions.yml" >/dev/null || true
+  rm -f ".github/.yamllint-for-gha.yml" >/dev/null || true
 
   rm -f "docs/static/img/init.gif" >/dev/null || true
 
@@ -317,6 +313,7 @@ process_internal() {
   uncomment_line ".gitattributes" "\/phpunit.xml"
   uncomment_line ".gitattributes" "\/rector.php"
   uncomment_line ".gitattributes" "\/.npmignore"
+  uncomment_line ".gitattributes" "\/renovate.json"
 
   remove_tokens_with_content "META"
   remove_special_comments
@@ -347,9 +344,13 @@ main() {
     if [ "${use_php_command}" = "y" ]; then
       php_command_name=$(ask "    CLI command name" "${project}")
       use_php_command_build="$(ask_yesno "    Build PHAR")"
+      use_php_script="n"
+      php_script_name="<unset>"
     else
       use_php_script="$(ask_yesno "  Use simple script")"
-      php_command_name=$(ask "    CLI command name" "${project}")
+      php_script_name=$(ask "    CLI script name" "${project}")
+      php_command_name="<unset>"
+      use_php_command_build="n"
     fi
   fi
 
@@ -357,7 +358,7 @@ main() {
 
   use_shell="$(ask_yesno "Use Shell")"
   if [ "${use_shell}" = "y" ]; then
-    shell_command_name=$(ask "  CLI command name" "${project}")
+    shell_command_name=$(ask "  Shell command name" "${project}")
   fi
 
   use_release_drafter="$(ask_yesno "Use GitHub release drafter")"
@@ -413,16 +414,17 @@ main() {
       [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
       replace_string_content "php-command" "${php_command_name}"
       mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
+      remove_php_script "${php_command_name}"
     else
       remove_php_command "${php_command_name}"
       remove_php_command_build
-    fi
 
-    if [ "${use_php_script:-n}" = "y" ]; then
-      replace_string_content "php-script" "${php_command_name}"
-      mv "php-script" "${php_command_name}" >/dev/null 2>&1 || true
-    else
-      remove_php_script "${php_command_name}"
+      if [ "${use_php_script:-n}" = "y" ]; then
+        replace_string_content "php-script" "${php_script_name}"
+        mv "php-script" "${php_script_name}" >/dev/null 2>&1 || true
+      else
+        remove_php_script "${php_script_name}"
+      fi
     fi
   else
     remove_php

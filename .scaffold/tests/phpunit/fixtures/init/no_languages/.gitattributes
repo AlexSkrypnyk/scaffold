@@ -1,4 +1,4 @@
-@@ -5,11 +5,5 @@
+@@ -5,11 +5,4 @@
  /.github         export-ignore
  /.gitignore      export-ignore
  /docs            export-ignore
@@ -8,5 +8,5 @@
 -/phpstan.neon    export-ignore
 -/phpunit.xml     export-ignore
 -/rector.php      export-ignore
- /.npmignore      export-ignore
+-/.npmignore      export-ignore
  /renovate.json   export-ignore

@@ -26,8 +26,10 @@ indent_size = 4
 [*.{yml,yaml}]
 indent_size = 2
 
+#;< SHELL
 [*.{sh,bash,bats}]
 indent_size = 2
+#;> SHELL
 
 [*.xml]
 indent_size = 4

@@ -8,17 +8,18 @@
  ## Usage
  
  
-@@ -52,9 +49,6 @@
+@@ -52,10 +49,7 @@
  
  
  
 -    ./force-crystal.sh
+ 
 -
 -
  ### CLI options
  
  | Name        | Default value | Description                        |
-@@ -76,13 +70,6 @@
+@@ -78,13 +72,6 @@
      npm run lint
      npm run test
  

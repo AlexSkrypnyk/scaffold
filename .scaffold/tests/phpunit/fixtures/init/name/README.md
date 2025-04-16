@@ -61,8 +61,8 @@
 +    ./star-forge.sh
  
  
- ### CLI options
-@@ -78,8 +78,8 @@
+ 
+@@ -80,8 +80,8 @@
  
  
  
@@ -73,7 +73,7 @@
  
      npm ci --prefix tests/bats
      ./tests/bats/node_modules/.bin/bats tests/bats
-@@ -86,4 +86,4 @@
+@@ -88,4 +88,4 @@
  
  
  ---
