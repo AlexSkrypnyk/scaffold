@@ -21,7 +21,7 @@
         "symfony/console": "^7"
     },
     "require-dev": {
-        "alexskrypnyk/phpunit-helpers": "^0.5.0",
+        "alexskrypnyk/phpunit-helpers": "^0.6.0",
         "bamarni/composer-bin-plugin": "^1.8",
         "dealerdirect/phpcodesniffer-composer-installer": "^1",
         "drupal/coder": "^8.3",
