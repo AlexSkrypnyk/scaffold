@@ -4,6 +4,7 @@ logo.png
 ^*/yarn.lock
 ^*/composer.lock
 ^*/package-lock.json
+^package-lock.json
 node_modules
 scripts/vortex/*
 vendor

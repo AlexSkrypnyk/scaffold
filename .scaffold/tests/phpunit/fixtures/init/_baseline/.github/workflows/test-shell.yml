@@ -43,7 +43,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@__VERSION__
         with:
-          node-version: 20
+          node-version: __VERSION__
 
       - name: Setup sh-checker
         uses: luizm/action-sh-checker@__VERSION__
