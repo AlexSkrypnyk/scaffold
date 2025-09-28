@@ -1,4 +1,4 @@
-@@ -1,12 +1,140 @@
+@@ -1,12 +1,142 @@
  #!/usr/bin/env php
  <?php
  
@@ -130,6 +130,8 @@
 +  });
 +
 +  try {
++    $argv = is_array($_SERVER['argv'] ?? NULL) ? array_filter($_SERVER['argv'], 'is_string') : [];
++    $argc = is_scalar($_SERVER['argc'] ?? NULL) ? (int) $_SERVER['argc'] : 0;
 +    // The function should not provide an exit code but rather throw exceptions.
 +    main($argv, $argc);
 +  }
