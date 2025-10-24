@@ -78,7 +78,7 @@ jobs:
 
       - name: Upload coverage report as an artifact
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{github.job}}-code-coverage-report
           include-hidden-files: true
