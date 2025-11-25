@@ -35,8 +35,8 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "AlexSkrypnyk\\Scaffold\\Tests\\": "src",
-            "AlexSkrypnyk\\File\\Tests\\": "vendor/alexskrypnyk/file/tests/"
+            "AlexSkrypnyk\\File\\Tests\\": "vendor/alexskrypnyk/file/tests/",
+            "AlexSkrypnyk\\Scaffold\\Tests\\": "src"
         }
     },
     "config": {
@@ -57,6 +57,8 @@
             "rector --clear-cache",
             "phpcbf"
         ],
-        "test": "phpunit"
+        "test": "phpunit",
+        "update-baseline": "UPDATE_FIXTURES=1 phpunit --filter=testInit@baseline",
+        "update-fixtures": "UPDATE_FIXTURES=1 phpunit --filter=testInit"
     }
 }
