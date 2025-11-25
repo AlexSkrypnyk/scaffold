@@ -27,7 +27,6 @@ abstract class ScriptFunctionalTestCase extends ScriptUnitTestCase {
    */
   const EXIT_ERROR = 1;
 
-  #[\Override]
   protected function setUp(): void {
     parent::setUp();
     // Allow script to run.
