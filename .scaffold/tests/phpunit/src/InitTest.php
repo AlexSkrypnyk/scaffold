@@ -44,6 +44,10 @@ class InitTest extends UnitTestCase {
 
     $baseline = File::dir(static::$fixtures . '/../' . self::BASELINE_DIR);
     static::replaceVersions(static::$sut);
+
+    if (!is_string(static::$fixtures)) {
+      throw new \RuntimeException('Fixtures directory is not set.');
+    }
     $this->assertDirectoryEqualsPatchedBaseline(static::$sut, $baseline, static::$fixtures);
 
     if ($after instanceof SerializableClosure) {
