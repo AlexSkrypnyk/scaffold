@@ -27,7 +27,7 @@
      },
      "require": {
          "php": "__VERSION__",
-@@ -37,12 +37,12 @@
+@@ -36,12 +36,12 @@
      "prefer-stable": true,
      "autoload": {
          "psr-4": {
@@ -42,7 +42,7 @@
          },
          "classmap": [
              "tests/phpunit"
-@@ -49,7 +49,7 @@
+@@ -48,7 +48,7 @@
          ]
      },
      "bin": [

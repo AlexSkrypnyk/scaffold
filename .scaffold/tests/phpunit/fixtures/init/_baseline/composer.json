@@ -28,7 +28,6 @@
         "ergebnis/composer-normalize": "__VERSION__",
         "mikey179/vfsstream": "__VERSION__",
         "opis/closure": "__VERSION__",
-        "phpmd/phpmd": "__VERSION__",
         "phpstan/phpstan": "__VERSION__",
         "phpunit/phpunit": "__VERSION__",
         "rector/rector": "__VERSION__"
@@ -69,7 +68,6 @@
         "lint": [
             "phpcs",
             "phpstan",
-            "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
             "rector --clear-cache --dry-run"
         ],
         "lint-fix": [

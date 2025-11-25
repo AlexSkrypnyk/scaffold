@@ -44,7 +44,7 @@ To add a Symfony Console command:
 ### Code Quality
 
 ```bash
-# Run all linters (PHPCS, PHPStan, PHPMD, Rector)
+# Run all linters (PHPCS, PHPStan, Rector)
 composer lint
 
 # Auto-fix code style issues
@@ -54,7 +54,6 @@ composer lint-fix
 ./vendor/bin/phpcs # Check coding standards
 ./vendor/bin/phpcbf # Fix coding standards
 ./vendor/bin/phpstan # Static analysis (level 9)
-./vendor/bin/phpmd . text phpmd.xml # Mess detection
 ./vendor/bin/rector --dry-run # Check Rector suggestions
 ```
 
@@ -99,7 +98,7 @@ composer install
 
 ## Code Quality Standards
 
-### Four-Layer Quality Stack
+### Three-Layer Quality Stack
 
 1. **PHP_CodeSniffer** - Drupal coding standards + strict types requirement
   - Config: `phpcs.xml`
@@ -110,10 +109,7 @@ composer install
   - Config: `phpstan.neon`
   - Ignores: Untyped iterables in tests/data providers
 
-3. **PHP Mess Detector** - Code complexity and design checks
-  - Config: `phpmd.xml`
-
-4. **Rector** - PHP 8.2/8.3 modernization + code quality
+3. **Rector** - PHP 8.2/8.3 modernization + code quality
   - Config: `rector.php`
   - Sets: PHP_82, PHP_83, CODE_QUALITY, CODING_STYLE, DEAD_CODE,
     TYPE_DECLARATION
