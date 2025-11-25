@@ -24,7 +24,7 @@
         "alexskrypnyk/phpunit-helpers": "^0.14.0",
         "bamarni/composer-bin-plugin": "^1.8",
         "dealerdirect/phpcodesniffer-composer-installer": "^1",
-        "drupal/coder": "^8.3",
+        "drupal/coder": "^9.0@alpha",
         "ergebnis/composer-normalize": "^2.48",
         "mikey179/vfsstream": "^1.6",
         "opis/closure": "^4.4",
@@ -67,13 +67,13 @@
             "box compile"
         ],
         "lint": [
-            "cp php-script php-script.php && phpcs; rm php-script.php",
+            "phpcs",
             "phpstan",
             "rector --clear-cache --dry-run"
         ],
         "lint-fix": [
             "rector --clear-cache",
-            "cp php-script php-script.php && phpcbf; rm php-script.php"
+            "phpcbf"
         ],
         "reset": "rm -Rf vendor vendor-bin composer.lock",
         "test": "phpunit --no-coverage",
