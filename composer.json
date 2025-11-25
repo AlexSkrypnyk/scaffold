@@ -28,7 +28,6 @@
         "ergebnis/composer-normalize": "^2.48",
         "mikey179/vfsstream": "^1.6",
         "opis/closure": "^4.4",
-        "phpmd/phpmd": "^2.15",
         "phpstan/phpstan": "^2",
         "phpunit/phpunit": "^11",
         "rector/rector": "^2"
@@ -70,7 +69,6 @@
         "lint": [
             "cp php-script php-script.php && phpcs; rm php-script.php",
             "phpstan",
-            "phpmd --exclude vendor,vendor-bin,node_modules . text phpmd.xml",
             "rector --clear-cache --dry-run"
         ],
         "lint-fix": [

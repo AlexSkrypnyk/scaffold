@@ -7,7 +7,7 @@
  - **Use for:** Complex applications with multiple commands, shared logic, OOP
    architecture
  
-@@ -76,12 +76,6 @@
+@@ -75,12 +75,6 @@
  ```
  
  
@@ -20,7 +20,7 @@
  ### Building
  
  
-@@ -143,15 +137,6 @@
+@@ -139,15 +133,6 @@
  - Data providers: `#[DataProvider('providerMethodName')]`
  
  
@@ -36,7 +36,7 @@
  ## CI/CD
  
  GitHub Actions workflows test across:
-@@ -163,9 +148,6 @@
+@@ -159,9 +144,6 @@
  
  - `.github/workflows/test-php.yml` - PHP testing
  - `.github/workflows/release-php.yml` - PHAR packaging and release

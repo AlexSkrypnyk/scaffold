@@ -142,7 +142,6 @@ remove_php() {
   rm -Rf vendor >/dev/null || true
   rm -Rf tests/phpunit || true
   rm -f phpcs.xml || true
-  rm -f phpmd.xml || true
   rm -f phpstan.neon || true
   rm -f phpunit.xml || true
   rm -f rector.php || true
@@ -151,7 +150,6 @@ remove_php() {
 
   remove_string_content_line "\/tests" ".gitattributes"
   remove_string_content_line "\/phpcs.xml" ".gitattributes"
-  remove_string_content_line "\/phpmd.xml" ".gitattributes"
   remove_string_content_line "\/phpstan.neon" ".gitattributes"
   remove_string_content_line "\/phpunit.xml" ".gitattributes"
   remove_string_content_line "\/rector.php" ".gitattributes"
@@ -308,7 +306,6 @@ process_internal() {
   uncomment_line ".gitattributes" "\/docs"
   uncomment_line ".gitattributes" "\/tests"
   uncomment_line ".gitattributes" "\/phpcs.xml"
-  uncomment_line ".gitattributes" "\/phpmd.xml"
   uncomment_line ".gitattributes" "\/phpstan.neon"
   uncomment_line ".gitattributes" "\/phpunit.xml"
   uncomment_line ".gitattributes" "\/rector.php"

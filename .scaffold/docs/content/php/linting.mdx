@@ -1,7 +1,6 @@
 ---
 title: Linting
 sidebar_position: 4
-cspell: ignore unusedcode codesize cleancode
 ---
 
 # Linting
@@ -40,32 +39,6 @@ By default, the linter runs with showing sniff codes, progress and colors.
 
 An example of annotated ruleset with all available options can be found on
 [the Annotated Ruleset page](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-Ruleset).
-
-## PHP Mess Detector
-
-This template provides integration with [PHP Mess Detector](https://phpmd.org/),
-which takes a given PHP source code base and looks for several potential
-problems within that source.
-
-These problems can be things like:
-
-- Possible bugs
-- Suboptimal code
-- Overcomplicated expressions
-- Unused parameters, methods, properties
-
-The [`phpmd.xml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpmd.xml)
-file contains a template ruleset with minimal configuration, serving as an
-initial foundation for further customization of coding standards.
-
-The rules enabled by default
-are: [`unusedcode`](https://phpmd.org/rules/index.html#unused-code-rules),
-[`codesize`](https://phpmd.org/rules/index.html#code-size-rules),
-[`cleancode`](https://phpmd.org/rules/index.html#clean-code-rules)
-
-For a list of all available rules, visit
-the [Rules section](https://phpmd.org/rules/index.html)
-of the PHPMD website.
 
 ## PHPStan
 
