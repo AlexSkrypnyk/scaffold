@@ -10,6 +10,7 @@
         "Cobertura",
         "Terminalizer",
         "autoloader",
+        "calver",
         "cobertura",
         "daemonized",
         "lhotari",
