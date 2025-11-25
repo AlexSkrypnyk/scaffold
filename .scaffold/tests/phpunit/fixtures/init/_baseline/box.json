@@ -5,8 +5,25 @@
         {
             "in": "./",
             "exclude": [
+                "docs",
                 "tests"
             ]
         }
-    ]
+    ],
+    "blacklist": [
+        ".editorconfig",
+        ".gitattributes",
+        ".github",
+        ".gitignore",
+        "CLAUDE.md",
+        "box.json",
+        "phpcs.xml",
+        "phpstan.neon",
+        "phpunit.xml",
+        "rector.php",
+        "renovate.json"
+    ],
+    "replacements": {
+        "force-crystal-version": "development"
+    }
 }

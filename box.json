@@ -23,5 +23,8 @@
         "phpunit.xml",
         "rector.php",
         "renovate.json"
-    ]
+    ],
+    "replacements": {
+        "yourproject-version": "development"
+    }
 }

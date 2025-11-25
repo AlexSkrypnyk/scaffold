@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -30,18 +36,24 @@ jobs:
       - name: Install dependencies
         run: composer install
 
+      - name: Set release version
+        run: |
+          version="${{ github.event.inputs.version || github.ref_name }}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "Release version: $version"
+          sed -i "s/\"force-crystal-version\": \"development\"/\"force-crystal-version\": \"${version}\"/g" box.json
+
       - name: Build PHAR
         run: composer build
 
       - name: Test PHAR
-        run: ./.build/force-crystal.phar || exit 1
-
-      - name: Get tag name
-        id: get-version
-        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+        run: |
+          ./.build/force-crystal.phar --version
+          ./.build/force-crystal.phar || exit 1
 
       - name: Create Release
         uses: softprops/action-gh-release@__VERSION__
         with:
+          tag_name: ${{ env.RELEASE_VERSION }}
           files: |
             ./.build/force-crystal.phar

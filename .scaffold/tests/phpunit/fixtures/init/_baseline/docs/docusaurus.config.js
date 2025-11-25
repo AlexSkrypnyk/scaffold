@@ -116,7 +116,7 @@ const config = {
             href: 'https://github.com/yodashut/force-crystal',
           },
         ],
-        copyright: `Copyright ©${new Date().getFullYear()} Luke Skywalker. Built with Docusaurus.`,
+        copyright: `Version: ${process.env.RELEASE_VERSION || 'dev'} <br/> Copyright ©${new Date().getFullYear()} Luke Skywalker. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,
