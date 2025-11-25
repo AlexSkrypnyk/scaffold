@@ -37,7 +37,7 @@
   - [Simple single-file script scaffold](php-script)
     with [unit tests](tests/phpunit/Functional) (with coverage)
   - Code quality tools with
-    configurations: [PHP Code Sniffer](phpcs.xml), [PHP Mess Detector](phpmd.xml),
+    configurations: [PHP Code Sniffer](phpcs.xml),
     [PHPStan](phpstan.neon), [Rector](rector.php)
   - CI config to [Lint, test](.github/workflows/test-php.yml)
     and [publish](.github/workflows/release-php.yml) PHP as [PHAR](box.json)
