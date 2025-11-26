@@ -2,12 +2,22 @@
 ##
 # Adjust project repository based on user input.
 #
+# This script initializes a new project from the Scaffold template by:
+# - Replacing placeholder values (namespace, project name, author)
+# - Removing unwanted components (PHP, NodeJS, Shell, etc.)
+# - Cleaning up template-specific files
+# - Configuring selected features (release drafter, renovate, docs)
+#
+# The script can run interactively (with prompts) or silently (with arguments).
+#
 # @usage:
 # Interactive prompt:
 # ./init.sh
 #
-# Silent:
+# Silent mode:
 # ./init.sh yournamespace yourproject "Your Name"
+#
+# Silent mode runs non-interactively and uses default values for all choices.
 #
 # shellcheck disable=SC2162,SC2015
 
@@ -19,7 +29,32 @@ project=${2-}
 author=${3-}
 
 #-------------------------------------------------------------------------------
+# STRING UTILITIES
+#-------------------------------------------------------------------------------
 
+##
+# Convert a string to various naming conventions.
+#
+# @param $1 string Input string to convert
+# @param $2 string Conversion type
+#
+# Conversion types:
+#   file_name        : lowercase with underscores (my_file_name)
+#   route_path       : lowercase with underscores (my_route_path)
+#   deployment_id    : lowercase with underscores (my_deployment_id)
+#   domain_name      : lowercase, underscores, no hyphens (mydomain_name)
+#   package_namespace: lowercase, underscores, no hyphens (mypackage_namespace)
+#   namespace        : PascalCase, no spaces/hyphens (MyNamespace)
+#   class_name       : PascalCase, no spaces/hyphens (MyClassName)
+#   package_name     : lowercase with hyphens (my-package-name)
+#   function_name    : lowercase with underscores (my_function_name)
+#   ui_id            : lowercase with underscores (my_ui_id)
+#   cli_command      : lowercase with underscores (my_cli_command)
+#   log_entry        : unchanged (My Log Entry)
+#   code_comment_title: unchanged (My Comment Title)
+#
+# @return string Converted string
+#
 convert_string() {
   input_string="$1"
   conversion_type="$2"
@@ -44,11 +79,23 @@ convert_string() {
       echo "${input_string}"
       ;;
     *)
-      echo "Invalid conversion type"
+      echo "Error: Invalid conversion type '${conversion_type}'" >&2
+      return 1
       ;;
   esac
 }
 
+#-------------------------------------------------------------------------------
+# FILE OPERATION FUNCTIONS
+#-------------------------------------------------------------------------------
+
+##
+# Replace all occurrences of a string in files.
+# Searches recursively, excluding common directories.
+#
+# @param $1 string Needle (string to find)
+# @param $2 string Replacement (string to replace with)
+#
 replace_string_content() {
   local needle="${1}"
   local replacement="${2}"
@@ -66,7 +113,7 @@ to_lowercase() {
 remove_string_content() {
   local token="${1}"
   local sed_opts
-  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
 }
 
@@ -74,14 +121,26 @@ remove_string_content_line() {
   local token="${1}"
   local target="${2:-.}"
   local sed_opts
-  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)/${target}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
+##
+# Remove tokens and their enclosed content from files.
+# Tokens use format: #;< TOKEN ... #;> TOKEN
+#
+# @param $1 string Token name (without #;< or #;> prefixes)
+#
+# Example:
+#   #;< PHP
+#   Some PHP-specific content
+#   #;> PHP
+#   This entire block will be removed
+#
 remove_tokens_with_content() {
   local token="${1}"
   local sed_opts
-  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   grep -rI --include=".*" --include="*" --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
 }
 
@@ -89,17 +148,28 @@ uncomment_line() {
   local file_name="${1}"
   local start_string="${2}"
   local sed_opts
-  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   LC_ALL=C.UTF-8 sed "${sed_opts[@]}" -e "s/^# ${start_string}/${start_string}/" "${file_name}"
 }
 
 remove_special_comments() {
   local token="#;"
   local sed_opts
-  sed_opts=(-i) && [ "$(uname)" == "Darwin" ] && sed_opts=(-i '')
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
+#-------------------------------------------------------------------------------
+# USER INTERACTION FUNCTIONS
+#-------------------------------------------------------------------------------
+
+##
+# Prompt user for input with optional default value.
+#
+# @param $1 string Prompt text
+# @param $2 string Default value (optional)
+# @return string User input or default value
+#
 ask() {
   local prompt="$1"
   local default="${2-}"
@@ -120,6 +190,13 @@ ask() {
   echo "${result}"
 }
 
+##
+# Prompt user for yes/no answer.
+#
+# @param $1 string Prompt text
+# @param $2 string Default value (Y or N, default: Y)
+# @return string 'y' or 'n'
+#
 ask_yesno() {
   local prompt="${1}"
   local default="${2:-Y}"
@@ -130,6 +207,48 @@ ask_yesno() {
   echo "${result}"
 }
 
+#-------------------------------------------------------------------------------
+# INPUT VALIDATION FUNCTIONS
+#-------------------------------------------------------------------------------
+
+##
+# Check if required commands are available.
+check_dependencies() {
+  local missing=() required=("sed" "grep" "tr" "awk" "curl")
+  for cmd in "${required[@]}"; do command -v "${cmd}" >/dev/null 2>&1 || missing+=("${cmd}"); done
+  [ ${#missing[@]} -gt 0 ] && echo "Error: Missing required commands: ${missing[*]}" >&2 && return 1
+  return 0
+}
+
+##
+# Validate namespace format (PascalCase).
+validate_namespace() {
+  [[ ${1} =~ ^[A-Z][a-zA-Z0-9]*$ ]] || {
+    echo "Error: Namespace must be PascalCase (e.g., MyNamespace)" >&2
+    return 1
+  }
+}
+
+##
+# Validate project name format (lowercase with hyphens).
+validate_project_name() {
+  [[ ${1} =~ ^[a-z0-9-]+$ ]] && [[ ! ${1} =~ ^- ]] && [[ ! ${1} =~ -$ ]] || {
+    echo "Error: Project name must be lowercase with hyphens (e.g., my-project)" >&2
+    return 1
+  }
+}
+
+##
+# Validate author name (non-empty).
+validate_author() {
+  [ -n "${1}" ] || {
+    echo "Error: Author name cannot be empty" >&2
+    return 1
+  }
+}
+
+#-------------------------------------------------------------------------------
+# COMPONENT REMOVAL FUNCTIONS
 #-------------------------------------------------------------------------------
 
 remove_php() {
@@ -248,6 +367,10 @@ remove_docs() {
   remove_string_content_line "\/docs" ".gitattributes"
 }
 
+#-------------------------------------------------------------------------------
+# PROCESSING FUNCTIONS
+#-------------------------------------------------------------------------------
+
 process_readme() {
   mv README.dist.md "README.md" >/dev/null 2>&1 || true
 
@@ -272,6 +395,7 @@ process_internal() {
 
   rm -f LICENSE >/dev/null || true
   rm -f SECURITY.md >/dev/null || true
+  rm -f plan.md >/dev/null || true
   rm -Rf ".scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
   rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true
@@ -315,8 +439,12 @@ process_internal() {
 }
 
 #-------------------------------------------------------------------------------
+# MAIN FUNCTION
+#-------------------------------------------------------------------------------
 
 main() {
+  check_dependencies || exit 1
+
   echo "Please follow the prompts to adjust your project configuration"
   echo
 
@@ -327,6 +455,11 @@ main() {
   # Make sure the input become valid value.
   project="$(convert_string "${project}" "package_name")"
   namespace="$(convert_string "${namespace}" "namespace")"
+
+  # Validate inputs.
+  validate_namespace "${namespace}" || exit 1
+  validate_project_name "${project}" || exit 1
+  validate_author "${author}" || exit 1
 
   use_php="$(ask_yesno "Use PHP")"
 
@@ -375,6 +508,7 @@ main() {
   echo "    CLI command name             : ${php_command_name}"
   echo "    Build PHAR                   : ${use_php_command_build}"
   echo "  Use simple script              : ${use_php_script}"
+  [ "${use_php_script}" = "y" ] && echo "    Simple script name           : ${php_script_name}"
   echo "Use NodeJS                       : ${use_nodejs}"
   echo "Use Shell                        : ${use_shell}"
   echo "Use GitHub release drafter       : ${use_release_drafter}"
