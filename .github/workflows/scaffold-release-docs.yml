@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -38,6 +44,13 @@ jobs:
       - name: Install dependencies
         run: npm install
         working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Set release version
+        working-directory: ${{ github.workspace }}
+        run: |
+          version="${{ github.event.inputs.version || github.ref_name }}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "Release version: $version"
 
       - name: Build documentation site
         run: npm run build

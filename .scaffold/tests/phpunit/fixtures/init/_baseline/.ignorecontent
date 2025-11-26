@@ -1,10 +1,11 @@
 *.jpg
 *.png
-logo.png
-^*/yarn.lock
 ^*/composer.lock
 ^*/package-lock.json
+^*/yarn.lock
 ^package-lock.json
+docs/.docusaurus
+logo.png
 node_modules
 scripts/vortex/*
 vendor

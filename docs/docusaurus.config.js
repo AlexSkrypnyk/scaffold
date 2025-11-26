@@ -119,7 +119,7 @@ const config = {
             href: 'https://github.com/yournamespace/yourproject',
           },
         ],
-        copyright: `Copyright ©${new Date().getFullYear()} Alex Skrypnyk. Built with Docusaurus.`,
+        copyright: `Version: ${process.env.RELEASE_VERSION || 'dev'} <br/> Copyright ©${new Date().getFullYear()} Alex Skrypnyk. Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,

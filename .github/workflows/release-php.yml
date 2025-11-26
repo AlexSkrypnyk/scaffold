@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -31,20 +37,26 @@ jobs:
         run: composer install
 
       # yamllint disable-line #;< PHP_PHAR
+      - name: Set release version
+        run: |
+          version="${{ github.event.inputs.version || github.ref_name }}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "Release version: $version"
+          sed -i "s/\"yourproject-version\": \"development\"/\"yourproject-version\": \"${version}\"/g" box.json
+
       - name: Build PHAR
         run: composer build
 
       - name: Test PHAR
-        run: ./.build/php-command.phar || exit 1
+        run: |
+          ./.build/php-command.phar --version
+          ./.build/php-command.phar || exit 1
       # yamllint disable-line #;> PHP_PHAR
-
-      - name: Get tag name
-        id: get-version
-        run: echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.RELEASE_VERSION }}
           files: |
             #;< PHP_PHAR
             ./.build/php-command.phar

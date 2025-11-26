@@ -114,7 +114,9 @@ jobs:
         run: composer build
 
       - name: Test PHAR
-        run: ./.build/php-command.phar || exit 1
+        run: |
+          ./.build/php-command.phar --version
+          ./.build/php-command.phar || exit 1
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}

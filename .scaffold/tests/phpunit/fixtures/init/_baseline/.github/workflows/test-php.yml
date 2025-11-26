@@ -113,7 +113,9 @@ jobs:
         run: composer build
 
       - name: Test PHAR
-        run: ./.build/force-crystal.phar || exit 1
+        run: |
+          ./.build/force-crystal.phar --version
+          ./.build/force-crystal.phar || exit 1
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}

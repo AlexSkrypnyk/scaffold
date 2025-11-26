@@ -1,4 +1,4 @@
-@@ -8,8 +8,8 @@
+@@ -8,11 +8,11 @@
  declare(strict_types=1);
  
  use Symfony\Component\Console\Application;
@@ -8,4 +8,8 @@
 +use JediTemple\App\Command\SayHelloCommand;
  
  // @codeCoverageIgnoreStart
- $application = new Application();
+-$application = new Application('force-crystal', '@force-crystal-version@');
++$application = new Application('star-forge', '@star-forge-version@');
+ 
+ $command = new JokeCommand();
+ $application->add($command);
