@@ -1,4 +1,11 @@
-@@ -13,7 +13,7 @@
+@@ -8,12 +8,12 @@
+ 
+ /** @type {import('@docusaurus/types').Config} */
+ const config = {
+-  title: 'ForceCrystal',
+-  tagline: 'ForceCrystal documentation',
++  title: 'StarForge',
++  tagline: 'StarForge documentation',
    favicon: 'img/favicon.ico',
  
    // Set the production url of your site here

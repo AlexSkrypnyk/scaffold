@@ -31,3 +31,18 @@ load "../../../init.sh"
 
   dataprovider_run "convert_string" 3
 }
+
+@test "Test to_pascalcase conversions" {
+  TEST_CASES=(
+    "my-awesome-project" "MyAwesomeProject"
+    "my_awesome_project" "MyAwesomeProject"
+    "my awesome project" "MyAwesomeProject"
+    "force-crystal" "ForceCrystal"
+    "test-app" "TestApp"
+    "single" "Single"
+    "mix-case_test project" "MixCaseTestProject"
+    "MyAwesomeProject" "MyAwesomeProject"
+  )
+
+  dataprovider_run "to_pascalcase" 2
+}

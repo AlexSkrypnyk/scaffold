@@ -110,6 +110,9 @@ to_lowercase() {
   echo "${1}" | tr '[:upper:]' '[:lower:]'
 }
 
+# Convert to PascalCase for project names (brief one-liner)
+to_pascalcase() { echo "${1}" | awk -F'[-_ ]' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); } 1' OFS=''; }
+
 remove_string_content() {
   local token="${1}"
   local sed_opts
@@ -389,13 +392,13 @@ process_internal() {
   local namespace="${1}"
   local project="${2}"
   local author="${3}"
+  local project_pascalcase="${4}"
   local namespace_lowercase
 
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
   rm -f LICENSE >/dev/null || true
   rm -f SECURITY.md >/dev/null || true
-  rm -f plan.md >/dev/null || true
   rm -Rf ".scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
   rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true
@@ -411,6 +414,7 @@ process_internal() {
   replace_string_content "YourNamespace" "${namespace}"
   replace_string_content "yournamespace" "${namespace_lowercase}"
   replace_string_content "yourproject" "${project}"
+  replace_string_content "Yourproject" "${project_pascalcase}"
   replace_string_content "Your Name" "${author}"
   replace_string_content "Alex Skrypnyk" "${author}"
 
@@ -455,6 +459,7 @@ main() {
   # Make sure the input become valid value.
   project="$(convert_string "${project}" "package_name")"
   namespace="$(convert_string "${namespace}" "namespace")"
+  project_pascalcase="$(to_pascalcase "${project}")"
 
   # Validate inputs.
   validate_namespace "${namespace}" || exit 1
@@ -577,7 +582,7 @@ main() {
 
   process_readme "${project}"
 
-  process_internal "${namespace}" "${project}" "${author}"
+  process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 
   [ "${remove_self}" != "n" ] && rm -- "$0" || true
 
