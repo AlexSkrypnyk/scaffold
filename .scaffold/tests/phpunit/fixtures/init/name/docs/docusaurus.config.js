@@ -55,8 +55,8 @@
 +            href: 'https://github.com/jeditemple/star-forge',
            },
          ],
--        copyright: `Version: ${process.env.RELEASE_VERSION || 'dev'} <br/> Copyright ©${new Date().getFullYear()} Luke Skywalker. Built with Docusaurus.`,
-+        copyright: `Version: ${process.env.RELEASE_VERSION || 'dev'} <br/> Copyright ©${new Date().getFullYear()} Obi-Wan Kenobi. Built with Docusaurus.`,
+-        copyright: `Version: ${process.env.RELEASE_VERSION || 'development'} <br/> Copyright ©${new Date().getFullYear()} Luke Skywalker. Built with Docusaurus.`,
++        copyright: `Version: ${process.env.RELEASE_VERSION || 'development'} <br/> Copyright ©${new Date().getFullYear()} Obi-Wan Kenobi. Built with Docusaurus.`,
        },
        prism: {
          theme: prismThemes.github,
