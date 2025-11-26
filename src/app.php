@@ -12,7 +12,7 @@ use YourNamespace\App\Command\JokeCommand;
 use YourNamespace\App\Command\SayHelloCommand;
 
 // @codeCoverageIgnoreStart
-$application = new Application('yourproject', '@yourproject-version@');
+$application = new Application('YourProject', '@yourproject-version@');
 
 $command = new JokeCommand();
 $application->add($command);
