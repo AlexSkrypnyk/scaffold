@@ -23,13 +23,13 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
         "drupal/coder": "^8.3.31",
         "ergebnis/composer-normalize": "^2.48.2",
-        "laravel/serializable-closure": "^2.0.6",
-        "phpstan/phpstan": "^2.1.32",
-        "phpunit/phpunit": "^11.5.44",
-        "rector/rector": "^2.2.8",
-        "symfony/filesystem": "^7.3.6",
-        "symfony/finder": "^7.3.5",
-        "symfony/process": "^7.3.4"
+        "laravel/serializable-closure": "^2.0.7",
+        "phpstan/phpstan": "^2.1.33",
+        "phpunit/phpunit": "^11.5.46",
+        "rector/rector": "^2.2.14",
+        "symfony/filesystem": "^7.4.0",
+        "symfony/finder": "^7.4.0",
+        "symfony/process": "^7.4.0"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
@@ -44,6 +44,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "ergebnis/composer-normalize": true
         },
+        "bump-after-update": true,
         "discard-changes": true,
         "sort-packages": true
     },
