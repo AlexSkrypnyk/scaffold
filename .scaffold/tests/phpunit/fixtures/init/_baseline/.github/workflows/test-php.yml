@@ -60,14 +60,14 @@ jobs:
       - name: Check code coverage threshold
         if: matrix.php-versions == '8.3'
         run: |
-          RATE=$(cat .logs/cobertura.xml)
-          RATE=${RATE#*line-rate=\"}; RATE=${RATE%%\"*}
-          PERCENT=$(echo "$RATE * 100" | bc -l)
+          RATE=$(grep -o 'line-rate="[0-9.]*"' .logs/cobertura.xml | head -1 | tr -cd '0-9.')
+          PERCENT=$(awk "BEGIN {printf \"%.2f\", $RATE*100}")
           echo "Coverage: $PERCENT% (threshold: $CI_CODE_COVERAGE_THRESHOLD%)"
-          if [ "$(echo "$PERCENT < $CI_CODE_COVERAGE_THRESHOLD" | bc -l)" = "1" ]; then
+          if [[ ${PERCENT//./} -lt $((CI_CODE_COVERAGE_THRESHOLD*100)) ]]; then
             echo "FAIL: coverage too low"
             exit 1
           fi
+          { echo "COVERAGE_CONTENT<<EOF"; sed '/./,$!d' .logs/coverage.txt; echo "EOF"; } >> "$GITHUB_ENV"
         env:
           CI_CODE_COVERAGE_THRESHOLD: ${{ vars.CI_CODE_COVERAGE_THRESHOLD || '80' }}
 
@@ -75,7 +75,10 @@ jobs:
         if: matrix.php-versions == '8.3' && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@__VERSION__
         with:
-          path: .logs/coverage.txt
+          message: |
+            ```
+            ${{ env.COVERAGE_CONTENT }}
+            ```
           # Post a new comment every time to keep the coverage history.
           hide_and_recreate: true
 
