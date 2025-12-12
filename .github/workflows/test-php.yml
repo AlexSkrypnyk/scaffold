@@ -83,7 +83,7 @@ jobs:
           hide_and_recreate: true
 
       - name: Upload coverage report as an artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{github.job}}-code-coverage-report-${{ matrix.php-versions }}
           path: .logs
