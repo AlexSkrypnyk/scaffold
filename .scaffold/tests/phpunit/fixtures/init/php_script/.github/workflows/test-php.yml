@@ -1,4 +1,4 @@
-@@ -113,36 +113,3 @@
+@@ -122,36 +122,3 @@
          uses: mxschmitt/action-tmate@__VERSION__
          timeout-minutes: 30
  
