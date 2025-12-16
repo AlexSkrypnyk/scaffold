@@ -19,7 +19,7 @@ use YodasHut\App\Command\SayHelloCommand;
 #[CoversMethod(SayHelloCommand::class, 'execute')]
 #[CoversMethod(SayHelloCommand::class, 'configure')]
 #[Group('command')]
-class SayHelloCommandTest extends TestCase {
+final class SayHelloCommandTest extends TestCase {
 
   use ApplicationTrait;
   use AssertArrayTrait;

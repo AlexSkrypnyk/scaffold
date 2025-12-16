@@ -14,6 +14,7 @@ use Rector\CodeQuality\Rector\Class_\CompleteDynamicPropertiesRector;
 use Rector\CodeQuality\Rector\ClassMethod\InlineArrayReturnAssignRector;
 use Rector\CodeQuality\Rector\Empty_\SimplifyEmptyCheckOnEmptyArrayRector;
 use Rector\CodingStyle\Rector\Catch_\CatchExceptionNameMatchingTypeRector;
+use Rector\CodingStyle\Rector\ClassLike\NewlineBetweenClassLikeStmtsRector;
 use Rector\CodingStyle\Rector\ClassMethod\NewlineBeforeNewAssignSetRector;
 use Rector\CodingStyle\Rector\FuncCall\CountArrayToEmptyArrayComparisonRector;
 use Rector\CodingStyle\Rector\Stmt\NewlineAfterStatementRector;
@@ -32,11 +33,14 @@ return RectorConfig::configure()
   ])
   ->withPhpSets(php82: TRUE)
   ->withPreparedSets(
-    deadCode: true,
-    codeQuality: true,
-    codingStyle: true,
-    typeDeclarations: true,
-    naming: true,
+    deadCode: TRUE,
+    codeQuality: TRUE,
+    codingStyle: TRUE,
+    typeDeclarations: TRUE,
+    naming: TRUE,
+    instanceOf: TRUE,
+    earlyReturn: TRUE,
+    phpunitCodeQuality: TRUE,
   )
   ->withSets([
     PHPUnitSetList::PHPUNIT_110,
@@ -54,6 +58,7 @@ return RectorConfig::configure()
     InlineArrayReturnAssignRector::class,
     NewlineAfterStatementRector::class,
     NewlineBeforeNewAssignSetRector::class,
+    NewlineBetweenClassLikeStmtsRector::class,
     RemoveAlwaysTrueIfConditionRector::class,
     RenameVariableToMatchMethodCallReturnTypeRector::class,
     RenameVariableToMatchNewTypeRector::class,

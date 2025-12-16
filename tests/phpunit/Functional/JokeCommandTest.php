@@ -21,7 +21,7 @@ use YourNamespace\App\Command\JokeCommand;
 #[CoversMethod(JokeCommand::class, 'configure')]
 #[CoversMethod(JokeCommand::class, 'getJoke')]
 #[Group('command')]
-class JokeCommandTest extends TestCase {
+final class JokeCommandTest extends TestCase {
 
   use ApplicationTrait;
   use AssertArrayTrait;
@@ -31,7 +31,7 @@ class JokeCommandTest extends TestCase {
     $builder = $this->getMockBuilder(JokeCommand::class);
     $builder->onlyMethods(['getContent']);
     $mock = $builder->getMock();
-    $mock->expects($this->any())->method('getContent')->willReturn($content);
+    $mock->method('getContent')->willReturn($content);
     $mock->setName('joke');
 
     $this->applicationInitFromCommand($mock);
@@ -41,13 +41,11 @@ class JokeCommandTest extends TestCase {
     }
   }
 
-  public static function dataProviderExecute(): array {
-    return [
-      [static::fixturePayload(['setup' => 'Test setup', 'punchline' => 'Test punchline']), ['Test setup', 'Test punchline']],
-      ['', ['Unable to retrieve a joke.'], TRUE],
-      ['non-json', ['Unable to retrieve a joke.'], TRUE],
-      [static::fixturePayload(['setup' => 'Test setup']), ['Unable to retrieve a joke.'], TRUE],
-    ];
+  public static function dataProviderExecute(): \Iterator {
+    yield [self::fixturePayload(['setup' => 'Test setup', 'punchline' => 'Test punchline']), ['Test setup', 'Test punchline']];
+    yield ['', ['Unable to retrieve a joke.'], TRUE];
+    yield ['non-json', ['Unable to retrieve a joke.'], TRUE];
+    yield [self::fixturePayload(['setup' => 'Test setup']), ['Unable to retrieve a joke.'], TRUE];
   }
 
   /**
