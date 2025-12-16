@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[CoversFunction('print_help')]
 #[CoversFunction('verbose')]
 #[Group('scripts')]
-class ExampleScriptUnitTest extends ScriptUnitTestCase {
+final class ExampleScriptUnitTest extends ScriptUnitTestCase {
 
   #[DataProvider('dataProviderMain')]
   public function testMain(string|array $args = [], array|string $expected_output = [], string|null $expected_exception_message = NULL): void {
@@ -34,17 +34,15 @@ class ExampleScriptUnitTest extends ScriptUnitTestCase {
     }
   }
 
-  public static function dataProviderMain(): array {
-    return [
-      ['help', 'PHP CLI script template.'],
-      ['--help', 'PHP CLI script template.'],
-      ['-h', 'PHP CLI script template.'],
-      ['-?', 'PHP CLI script template.'],
-      ['-help', 'Would execute script business logic with argument -help.'],
-      ['', [], 'Please provide a value of the first argument.'],
-      ['testarg1', 'Would execute script business logic with argument testarg1.'],
-      [['testarg1', 'testarg2'], [], 'Please provide a value of the first argument.'],
-    ];
+  public static function dataProviderMain(): \Iterator {
+    yield ['help', 'PHP CLI script template.'];
+    yield ['--help', 'PHP CLI script template.'];
+    yield ['-h', 'PHP CLI script template.'];
+    yield ['-?', 'PHP CLI script template.'];
+    yield ['-help', 'Would execute script business logic with argument -help.'];
+    yield ['', [], 'Please provide a value of the first argument.'];
+    yield ['testarg1', 'Would execute script business logic with argument testarg1.'];
+    yield [['testarg1', 'testarg2'], [], 'Please provide a value of the first argument.'];
   }
 
 }
