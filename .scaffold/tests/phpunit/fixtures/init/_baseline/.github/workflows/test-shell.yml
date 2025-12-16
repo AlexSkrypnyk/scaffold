@@ -21,6 +21,7 @@ env:
 
 jobs:
   test-shell:
+    name: Shell (${{ matrix.os }})
     strategy:
       matrix:
         os:

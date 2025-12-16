@@ -1,4 +1,4 @@
-@@ -41,7 +41,7 @@
+@@ -42,7 +42,7 @@
            version="${{ github.event.inputs.version || github.ref_name }}"
            echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
            echo "Release version: $version"
@@ -7,7 +7,7 @@
  
        - name: Build PHAR
          run: composer build
-@@ -48,8 +48,8 @@
+@@ -49,8 +49,8 @@
  
        - name: Test PHAR
          run: |
@@ -18,7 +18,7 @@
  
        - name: Create Release
          uses: softprops/action-gh-release@__VERSION__
-@@ -56,4 +56,4 @@
+@@ -57,4 +57,4 @@
          with:
            tag_name: ${{ env.RELEASE_VERSION }}
            files: |

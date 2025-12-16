@@ -11,6 +11,7 @@ on:
 
 jobs:
   test-actions:
+    name: Test Actions
     runs-on: ubuntu-latest
 
     steps:
