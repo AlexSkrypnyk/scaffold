@@ -13,7 +13,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
  *
  * Functional tests for init.sh script.
  */
-class InitTest extends UnitTestCase {
+final class InitTest extends UnitTestCase {
 
   #[DataProvider('dataProviderInit')]
   public function testInit(
@@ -22,16 +22,16 @@ class InitTest extends UnitTestCase {
     ?SerializableClosure $before = NULL,
     ?SerializableClosure $after = NULL,
   ): void {
-    static::$fixtures = static::locationsFixtureDir();
+    self::$fixtures = static::locationsFixtureDir();
 
     if ($before instanceof SerializableClosure) {
-      $before = static::cu($before);
+      $before = self::cu($before);
       $before($this);
     }
 
-    $answers = static::tuiEntries(array_replace(static::defaultAnswers(), $answers));
+    $answers = self::tuiEntries(array_replace(self::defaultAnswers(), $answers));
 
-    $this->processRun(static::$sut . DIRECTORY_SEPARATOR . 'init.sh', [], $answers);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [], $answers);
 
     $this->assertProcessSuccessful();
 
@@ -42,105 +42,103 @@ class InitTest extends UnitTestCase {
 
     $this->assertProcessOutputContainsOrNot($expected);
 
-    $baseline = File::dir(static::$fixtures . '/../' . self::BASELINE_DIR);
-    static::replaceVersions(static::$sut);
+    $baseline = File::dir(self::$fixtures . '/../' . self::BASELINE_DIR);
+    self::replaceVersions(self::$sut);
 
-    if (!is_string(static::$fixtures)) {
+    if (!is_string(self::$fixtures)) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
-    $this->assertDirectoryEqualsPatchedBaseline(static::$sut, $baseline, static::$fixtures);
+    $this->assertDirectoryEqualsPatchedBaseline(self::$sut, $baseline, self::$fixtures);
 
     if ($after instanceof SerializableClosure) {
-      $after = static::cu($after);
+      $after = self::cu($after);
       $after($this);
     }
   }
 
-  public static function dataProviderInit(): array {
-    return [
-      static::BASELINE_DATASET => [
+  public static function dataProviderInit(): \Iterator {
+    yield self::BASELINE_DATASET => [
         [],
-      ],
-      'name' => [
+    ];
+    yield 'name' => [
         [
           'namespace' => 'JediTemple',
           'project' => 'star-forge',
           'author' => 'Obi-Wan Kenobi',
         ],
-      ],
-      'php command' => [
+    ];
+    yield 'php command' => [
         [
-          'use_php' => static::$tuiYes,
-          'use_php_command' => static::$tuiYes,
+          'use_php' => self::$tuiYes,
+          'use_php_command' => self::$tuiYes,
           'php_command_name' => 'star-forge',
-          'use_nodejs' => static::$tuiNo,
-          'use_shell' => static::$tuiNo,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
         ],
-      ],
-      'php script' => [
+    ];
+    yield 'php script' => [
         [
-          'use_php' => static::$tuiYes,
-          'use_php_command' => static::$tuiNo,
-          'use_php_script' => static::$tuiYes,
-          'use_nodejs' => static::$tuiNo,
-          'use_shell' => static::$tuiNo,
+          'use_php' => self::$tuiYes,
+          'use_php_command' => self::$tuiNo,
+          'use_php_script' => self::$tuiYes,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
         ],
-      ],
-      'nodejs' => [
+    ];
+    yield 'nodejs' => [
         [
-          'use_php' => static::$tuiNo,
-          'use_nodejs' => static::$tuiYes,
-          'use_shell' => static::$tuiNo,
+          'use_php' => self::$tuiNo,
+          'use_nodejs' => self::$tuiYes,
+          'use_shell' => self::$tuiNo,
         ],
-      ],
-      'shell' => [
+    ];
+    yield 'shell' => [
         [
-          'use_php' => static::$tuiNo,
-          'use_nodejs' => static::$tuiNo,
-          'use_shell' => static::$tuiYes,
+          'use_php' => self::$tuiNo,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiYes,
         ],
-      ],
-      'no languages' => [
+    ];
+    yield 'no languages' => [
         [
-          'use_php' => static::$tuiNo,
-          'use_php_command' => static::TUI_SKIP,
-          'php_command_name' => static::TUI_SKIP,
-          'use_php_command_build' => static::TUI_SKIP,
-          'use_php_script' => static::TUI_SKIP,
-          'use_nodejs' => static::$tuiNo,
-          'use_shell' => static::$tuiNo,
+          'use_php' => self::$tuiNo,
+          'use_php_command' => self::TUI_SKIP,
+          'php_command_name' => self::TUI_SKIP,
+          'use_php_command_build' => self::TUI_SKIP,
+          'use_php_script' => self::TUI_SKIP,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
         ],
-      ],
-      'no release drafter' => [
+    ];
+    yield 'no release drafter' => [
         [
-          'use_release_drafter' => static::$tuiNo,
+          'use_release_drafter' => self::$tuiNo,
         ],
-      ],
-      'no pr autoassign' => [
+    ];
+    yield 'no pr autoassign' => [
         [
-          'use_pr_autoassign' => static::$tuiNo,
+          'use_pr_autoassign' => self::$tuiNo,
         ],
-      ],
-      'no funding' => [
+    ];
+    yield 'no funding' => [
         [
-          'use_funding' => static::$tuiNo,
+          'use_funding' => self::$tuiNo,
         ],
-      ],
-      'no pr template' => [
+    ];
+    yield 'no pr template' => [
         [
-          'use_pr_template' => static::$tuiNo,
+          'use_pr_template' => self::$tuiNo,
         ],
-      ],
-      'no renovate' => [
+    ];
+    yield 'no renovate' => [
         [
-          'use_renovate' => static::$tuiNo,
+          'use_renovate' => self::$tuiNo,
         ],
-      ],
-      'no docs' => [
+    ];
+    yield 'no docs' => [
         [
-          'use_docs' => static::$tuiNo,
+          'use_docs' => self::$tuiNo,
         ],
-      ],
     ];
   }
 
@@ -149,20 +147,20 @@ class InitTest extends UnitTestCase {
       'namespace' => 'YodasHut',
       'project' => 'force-crystal',
       'author' => 'Luke Skywalker',
-      'use_php' => static::TUI_DEFAULT,
-      'use_php_command' => static::TUI_DEFAULT,
-      'php_command_name' => static::TUI_DEFAULT,
-      'use_php_command_build' => static::TUI_DEFAULT,
-      'use_php_script' => static::TUI_DEFAULT,
-      'use_nodejs' => static::TUI_DEFAULT,
-      'use_shell' => static::TUI_DEFAULT,
-      'use_release_drafter' => static::TUI_DEFAULT,
-      'use_pr_autoassign' => static::TUI_DEFAULT,
-      'use_funding' => static::TUI_DEFAULT,
-      'use_pr_template' => static::TUI_DEFAULT,
-      'use_renovate' => static::TUI_DEFAULT,
-      'use_docs' => static::TUI_DEFAULT,
-      'remove_self' => static::TUI_DEFAULT,
+      'use_php' => self::TUI_DEFAULT,
+      'use_php_command' => self::TUI_DEFAULT,
+      'php_command_name' => self::TUI_DEFAULT,
+      'use_php_command_build' => self::TUI_DEFAULT,
+      'use_php_script' => self::TUI_DEFAULT,
+      'use_nodejs' => self::TUI_DEFAULT,
+      'use_shell' => self::TUI_DEFAULT,
+      'use_release_drafter' => self::TUI_DEFAULT,
+      'use_pr_autoassign' => self::TUI_DEFAULT,
+      'use_funding' => self::TUI_DEFAULT,
+      'use_pr_template' => self::TUI_DEFAULT,
+      'use_renovate' => self::TUI_DEFAULT,
+      'use_docs' => self::TUI_DEFAULT,
+      'remove_self' => self::TUI_DEFAULT,
     ];
   }
 

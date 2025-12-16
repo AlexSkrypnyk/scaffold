@@ -2,7 +2,7 @@
     "name": "alexskrypnyk/scaffold-tests",
     "description": "Tests for Scaffold project functionality.",
     "license": "GPL-2.0-or-later",
-    "type": "library",
+    "type": "project",
     "authors": [
         {
             "name": "Alex Skrypnyk",
