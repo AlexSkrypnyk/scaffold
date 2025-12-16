@@ -1,8 +1,9 @@
-@@ -122,36 +122,3 @@
+@@ -122,37 +122,3 @@
          uses: mxschmitt/action-tmate@__VERSION__
          timeout-minutes: 30
  
 -  build-php:
+-    name: Build PHAR
 -    runs-on: ubuntu-latest
 -
 -    steps:

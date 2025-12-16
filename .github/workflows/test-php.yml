@@ -124,6 +124,7 @@ jobs:
 
   # yamllint disable-line #;< PHP_PHAR
   build-php:
+    name: Build PHAR
     runs-on: ubuntu-latest
 
     steps:

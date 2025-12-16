@@ -123,6 +123,7 @@ jobs:
         timeout-minutes: 30
 
   build-php:
+    name: Build PHAR
     runs-on: ubuntu-latest
 
     steps:

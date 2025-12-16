@@ -22,6 +22,7 @@ on:
 
 jobs:
   test-scaffold:
+    name: Test Scaffold
     runs-on: ubuntu-latest
 
     steps:
@@ -103,6 +104,7 @@ jobs:
         timeout-minutes: 30
 
   test-scaffold-docs:
+    name: Test Scaffold documentation
     runs-on: ubuntu-latest
 
     steps:

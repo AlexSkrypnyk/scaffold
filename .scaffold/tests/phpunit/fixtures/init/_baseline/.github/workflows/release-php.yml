@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   release-php:
+    name: Release PHP
     runs-on: ubuntu-latest
 
     steps:

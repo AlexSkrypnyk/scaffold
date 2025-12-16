@@ -22,6 +22,7 @@ concurrency:
 
 jobs:
   release-docs:
+    name: Release Scaffold documentation
     runs-on: ubuntu-latest
 
     environment:

@@ -18,6 +18,7 @@ on:
 
 jobs:
   test-nodejs:
+    name: Node.js ${{ matrix.node }}
     runs-on: ubuntu-latest
 
     strategy:
