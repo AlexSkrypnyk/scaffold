@@ -2,10 +2,11 @@
 <ruleset name="custom">
     <description>Custom PHPCS standard.</description>
 
-    <!-- Using Drupal coding standard as a base-fix. -->
+    <!-- Using Drupal coding standard as a base. -->
     <rule ref="Drupal"/>
+    <rule ref="DrevOps"/>
     <!-- Checks that the strict_types has been declared. -->
-    <rule ref="Generic.PHP.RequireStrictTypes" />
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
 
     <!-- Show sniff codes in all reports -->
     <arg value="s"/>
