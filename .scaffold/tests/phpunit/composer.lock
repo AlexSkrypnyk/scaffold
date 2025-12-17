@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "acd32d344853527a2f8bbe385f23a9af",
+    "content-hash": "412b74b720d089460d4fd7ab676d2483",
     "packages": [
         {
             "name": "alexskrypnyk/file",
-            "version": "0.5.4",
+            "version": "0.17.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/AlexSkrypnyk/file.git",
-                "reference": "3f627676c9124ac4effb30ed75554942d9f03d08"
+                "reference": "d86e6f0db258fd136015eb42193205f1ace19356"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/AlexSkrypnyk/file/zipball/3f627676c9124ac4effb30ed75554942d9f03d08",
-                "reference": "3f627676c9124ac4effb30ed75554942d9f03d08",
+                "url": "https://api.github.com/repos/AlexSkrypnyk/file/zipball/d86e6f0db258fd136015eb42193205f1ace19356",
+                "reference": "d86e6f0db258fd136015eb42193205f1ace19356",
                 "shasum": ""
             },
             "require": {
@@ -25,19 +25,21 @@
                 "symfony/filesystem": "^7.2"
             },
             "require-dev": {
-                "alexskrypnyk/phpunit-helpers": "^0.4.0",
+                "alexskrypnyk/phpunit-helpers": "^0.15.0",
                 "dealerdirect/phpcodesniffer-composer-installer": "^1",
+                "drevops/phpcs-standard": "^0.6",
                 "drupal/coder": "^8.3",
                 "ergebnis/composer-normalize": "^2.42",
+                "phpbench/phpbench": "^1.4",
                 "phpstan/phpstan": "^2",
                 "phpunit/phpunit": "^11",
                 "rector/rector": "^2"
             },
+            "suggest": {
+                "phpunit/phpunit": "Required for using FileAssertionsTrait and DirectoryAssertionsTrait (^11)"
+            },
             "type": "library",
             "autoload": {
-                "files": [
-                    "File.php"
-                ],
                 "psr-4": {
                     "AlexSkrypnyk\\File\\": "src/"
                 }
@@ -70,7 +72,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2025-04-17T20:18:13+00:00"
+            "time": "2025-12-18T04:35:32+00:00"
         },
         {
             "name": "alexskrypnyk/phpunit-helpers",
@@ -137,6 +139,75 @@
                 }
             ],
             "time": "2025-04-17T01:04:49+00:00"
+        },
+        {
+            "name": "alexskrypnyk/snapshot",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/AlexSkrypnyk/snapshot.git",
+                "reference": "c7d25d43624a50a0acb8a983d20b85f04f05fe76"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/AlexSkrypnyk/snapshot/zipball/c7d25d43624a50a0acb8a983d20b85f04f05fe76",
+                "reference": "c7d25d43624a50a0acb8a983d20b85f04f05fe76",
+                "shasum": ""
+            },
+            "require": {
+                "alexskrypnyk/file": "^0.17.0",
+                "php": ">=8.2",
+                "sebastian/diff": "^6.0"
+            },
+            "require-dev": {
+                "alexskrypnyk/phpunit-helpers": "^0.15.0",
+                "dealerdirect/phpcodesniffer-composer-installer": "^1",
+                "drevops/phpcs-standard": "^0.6",
+                "drupal/coder": "^9.0@alpha",
+                "ergebnis/composer-normalize": "^2.48",
+                "phpbench/phpbench": "^1.4",
+                "phpstan/phpstan": "^2",
+                "phpunit/phpunit": "^11.5",
+                "rector/rector": "^2"
+            },
+            "bin": [
+                "bin/update-snapshots"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "AlexSkrypnyk\\Snapshot\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Alex Skrypnyk",
+                    "email": "alex@drevops.com",
+                    "homepage": "https://alexskrypnyk.com",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Directory snapshot, diff, and patch system useful for test fixtures.",
+            "homepage": "https://github.com/alexskrypnyk/snapshot",
+            "support": {
+                "issues": "https://github.com/alexskrypnyk/snapshot/issues",
+                "source": "https://github.com/alexskrypnyk/snapshot"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/alexskrypnyk",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/alexskrypnyk",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2025-12-18T04:47:14+00:00"
         },
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",

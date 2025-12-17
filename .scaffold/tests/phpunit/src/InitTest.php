@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\Scaffold\Tests;
 
 use AlexSkrypnyk\File\File;
+use AlexSkrypnyk\Snapshot\Replacer\Replacer;
 use Laravel\SerializableClosure\SerializableClosure;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -43,12 +44,12 @@ final class InitTest extends UnitTestCase {
     $this->assertProcessOutputContainsOrNot($expected);
 
     $baseline = File::dir(self::$fixtures . '/../' . self::BASELINE_DIR);
-    self::replaceVersions(self::$sut);
+    Replacer::versions()->replaceInDir(self::$sut);
 
     if (!is_string(self::$fixtures)) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
-    $this->assertDirectoryEqualsPatchedBaseline(self::$sut, $baseline, self::$fixtures);
+    $this->assertSnapshotMatchesBaseline(self::$sut, $baseline, self::$fixtures);
 
     if ($after instanceof SerializableClosure) {
       $after = self::cu($after);
