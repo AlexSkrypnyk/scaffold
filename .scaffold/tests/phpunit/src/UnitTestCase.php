@@ -4,21 +4,17 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\Scaffold\Tests;
 
-use AlexSkrypnyk\File\File;
-use AlexSkrypnyk\File\Internal\Index;
-use AlexSkrypnyk\File\Tests\Traits\DirectoryAssertionsTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\SerializableClosureTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
 use AlexSkrypnyk\PhpunitHelpers\UnitTestCase as UpstreamUnitTestCase;
-use PHPUnit\Framework\TestStatus\Error;
-use PHPUnit\Framework\TestStatus\Failure;
+use AlexSkrypnyk\Snapshot\Testing\SnapshotTrait;
 
 abstract class UnitTestCase extends UpstreamUnitTestCase {
 
-  use DirectoryAssertionsTrait;
   use ProcessTrait;
   use SerializableClosureTrait;
+  use SnapshotTrait;
   use TuiTrait;
 
   /**
@@ -32,6 +28,7 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
       '.idea',
       '.logs',
       '.phpunit.cache',
+      '.claude',
     ]);
 
     // Change the current working directory to the 'system under test'.
@@ -42,37 +39,8 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
    * {@inheritdoc}
    */
   protected function tearDown(): void {
-    if (empty(static::$fixtures)) {
-      throw new \RuntimeException('Fixtures directory is not set.');
-    }
-
-    $is_failure = $this->status() instanceof Failure || $this->status() instanceof Error;
-    $has_message = str_contains($this->status()->message(), 'Differences between directories') || str_contains($this->status()->message(), 'Failed to apply patch');
-    $fixture_exists = str_contains(static::$fixtures, DIRECTORY_SEPARATOR . 'init' . DIRECTORY_SEPARATOR);
-    $update_requested = getenv('UPDATE_FIXTURES');
-
-    if ($is_failure && $has_message && $fixture_exists && $update_requested) {
-      $baseline = File::dir(static::$fixtures . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . static::BASELINE_DIR);
-
-      $ic_baseline = $baseline . DIRECTORY_SEPARATOR . Index::IGNORECONTENT;
-      $ic_sut = static::$sut . DIRECTORY_SEPARATOR . Index::IGNORECONTENT;
-      $ic_tmp = static::$tmp . DIRECTORY_SEPARATOR . Index::IGNORECONTENT;
-      $ic_fixtures = static::$fixtures . DIRECTORY_SEPARATOR . Index::IGNORECONTENT;
-
-      if (str_contains(static::$fixtures, DIRECTORY_SEPARATOR . static::BASELINE_DIR . DIRECTORY_SEPARATOR)) {
-        File::copyIfExists($ic_baseline, $ic_sut);
-        File::copyIfExists($ic_baseline, $ic_tmp);
-        File::rmdir($baseline);
-        File::sync(static::$sut, $baseline);
-        static::replaceVersions($baseline);
-        File::copyIfExists($ic_tmp, $ic_baseline);
-      }
-      else {
-        File::copyIfExists($ic_fixtures, $ic_tmp);
-        File::rmdir(static::$fixtures);
-        File::diff($baseline, static::$sut, static::$fixtures);
-        File::copyIfExists($ic_tmp, $ic_fixtures);
-      }
+    if (!empty(static::$fixtures)) {
+      $this->snapshotUpdateOnFailure(static::$fixtures, static::$sut, static::$tmp);
     }
 
     parent::tearDown();
@@ -83,45 +51,6 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
    */
   protected static function locationsFixturesDir(): string {
     return 'fixtures';
-  }
-
-  /**
-   * Replace versions in the given directory.
-   *
-   * @param string $directory
-   *   The directory to replace versions in.
-   */
-  protected static function replaceVersions(string $directory): void {
-    $regexes = [
-      '/sha512\-[A-Za-z0-9+\/]{86}={0,2}/' => '__INTEGRITY__',
-
-      // GitHub Actions with digests and version comments.
-      '/([\w.-]+\/[\w.-]+)@[a-f0-9]{40}\s*#\s*v\d+(?:\.\d+)*/' => '${1}@__HASH__ # __VERSION__',
-      // GitHub Actions with digests (no version comments).
-      '/([\w.-]+\/[\w.-]+)@[a-f0-9]{40}/' => '${1}@__HASH__',
-
-      '/#[a-fA-F0-9]{39,40}/' => '#__HASH__',
-      '/@[a-fA-F0-9]{39,40}/' => '@__HASH__',
-
-      // composer.json and package.json.
-      '/": "(?:\^|~|>=|<=)?\d+(?:\.\d+){0,2}(?:(?:-|@)[\w.-]+)?"/' => '": "__VERSION__"',
-      // Docker images with digests. Must come before regular docker image
-      // pattern.
-      '/([\w.-]+\/[\w.-]+:)(?:v)?\d+(?:\.\d+){0,2}(?:-[\w.-]+)?@sha256:[a-f0-9]{64}/' => '${1}__VERSION__',
-      // docker-compose.yml.
-      '/([\w.-]+\/[\w.-]+:)(?:v)?\d+(?:\.\d+){0,2}(?:-[\w.-]+)?/' => '${1}__VERSION__',
-      '/([\w.-]+\/[\w.-]+:)canary$/m' => '${1}__VERSION__',
-      // GHAs.
-      '/([\w.-]+\/[\w.-]+)@(?:v)?\d+(?:\.\d+){0,2}(?:-[\w.-]+)?/' => '${1}@__VERSION__',
-      '/(node-version:\s)(?:v)?\d+(?:\.\d+){0,2}(?:-[\w.-]+)?/' => '${1}__VERSION__',
-
-      // Catch all.
-      '/(?:\^|~)?v?\d+\.\d+\.\d+(?:(?:-|@)[\w.-]+)?/' => '__VERSION__',
-    ];
-
-    foreach ($regexes as $regex => $replace) {
-      File::replaceContentInDir($directory, $regex, $replace);
-    }
   }
 
 }
