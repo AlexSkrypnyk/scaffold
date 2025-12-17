@@ -24,6 +24,7 @@
         "alexskrypnyk/phpunit-helpers": "__VERSION__",
         "bamarni/composer-bin-plugin": "__VERSION__",
         "dealerdirect/phpcodesniffer-composer-installer": "__VERSION__",
+        "drevops/phpcs-standard": "__VERSION__",
         "drupal/coder": "__VERSION__",
         "ergebnis/composer-normalize": "__VERSION__",
         "mikey179/vfsstream": "__VERSION__",
