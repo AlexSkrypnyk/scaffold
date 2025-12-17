@@ -68,7 +68,9 @@ jobs:
 
       - name: Run Tests and Code Coverage on Ubuntu
         if: matrix.os == 'ubuntu-latest'
-        run: kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.coverage-html,docs,tests "$(pwd)"/.coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
+        run: |
+          mkdir -p "$(pwd)"/.logs/.coverage-html
+          kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.logs,docs,tests "$(pwd)"/.logs/.coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
         shell: bash
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
@@ -78,14 +80,14 @@ jobs:
         with:
           name: ${{github.job}}-code-coverage-report
           include-hidden-files: true
-          path: .coverage-html
+          path: .logs/.coverage-html
           if-no-files-found: error
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@__VERSION__
         if: ${{ env.CODECOV_TOKEN != '' && matrix.os == 'ubuntu-latest' }}
         with:
-          directory: .coverage-html
+          directory: .logs/.coverage-html
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
         env:
