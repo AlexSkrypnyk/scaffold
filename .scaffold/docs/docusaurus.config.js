@@ -88,9 +88,10 @@ const config = {
       // Replace with your project's social card
       image: 'img/social-card.jpg',
       navbar: {
+        title: 'Scaffold',
         logo: {
           alt: 'Scaffold Logo',
-          src: 'img/logo.svg',
+          src: 'img/logo.png',
         },
         items: [
           {
