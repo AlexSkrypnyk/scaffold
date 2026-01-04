@@ -49,7 +49,7 @@ jobs:
         working-directory: .scaffold/tests/phpunit
 
       - name: Check coding standards
-        uses: luizm/action-sh-checker@v0.9.0
+        uses: luizm/action-sh-checker@v0.10.0
         with:
           sh_checker_exclude: '.scaffold/tests/phpunit'
         env:
