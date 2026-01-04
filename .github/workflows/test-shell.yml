@@ -46,7 +46,7 @@ jobs:
           node-version: 24
 
       - name: Setup sh-checker
-        uses: luizm/action-sh-checker@v0.9.0
+        uses: luizm/action-sh-checker@v0.10.0
         if: matrix.os == 'ubuntu-latest'
         env:
           SHFMT_OPTS: -i 2 -ci -s -d
