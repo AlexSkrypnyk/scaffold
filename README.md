@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="" rel="noopener"><img src="docs/static/img/logo.png" alt="Scaffold logo" width=400px/></a>
+  <a href="" rel="noopener"><img src=".scaffold/docs/static/img/logo.png" alt="Scaffold logo" height=100px/></a>
 </p>
 
 <h1 align="center">Generic project scaffold template</h1>
