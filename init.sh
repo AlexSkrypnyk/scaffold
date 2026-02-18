@@ -340,6 +340,16 @@ remove_shell() {
   remove_tokens_with_content "SHELL"
 }
 
+remove_docker() {
+  rm -f Dockerfile >/dev/null || true
+  rm -f entrypoint.sh >/dev/null || true
+
+  rm -f .github/workflows/test-docker.yml || true
+  rm -f .github/workflows/release-docker.yml || true
+
+  remove_tokens_with_content "DOCKER"
+}
+
 remove_release_drafter() {
   rm -f .github/workflows/draft-release-notes.yml || true
   rm -f .github/release-drafter.yml
@@ -494,6 +504,11 @@ main() {
     shell_command_name=$(ask "  Shell command name" "${project}")
   fi
 
+  use_docker="$(ask_yesno "Use Docker" "N")"
+  if [ "${use_docker}" = "y" ]; then
+    docker_image_name=$(ask "  Docker image name" "$(to_lowercase "${namespace}")/${project}")
+  fi
+
   use_release_drafter="$(ask_yesno "Use GitHub release drafter")"
   use_pr_autoassign="$(ask_yesno "Use GitHub PR author auto-assign")"
   use_funding="$(ask_yesno "Use GitHub funding")"
@@ -516,6 +531,8 @@ main() {
   [ "${use_php_script}" = "y" ] && echo "    Simple script name           : ${php_script_name}"
   echo "Use NodeJS                       : ${use_nodejs}"
   echo "Use Shell                        : ${use_shell}"
+  echo "Use Docker                       : ${use_docker}"
+  [ "${use_docker}" = "y" ] && echo "  Docker image name              : ${docker_image_name}"
   echo "Use GitHub release drafter       : ${use_release_drafter}"
   echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
   echo "Use GitHub funding               : ${use_funding}"
@@ -571,6 +588,12 @@ main() {
     mv "shell-command.sh" "${shell_command_name}.sh" >/dev/null 2>&1 || true
   else
     remove_shell
+  fi
+
+  if [ "${use_docker}" = "y" ]; then
+    replace_string_content "yournamespace/yourproject" "${docker_image_name}"
+  else
+    remove_docker
   fi
 
   [ "${use_release_drafter}" != "y" ] && remove_release_drafter

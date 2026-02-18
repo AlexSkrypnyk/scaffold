@@ -111,6 +111,19 @@ final class InitTest extends UnitTestCase {
           'use_shell' => self::$tuiNo,
         ],
     ];
+    yield 'docker' => [
+        [
+          'use_php' => self::$tuiNo,
+          'use_php_command' => self::TUI_SKIP,
+          'php_command_name' => self::TUI_SKIP,
+          'use_php_command_build' => self::TUI_SKIP,
+          'use_php_script' => self::TUI_SKIP,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
+          'use_docker' => self::$tuiYes,
+          'docker_image_name' => self::TUI_DEFAULT,
+        ],
+    ];
     yield 'no release drafter' => [
         [
           'use_release_drafter' => self::$tuiNo,
@@ -155,6 +168,8 @@ final class InitTest extends UnitTestCase {
       'use_php_script' => self::TUI_DEFAULT,
       'use_nodejs' => self::TUI_DEFAULT,
       'use_shell' => self::TUI_DEFAULT,
+      'use_docker' => self::TUI_DEFAULT,
+      'docker_image_name' => self::TUI_SKIP,
       'use_release_drafter' => self::TUI_DEFAULT,
       'use_pr_autoassign' => self::TUI_DEFAULT,
       'use_funding' => self::TUI_DEFAULT,
