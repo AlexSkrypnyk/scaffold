@@ -45,6 +45,12 @@
   - [`package.json`](package.json)
   - CI config to [build and test](.github/workflows/test-nodehs.yml) and test
     for NodeJS
+- **Docker**
+  - [`Dockerfile`](Dockerfile) with minimal Alpine-based image and [`entrypoint.sh`](entrypoint.sh)
+  - CI config to [lint and test](.github/workflows/test-docker.yml) Docker
+    image (Hadolint + Buildx build)
+  - CI config to [publish](.github/workflows/release-docker.yml) multi-arch
+    images (`linux/amd64`, `linux/arm64`) to Docker Hub
 - **CI**
   - [Release drafter](.github/workflows/release-drafter.yml)
   - Release asset packaging and upload
