@@ -10,6 +10,7 @@
         "Cobertura",
         "Terminalizer",
         "autoloader",
+        "Buildx",
         "calver",
         "cobertura",
         "daemonized",

@@ -11,6 +11,7 @@
         "GHSA",
         "Terminalizer",
         "autoloader",
+        "Buildx",
         "calver",
         "cobertura",
         "daemonized",
