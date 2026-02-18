@@ -1,0 +1,81 @@
+---
+title: Docker
+sidebar_position: 6
+---
+
+# Docker
+
+This scaffold provides optional Docker support for building and publishing
+container images. When enabled during initialization, it includes a Dockerfile,
+an entrypoint script, and GitHub Actions workflows for testing and releasing
+Docker images.
+
+## Dockerfile
+
+The included `Dockerfile` uses a minimal Alpine Linux base image with Bash
+installed. It follows OCI image labeling conventions and uses a dedicated
+entrypoint script.
+
+```dockerfile
+FROM alpine:3
+
+RUN apk add --no-cache bash
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+```
+
+## Entrypoint
+
+The `entrypoint.sh` script enforces strict shell options (`set -euo pipefail`)
+and forwards arguments to the container command.
+
+## Building and running
+
+```bash
+# Build the image
+docker build -t yournamespace/yourproject .
+
+# Run the container
+docker run --rm yournamespace/yourproject
+```
+
+## Linting
+
+The Dockerfile is linted using [Hadolint](https://github.com/hadolint/hadolint),
+a Dockerfile linter that helps enforce best practices.
+
+```bash
+# Lint locally
+hadolint Dockerfile
+```
+
+Linting also runs automatically in CI via the `test-docker.yml` workflow.
+
+## CI/CD workflows
+
+### Testing (`test-docker.yml`)
+
+Runs on pushes to `main` and pull requests. This workflow:
+
+1. Lints the Dockerfile with Hadolint
+2. Builds the Docker image using Docker Buildx
+3. Runs the container to verify it starts correctly
+
+### Release (`release-docker.yml`)
+
+Runs on tag pushes. This workflow:
+
+1. Sets up QEMU and Docker Buildx for multi-architecture builds
+2. Authenticates with Docker Hub
+3. Builds and pushes multi-arch images (`linux/amd64`, `linux/arm64`)
+
+#### Docker Hub credentials
+
+The release workflow requires the following repository secrets:
+
+- `DOCKER_USER` — Docker Hub username
+- `DOCKER_PASS` — Docker Hub access token
+
+Set these in your repository's **Settings > Secrets and variables > Actions**.

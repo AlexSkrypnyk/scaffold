@@ -229,6 +229,37 @@ Key workflows:
 - `.github/workflows/test-nodejs.yml` - NodeJS testing
 
 [//]: # (#;> NODEJS)
+[//]: # (#;< DOCKER)
+
+## Docker
+
+### Building
+
+```bash
+# Build the Docker image
+docker build -t yournamespace/yourproject .
+
+# Run the container
+docker run --rm yournamespace/yourproject
+```
+
+### Linting
+
+```bash
+# Lint Dockerfile with hadolint
+docker run --rm -i hadolint/hadolint < Dockerfile
+```
+
+### CI/CD
+
+- `.github/workflows/test-docker.yml` - Build and lint Docker image
+- `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag
+
+Docker Hub credentials are stored as repository secrets:
+- `DOCKER_USER` - Docker Hub username
+- `DOCKER_PASS` - Docker Hub access token
+
+[//]: # (#;> DOCKER)
 
 ## Documentation
 
