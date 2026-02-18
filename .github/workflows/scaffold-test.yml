@@ -78,7 +78,7 @@ jobs:
           kcov \
             --include-pattern=.sh,.bash \
             --bash-parse-files-in-dir=. \
-            --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests,entrypoint.sh \
+            --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests,*/entrypoint.sh,entrypoint.sh \
             "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/bats/node_modules/.bin/bats .scaffold/tests/bats
 
       - name: Upload coverage report as an artifact
