@@ -1,0 +1,7 @@
+@@ -1,5 +1,5 @@
+ {
+-  "name": "@yodashut/force-crystal-docs",
++  "name": "@jeditemple/star-forge-docs",
+   "version": "__VERSION__",
+   "private": true,
+   "scripts": {

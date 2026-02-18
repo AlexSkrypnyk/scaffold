@@ -1,0 +1,70 @@
+name: Release Scaffold docs
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  release-docs:
+    name: Release Scaffold documentation
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.base_url }}
+
+    defaults:
+      run:
+        working-directory: docs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Set release version
+        working-directory: ${{ github.workspace }}
+        run: |
+          version="${{ github.event.inputs.version || github.ref_name }}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "Release version: $version"
+
+      - name: Build documentation site
+        run: npm run build
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Setup GitHub pages
+        uses: actions/configure-pages@v5
+        id: pages
+
+      - name: Upload documentation site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ".scaffold/docs/build"
+
+      - name: Deploy documentation site
+        uses: actions/deploy-pages@v4

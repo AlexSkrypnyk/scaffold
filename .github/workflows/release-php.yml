@@ -1,0 +1,67 @@
+name: Release PHP
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release-php:
+    name: Release PHP
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+
+      - name: Install dependencies
+        run: composer install
+
+      # yamllint disable-line #;< PHP_PHAR
+      - name: Set release version
+        run: |
+          version="${{ github.event.inputs.version || github.ref_name }}"
+          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+          echo "Release version: $version"
+          sed -i "s/\"yourproject-version\": \"development\"/\"yourproject-version\": \"${version}\"/g" box.json
+
+      - name: Build PHAR
+        run: composer build
+
+      - name: Test PHAR
+        run: |
+          ./.build/php-command.phar --version
+          ./.build/php-command.phar || exit 1
+      # yamllint disable-line #;> PHP_PHAR
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          files: |
+            #;< PHP_PHAR
+            ./.build/php-command.phar
+            #;> PHP_PHAR
+            #;< !PHP_PHAR
+            php-script
+            #;> !PHP_PHAR

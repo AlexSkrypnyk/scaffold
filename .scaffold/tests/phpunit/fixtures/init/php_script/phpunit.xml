@@ -1,0 +1,9 @@
+@@ -22,7 +22,7 @@
+             restrictWarnings="true"
+             ignoreIndirectDeprecations="true">
+         <include>
+-            <directory>src</directory>
++            <file>force-crystal</file>
+         </include>
+         <exclude>
+             <directory>tests</directory>

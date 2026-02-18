@@ -1,0 +1,99 @@
+---
+title: Composer
+sidebar_position: 1
+---
+
+# Composer
+
+[Composer](https://getcomposer.org/) is a dependency manager for PHP. It allows you to declare the libraries
+your project depends on and it will manage (install/update) them for you.
+
+This template uses Composer to manage dependencies and provide scripts for
+linting and testing code.
+
+The provided [`composer.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/composer.json) file contains the following sections:
+
+- **Project Information**:
+Metadata like name, description, and license.
+
+- **Author and Support**:
+Includes maintainer details and URLs for issues and source code.
+
+- **Dependencies**:
+Requires PHP version `>= 8.2`. If using as base for CLI command,
+`symfony/console` is provided as a dependency as well.
+
+- **Development Dependencies**:
+Tools like [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), and [PHPUnit](https://phpunit.de/) for development are listed.
+
+- **Auto-loading**:
+PSR-4 standard is used for auto-loading classes from the `src` directory.
+
+- **Dev Auto-loading**:
+Auto-loads classes for development from `tests/phpunit` directory.
+
+- **Custom Scripts**:
+Defines CLI scripts for tasks:
+  - `lint` and `lint-fix` - to lint and fix code using [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), and [Rector](https://getrector.org/).
+  - `test` - to run PHPUnit tests without generating coverage report.
+  - `test-coverage` - to run PHPUnit tests and generate coverage report.
+  - `build` - to build a PHAR file (if using as base for CLI command).
+
+- **Executable Binaries**:
+Executable binaries are defined as executable scripts in `bin` directory,
+which makes them easily accessible without cluttering the global scope.
+
+- **Configuration**:
+Composer is configured with the following settings:
+
+  - **Security Audit (Composer 2.9.0+)**:
+  Composer 2.9.0 introduced automatic security auditing during install and update operations. The template is configured with security-focused defaults:
+
+    - **`block-insecure: true`** - Blocks installation of packages with known security vulnerabilities (CVE or GHSA advisories) unless explicitly ignored. This enforces security by default and prevents vulnerable dependencies from being installed.
+
+    - **`abandoned: "report"`** - Reports warnings for abandoned/unmaintained packages without failing the build. This provides visibility into maintenance status while allowing flexibility for projects that need to continue using unmaintained packages.
+
+  **Choosing the right audit settings for your project:**
+
+  | Setting | Value | Use Case |
+  |---------|-------|----------|
+  | `block-insecure` | `true` | **Recommended for most projects.** Enforces security by blocking vulnerable packages. Best for production applications where security is critical. |
+  | `block-insecure` | `false` | Only for development/testing environments where you need to temporarily work with vulnerable dependencies. Not recommended for production. |
+  | `abandoned` | `"report"` | **Recommended default.** Shows warnings but doesn't fail builds. Good balance between awareness and flexibility. |
+  | `abandoned` | `"fail"` | Strict mode - fails builds with abandoned packages. Use when you want to enforce active maintenance across all dependencies. |
+  | `abandoned` | `"ignore"` | Suppresses all abandoned package warnings. Only use if you've consciously accepted the maintenance risk. |
+
+  **Temporarily allowing specific vulnerabilities:**
+
+  If you need to temporarily allow a specific vulnerability after security review (e.g., waiting for upstream fix, confirmed false positive, mitigated by other controls), you can add an `ignore` section:
+
+  ```json
+  "audit": {
+    "abandoned": "report",
+    "block-insecure": true,
+    "ignore": {
+      "CVE-2024-1234": "Waiting for upstream fix, mitigated by input validation",
+      "GHSA-xxxx-yyyy-zzzz": "False positive - feature not used in our code"
+    }
+  }
+  ```
+
+  Each ignored advisory should include a brief rationale explaining why it's acceptable for your project. Review and remove these exceptions regularly as fixes become available.
+
+  - **Discard Changes**:
+  Automatically discards any changes to the `composer.lock` file that are not committed. This ensures a clean state for the dependency versions defined in `composer.json`.
+
+  - **Sort Packages**:
+  Ensures that the packages in `composer.json` are sorted, which helps in maintaining a consistent and organized structure. Run `composer normalize` to sort the packages.
+
+  - **Minimum Stability**:
+  Sets the minimum stability to `stable`, meaning that only stable versions of packages will be considered when resolving dependencies. You can change this to `dev` or `alpha` if you want to include unstable versions in your project.
+
+  - **Prefer Stable**:
+  Prefers stable versions of packages over unstable ones, providing more reliable and tested packages unless a specific unstable version is required.
+
+
+
+
+
+

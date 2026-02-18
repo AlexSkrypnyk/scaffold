@@ -1,0 +1,144 @@
+name: Test Scaffold
+
+# Workflow to **validate** the **integrity** of the scaffold template itself.
+# This workflow will be automatically removed from the scaffolded project
+# after running init.sh script.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+  workflow_dispatch:
+    inputs:
+      enable_terminal:
+        type: boolean
+        description: 'Enable terminal session.'
+        required: false
+        default: false
+
+jobs:
+  test-scaffold:
+    name: Test Scaffold
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: pcov
+          ini-values: pcov.directory=.
+
+      - name: Install PHP dependencies for PHPUnit tests
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
+        working-directory: .scaffold/tests/phpunit
+
+      - name: Lint PHPUnit tests code
+        run: composer lint
+        working-directory: .scaffold/tests/phpunit
+
+      - name: Run PHPUnit tests
+        run: composer test
+        working-directory: .scaffold/tests/phpunit
+
+      - name: Check coding standards
+        uses: luizm/action-sh-checker@v0.10.0
+        with:
+          sh_checker_exclude: '.scaffold/tests/phpunit'
+        env:
+          SHFMT_OPTS: -i 2 -ci -s -d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          cache: 'npm'
+          cache-dependency-path: .scaffold/tests/bats/package-lock.json
+
+      - name: Install Kcov
+        run: |
+          KCOV_VERSION=v43 && \
+          sudo apt update && sudo apt install -y git cmake g++ libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev binutils-dev && \
+          git clone https://github.com/SimonKagstrom/kcov.git && \
+          cd kcov && git checkout ${KCOV_VERSION} && mkdir build && cd build && \
+          cmake .. && make && sudo make install && \
+          kcov --version
+
+      - name: Install BATS dependencies
+        run: npm --prefix=.scaffold/tests/bats ci
+
+      - name: Run BATS tests
+        run: |
+          kcov \
+            --include-pattern=.sh,.bash \
+            --bash-parse-files-in-dir=. \
+            --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests \
+            "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/bats/node_modules/.bin/bats .scaffold/tests/bats
+
+      - name: Upload coverage report as an artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{github.job}}-code-coverage-report
+          path: .scaffold-coverage-html
+          include-hidden-files: true
+          if-no-files-found: error
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@v5
+        if: ${{ env.CODECOV_TOKEN != '' }}
+        with:
+          directory: .scaffold-coverage-html
+          fail_ci_if_error: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Setup tmate session
+        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 30
+
+  test-scaffold-docs:
+    name: Test Scaffold documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Build documentation site
+        run: npm run build
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Run tests
+        run: npm run test
+        working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          publish-dir: '.scaffold/docs/build'
+          production-branch: main
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.SCAFFOLD_NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.SCAFFOLD_NETLIFY_AUTH_TOKEN }}
+        timeout-minutes: 1

@@ -1,0 +1,5 @@
+@@ -11,4 +11,3 @@
+ /phpunit.xml     export-ignore
+ /rector.php      export-ignore
+ /.npmignore      export-ignore
+-/renovate.json   export-ignore

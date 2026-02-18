@@ -1,0 +1,149 @@
+@@ -1,12 +1,142 @@
+ #!/usr/bin/env php
+ <?php
+ 
+-foreach ([$GLOBALS['_composer_autoload_path'] ?? NULL, __DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+-  if ($file && file_exists($file)) {
+-    require_once $file;
+-    unset($file);
+-    break;
++/**
++ * @file
++ * PHP CLI script template.
++ *
++ * -----------------------------------------------------------------------------
++ * PHP script template for single-file CLI scripts without dependency on
++ * external packages.
++ *
++ * To adopt script template:
++ * - Replace "PHP CLI script template" with your script human name.
++ * - Replace "force-crystal" with your script file name.
++ * - Update arguments count check to suit your needs.
++ * - Update print_help() function with your content.
++ * - Copy '/tests' directory into your project and update
++ *   ExampleScriptUnitTest.php (with a test class inside) to a script file name.
++ * - Remove this block of comments.
++ * -----------------------------------------------------------------------------
++ *
++ * Environment variables:
++ * - SCRIPT_QUIET: Set to '1' to suppress verbose messages.
++ * - SCRIPT_RUN_SKIP: Set to '1' to skip running of the script. Useful when
++ *   unit-testing or requiring this file from other files.
++ *
++ * Usage:
++ * @code
++ * ./force-crystal
++ * @endcode
++ */
++
++declare(strict_types=1);
++
++/**
++ * Main functionality.
++ *
++ * @param array<string> $argv
++ *   Array of arguments.
++ * @param int $argc
++ *   Number of arguments.
++ */
++function main(array $argv, int $argc): void {
++  if (array_intersect(['help', '--help', '-h', '-?'], $argv)) {
++    print_help();
++
++    return;
+   }
++
++  if ($argc < 2 || $argc > 2) {
++    throw new \Exception('Please provide a value of the first argument.');
++  }
++
++  // Add your logic here.
++  verbose(sprintf('Would execute script business logic with argument %s.', $argv[1]));
+ }
+ 
+-require __DIR__ . '/src/app.php';
++/**
++ * Print help.
++ */
++function print_help(): void {
++  $script_name = basename(__FILE__);
++  $out = <<<EOF
++PHP CLI script template.
++------------------------
++
++Arguments:
++  value/of/argument     Value of the first argument.
++
++Options:
++  --help                This help.
++
++Examples:
++  php $script_name value/of/argument
++
++EOF;
++  verbose($out);
++}
++
++/**
++ * Show a verbose message and record messages into internal buffer.
++ *
++ * @param string $string
++ *   Message to print.
++ * @param bool|float|int|string|null ...$args
++ *   Arguments to sprintf() the message.
++ *
++ * @return array<string>
++ *   Array of messages.
++ */
++function verbose(string $string, ...$args): array {
++  $string = sprintf($string, ...$args);
++
++  static $buffer = [];
++  $buffer[] = $string;
++  if (empty(getenv('SCRIPT_QUIET'))) {
++    // @codeCoverageIgnoreStart
++    print end($buffer);
++    // @codeCoverageIgnoreEnd
++  }
++
++  return $buffer;
++}
++
++// Entrypoint.
++//
++// @codeCoverageIgnoreStart
++ini_set('display_errors', 1);
++
++if (PHP_SAPI != 'cli' || !empty($_SERVER['REMOTE_ADDR'])) {
++  die('This script can be only ran from the command line.');
++}
++
++// Allow to skip the script run.
++if (getenv('SCRIPT_RUN_SKIP') != 1) {
++  set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
++    if (!(error_reporting() & $severity)) {
++      // This error code is not included in error_reporting - continue
++      // execution with the normal error handler.
++      return FALSE;
++    }
++    throw new ErrorException($message, 0, $severity, $file, $line);
++  });
++
++  try {
++    $argv = is_array($_SERVER['argv'] ?? NULL) ? array_filter($_SERVER['argv'], 'is_string') : [];
++    $argc = is_scalar($_SERVER['argc'] ?? NULL) ? (int) $_SERVER['argc'] : 0;
++    // The function should not provide an exit code but rather throw exceptions.
++    main($argv, $argc);
++  }
++  catch (\ErrorException $exception) {
++    if ($exception->getSeverity() <= E_USER_WARNING) {
++      verbose(PHP_EOL . 'RUNTIME ERROR: ' . $exception->getMessage() . PHP_EOL);
++      exit($exception->getCode() == 0 ? 1 : $exception->getCode());
++    }
++  }
++  catch (\Exception $exception) {
++    verbose(PHP_EOL . 'ERROR: ' . $exception->getMessage() . PHP_EOL);
++    exit($exception->getCode() == 0 ? 1 : $exception->getCode());
++  }
++}
++// @codeCoverageIgnoreEnd

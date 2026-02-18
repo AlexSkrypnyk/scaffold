@@ -1,0 +1,26 @@
+@@ -37,24 +37,10 @@
+       - name: Install dependencies
+         run: composer install
+ 
+-      - name: Set release version
+-        run: |
+-          version="${{ github.event.inputs.version || github.ref_name }}"
+-          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
+-          echo "Release version: $version"
+-          sed -i "s/\"force-crystal-version\": \"development\"/\"force-crystal-version\": \"${version}\"/g" box.json
+ 
+-      - name: Build PHAR
+-        run: composer build
+-
+-      - name: Test PHAR
+-        run: |
+-          ./.build/force-crystal.phar --version
+-          ./.build/force-crystal.phar || exit 1
+-
+       - name: Create Release
+         uses: softprops/action-gh-release@__VERSION__
+         with:
+           tag_name: ${{ env.RELEASE_VERSION }}
+           files: |
+-            ./.build/force-crystal.phar
++            force-crystal

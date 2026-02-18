@@ -1,0 +1,30 @@
+{
+    "output": ".build/php-command.phar",
+    "compression": "GZ",
+    "finder": [
+        {
+            "in": "./",
+            "exclude": [
+                "docs",
+                "php-script",
+                "tests"
+            ]
+        }
+    ],
+    "blacklist": [
+        ".editorconfig",
+        ".gitattributes",
+        ".github",
+        ".gitignore",
+        "CLAUDE.md",
+        "box.json",
+        "phpcs.xml",
+        "phpstan.neon",
+        "phpunit.xml",
+        "rector.php",
+        "renovate.json"
+    ],
+    "replacements": {
+        "yourproject-version": "development"
+    }
+}

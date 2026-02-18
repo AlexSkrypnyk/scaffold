@@ -1,0 +1,29 @@
+{
+    "name": "@yournamespace/yourproject",
+    "version": "0.1.0",
+    "description": "Provides yourproject functionality.",
+    "license": "GPL-2.0-or-later",
+    "author": {
+        "name": "Your Name",
+        "email": "yourproject@yournamespace.com",
+        "url": "https://yournamespace.com"
+    },
+    "contributors": [],
+    "repository": "github:yournamespace/yourproject",
+    "bugs": "https://github.com/yournamespace/yourproject/issues",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "build": "echo Would run build",
+        "lint": "echo Would run code lint",
+        "lint-fix": "echo Would run code lint fix",
+        "test": "echo Would run tests",
+        "reset": "rm -Rf node_modules package-lock.json"
+    },
+    "engines": {
+        "npm": ">=8.0.0",
+        "node": ">=20.0.0"
+    },
+    "dependencies": {}
+}

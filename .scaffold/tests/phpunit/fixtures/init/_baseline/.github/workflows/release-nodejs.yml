@@ -1,0 +1,29 @@
+name: Release Node.js
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release-nodejs:
+    name: Release Node.js
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@__VERSION__
+
+      - name: Setup Node.js
+        uses: actions/setup-node@__VERSION__
+        with:
+          node-version: __VERSION__
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Release
+        run: npm run build

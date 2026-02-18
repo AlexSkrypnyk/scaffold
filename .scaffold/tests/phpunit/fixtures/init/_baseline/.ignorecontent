@@ -1,0 +1,13 @@
+*.jpg
+*.png
+composer.lock
+^*/composer.lock
+^*/package-lock.json
+^*/yarn.lock
+^package-lock.json
+docs/.docusaurus
+^docs/package-lock.json
+logo.png
+node_modules
+scripts/vortex/*
+vendor
