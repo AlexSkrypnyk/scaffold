@@ -82,7 +82,7 @@ jobs:
             "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/bats/node_modules/.bin/bats .scaffold/tests/bats
 
       - name: Upload coverage report as an artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{github.job}}-code-coverage-report
           path: .scaffold-coverage-html
