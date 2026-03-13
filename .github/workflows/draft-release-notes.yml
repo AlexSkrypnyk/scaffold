@@ -33,7 +33,7 @@ jobs:
           fi
 
       - name: Draft release notes
-        uses: release-drafter/release-drafter@v6
+        uses: release-drafter/release-drafter@v7
         with:
           tag: ${{ steps.version.outputs.version }}
           name: ${{ steps.version.outputs.version }}
