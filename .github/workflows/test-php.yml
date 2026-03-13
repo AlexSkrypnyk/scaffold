@@ -82,7 +82,7 @@ jobs:
 
       - name: Post coverage summary as PR comment
         if: matrix.php-versions == '8.3' && matrix.deps == 'normal' && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           message: |
             ```
