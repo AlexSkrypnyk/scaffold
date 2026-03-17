@@ -46,3 +46,96 @@ load "../../../init.sh"
 
   dataprovider_run "to_pascalcase" 2
 }
+
+create_renovate_json() {
+  cat >"${1}/renovate.json" <<'RENOVATE'
+{
+    "extends": ["config:recommended"],
+    "automerge": true,
+    "rangeStrategy": "bump",
+    "dependencyDashboard": true,
+    "pinDigests": true,
+    "branchPrefix": "deps/",
+    "packageRules": [
+        {
+            "matchManagers": ["npm", "composer"],
+            "matchUpdateTypes": ["major"],
+            "enabled": false
+        },
+        {
+            "matchPackageNames": ["*"],
+            "groupName": "all dependencies",
+            "groupSlug": "all"
+        }
+    ]
+}
+RENOVATE
+}
+
+@test "remove_php removes composer from renovate matchManagers" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_php"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  remove_php
+  popd >/dev/null || exit 1
+
+  assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
+  assert_file_not_contains "${tmpdir}/renovate.json" '"composer"'
+}
+
+@test "remove_nodejs removes npm from renovate matchManagers" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_nodejs"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  remove_nodejs
+  popd >/dev/null || exit 1
+
+  assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["composer"]'
+  assert_file_not_contains "${tmpdir}/renovate.json" '"npm"'
+}
+
+@test "remove_php then remove_nodejs empties matchManagers" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_both"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  remove_php
+  remove_nodejs
+  popd >/dev/null || exit 1
+
+  assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": []'
+}
+
+@test "cleanup_renovate_managers removes empty matchManagers block" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cleanup"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  remove_php
+  remove_nodejs
+  cleanup_renovate_managers
+  popd >/dev/null || exit 1
+
+  assert_file_not_contains "${tmpdir}/renovate.json" '"matchManagers"'
+  assert_file_not_contains "${tmpdir}/renovate.json" '"matchUpdateTypes"'
+  assert_file_contains "${tmpdir}/renovate.json" '"matchPackageNames"'
+}
+
+@test "cleanup_renovate_managers no-ops when matchManagers is not empty" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cleanup_noop"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  remove_php
+  cleanup_renovate_managers
+  popd >/dev/null || exit 1
+
+  assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
+}
