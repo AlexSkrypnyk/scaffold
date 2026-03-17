@@ -26,19 +26,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Lint Dockerfile
-        uses: hadolint/hadolint-action@__VERSION__
+        uses: hadolint/hadolint-action@__HASH__ # __VERSION__
         with:
           dockerfile: Dockerfile
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@__VERSION__
+        uses: docker/setup-buildx-action@__HASH__ # __VERSION__
 
       - name: Build Docker image
-        uses: docker/build-push-action@__VERSION__
+        uses: docker/build-push-action@__HASH__ # __VERSION__
         with:
           context: .
           push: false
@@ -52,5 +52,5 @@ jobs:
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
-        uses: mxschmitt/action-tmate@__VERSION__
+        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
         timeout-minutes: 30

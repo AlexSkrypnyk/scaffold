@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Setup Node.js
-        uses: actions/setup-node@__VERSION__
+        uses: actions/setup-node@__HASH__ # __VERSION__
         with:
           node-version: ${{ matrix.node }}
 
@@ -47,5 +47,5 @@ jobs:
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: mxschmitt/action-tmate@__VERSION__
+        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
         timeout-minutes: 30

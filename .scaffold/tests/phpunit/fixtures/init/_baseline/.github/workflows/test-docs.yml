@@ -16,12 +16,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@__VERSION__
+        uses: actions/setup-node@__HASH__ # __VERSION__
 
       - name: Install dependencies
         run: npm install
@@ -36,7 +36,7 @@ jobs:
         working-directory: '${{ github.workspace }}/docs'
 
       - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@__VERSION__
+        uses: nwtgck/actions-netlify@__HASH__ # __VERSION__
         if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

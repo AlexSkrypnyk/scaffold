@@ -17,7 +17,7 @@
 +          ./.build/star-forge.phar || exit 1
  
        - name: Create Release
-         uses: softprops/action-gh-release@__VERSION__
+         uses: softprops/action-gh-release@__HASH__ # __VERSION__
 @@ -57,4 +57,4 @@
          with:
            tag_name: ${{ env.RELEASE_VERSION }}

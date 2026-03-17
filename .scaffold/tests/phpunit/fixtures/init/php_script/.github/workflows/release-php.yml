@@ -18,7 +18,7 @@
 -          ./.build/force-crystal.phar || exit 1
 -
        - name: Create Release
-         uses: softprops/action-gh-release@__VERSION__
+         uses: softprops/action-gh-release@__HASH__ # __VERSION__
          with:
            tag_name: ${{ env.RELEASE_VERSION }}
            files: |

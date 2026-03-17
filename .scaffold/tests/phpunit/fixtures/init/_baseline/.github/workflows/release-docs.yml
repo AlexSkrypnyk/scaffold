@@ -35,12 +35,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@__VERSION__
+        uses: actions/setup-node@__HASH__ # __VERSION__
 
       - name: Install dependencies
         run: npm install
@@ -58,7 +58,7 @@ jobs:
         working-directory: '${{ github.workspace }}/docs'
 
       - name: Setup GitHub pages
-        uses: actions/configure-pages@__VERSION__
+        uses: actions/configure-pages@__HASH__ # __VERSION__
         id: pages
 
       # Uncomment the following lines to deploy the documentation site.

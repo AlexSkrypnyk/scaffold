@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Setup Node.js
-        uses: actions/setup-node@__VERSION__
+        uses: actions/setup-node@__HASH__ # __VERSION__
         with:
           node-version: __VERSION__
 

@@ -1,5 +1,5 @@
 @@ -122,37 +122,3 @@
-         uses: mxschmitt/action-tmate@__VERSION__
+         uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
          timeout-minutes: 30
  
 -  build-php:
@@ -8,16 +8,16 @@
 -
 -    steps:
 -      - name: Checkout code
--        uses: actions/checkout@__VERSION__
+-        uses: actions/checkout@__HASH__ # __VERSION__
 -
 -      - name: Cache Composer dependencies
--        uses: actions/cache@__VERSION__
+-        uses: actions/cache@__HASH__ # __VERSION__
 -        with:
 -          path: /tmp/composer-cache
 -          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
 -
 -      - name: Setup PHP
--        uses: shivammathur/setup-php@__VERSION__
+-        uses: shivammathur/setup-php@__HASH__ # __VERSION__
 -        with:
 -          php-version: 8.3
 -
@@ -34,5 +34,5 @@
 -
 -      - name: Setup tmate session
 -        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
--        uses: mxschmitt/action-tmate@__VERSION__
+-        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
 -        timeout-minutes: 30
