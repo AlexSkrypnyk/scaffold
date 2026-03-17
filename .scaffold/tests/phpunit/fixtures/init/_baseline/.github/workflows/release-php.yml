@@ -21,16 +21,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Cache Composer dependencies
-        uses: actions/cache@__VERSION__
+        uses: actions/cache@__HASH__ # __VERSION__
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@__VERSION__
+        uses: shivammathur/setup-php@__HASH__ # __VERSION__
         with:
           php-version: 8.3
 
@@ -53,7 +53,7 @@ jobs:
           ./.build/force-crystal.phar || exit 1
 
       - name: Create Release
-        uses: softprops/action-gh-release@__VERSION__
+        uses: softprops/action-gh-release@__HASH__ # __VERSION__
         with:
           tag_name: ${{ env.RELEASE_VERSION }}
           files: |

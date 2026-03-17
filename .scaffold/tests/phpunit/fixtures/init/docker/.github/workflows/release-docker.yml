@@ -14,28 +14,28 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@__VERSION__
+        uses: docker/setup-qemu-action@__HASH__ # __VERSION__
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@__VERSION__
+        uses: docker/setup-buildx-action@__HASH__ # __VERSION__
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@__VERSION__
+        uses: docker/login-action@__HASH__ # __VERSION__
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@__VERSION__
+        uses: docker/metadata-action@__HASH__ # __VERSION__
         with:
           images: yodashut/force-crystal
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@__VERSION__
+        uses: docker/build-push-action@__HASH__ # __VERSION__
         with:
           context: .
           push: true

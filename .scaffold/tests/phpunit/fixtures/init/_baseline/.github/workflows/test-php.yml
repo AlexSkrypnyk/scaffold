@@ -29,16 +29,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Cache Composer dependencies
-        uses: actions/cache@__VERSION__
+        uses: actions/cache@__HASH__ # __VERSION__
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ matrix.deps }}-${{ hashFiles('**/composer.lock') }}
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@__VERSION__
+        uses: shivammathur/setup-php@__HASH__ # __VERSION__
         with:
           php-version: ${{ matrix.php-versions }}
           coverage: pcov
@@ -82,7 +82,7 @@ jobs:
 
       - name: Post coverage summary as PR comment
         if: matrix.php-versions == '8.3' && matrix.deps == 'normal' && github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@__VERSION__
+        uses: marocchino/sticky-pull-request-comment@__HASH__ # __VERSION__
         with:
           message: |
             ```
@@ -92,7 +92,7 @@ jobs:
           hide_and_recreate: true
 
       - name: Upload coverage report as an artifact
-        uses: actions/upload-artifact@__VERSION__
+        uses: actions/upload-artifact@__HASH__ # __VERSION__
         with:
           name: ${{github.job}}-code-coverage-report-${{ matrix.php-versions }}-${{ matrix.deps }}
           path: .logs
@@ -100,7 +100,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload test results to Codecov
-        uses: codecov/test-results-action@__VERSION__
+        uses: codecov/test-results-action@__HASH__ # __VERSION__
         if: matrix.php-versions == '8.3' && matrix.deps == 'normal' && env.CODECOV_TOKEN != ''
         with:
           files: .logs/junit.xml
@@ -109,7 +109,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@__VERSION__
+        uses: codecov/codecov-action@__HASH__ # __VERSION__
         if: matrix.php-versions == '8.3' && matrix.deps == 'normal' && env.CODECOV_TOKEN != ''
         with:
           files: .logs/cobertura.xml
@@ -119,7 +119,7 @@ jobs:
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
-        uses: mxschmitt/action-tmate@__VERSION__
+        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
         timeout-minutes: 30
 
   build-php:
@@ -128,16 +128,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Cache Composer dependencies
-        uses: actions/cache@__VERSION__
+        uses: actions/cache@__HASH__ # __VERSION__
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@__VERSION__
+        uses: shivammathur/setup-php@__HASH__ # __VERSION__
         with:
           php-version: 8.3
 
@@ -154,5 +154,5 @@ jobs:
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
-        uses: mxschmitt/action-tmate@__VERSION__
+        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
         timeout-minutes: 30

@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
         with:
           php-version: '8.3'
           coverage: pcov
@@ -49,14 +49,14 @@ jobs:
         working-directory: .scaffold/tests/phpunit
 
       - name: Check coding standards
-        uses: luizm/action-sh-checker@v0.10.0
+        uses: luizm/action-sh-checker@883217215b11c1fabbf00eb1a9a041f62d74c744 # v0.10.0
         with:
           sh_checker_exclude: '.scaffold/tests/phpunit'
         env:
           SHFMT_OPTS: -i 2 -ci -s -d
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           cache: 'npm'
           cache-dependency-path: .scaffold/tests/bats/package-lock.json
@@ -82,7 +82,7 @@ jobs:
             "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/bats/node_modules/.bin/bats .scaffold/tests/bats
 
       - name: Upload coverage report as an artifact
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
         with:
           name: ${{github.job}}-code-coverage-report
           path: .scaffold-coverage-html
@@ -90,7 +90,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
         if: ${{ env.CODECOV_TOKEN != '' }}
         with:
           directory: .scaffold-coverage-html
@@ -100,7 +100,7 @@ jobs:
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
-        uses: mxschmitt/action-tmate@v3
+        uses: mxschmitt/action-tmate@c0afd6f790e3a5564914980036ebf83216678101 # v3
         timeout-minutes: 30
 
   test-scaffold-docs:
@@ -109,12 +109,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
 
       - name: Install dependencies
         run: npm install
@@ -129,7 +129,7 @@ jobs:
         working-directory: '${{ github.workspace }}/.scaffold/docs'
 
       - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v3.0
+        uses: nwtgck/actions-netlify@4cbaf4c08f1a7bfa537d6113472ef4424e4eb654 # v3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-dir: '.scaffold/docs/build'

@@ -38,15 +38,15 @@ jobs:
         run: brew install bash
 
       - name: Checkout code
-        uses: actions/checkout@__VERSION__
+        uses: actions/checkout@__HASH__ # __VERSION__
 
       - name: Setup Node.js
-        uses: actions/setup-node@__VERSION__
+        uses: actions/setup-node@__HASH__ # __VERSION__
         with:
           node-version: __VERSION__
 
       - name: Setup sh-checker
-        uses: luizm/action-sh-checker@__VERSION__
+        uses: luizm/action-sh-checker@__HASH__ # __VERSION__
         if: matrix.os == 'ubuntu-latest'
         env:
           SHFMT_OPTS: -i 2 -ci -s -d
@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload coverage report as an artifact
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@__VERSION__
+        uses: actions/upload-artifact@__HASH__ # __VERSION__
         with:
           name: ${{github.job}}-code-coverage-report
           include-hidden-files: true
@@ -84,7 +84,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@__VERSION__
+        uses: codecov/codecov-action@__HASH__ # __VERSION__
         if: ${{ env.CODECOV_TOKEN != '' && matrix.os == 'ubuntu-latest' }}
         with:
           directory: .logs/.coverage-html
@@ -101,5 +101,5 @@ jobs:
 
       - name: Setup tmate session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
-        uses: mxschmitt/action-tmate@__VERSION__
+        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
         timeout-minutes: 30
