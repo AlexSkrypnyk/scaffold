@@ -27,6 +27,16 @@ The configuration is stored in
 
 All dependency updates are grouped into a single pull request to reduce noise.
 
+### Language version constraints
+
+Language version constraints are **completely disabled** from Renovate updates
+and must be updated manually:
+
+| Constraint | Manager | Why |
+|---|---|---|
+| `php` | Composer | PHP version changes affect the entire runtime environment |
+| `node`, `yarn` | npm | Node/Yarn version changes affect the build toolchain |
+
 ### Major version updates
 
 Major version updates are **disabled** for npm and Composer packages to prevent
@@ -47,12 +57,12 @@ dependency constraint manually and run the appropriate install command.
 During project initialization via `init.sh`, the Renovate configuration
 adjusts based on selected features:
 
-| Features selected | `matchManagers` value |
+| Features selected | Changes to configuration |
 |---|---|
-| PHP + NodeJS | `["npm", "composer"]` |
-| PHP only | `["composer"]` |
-| NodeJS only | `["npm"]` |
-| Neither PHP nor NodeJS | Major-blocking rule removed entirely |
+| PHP + NodeJS | All rules active |
+| PHP only | `node`/`yarn` ignore rule and `"npm"` from major-blocking removed |
+| NodeJS only | `php` ignore rule and `"composer"` from major-blocking removed |
+| Neither PHP nor NodeJS | All language and major-blocking rules removed |
 
 If Renovate is deselected during initialization, the `renovate.json` file is
 removed entirely.

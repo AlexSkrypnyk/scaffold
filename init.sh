@@ -281,12 +281,19 @@ remove_php() {
 
   remove_tokens_with_content "PHP"
 
-  # Remove "composer" from renovate matchManagers.
+  # Remove "composer" from renovate matchManagers and php language rule.
   if [ -f renovate.json ]; then
     local sed_opts
     sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
     sed "${sed_opts[@]}" 's/\["npm", "composer"\]/["npm"]/' renovate.json
     sed "${sed_opts[@]}" 's/\["composer"\]/[]/' renovate.json
+    local line
+    line=$(grep -n '"matchDepNames": \["php"\]' renovate.json | cut -d: -f1)
+    if [ -n "${line}" ]; then
+      local start=$((line - 1))
+      local end=$((line + 3))
+      sed "${sed_opts[@]}" "${start},${end}d" renovate.json
+    fi
   fi
 }
 
@@ -338,12 +345,19 @@ remove_nodejs() {
 
   remove_tokens_with_content "NODEJS"
 
-  # Remove "npm" from renovate matchManagers.
+  # Remove "npm" from renovate matchManagers and node/yarn language rule.
   if [ -f renovate.json ]; then
     local sed_opts
     sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
     sed "${sed_opts[@]}" 's/\["npm", "composer"\]/["composer"]/' renovate.json
     sed "${sed_opts[@]}" 's/\["npm"\]/[]/' renovate.json
+    local line
+    line=$(grep -n '"matchDepNames": \["node", "yarn"\]' renovate.json | cut -d: -f1)
+    if [ -n "${line}" ]; then
+      local start=$((line - 1))
+      local end=$((line + 3))
+      sed "${sed_opts[@]}" "${start},${end}d" renovate.json
+    fi
   fi
 }
 
