@@ -280,6 +280,14 @@ remove_php() {
   rm -f .github/workflows/release-php.yml || true
 
   remove_tokens_with_content "PHP"
+
+  # Remove "composer" from renovate matchManagers.
+  if [ -f renovate.json ]; then
+    local sed_opts
+    sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+    sed "${sed_opts[@]}" 's/\["npm", "composer"\]/["npm"]/' renovate.json
+    sed "${sed_opts[@]}" 's/\["composer"\]/[]/' renovate.json
+  fi
 }
 
 remove_php_command() {
@@ -329,6 +337,14 @@ remove_nodejs() {
   rm -f .github/workflows/release-nodejs.yml || true
 
   remove_tokens_with_content "NODEJS"
+
+  # Remove "npm" from renovate matchManagers.
+  if [ -f renovate.json ]; then
+    local sed_opts
+    sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+    sed "${sed_opts[@]}" 's/\["npm", "composer"\]/["composer"]/' renovate.json
+    sed "${sed_opts[@]}" 's/\["npm"\]/[]/' renovate.json
+  fi
 }
 
 remove_shell() {
@@ -371,6 +387,20 @@ remove_pr_template() {
 remove_renovate() {
   rm -f renovate.json || true
   remove_tokens_with_content "RENOVATE"
+}
+
+cleanup_renovate_managers() {
+  if [ -f renovate.json ] && grep -q '"matchManagers": \[\]' renovate.json; then
+    local sed_opts
+    sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+    local line
+    line=$(grep -n '"matchManagers": \[\]' renovate.json | cut -d: -f1)
+    if [ -n "${line}" ]; then
+      local start=$((line - 1))
+      local end=$((line + 3))
+      sed "${sed_opts[@]}" "${start},${end}d" renovate.json
+    fi
+  fi
 }
 
 remove_docs() {
@@ -602,6 +632,8 @@ main() {
   [ "${use_pr_template}" != "y" ] && remove_pr_template
   [ "${use_renovate}" != "y" ] && remove_renovate
   [ "${use_docs}" != "y" ] && remove_docs
+
+  cleanup_renovate_managers
 
   process_readme "${project}"
 
