@@ -1,6 +1,16 @@
-@@ -7,7 +7,7 @@
+@@ -7,17 +7,12 @@
      "branchPrefix": "deps/",
      "packageRules": [
+         {
+-            "matchDepNames": ["php"],
+-            "matchManagers": ["composer"],
+-            "enabled": false
+-        },
+-        {
+             "matchDepNames": ["node", "yarn"],
+             "matchManagers": ["npm"],
+             "enabled": false
+         },
          {
 -            "matchManagers": ["npm", "composer"],
 +            "matchManagers": ["npm"],

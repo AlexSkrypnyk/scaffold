@@ -58,6 +58,16 @@ create_renovate_json() {
     "branchPrefix": "deps/",
     "packageRules": [
         {
+            "matchDepNames": ["php"],
+            "matchManagers": ["composer"],
+            "enabled": false
+        },
+        {
+            "matchDepNames": ["node", "yarn"],
+            "matchManagers": ["npm"],
+            "enabled": false
+        },
+        {
             "matchManagers": ["npm", "composer"],
             "matchUpdateTypes": ["major"],
             "enabled": false
@@ -72,7 +82,7 @@ create_renovate_json() {
 RENOVATE
 }
 
-@test "remove_php removes composer from renovate matchManagers" {
+@test "remove_php removes composer from renovate matchManagers and php language rule" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_php"
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
@@ -83,9 +93,11 @@ RENOVATE
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
   assert_file_not_contains "${tmpdir}/renovate.json" '"composer"'
+  assert_file_not_contains "${tmpdir}/renovate.json" '"matchDepNames": ["php"]'
+  assert_file_contains "${tmpdir}/renovate.json" '"matchDepNames": ["node", "yarn"]'
 }
 
-@test "remove_nodejs removes npm from renovate matchManagers" {
+@test "remove_nodejs removes npm from renovate matchManagers and node/yarn language rule" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_nodejs"
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
@@ -96,6 +108,8 @@ RENOVATE
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["composer"]'
   assert_file_not_contains "${tmpdir}/renovate.json" '"npm"'
+  assert_file_not_contains "${tmpdir}/renovate.json" '"matchDepNames": ["node", "yarn"]'
+  assert_file_contains "${tmpdir}/renovate.json" '"matchDepNames": ["php"]'
 }
 
 @test "remove_php then remove_nodejs empties matchManagers" {
