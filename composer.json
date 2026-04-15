@@ -26,7 +26,7 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
         "drevops/phpcs-standard": "^0.7",
         "drupal/coder": "^9.0.0",
-        "ergebnis/composer-normalize": "^2.50.0",
+        "ergebnis/composer-normalize": "^2.51.0",
         "mikey179/vfsstream": "^1.6.12",
         "opis/closure": "^4.5.0",
         "phpstan/phpstan": "^2.1.47",
