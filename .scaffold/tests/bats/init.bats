@@ -2,7 +2,9 @@
 #
 # Unit tests for init.sh.
 #
-# shellcheck disable=SC2034
+# Variables under test are assigned by the sourced init.sh, which shellcheck
+# does not follow, so disable "unassigned variable" (SC2154) here.
+# shellcheck disable=SC2034,SC2154
 
 load _helper
 load "../../../init.sh"
@@ -215,4 +217,44 @@ RENOVATE
   run parse_args --help
   assert_success
   assert_output_contains "Usage: ./init.sh"
+}
+
+@test "require_identity fails when identity is missing" {
+  run require_identity
+  assert_failure
+  assert_output_contains "Missing required option"
+}
+
+@test "normalize_inputs canonicalises identity values" {
+  namespace="Acme App"
+  project="Acme App"
+  author="Jane Doe"
+  normalize_inputs
+  assert_equal "${namespace}" "AcmeApp"
+  assert_equal "${project}" "acme-app"
+  assert_equal "${project_pascalcase}" "AcmeApp"
+}
+
+@test "collect_noninteractive applies defaults and prints a summary" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Summary"
+  assert_output_contains "AcmeApp"
+  assert_output_contains "acme-app"
+}
+
+@test "collect_noninteractive honours the script sub-mode" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --php-script
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use simple script              : y"
+}
+
+@test "collect_noninteractive disables features on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php --docker
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use PHP                          : n"
+  assert_output_contains "Use Docker                       : y"
 }
