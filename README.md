@@ -66,6 +66,10 @@
   - [Pull request template](.github/PULL_REQUEST_TEMPLATE.md)
   - [Funding](.github/FUNDING.yml)
   - Init shell script to chose features
+- **AI agents**
+  - [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) guidance for AI coding agents
+  - Bundled [`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md)
+    skill that updates a generated project to the latest scaffold release
 
 ## How to use this scaffold repository
 
@@ -91,3 +95,14 @@ curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh 
 ```
 
 Run `./init.sh --help` for the full list of options.
+
+## Updating a generated project
+
+Projects generated from this scaffold can pull later template improvements
+without losing their own code. If you use Claude Code, the bundled
+[`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md)
+skill automates it: in your generated project, ask Claude to "update scaffold"
+and it fetches the skill, downloads the latest scaffold release, re-runs
+`init.sh` with your original answers, restores your project-specific files from
+git, and reconciles the differences. The generated project's
+[`AGENTS.md`](AGENTS.md) carries the same instructions for any AI agent.
