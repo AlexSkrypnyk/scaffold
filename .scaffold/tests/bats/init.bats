@@ -89,9 +89,9 @@ RENOVATE
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   remove_php
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
   assert_file_not_contains "${tmpdir}/renovate.json" '"composer"'
@@ -104,9 +104,9 @@ RENOVATE
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   remove_nodejs
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["composer"]'
   assert_file_not_contains "${tmpdir}/renovate.json" '"npm"'
@@ -119,10 +119,10 @@ RENOVATE
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   remove_php
   remove_nodejs
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": []'
 }
@@ -132,11 +132,11 @@ RENOVATE
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   remove_php
   remove_nodejs
   cleanup_renovate_managers
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_not_contains "${tmpdir}/renovate.json" '"matchManagers"'
   assert_file_not_contains "${tmpdir}/renovate.json" '"matchUpdateTypes"'
@@ -148,10 +148,10 @@ RENOVATE
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   remove_php
   cleanup_renovate_managers
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
 }
@@ -191,9 +191,9 @@ AGENTS
   touch "${tmpdir}/.github/.yamllint-for-gha.yml"
   touch "${tmpdir}/zizmor.yml"
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   remove_test_actions
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_not_exists "${tmpdir}/.github/workflows/test-actions.yml"
   assert_file_not_exists "${tmpdir}/.github/.yamllint-for-gha.yml"
