@@ -939,11 +939,13 @@ process_project() {
 
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 
-  # Remove this init script. Only an actual file on disk is removed: when piped
-  # through 'curl ... | bash' there is no script file ("$0" is "bash"), so this
-  # is a safe no-op.
-  if [ "${remove_self}" != "n" ] && [ -f "${0}" ]; then
-    rm -- "${0}" || true
+  # Remove this init script. "${BASH_SOURCE[0]}" is the script's own path when
+  # run as a file, and is empty (or a bare shell name) when piped through
+  # 'curl ... | bash', so only a real on-disk script is removed - never the
+  # interpreter (e.g. "/bin/bash" when invoked as 'curl ... | /bin/bash -s').
+  local script_path="${BASH_SOURCE[0]:-}"
+  if [ "${remove_self}" != "n" ] && [ -n "${script_path}" ] && [ -f "${script_path}" ]; then
+    rm -- "${script_path}" || true
   fi
 
   echo
