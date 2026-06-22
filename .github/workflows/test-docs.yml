@@ -1,6 +1,10 @@
 name: Test Docs
 
 on:
+  #;< SCHEDULE
+  schedule:
+    - cron: '23 4 * * *'
+  #;> SCHEDULE
   push:
     branches:
       - main
@@ -42,7 +46,7 @@ jobs:
 
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@d22a32a27c918fe470bbc562e984f80ec48c2668 # v4.0
-        if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' }}
+        if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' && github.event_name != 'schedule' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-dir: 'docs/build'

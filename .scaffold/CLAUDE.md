@@ -56,6 +56,7 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `PHP_SCRIPT` - Standalone script features
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
+- `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
 
 **Token usage locations:**
 
@@ -189,7 +190,7 @@ Each test scenario in `InitTest.php` validates a specific configuration:
   selections
 - `no_languages` - No languages selected
 - Feature toggles: `no_release_drafter`, `no_pr_autoassign`, `no_funding`,
-  `no_pr_template`, `no_renovate`, `no_docs`
+  `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`
 
 #### Running Init Tests
 

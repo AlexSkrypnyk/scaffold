@@ -1,6 +1,10 @@
 name: Test shell
 
 on:
+  #;< SCHEDULE
+  schedule:
+    - cron: '23 4 * * *'
+  #;> SCHEDULE
   push:
     branches:
       - main
