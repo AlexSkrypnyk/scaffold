@@ -57,6 +57,7 @@ use_pr_template=""
 use_renovate=""
 use_docs=""
 use_test_actions=""
+use_schedule=""
 remove_self=""
 
 # Whether to run interactively. Disabled as soon as any option is passed.
@@ -474,6 +475,10 @@ remove_test_actions() {
   rm -f zizmor.yml || true
 }
 
+remove_schedule() {
+  remove_tokens_with_content "SCHEDULE"
+}
+
 #-------------------------------------------------------------------------------
 # PROCESSING FUNCTIONS
 #-------------------------------------------------------------------------------
@@ -622,6 +627,7 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --renovate, --no-renovate      Renovate configuration.
   --docs, --no-docs              Documentation site.
   --test-actions, --no-test-actions  GitHub Actions linting (default: off).
+  --schedule, --no-schedule      Daily scheduled build (default: on).
   --keep                         Keep this init script (default: removed).
 
 Other:
@@ -693,6 +699,8 @@ parse_args() {
       --no-docs) use_docs="n" ;;
       --test-actions) use_test_actions="y" ;;
       --no-test-actions) use_test_actions="n" ;;
+      --schedule) use_schedule="y" ;;
+      --no-schedule) use_schedule="n" ;;
 
       --keep) remove_self="n" ;;
 
@@ -774,6 +782,7 @@ apply_noninteractive_defaults() {
   : "${use_renovate:=y}"
   : "${use_docs:=y}"
   : "${use_test_actions:=n}"
+  : "${use_schedule:=y}"
   : "${remove_self:=y}"
 
   if [ "${use_php}" = "y" ]; then
@@ -835,6 +844,7 @@ print_summary() {
   echo "Use Renovate                     : ${use_renovate}"
   echo "Use Docs                         : ${use_docs}"
   echo "Use GitHub Actions linting       : ${use_test_actions}"
+  echo "Use scheduled builds             : ${use_schedule}"
   echo "Remove this script               : ${remove_self}"
   echo "---------------------------------"
   echo
@@ -893,6 +903,7 @@ collect_interactive() {
   use_renovate="$(ask_yesno "Use Renovate")"
   use_docs="$(ask_yesno "Use docs")"
   use_test_actions="$(ask_yesno "Use GitHub Actions linting" "N")"
+  use_schedule="$(ask_yesno "Use scheduled builds")"
   remove_self="$(ask_yesno "Remove this script")"
 
   print_summary
@@ -976,6 +987,7 @@ process_project() {
   [ "${use_renovate}" != "y" ] && remove_renovate
   [ "${use_docs}" != "y" ] && remove_docs
   [ "${use_test_actions}" != "y" ] && remove_test_actions
+  [ "${use_schedule}" != "y" ] && remove_schedule
 
   cleanup_renovate_managers
 

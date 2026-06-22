@@ -200,6 +200,29 @@ AGENTS
   assert_file_not_exists "${tmpdir}/zizmor.yml"
 }
 
+@test "remove_schedule removes the schedule trigger block" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_schedule"
+  mkdir -p "${tmpdir}/.github/workflows"
+  cat >"${tmpdir}/.github/workflows/test-php.yml" <<'WORKFLOW'
+on:
+  # yamllint disable-line #;< SCHEDULE
+  schedule:
+    - cron: '23 4 * * *'
+  # yamllint disable-line #;> SCHEDULE
+  push:
+    branches:
+      - main
+WORKFLOW
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_schedule
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/.github/workflows/test-php.yml" "schedule:"
+  assert_file_not_contains "${tmpdir}/.github/workflows/test-php.yml" "SCHEDULE"
+  assert_file_contains "${tmpdir}/.github/workflows/test-php.yml" "push:"
+}
+
 @test "parse_args without arguments keeps interactive mode" {
   parse_args
   assert_equal "${interactive}" "1"
@@ -243,6 +266,16 @@ AGENTS
 @test "parse_args --no-test-actions disables GitHub Actions linting" {
   parse_args --no-test-actions
   assert_equal "${use_test_actions}" "n"
+}
+
+@test "parse_args --schedule enables scheduled builds" {
+  parse_args --schedule
+  assert_equal "${use_schedule}" "y"
+}
+
+@test "parse_args --no-schedule disables scheduled builds" {
+  parse_args --no-schedule
+  assert_equal "${use_schedule}" "n"
 }
 
 @test "parse_args --keep preserves the script" {
@@ -325,4 +358,18 @@ AGENTS
   run collect_noninteractive
   assert_success
   assert_output_contains "Use GitHub Actions linting       : y"
+}
+
+@test "collect_noninteractive keeps scheduled builds on by default" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use scheduled builds             : y"
+}
+
+@test "collect_noninteractive disables scheduled builds on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-schedule
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use scheduled builds             : n"
 }

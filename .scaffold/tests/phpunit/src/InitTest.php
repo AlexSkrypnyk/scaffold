@@ -199,6 +199,10 @@ final class InitTest extends UnitTestCase {
       array_merge($identity, ['--test-actions']),
       'test_actions',
     ];
+    yield 'no schedule' => [
+      array_merge($identity, ['--no-schedule']),
+      'no_schedule',
+    ];
   }
 
   public static function dataProviderInit(): \Iterator {
@@ -303,6 +307,11 @@ final class InitTest extends UnitTestCase {
           'use_test_actions' => self::$tuiYes,
         ],
     ];
+    yield 'no schedule' => [
+        [
+          'use_schedule' => self::$tuiNo,
+        ],
+    ];
   }
 
   protected static function defaultAnswers(): array {
@@ -326,6 +335,7 @@ final class InitTest extends UnitTestCase {
       'use_renovate' => self::TUI_DEFAULT,
       'use_docs' => self::TUI_DEFAULT,
       'use_test_actions' => self::TUI_DEFAULT,
+      'use_schedule' => self::TUI_DEFAULT,
       'remove_self' => self::TUI_DEFAULT,
     ];
   }

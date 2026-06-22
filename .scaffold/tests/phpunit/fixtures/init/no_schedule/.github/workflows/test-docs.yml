@@ -1,0 +1,9 @@
+@@ -1,8 +1,6 @@
+ name: Test Docs
+ 
+ on:
+-  schedule:
+-    - cron: '23 4 * * *'
+   push:
+     branches:
+       - main

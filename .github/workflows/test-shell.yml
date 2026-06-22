@@ -1,6 +1,10 @@
 name: Test shell
 
 on:
+  # yamllint disable-line #;< SCHEDULE
+  schedule:
+    - cron: '23 4 * * *'
+  # yamllint disable-line #;> SCHEDULE
   push:
     branches:
       - main
