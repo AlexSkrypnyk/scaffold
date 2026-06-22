@@ -133,9 +133,10 @@ final class InitTest extends UnitTestCase {
   /**
    * The initialised project keeps the updater skill pointing upstream.
    *
-   * The bulk `scaffold` -> project rewrite in init.sh would otherwise mangle the
-   * self-update skill URL, name, and trigger. They are token-protected, so a
-   * regression here must fail loudly rather than be silently re-baselined.
+   * The bulk `scaffold` -> project rewrite in init.sh would otherwise
+   * mangle the self-update skill URL, name, and trigger. They are
+   * token-protected, so a regression here must fail loudly rather than
+   * being silently re-baselined.
    */
   public function testInitPreservesUpdateSkillReferences(): void {
     self::$fixtures = NULL;

@@ -485,6 +485,29 @@ process_readme() {
   rm logo.tmp.png >/dev/null 2>&1 || true
 }
 
+##
+# Replace the self-update skill references with placeholder tokens.
+#
+# The initialised project must keep instructions that point at the upstream
+# template repository rather than at the project's own namespace, so these
+# references are hidden behind tokens before the bulk replacements run and put
+# back afterwards by restore_skill_references().
+#
+protect_skill_references() {
+  replace_string_content "https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md" "__SCAFFOLD_SKILL_URL__"
+  replace_string_content "update-consumer-scaffold" "__SCAFFOLD_SKILL_NAME__"
+  replace_string_content "update scaffold" "__SCAFFOLD_SKILL_TRIGGER__"
+}
+
+##
+# Restore the self-update skill references hidden by protect_skill_references().
+#
+restore_skill_references() {
+  replace_string_content "__SCAFFOLD_SKILL_URL__" "https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md"
+  replace_string_content "__SCAFFOLD_SKILL_NAME__" "update-consumer-scaffold"
+  replace_string_content "__SCAFFOLD_SKILL_TRIGGER__" "update scaffold"
+}
+
 process_internal() {
   local namespace="${1}"
   local project="${2}"
@@ -504,12 +527,7 @@ process_internal() {
 
   rm -f "docs/static/img/init.gif" >/dev/null || true
 
-  # Protect the self-update skill references so the initialised project keeps
-  # working instructions that still point at the upstream template repository
-  # rather than at the project's own namespace.
-  replace_string_content "https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md" "__SCAFFOLD_SKILL_URL__"
-  replace_string_content "update-consumer-scaffold" "__SCAFFOLD_SKILL_NAME__"
-  replace_string_content "update scaffold" "__SCAFFOLD_SKILL_TRIGGER__"
+  protect_skill_references
 
   # Replace any existing necessary placeholders using a real value with
   # tokens used in further replacements.
@@ -528,10 +546,7 @@ process_internal() {
   replace_string_content "scaffold" "${project}"
   replace_string_content "__ATTRIBUTION__" "https://getscaffold.dev/ project scaffold template"
 
-  # Restore the protected self-update skill references.
-  replace_string_content "__SCAFFOLD_SKILL_URL__" "https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md"
-  replace_string_content "__SCAFFOLD_SKILL_NAME__" "update-consumer-scaffold"
-  replace_string_content "__SCAFFOLD_SKILL_TRIGGER__" "update scaffold"
+  restore_skill_references
 
   remove_string_content "# Uncomment the lines below"
   uncomment_line ".gitattributes" "\/.editorconfig"

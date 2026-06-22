@@ -156,6 +156,34 @@ RENOVATE
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
 }
 
+@test "protect_skill_references and restore_skill_references round-trip" {
+  local tmpdir="${BATS_TEST_TMPDIR}/skill_refs"
+  mkdir -p "${tmpdir}"
+  cat >"${tmpdir}/AGENTS.md" <<'AGENTS'
+curl https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md
+Invoke the update-consumer-scaffold skill
+ask Claude Code to "update scaffold"
+AGENTS
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  protect_skill_references
+  popd >/dev/null || exit 1
+
+  assert_file_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL_URL__'
+  assert_file_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL_NAME__'
+  assert_file_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL_TRIGGER__'
+  assert_file_not_contains "${tmpdir}/AGENTS.md" 'AlexSkrypnyk/scaffold'
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  restore_skill_references
+  popd >/dev/null || exit 1
+
+  assert_file_contains "${tmpdir}/AGENTS.md" 'https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md'
+  assert_file_contains "${tmpdir}/AGENTS.md" 'Invoke the update-consumer-scaffold skill'
+  assert_file_contains "${tmpdir}/AGENTS.md" '"update scaffold"'
+  assert_file_not_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL'
+}
+
 @test "parse_args without arguments keeps interactive mode" {
   parse_args
   assert_equal "${interactive}" "1"
