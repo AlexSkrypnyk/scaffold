@@ -134,12 +134,12 @@ final class InitTest extends UnitTestCase {
     $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
 
     yield 'all defaults' => [
-        $identity,
-        self::BASELINE_DIR,
+      $identity,
+      self::BASELINE_DIR,
     ];
     yield 'no docs' => [
-        array_merge($identity, ['--no-docs']),
-        'no_docs',
+      array_merge($identity, ['--no-docs']),
+      'no_docs',
     ];
   }
 
