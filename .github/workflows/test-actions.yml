@@ -1,10 +1,10 @@
 name: Test Actions
 
 on:
-  #;< SCHEDULE
+  # yamllint disable-line #;< SCHEDULE
   schedule:
     - cron: '23 4 * * *'
-  #;> SCHEDULE
+  # yamllint disable-line #;> SCHEDULE
   push:
     branches:
       - main

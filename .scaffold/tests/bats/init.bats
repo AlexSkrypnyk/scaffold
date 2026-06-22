@@ -205,10 +205,10 @@ AGENTS
   mkdir -p "${tmpdir}/.github/workflows"
   cat >"${tmpdir}/.github/workflows/test-php.yml" <<'WORKFLOW'
 on:
-  #;< SCHEDULE
+  # yamllint disable-line #;< SCHEDULE
   schedule:
     - cron: '23 4 * * *'
-  #;> SCHEDULE
+  # yamllint disable-line #;> SCHEDULE
   push:
     branches:
       - main
