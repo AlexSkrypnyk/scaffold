@@ -14,11 +14,16 @@ jobs:
     name: Test documentation
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      pull-requests: write # 'actions-netlify' posts the deploy preview as a PR comment.
+
     steps:
       - name: Checkout code
         uses: actions/checkout@__HASH__ # __VERSION__
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@__HASH__ # __VERSION__

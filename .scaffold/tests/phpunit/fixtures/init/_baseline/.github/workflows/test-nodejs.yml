@@ -21,6 +21,9 @@ jobs:
     name: Node.js ${{ matrix.node }}
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+
     strategy:
       matrix:
         node: [18, 20, 22]
@@ -28,6 +31,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@__HASH__ # __VERSION__
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@__HASH__ # __VERSION__

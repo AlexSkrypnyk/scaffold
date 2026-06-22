@@ -38,6 +38,7 @@ jobs:
         uses: actions/checkout@__HASH__ # __VERSION__
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@__HASH__ # __VERSION__
@@ -48,8 +49,11 @@ jobs:
 
       - name: Set release version
         working-directory: ${{ github.workspace }}
+        env:
+          INPUTS_VERSION: ${{ github.event.inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          version="${{ github.event.inputs.version || github.ref_name }}"
+          version="${INPUTS_VERSION:-${REF_NAME}}"
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "Release version: $version"
 

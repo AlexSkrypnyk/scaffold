@@ -1,10 +1,13 @@
-@@ -37,24 +37,10 @@
+@@ -39,27 +39,10 @@
        - name: Install dependencies
          run: composer install
  
 -      - name: Set release version
+-        env:
+-          INPUTS_VERSION: ${{ github.event.inputs.version }}
+-          REF_NAME: ${{ github.ref_name }}
 -        run: |
--          version="${{ github.event.inputs.version || github.ref_name }}"
+-          version="${INPUTS_VERSION:-${REF_NAME}}"
 -          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
 -          echo "Release version: $version"
 -          sed -i "s/\"force-crystal-version\": \"development\"/\"force-crystal-version\": \"${version}\"/g" box.json
