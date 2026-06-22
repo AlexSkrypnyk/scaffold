@@ -87,5 +87,10 @@ Download the latest release from GitHub releases page.
     ./tests/bats/node_modules/.bin/bats tests/bats
 
 
+## Updating
+
+To pull the latest infrastructure from the template into this project, ask
+Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
+
 ---
 _This repository was created using the [force-crystal](https://getforce-crystal.dev/) project template_

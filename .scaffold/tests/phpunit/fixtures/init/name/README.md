@@ -73,8 +73,8 @@
  
      npm ci --prefix tests/bats
      ./tests/bats/node_modules/.bin/bats tests/bats
-@@ -88,4 +88,4 @@
- 
+@@ -93,4 +93,4 @@
+ Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
  
  ---
 -_This repository was created using the [force-crystal](https://getforce-crystal.dev/) project template_

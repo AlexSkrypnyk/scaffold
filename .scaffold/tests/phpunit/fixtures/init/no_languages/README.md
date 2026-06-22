@@ -59,4 +59,4 @@
 -    ./tests/bats/node_modules/.bin/bats tests/bats
  
  
- ---
+ ## Updating

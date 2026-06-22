@@ -130,6 +130,35 @@ final class InitTest extends UnitTestCase {
     $this->assertStringContainsString('YourNamespace', $composer);
   }
 
+  /**
+   * The initialised project keeps the updater skill pointing upstream.
+   *
+   * The bulk `scaffold` -> project rewrite in init.sh would otherwise
+   * mangle the self-update skill URL, name, and trigger. They are
+   * token-protected, so a regression here must fail loudly rather than
+   * being silently re-baselined.
+   */
+  public function testInitPreservesUpdateSkillReferences(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $agents = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'AGENTS.md');
+    $this->assertStringContainsString('https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md', $agents);
+    $this->assertStringContainsString('"update scaffold"', $agents);
+    $this->assertStringNotContainsString('update-consumer-acme-app', $agents);
+
+    $gitignore = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . '.gitignore');
+    $this->assertStringContainsString('/.claude/skills/update-consumer-scaffold/', $gitignore);
+  }
+
   public static function dataProviderInitNonInteractive(): \Iterator {
     $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
 
