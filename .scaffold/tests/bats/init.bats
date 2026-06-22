@@ -184,6 +184,22 @@ AGENTS
   assert_file_not_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL'
 }
 
+@test "remove_test_actions removes the workflow and its companion configs" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_test_actions"
+  mkdir -p "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/workflows/test-actions.yml"
+  touch "${tmpdir}/.github/.yamllint-for-gha.yml"
+  touch "${tmpdir}/zizmor.yml"
+
+  pushd "${tmpdir}" >/dev/null || exit 1
+  remove_test_actions
+  popd >/dev/null || exit 1
+
+  assert_file_not_exists "${tmpdir}/.github/workflows/test-actions.yml"
+  assert_file_not_exists "${tmpdir}/.github/.yamllint-for-gha.yml"
+  assert_file_not_exists "${tmpdir}/zizmor.yml"
+}
+
 @test "parse_args without arguments keeps interactive mode" {
   parse_args
   assert_equal "${interactive}" "1"
@@ -217,6 +233,16 @@ AGENTS
   parse_args --docker-image-name=acme/app
   assert_equal "${docker_image_name}" "acme/app"
   assert_equal "${use_docker}" "y"
+}
+
+@test "parse_args --test-actions enables GitHub Actions linting" {
+  parse_args --test-actions
+  assert_equal "${use_test_actions}" "y"
+}
+
+@test "parse_args --no-test-actions disables GitHub Actions linting" {
+  parse_args --no-test-actions
+  assert_equal "${use_test_actions}" "n"
 }
 
 @test "parse_args --keep preserves the script" {
@@ -285,4 +311,18 @@ AGENTS
   assert_success
   assert_output_contains "Use PHP                          : n"
   assert_output_contains "Use Docker                       : y"
+}
+
+@test "collect_noninteractive keeps GitHub Actions linting off by default" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use GitHub Actions linting       : n"
+}
+
+@test "collect_noninteractive enables GitHub Actions linting on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --test-actions
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use GitHub Actions linting       : y"
 }

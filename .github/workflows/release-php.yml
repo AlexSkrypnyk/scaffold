@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
 
       - name: Cache Composer dependencies
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
@@ -39,8 +41,11 @@ jobs:
 
       # yamllint disable-line #;< PHP_PHAR
       - name: Set release version
+        env:
+          INPUTS_VERSION: ${{ github.event.inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          version="${{ github.event.inputs.version || github.ref_name }}"
+          version="${INPUTS_VERSION:-${REF_NAME}}"
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "Release version: $version"
           sed -i "s/\"yourproject-version\": \"development\"/\"yourproject-version\": \"${version}\"/g" box.json
