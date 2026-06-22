@@ -32,6 +32,9 @@ jobs:
           - macos-15
     runs-on: ${{ matrix.os }}
 
+    permissions:
+      contents: read
+
     steps:
       - name: Install current Bash on macOS
         if: startsWith(matrix.os, 'macos-')
@@ -39,6 +42,8 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@__HASH__ # __VERSION__
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@__HASH__ # __VERSION__

@@ -8,6 +8,7 @@ use AlexSkrypnyk\File\File;
 use AlexSkrypnyk\Snapshot\Replacer\Replacer;
 use Laravel\SerializableClosure\SerializableClosure;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\Process\ExecutableFinder;
 
 /**
  * Class InitFunctionalTest.
@@ -159,6 +160,30 @@ final class InitTest extends UnitTestCase {
     $this->assertStringContainsString('/.claude/skills/update-consumer-scaffold/', $gitignore);
   }
 
+  /**
+   * A project generated with Actions linting must pass the zizmor audit.
+   *
+   * Mirrors the audit the shipped "Test Actions" workflow runs, using the
+   * generated suppression config, so consumer projects stay clean without a
+   * manual check.
+   */
+  public function testInitTestActionsPassesZizmor(): void {
+    $zizmor = (new ExecutableFinder())->find('zizmor');
+
+    if (!is_string($zizmor)) {
+      $this->markTestSkipped('The "zizmor" binary is not available.');
+    }
+
+    self::$fixtures = NULL;
+
+    $arguments = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker', '--test-actions'];
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+    $this->assertProcessSuccessful();
+
+    $this->processRun($zizmor, ['--offline', '--config', 'zizmor.yml', '.github/workflows']);
+    $this->assertProcessSuccessful();
+  }
+
   public static function dataProviderInitNonInteractive(): \Iterator {
     $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
 
@@ -169,6 +194,10 @@ final class InitTest extends UnitTestCase {
     yield 'no docs' => [
       array_merge($identity, ['--no-docs']),
       'no_docs',
+    ];
+    yield 'test actions' => [
+      array_merge($identity, ['--test-actions']),
+      'test_actions',
     ];
   }
 
@@ -269,6 +298,11 @@ final class InitTest extends UnitTestCase {
           'use_docs' => self::$tuiNo,
         ],
     ];
+    yield 'test actions' => [
+        [
+          'use_test_actions' => self::$tuiYes,
+        ],
+    ];
   }
 
   protected static function defaultAnswers(): array {
@@ -291,6 +325,7 @@ final class InitTest extends UnitTestCase {
       'use_pr_template' => self::TUI_DEFAULT,
       'use_renovate' => self::TUI_DEFAULT,
       'use_docs' => self::TUI_DEFAULT,
+      'use_test_actions' => self::TUI_DEFAULT,
       'remove_self' => self::TUI_DEFAULT,
     ];
   }

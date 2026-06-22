@@ -56,6 +56,7 @@ use_funding=""
 use_pr_template=""
 use_renovate=""
 use_docs=""
+use_test_actions=""
 remove_self=""
 
 # Whether to run interactively. Disabled as soon as any option is passed.
@@ -467,6 +468,12 @@ remove_docs() {
   remove_string_content_line "\/docs" ".gitattributes"
 }
 
+remove_test_actions() {
+  rm -f .github/workflows/test-actions.yml || true
+  rm -f .github/.yamllint-for-gha.yml || true
+  rm -f zizmor.yml || true
+}
+
 #-------------------------------------------------------------------------------
 # PROCESSING FUNCTIONS
 #-------------------------------------------------------------------------------
@@ -522,8 +529,11 @@ process_internal() {
   rm -Rf ".scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
   rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true
-  rm -f ".github/workflows/test-actions.yml" >/dev/null || true
-  rm -f ".github/.yamllint-for-gha.yml" >/dev/null || true
+
+  # The scaffold-only release workflow is always removed, so drop its companion
+  # zizmor suppression entry too. A no-op when zizmor.yml is absent (Actions
+  # linting not selected).
+  remove_string_content_line "scaffold-release-docs.yml" "zizmor.yml"
 
   rm -f "docs/static/img/init.gif" >/dev/null || true
 
@@ -611,6 +621,7 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --pr-template, --no-pr-template            GitHub pull request template.
   --renovate, --no-renovate      Renovate configuration.
   --docs, --no-docs              Documentation site.
+  --test-actions, --no-test-actions  GitHub Actions linting (default: off).
   --keep                         Keep this init script (default: removed).
 
 Other:
@@ -680,6 +691,8 @@ parse_args() {
       --no-renovate) use_renovate="n" ;;
       --docs) use_docs="y" ;;
       --no-docs) use_docs="n" ;;
+      --test-actions) use_test_actions="y" ;;
+      --no-test-actions) use_test_actions="n" ;;
 
       --keep) remove_self="n" ;;
 
@@ -760,6 +773,7 @@ apply_noninteractive_defaults() {
   : "${use_pr_template:=y}"
   : "${use_renovate:=y}"
   : "${use_docs:=y}"
+  : "${use_test_actions:=n}"
   : "${remove_self:=y}"
 
   if [ "${use_php}" = "y" ]; then
@@ -820,6 +834,7 @@ print_summary() {
   echo "Use GitHub PR template           : ${use_pr_template}"
   echo "Use Renovate                     : ${use_renovate}"
   echo "Use Docs                         : ${use_docs}"
+  echo "Use GitHub Actions linting       : ${use_test_actions}"
   echo "Remove this script               : ${remove_self}"
   echo "---------------------------------"
   echo
@@ -877,6 +892,7 @@ collect_interactive() {
   use_pr_template="$(ask_yesno "Use GitHub PR template")"
   use_renovate="$(ask_yesno "Use Renovate")"
   use_docs="$(ask_yesno "Use docs")"
+  use_test_actions="$(ask_yesno "Use GitHub Actions linting" "N")"
   remove_self="$(ask_yesno "Remove this script")"
 
   print_summary
@@ -959,6 +975,7 @@ process_project() {
   [ "${use_pr_template}" != "y" ] && remove_pr_template
   [ "${use_renovate}" != "y" ] && remove_renovate
   [ "${use_docs}" != "y" ] && remove_docs
+  [ "${use_test_actions}" != "y" ] && remove_test_actions
 
   cleanup_renovate_managers
 

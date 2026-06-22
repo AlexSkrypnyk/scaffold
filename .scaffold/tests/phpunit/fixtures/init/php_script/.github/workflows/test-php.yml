@@ -1,4 +1,4 @@
-@@ -122,37 +122,3 @@
+@@ -131,39 +131,3 @@
          uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
          timeout-minutes: 30
  
@@ -9,6 +9,8 @@
 -    steps:
 -      - name: Checkout code
 -        uses: actions/checkout@__HASH__ # __VERSION__
+-        with:
+-          persist-credentials: false
 -
 -      - name: Cache Composer dependencies
 -        uses: actions/cache@__HASH__ # __VERSION__

@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        uses: actions/checkout@__HASH__ # __VERSION__
         with:
           persist-credentials: false
 
@@ -30,11 +30,11 @@ jobs:
         continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}
 
       - name: Check coding standards with actionlint
-        run: docker run --rm -v "${GITHUB_WORKSPACE:-.}":/app --workdir /app rhysd/actionlint:1.7.4
+        run: docker run --rm -v "${GITHUB_WORKSPACE:-.}":/app --workdir /app rhysd/actionlint:__VERSION__
         continue-on-error: ${{ vars.CI_ACTIONLINT_IGNORE_FAILURE == '1' }}
 
       - name: Check GitHub Actions security with Zizmor
-        uses: zizmorcore/zizmor-action@192e21d79ab29983730a13d1382995c2307fbcaa # v0.5.7
+        uses: zizmorcore/zizmor-action@__HASH__ # __VERSION__
         with:
           inputs: .github/workflows
           config: zizmor.yml

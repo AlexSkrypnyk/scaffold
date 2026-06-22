@@ -212,11 +212,8 @@ composer test
 ```bash
 cd .scaffold/tests/phpunit
 
-# Update the baseline fixture (default configuration)
-composer update-baseline
-
-# Update all diff fixtures (test scenarios)
-composer update-fixtures
+# Regenerate the baseline and all diff fixtures (test scenarios).
+composer update-snapshots
 ```
 
 **How fixture updates work:**
@@ -240,8 +237,7 @@ composer update-fixtures
 1. Make changes to `init.sh` or template files
 2. Run tests: `composer test` (will fail with "Differences between directories")
 3. Review the differences carefully
-4. If changes are correct: `composer update-baseline` or
-   `composer update-fixtures`
+4. If changes are correct: `composer update-snapshots`
 5. Verify updated fixtures with: `composer test`
 6. Commit updated fixtures with your changes
 
@@ -271,7 +267,23 @@ GitHub Actions workflows test the **scaffold template itself**:
 - `.github/workflows/test-shell.yml` - Validate shell scripts
 - `.github/workflows/test-nodejs.yml` - Validate NodeJS components
 - `.github/workflows/test-docs.yml` - Validate documentation site
+- `.github/workflows/test-actions.yml` - Lint workflow files (yamllint,
+  actionlint) and audit them for security with zizmor
 - `.github/workflows/scaffold-test.yml` - Integration test of `init.sh`
+
+### GitHub Actions linting (`test-actions.yml`)
+
+`test-actions.yml` runs three checks over `.github/workflows`: `yamllint`,
+`actionlint`, and `zizmor` (GitHub Actions security static analysis, uploaded as
+SARIF to the Security tab). Accepted zizmor findings are documented per-rule in
+the repository-root `zizmor.yml`.
+
+Unlike the other `scaffold-*` maintenance workflows, this one is a **selectable
+consumer feature**: `init.sh` offers "Use GitHub Actions linting" (off by
+default; `--test-actions` / `--no-test-actions` non-interactively). When not
+selected, `init.sh` removes `test-actions.yml`, `.github/.yamllint-for-gha.yml`,
+and `zizmor.yml`. The `scaffold-release-docs.yml` entry in `zizmor.yml` is
+stripped on init because that workflow is template-only.
 
 ### Release Workflows
 

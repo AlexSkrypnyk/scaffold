@@ -16,10 +16,17 @@ on:
         required: false
         default: false
 
+permissions:
+  contents: read
+
 jobs:
   test-php:
     name: PHP ${{ matrix.php-versions }}, Deps ${{ matrix.deps }}
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write # Post the coverage summary as a PR comment.
 
     strategy:
       fail-fast: false
@@ -30,6 +37,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
 
       - name: Cache Composer dependencies
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
@@ -130,6 +139,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
 
       - name: Cache Composer dependencies
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5

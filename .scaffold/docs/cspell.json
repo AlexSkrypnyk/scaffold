@@ -21,7 +21,8 @@
         "ruleset",
         "softprops",
         "tmate",
-        "toshimaru"
+        "toshimaru",
+        "zizmor"
     ],
     "overrides": [
         {

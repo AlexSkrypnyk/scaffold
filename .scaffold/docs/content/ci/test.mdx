@@ -73,14 +73,18 @@ The workflow includes steps for linting, testing, and code coverage.
 
 ## Actions job
 
-Used to validate the GitHub Actions workflow files in the repository.
+Validates and audits the GitHub Actions workflow files in the repository. This
+job is optional and disabled by default - enable it during initialization by
+answering "Use GitHub Actions linting" (or passing `--test-actions`).
 
 - Checks out code.
 - Runs code linting with [`yamllint`](https://github.com/adrienverge/yamllint) using [configuration](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/.yamllint-for-gha.yml) file.
 - Runs code linting with [`actionlint`](https://github.com/rhysd/actionlint).
+- Runs security analysis with [`zizmor`](https://docs.zizmor.sh/), uploading the results to the repository's Security tab. Accepted findings are documented per-rule in the repository-root `zizmor.yml`.
 
 Add `CI_ACTIONLINT_IGNORE_FAILURE` with a value of `1` to your repository's variables
-to ignore linting failures.
+to ignore the `yamllint`/`actionlint` failures, or `CI_ZIZMOR_IGNORE_FAILURE`
+to ignore zizmor failures.
 
 ## Code coverage
 
