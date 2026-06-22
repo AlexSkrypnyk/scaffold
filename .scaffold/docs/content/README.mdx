@@ -23,3 +23,12 @@ projects, so you can focus on the important stuff.
 3. Commit and push the changes to your repository.
 
 ![init](/img/init.gif)
+
+To set up without prompts, pass options instead (useful for automation):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+  bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+```
+
+Run `./init.sh --help` for all options.

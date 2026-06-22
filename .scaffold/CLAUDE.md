@@ -355,7 +355,7 @@ composer update --with-all-dependencies
 composer build
 
 # Test init.sh locally (creates test project)
-./init.sh testnamespace testproject "Test Author"
+./init.sh --namespace=TestProject --name=test-project --author="Test Author"
 ```
 
 ## Template Release Process

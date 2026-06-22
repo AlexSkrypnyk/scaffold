@@ -57,6 +57,92 @@ final class InitTest extends UnitTestCase {
     }
   }
 
+  /**
+   * Non-interactive runs must produce the same result as interactive defaults.
+   */
+  #[DataProvider('dataProviderInitNonInteractive')]
+  public function testInitNonInteractive(array $arguments, string $diffs_name): void {
+    // Parity checks compare against the existing interactive fixtures, so a
+    // divergence must surface as a failure to fix in code, never an update.
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+    $this->assertProcessOutputNotContains([
+      'Please follow the prompts',
+      'Proceed with project init',
+    ]);
+
+    Replacer::versions()->replaceInDir(self::$sut);
+
+    $fixtures_init = self::$root . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'init';
+    $baseline = File::dir($fixtures_init . DIRECTORY_SEPARATOR . self::BASELINE_DIR);
+    $diffs = File::dir($fixtures_init . DIRECTORY_SEPARATOR . $diffs_name);
+
+    $this->assertSnapshotMatchesBaseline(self::$sut, $baseline, $diffs);
+  }
+
+  /**
+   * The script initialises a project when fetched and piped through curl.
+   */
+  public function testInitViaCurlWithArgs(): void {
+    self::$fixtures = NULL;
+
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $script = sprintf(
+      'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
+      escapeshellarg($url),
+      escapeshellarg('Curl Author'),
+    );
+
+    $this->processRun('bash', ['-c', $script]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $composer_path = self::$sut . DIRECTORY_SEPARATOR . 'composer.json';
+    $this->assertFileExists($composer_path);
+    $composer = (string) file_get_contents($composer_path);
+    $this->assertStringContainsString('CurlNs', $composer);
+    $this->assertStringNotContainsString('YourNamespace', $composer);
+  }
+
+  /**
+   * Piping through curl without options fails cleanly instead of hanging.
+   */
+  public function testInitViaCurlWithoutArgs(): void {
+    self::$fixtures = NULL;
+
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $script = sprintf('set -o pipefail; curl -fsSL %s | bash -s --', escapeshellarg($url));
+
+    $this->processRun('bash', ['-c', $script]);
+
+    $this->assertProcessFailed();
+    $this->assertProcessErrorOutputContains('No input available');
+
+    // The aborted run must leave the project untouched.
+    $composer_path = self::$sut . DIRECTORY_SEPARATOR . 'composer.json';
+    $this->assertFileExists($composer_path);
+    $composer = (string) file_get_contents($composer_path);
+    $this->assertStringContainsString('YourNamespace', $composer);
+  }
+
+  public static function dataProviderInitNonInteractive(): \Iterator {
+    $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
+
+    yield 'all defaults' => [
+      $identity,
+      self::BASELINE_DIR,
+    ];
+    yield 'no docs' => [
+      array_merge($identity, ['--no-docs']),
+      'no_docs',
+    ];
+  }
+
   public static function dataProviderInit(): \Iterator {
     yield self::BASELINE_DATASET => [
         [],

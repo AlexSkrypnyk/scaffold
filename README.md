@@ -74,3 +74,20 @@
 3. Run [`./init.sh`](init.sh) to replace `yournamespace`, `yourproject`,
    `Your Name` strings with your own and choose the features.<br/>
    ![init](.scaffold/docs/static/img/init.gif)
+
+### Non-interactive setup
+
+Pass options instead of answering prompts to initialise without any interaction - useful for automation and AI agents. Any option enables non-interactive mode; `--namespace`, `--name` and `--author` are required, and every other choice falls back to its default.
+
+```bash
+./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+```
+
+The same works as a one-liner straight from GitHub:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+  bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+```
+
+Run `./init.sh --help` for the full list of options.

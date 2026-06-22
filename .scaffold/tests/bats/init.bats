@@ -2,7 +2,9 @@
 #
 # Unit tests for init.sh.
 #
-# shellcheck disable=SC2034
+# Variables under test are assigned by the sourced init.sh, which shellcheck
+# does not follow, so disable "unassigned variable" (SC2154) here.
+# shellcheck disable=SC2034,SC2154
 
 load _helper
 load "../../../init.sh"
@@ -152,4 +154,107 @@ RENOVATE
   popd >/dev/null || exit 1
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
+}
+
+@test "parse_args without arguments keeps interactive mode" {
+  parse_args
+  assert_equal "${interactive}" "1"
+}
+
+@test "parse_args sets identity values and disables interactive mode" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  assert_equal "${namespace}" "AcmeApp"
+  assert_equal "${project}" "acme-app"
+  assert_equal "${author}" "Jane Doe"
+  assert_equal "${interactive}" "0"
+}
+
+@test "parse_args --no-php disables PHP" {
+  parse_args --no-php
+  assert_equal "${use_php}" "n"
+}
+
+@test "parse_args --php-script selects the script sub-mode" {
+  parse_args --php-script
+  assert_equal "${use_php_script}" "y"
+}
+
+@test "parse_args --php-command-name implies the command sub-mode" {
+  parse_args --php-command-name=mycli
+  assert_equal "${php_command_name}" "mycli"
+  assert_equal "${use_php_command}" "y"
+}
+
+@test "parse_args --docker-image-name implies Docker support" {
+  parse_args --docker-image-name=acme/app
+  assert_equal "${docker_image_name}" "acme/app"
+  assert_equal "${use_docker}" "y"
+}
+
+@test "parse_args --keep preserves the script" {
+  parse_args --keep
+  assert_equal "${remove_self}" "n"
+}
+
+@test "parse_args --yes disables interactive mode" {
+  parse_args --yes
+  assert_equal "${interactive}" "0"
+}
+
+@test "parse_args fails on conflicting PHP sub-modes" {
+  run parse_args --php-command --php-script
+  assert_failure
+  assert_output_contains "cannot be used together"
+}
+
+@test "parse_args fails on an unknown option" {
+  run parse_args --unknown
+  assert_failure
+  assert_output_contains "Unknown option"
+}
+
+@test "parse_args prints usage for --help" {
+  run parse_args --help
+  assert_success
+  assert_output_contains "Usage: ./init.sh"
+}
+
+@test "require_identity fails when identity is missing" {
+  run require_identity
+  assert_failure
+  assert_output_contains "Missing required option"
+}
+
+@test "normalize_inputs canonicalises identity values" {
+  namespace="Acme App"
+  project="Acme App"
+  author="Jane Doe"
+  normalize_inputs
+  assert_equal "${namespace}" "AcmeApp"
+  assert_equal "${project}" "acme-app"
+  assert_equal "${project_pascalcase}" "AcmeApp"
+}
+
+@test "collect_noninteractive applies defaults and prints a summary" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Summary"
+  assert_output_contains "AcmeApp"
+  assert_output_contains "acme-app"
+}
+
+@test "collect_noninteractive honours the script sub-mode" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --php-script
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use simple script              : y"
+}
+
+@test "collect_noninteractive disables features on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php --docker
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use PHP                          : n"
+  assert_output_contains "Use Docker                       : y"
 }
