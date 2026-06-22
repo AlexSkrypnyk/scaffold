@@ -153,3 +153,66 @@ RENOVATE
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
 }
+
+@test "parse_args without arguments keeps interactive mode" {
+  parse_args
+  assert_equal "${interactive}" "1"
+}
+
+@test "parse_args sets identity values and disables interactive mode" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  assert_equal "${namespace}" "AcmeApp"
+  assert_equal "${project}" "acme-app"
+  assert_equal "${author}" "Jane Doe"
+  assert_equal "${interactive}" "0"
+}
+
+@test "parse_args --no-php disables PHP" {
+  parse_args --no-php
+  assert_equal "${use_php}" "n"
+}
+
+@test "parse_args --php-script selects the script sub-mode" {
+  parse_args --php-script
+  assert_equal "${use_php_script}" "y"
+}
+
+@test "parse_args --php-command-name implies the command sub-mode" {
+  parse_args --php-command-name=mycli
+  assert_equal "${php_command_name}" "mycli"
+  assert_equal "${use_php_command}" "y"
+}
+
+@test "parse_args --docker-image-name implies Docker support" {
+  parse_args --docker-image-name=acme/app
+  assert_equal "${docker_image_name}" "acme/app"
+  assert_equal "${use_docker}" "y"
+}
+
+@test "parse_args --keep preserves the script" {
+  parse_args --keep
+  assert_equal "${remove_self}" "n"
+}
+
+@test "parse_args --yes disables interactive mode" {
+  parse_args --yes
+  assert_equal "${interactive}" "0"
+}
+
+@test "parse_args fails on conflicting PHP sub-modes" {
+  run parse_args --php-command --php-script
+  assert_failure
+  assert_output_contains "cannot be used together"
+}
+
+@test "parse_args fails on an unknown option" {
+  run parse_args --unknown
+  assert_failure
+  assert_output_contains "Unknown option"
+}
+
+@test "parse_args prints usage for --help" {
+  run parse_args --help
+  assert_success
+  assert_output_contains "Usage: ./init.sh"
+}

@@ -1,3 +1,4 @@
+.artifacts/
 *.jpg
 *.png
 composer.lock

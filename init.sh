@@ -8,25 +8,58 @@
 # - Cleaning up template-specific files
 # - Configuring selected features (release drafter, renovate, docs)
 #
-# The script can run interactively (with prompts) or silently (with arguments).
+# The script can run interactively (with prompts) or non-interactively (with
+# options). Passing any option switches to non-interactive mode: prompts are
+# skipped, unspecified choices use their defaults, and --namespace, --name and
+# --author are required.
 #
 # @usage:
 # Interactive prompt:
 # ./init.sh
 #
-# Silent mode:
-# ./init.sh yournamespace yourproject "Your Name"
+# Non-interactive:
+# ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 #
-# Silent mode runs non-interactively and uses default values for all choices.
+# Non-interactive one-liner (for AI agents and automation):
+# curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+#   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+#
+# Run "./init.sh --help" for the full list of options.
 #
 # shellcheck disable=SC2162,SC2015
 
 set -euo pipefail
 [ "${SCRIPT_DEBUG-}" = "1" ] && set -x
 
-namespace=${1-}
-project=${2-}
-author=${3-}
+# Identity values. Populated from options or interactive prompts.
+namespace=""
+project=""
+author=""
+project_pascalcase=""
+
+# Feature selections. An empty value means "not set on the command line"; it is
+# resolved later from an interactive prompt or a non-interactive default.
+use_php=""
+use_php_command=""
+php_command_name=""
+use_php_command_build=""
+use_php_script=""
+php_script_name=""
+use_nodejs=""
+use_shell=""
+shell_command_name=""
+use_docker=""
+docker_image_name=""
+use_release_drafter=""
+use_pr_autoassign=""
+use_funding=""
+use_pr_template=""
+use_renovate=""
+use_docs=""
+remove_self=""
+
+# Whether to run interactively. Disabled as soon as any option is passed.
+interactive=1
 
 #-------------------------------------------------------------------------------
 # STRING UTILITIES
@@ -174,6 +207,7 @@ remove_special_comments() {
 # @return string User input or default value
 #
 ask() {
+  local label="$1"
   local prompt="$1"
   local default="${2-}"
   local result=""
@@ -185,7 +219,16 @@ ask() {
   fi
 
   while [[ -z ${result} ]]; do
-    read -p "${prompt}" result
+    if ! read -p "${prompt}" result; then
+      # Stdin reached EOF with no value. This happens when the script is piped
+      # (e.g. 'curl ... | bash') without options, so there is nothing to read.
+      if [[ -n $default ]]; then
+        result="${default}"
+        break
+      fi
+      echo "Error: No input available for '${label}'. Pass options (run with --help) or run interactively." >&2
+      exit 1
+    fi
     if [[ -n $default && -z ${result} ]]; then
       result="${default}"
     fi
@@ -497,12 +540,268 @@ process_internal() {
 }
 
 #-------------------------------------------------------------------------------
-# MAIN FUNCTION
+# ARGUMENT PARSING
 #-------------------------------------------------------------------------------
 
-main() {
-  check_dependencies || exit 1
+##
+# Print usage information.
+#
+usage() {
+  cat <<'USAGE'
+Usage: ./init.sh [OPTIONS]
 
+Initialise a new project from the Scaffold template.
+
+With no options the script runs interactively and prompts for every choice.
+Passing any option switches to non-interactive mode: prompts are skipped,
+unspecified choices use their defaults, and --namespace, --name and --author
+are required.
+
+One-liner (non-interactive):
+  curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+    bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+
+Identity (required in non-interactive mode):
+  --namespace=VALUE              Project namespace in PascalCase (e.g. AcmeApp).
+  --name=VALUE                   Project name in kebab-case (e.g. acme-app).
+  --author=VALUE                 Author name (e.g. "Jane Doe").
+
+Features (enabled by default unless noted; use --no-<name> to disable):
+  --php, --no-php                PHP support.
+  --php-command                  Use the Symfony CLI command app (default).
+  --php-script                   Use a single-file script instead of the app.
+  --php-command-name=VALUE       CLI command file name (default: project name).
+  --php-script-name=VALUE        Script file name (default: project name).
+  --phar, --no-phar              Build a PHAR (default: on).
+  --nodejs, --no-nodejs          NodeJS support.
+  --shell, --no-shell            Shell script support.
+  --shell-command-name=VALUE     Shell script name (default: project name).
+  --docker, --no-docker          Docker support (default: off).
+  --docker-image-name=VALUE      Docker image name (default: namespace/project).
+  --release-drafter, --no-release-drafter   GitHub Release Drafter.
+  --pr-autoassign, --no-pr-autoassign       GitHub PR author auto-assign.
+  --funding, --no-funding        GitHub funding configuration.
+  --pr-template, --no-pr-template            GitHub pull request template.
+  --renovate, --no-renovate      Renovate configuration.
+  --docs, --no-docs              Documentation site.
+  --keep                         Keep this init script (default: removed).
+
+Other:
+  --yes, -y                      Run non-interactively using defaults.
+  --help, -h                     Show this help and exit.
+USAGE
+}
+
+##
+# Parse command-line options.
+#
+# Any recognised option disables interactive mode. Unknown options and the
+# --help flag terminate the script.
+#
+parse_args() {
+  if [ "$#" -gt 0 ]; then
+    interactive=0
+  fi
+
+  while [ "$#" -gt 0 ]; do
+    case "${1}" in
+      --namespace=*) namespace="${1#*=}" ;;
+      --name=*) project="${1#*=}" ;;
+      --author=*) author="${1#*=}" ;;
+
+      --php) use_php="y" ;;
+      --no-php) use_php="n" ;;
+      --php-command) use_php_command="y" ;;
+      --php-script) use_php_script="y" ;;
+      --php-command-name=*)
+        php_command_name="${1#*=}"
+        use_php_command="y"
+        ;;
+      --php-script-name=*)
+        php_script_name="${1#*=}"
+        use_php_script="y"
+        ;;
+      --phar) use_php_command_build="y" ;;
+      --no-phar) use_php_command_build="n" ;;
+
+      --nodejs) use_nodejs="y" ;;
+      --no-nodejs) use_nodejs="n" ;;
+
+      --shell) use_shell="y" ;;
+      --no-shell) use_shell="n" ;;
+      --shell-command-name=*)
+        shell_command_name="${1#*=}"
+        use_shell="y"
+        ;;
+
+      --docker) use_docker="y" ;;
+      --no-docker) use_docker="n" ;;
+      --docker-image-name=*)
+        docker_image_name="${1#*=}"
+        use_docker="y"
+        ;;
+
+      --release-drafter) use_release_drafter="y" ;;
+      --no-release-drafter) use_release_drafter="n" ;;
+      --pr-autoassign) use_pr_autoassign="y" ;;
+      --no-pr-autoassign) use_pr_autoassign="n" ;;
+      --funding) use_funding="y" ;;
+      --no-funding) use_funding="n" ;;
+      --pr-template) use_pr_template="y" ;;
+      --no-pr-template) use_pr_template="n" ;;
+      --renovate) use_renovate="y" ;;
+      --no-renovate) use_renovate="n" ;;
+      --docs) use_docs="y" ;;
+      --no-docs) use_docs="n" ;;
+
+      --keep) remove_self="n" ;;
+
+      --yes | -y) interactive=0 ;;
+      --help | -h)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "Error: Unknown option: ${1}" >&2
+        echo "Run with --help for usage." >&2
+        exit 1
+        ;;
+    esac
+    shift
+  done
+
+  validate_php_mode
+}
+
+##
+# Ensure the PHP sub-mode selection is not contradictory.
+#
+validate_php_mode() {
+  if [ "${use_php_command}" = "y" ] && [ "${use_php_script}" = "y" ]; then
+    echo "Error: --php-command and --php-script cannot be used together." >&2
+    exit 1
+  fi
+}
+
+#-------------------------------------------------------------------------------
+# INPUT COLLECTION
+#-------------------------------------------------------------------------------
+
+##
+# Ensure required identity values are present in non-interactive mode.
+#
+require_identity() {
+  local missing=()
+  [ -z "${namespace}" ] && missing+=("--namespace")
+  [ -z "${project}" ] && missing+=("--name")
+  [ -z "${author}" ] && missing+=("--author")
+
+  if [ "${#missing[@]}" -gt 0 ]; then
+    echo "Error: Missing required option(s) in non-interactive mode: ${missing[*]}" >&2
+    echo "Run with --help for usage." >&2
+    exit 1
+  fi
+}
+
+##
+# Coerce raw identity input into canonical values and validate them.
+#
+normalize_inputs() {
+  project="$(convert_string "${project}" "package_name")"
+  namespace="$(convert_string "${namespace}" "namespace")"
+  project_pascalcase="$(to_pascalcase "${project}")"
+
+  validate_namespace "${namespace}" || exit 1
+  validate_project_name "${project}" || exit 1
+  validate_author "${author}" || exit 1
+}
+
+##
+# Fill any choice not set on the command line with its default value.
+#
+# Mirrors the defaults offered by the interactive prompts so that a
+# non-interactive run with no feature options yields the same result.
+#
+apply_noninteractive_defaults() {
+  : "${use_php:=y}"
+  : "${use_nodejs:=y}"
+  : "${use_shell:=y}"
+  : "${use_docker:=n}"
+  : "${use_release_drafter:=y}"
+  : "${use_pr_autoassign:=y}"
+  : "${use_funding:=y}"
+  : "${use_pr_template:=y}"
+  : "${use_renovate:=y}"
+  : "${use_docs:=y}"
+  : "${remove_self:=y}"
+
+  if [ "${use_php}" = "y" ]; then
+    if [ "${use_php_script}" = "y" ]; then
+      use_php_command="n"
+    else
+      : "${use_php_command:=y}"
+    fi
+
+    if [ "${use_php_command}" = "y" ]; then
+      : "${php_command_name:=${project}}"
+      : "${use_php_command_build:=y}"
+      use_php_script="n"
+      php_script_name="<unset>"
+    else
+      : "${use_php_script:=y}"
+      : "${php_script_name:=${project}}"
+      use_php_command_build="n"
+      php_command_name="<unset>"
+    fi
+  else
+    use_php_command="n"
+    use_php_command_build="n"
+    use_php_script="n"
+    php_command_name="<unset>"
+    php_script_name="<unset>"
+  fi
+
+  [ "${use_shell}" = "y" ] && : "${shell_command_name:=${project}}"
+  [ "${use_docker}" = "y" ] && : "${docker_image_name:=$(to_lowercase "${namespace}")/${project}}"
+
+  return 0
+}
+
+##
+# Print the selected configuration.
+#
+print_summary() {
+  echo
+  echo "            Summary"
+  echo "---------------------------------"
+  echo "Namespace                        : ${namespace}"
+  echo "Project                          : ${project}"
+  echo "Author                           : ${author}"
+  echo "Use PHP                          : ${use_php}"
+  echo "  Use CLI command app            : ${use_php_command}"
+  echo "    CLI command name             : ${php_command_name}"
+  echo "    Build PHAR                   : ${use_php_command_build}"
+  echo "  Use simple script              : ${use_php_script}"
+  [ "${use_php_script}" = "y" ] && echo "    Simple script name           : ${php_script_name}"
+  echo "Use NodeJS                       : ${use_nodejs}"
+  echo "Use Shell                        : ${use_shell}"
+  echo "Use Docker                       : ${use_docker}"
+  [ "${use_docker}" = "y" ] && echo "  Docker image name              : ${docker_image_name}"
+  echo "Use GitHub release drafter       : ${use_release_drafter}"
+  echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
+  echo "Use GitHub funding               : ${use_funding}"
+  echo "Use GitHub PR template           : ${use_pr_template}"
+  echo "Use Renovate                     : ${use_renovate}"
+  echo "Use Docs                         : ${use_docs}"
+  echo "Remove this script               : ${remove_self}"
+  echo "---------------------------------"
+  echo
+}
+
+##
+# Collect configuration through interactive prompts.
+#
+collect_interactive() {
   echo "Please follow the prompts to adjust your project configuration"
   echo
 
@@ -510,15 +809,7 @@ main() {
   [ -z "${project}" ] && project="$(ask "Project")"
   [ -z "${author}" ] && author="$(ask "Author")"
 
-  # Make sure the input become valid value.
-  project="$(convert_string "${project}" "package_name")"
-  namespace="$(convert_string "${namespace}" "namespace")"
-  project_pascalcase="$(to_pascalcase "${project}")"
-
-  # Validate inputs.
-  validate_namespace "${namespace}" || exit 1
-  validate_project_name "${project}" || exit 1
-  validate_author "${author}" || exit 1
+  normalize_inputs
 
   use_php="$(ask_yesno "Use PHP")"
 
@@ -561,32 +852,9 @@ main() {
   use_docs="$(ask_yesno "Use docs")"
   remove_self="$(ask_yesno "Remove this script")"
 
-  echo
-  echo "            Summary"
-  echo "---------------------------------"
-  echo "Namespace                        : ${namespace}"
-  echo "Project                          : ${project}"
-  echo "Author                           : ${author}"
-  echo "Use PHP                          : ${use_php}"
-  echo "  Use CLI command app            : ${use_php_command}"
-  echo "    CLI command name             : ${php_command_name}"
-  echo "    Build PHAR                   : ${use_php_command_build}"
-  echo "  Use simple script              : ${use_php_script}"
-  [ "${use_php_script}" = "y" ] && echo "    Simple script name           : ${php_script_name}"
-  echo "Use NodeJS                       : ${use_nodejs}"
-  echo "Use Shell                        : ${use_shell}"
-  echo "Use Docker                       : ${use_docker}"
-  [ "${use_docker}" = "y" ] && echo "  Docker image name              : ${docker_image_name}"
-  echo "Use GitHub release drafter       : ${use_release_drafter}"
-  echo "Use GitHub PR author auto-assign : ${use_pr_autoassign}"
-  echo "Use GitHub funding               : ${use_funding}"
-  echo "Use GitHub PR template           : ${use_pr_template}"
-  echo "Use Renovate                     : ${use_renovate}"
-  echo "Use Docs                         : ${use_docs}"
-  echo "Remove this script               : ${remove_self}"
-  echo "---------------------------------"
-  echo
+  print_summary
 
+  local should_proceed
   should_proceed="$(ask_yesno "Proceed with project init")"
 
   if [ "${should_proceed}" != "y" ]; then
@@ -594,11 +862,29 @@ main() {
     echo "Aborting."
     exit 1
   fi
+}
 
-  #
-  # Processing.
-  #
+##
+# Collect configuration from options, falling back to defaults.
+#
+collect_noninteractive() {
+  require_identity
 
+  normalize_inputs
+
+  apply_noninteractive_defaults
+
+  print_summary
+}
+
+#-------------------------------------------------------------------------------
+# MAIN FUNCTION
+#-------------------------------------------------------------------------------
+
+##
+# Apply the selected configuration to the project files.
+#
+process_project() {
   : "${namespace:?Namespace is required}"
   : "${project:?Project is required}"
   : "${author:?Author is required}"
@@ -653,12 +939,34 @@ main() {
 
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 
-  [ "${remove_self}" != "n" ] && rm -- "$0" || true
+  # Remove this init script. Only an actual file on disk is removed: when piped
+  # through 'curl ... | bash' there is no script file ("$0" is "bash"), so this
+  # is a safe no-op.
+  if [ "${remove_self}" != "n" ] && [ -f "${0}" ]; then
+    rm -- "${0}" || true
+  fi
 
   echo
   echo "Initialization complete."
 }
 
-if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+main() {
+  parse_args "$@"
+
+  check_dependencies || exit 1
+
+  if [ "${interactive}" = "1" ]; then
+    collect_interactive
+  else
+    collect_noninteractive
+  fi
+
+  process_project
+}
+
+# Run main only when the script is executed, not when it is sourced (e.g. by
+# the BATS unit tests). When piped through 'bash -s' the script has no source
+# file, so "${BASH_SOURCE[0]}" is empty - that case must still run.
+if [ -z "${BASH_SOURCE[0]:-}" ] || [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   main "$@"
 fi
