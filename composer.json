@@ -30,8 +30,8 @@
         "mikey179/vfsstream": "^1.6.12",
         "opis/closure": "^4.5.0",
         "phpstan/phpstan": "^2.2.5",
-        "phpunit/phpunit": "^11.5.55",
-        "rector/rector": "^2.5.3"
+        "phpunit/phpunit": "^11.5.56",
+        "rector/rector": "^2.5.4"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
