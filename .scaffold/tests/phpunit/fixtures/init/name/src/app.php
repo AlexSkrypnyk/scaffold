@@ -8,8 +8,8 @@
 +use JediTemple\App\Command\SayHelloCommand;
  
  // @codeCoverageIgnoreStart
--$application = new Application('YourProject', '@force-crystal-version@');
-+$application = new Application('YourProject', '@star-forge-version@');
+-$application = new Application('ForceCrystal', '@force-crystal-version@');
++$application = new Application('StarForge', '@star-forge-version@');
  
  $command = new JokeCommand();
  $application->add($command);

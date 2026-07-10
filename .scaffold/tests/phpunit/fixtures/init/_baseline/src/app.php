@@ -12,7 +12,7 @@ use YodasHut\App\Command\JokeCommand;
 use YodasHut\App\Command\SayHelloCommand;
 
 // @codeCoverageIgnoreStart
-$application = new Application('YourProject', '@force-crystal-version@');
+$application = new Application('ForceCrystal', '@force-crystal-version@');
 
 $command = new JokeCommand();
 $application->add($command);
