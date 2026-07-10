@@ -3,8 +3,10 @@
 # Unit tests for init.sh.
 #
 # Variables under test are assigned by the sourced init.sh, which shellcheck
-# does not follow, so disable "unassigned variable" (SC2154) here.
-# shellcheck disable=SC2034,SC2154
+# does not follow, so disable "unassigned variable" (SC2154) here. The 'curl'
+# mocks are invoked indirectly by init.sh functions under 'run' and cannot be
+# traced statically, so "function never invoked" (SC2329) is disabled too.
+# shellcheck disable=SC2034,SC2154,SC2329
 
 load _helper
 load "../../../init.sh"
