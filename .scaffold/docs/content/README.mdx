@@ -4,6 +4,8 @@ sidebar_position: 1
 cspell: ignore yournamespace yourproject
 ---
 
+import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
+
 # Introduction
 
 Welcome to the documentation for Scaffold, your go-to repository for
@@ -22,7 +24,13 @@ projects, so you can focus on the important stuff.
    other strings with your own and choose the features.
 3. Commit and push the changes to your repository.
 
-![init](/img/init.gif)
+<AsciinemaPlayer
+  src="/img/init.cast"
+  autoPlay={true}
+  loop={true}
+  controls={true}
+  terminalLineHeight={1.1}
+/>
 
 To set up without prompts, pass options instead (useful for automation):
 

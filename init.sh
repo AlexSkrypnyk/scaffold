@@ -563,11 +563,11 @@ process_internal() {
   rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true
 
   # The scaffold-only release workflow is always removed, so drop its companion
-  # zizmor suppression entry too. A no-op when zizmor.yml is absent (Actions
-  # linting not selected).
-  remove_string_content_line "scaffold-release-docs.yml" "zizmor.yml"
-
-  rm -f "docs/static/img/init.gif" >/dev/null || true
+  # zizmor suppression entry too. Guarded because zizmor.yml is absent when
+  # Actions linting is not selected, and grepping a missing file errors.
+  if [ -f zizmor.yml ]; then
+    remove_string_content_line "scaffold-release-docs.yml" "zizmor.yml"
+  fi
 
   protect_skill_references
 
