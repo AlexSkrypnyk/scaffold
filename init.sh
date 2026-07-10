@@ -557,7 +557,6 @@ process_internal() {
 
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
-  rm -f LICENSE >/dev/null || true
   rm -f SECURITY.md >/dev/null || true
   rm -Rf ".scaffold" >/dev/null || true
   rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
