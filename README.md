@@ -31,7 +31,7 @@
     coverage)
 - **PHP**
   - [`composer.json`](composer.json)
-  - [Symfony CLI command app scaffold](src/app.php)
+  - [Symfony CLI command app scaffold](php-command)
     with [unit tests](tests/phpunit/Unit/Command) (with coverage)
     and [traits](tests/phpunit/Traits)
   - [Simple single-file script scaffold](php-script)

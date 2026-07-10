@@ -16,6 +16,7 @@
 
     <!-- #;< PHP_COMMAND -->
     <file>src</file>
+    <file>php-command</file>
     <!-- #;> PHP_COMMAND -->
     <!-- #;< !PHP_COMMAND -->
     <file>php-script</file>
