@@ -19,10 +19,14 @@ projects, so you can focus on the important stuff.
 
 ## Quick start
 
-1. Download the latest release from [GitHub](https://github.com/AlexSkrypnyk/scaffold/releases/latest)
-2. Run `./init.sh` to replace `yournamespace`, `yourproject`, `Your Name` and
-   other strings with your own and choose the features.
-3. Commit and push the changes to your repository.
+The quickest way to start is a single command in a new **empty directory** - it downloads Scaffold and initializes the project in place, with no manual download or checkout:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+  bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+```
+
+Piping with no options prompts you interactively for every choice; pass options (as above) to run unattended. The latest release is used by default - add `--ref=<tag|branch|commit>` to pin a specific version. Then commit and push the result to your repository.
 
 <AsciinemaPlayer
   src="/img/init.cast"
@@ -32,11 +36,12 @@ projects, so you can focus on the important stuff.
   terminalLineHeight={1.1}
 />
 
-To set up without prompts, pass options instead (useful for automation):
+### Alternative: start from a checkout
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
-  bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
-```
+Prefer to work from a local copy first?
+
+1. Download the latest release from [GitHub](https://github.com/AlexSkrypnyk/scaffold/releases/latest).
+2. Run `./init.sh` to replace `yournamespace`, `yourproject`, `Your Name` and other strings with your own and choose the features.
+3. Commit and push the changes to your repository.
 
 Run `./init.sh --help` for all options.
