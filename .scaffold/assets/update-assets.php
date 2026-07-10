@@ -252,33 +252,37 @@ function main(): void {
   verbose('Workspace: ' . $workspace_dir);
 
   $expect_script = $tmp_dir . '/init.exp';
-  file_put_contents($expect_script, buildInitExpectScript($workspace_dir, RECORD_NAMESPACE, RECORD_PROJECT, RECORD_AUTHOR));
-  chmod($expect_script, 0755);
-
   $cast_file = $tmp_dir . '/init-raw.cast';
-  verbose('Recording init.sh...');
-  recordSession($cast_file, $expect_script);
-
-  $raw = (string) file_get_contents($cast_file);
-  $home = (string) getenv('HOME');
-  $clean = sanitizeCast($raw, $workspace_dir, $home);
-
-  $cast_dest = $project_dir . '/.scaffold/docs/static/img/init.cast';
-  file_put_contents($cast_dest, $clean);
-  verbose('Cast written: ' . $cast_dest);
-
   $svg_input = $tmp_dir . '/init-svg.cast';
-  file_put_contents($svg_input, appendEndPause($clean, END_PAUSE));
 
-  $svg_file = $assets_dir . '/init.svg';
-  verbose('Rendering SVG...');
-  renderSvg($svg_input, $svg_file, $assets_dir);
-  verbose('SVG written: ' . $svg_file);
+  try {
+    file_put_contents($expect_script, buildInitExpectScript($workspace_dir, RECORD_NAMESPACE, RECORD_PROJECT, RECORD_AUTHOR));
+    chmod($expect_script, 0755);
 
-  removeDir($workspace_dir);
-  cleanupFile($expect_script);
-  cleanupFile($cast_file);
-  cleanupFile($svg_input);
+    verbose('Recording init.sh...');
+    recordSession($cast_file, $expect_script);
+
+    $raw = (string) file_get_contents($cast_file);
+    $home = (string) getenv('HOME');
+    $clean = sanitizeCast($raw, $workspace_dir, $home);
+
+    $cast_dest = $project_dir . '/.scaffold/docs/static/img/init.cast';
+    file_put_contents($cast_dest, $clean);
+    verbose('Cast written: ' . $cast_dest);
+
+    file_put_contents($svg_input, appendEndPause($clean, END_PAUSE));
+
+    $svg_file = $assets_dir . '/init.svg';
+    verbose('Rendering SVG...');
+    renderSvg($svg_input, $svg_file, $assets_dir);
+    verbose('SVG written: ' . $svg_file);
+  }
+  finally {
+    removeDir($workspace_dir);
+    cleanupFile($expect_script);
+    cleanupFile($cast_file);
+    cleanupFile($svg_input);
+  }
 
   verbose('Done.');
 }
