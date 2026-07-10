@@ -52,7 +52,6 @@ jobs:
         uses: shivammathur/setup-php@__HASH__ # __VERSION__
         with:
           php-version: ${{ matrix.php-versions }}
-          tools: composer:2.10
           coverage: pcov
           ini-values: pcov.directory=.
 
@@ -154,7 +153,6 @@ jobs:
         uses: shivammathur/setup-php@__HASH__ # __VERSION__
         with:
           php-version: 8.4
-          tools: composer:2.10
 
       - name: Install dependencies
         run: composer install
