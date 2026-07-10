@@ -59,7 +59,7 @@
   - [Readme with badges](README.dist.md) and [generated logo](logo.png)
   - [Scaffold](docs) for the documentation site using [Docusaurus](https://docusaurus.io/)
   - Spell check with [CSpell](https://cspell.org/)
-  - [Terminalizer](assets/terminalizer.yml) configuration file
+  - [Terminal recorder](.scaffold/assets/update-assets.php) rendering an animated SVG plus an [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component
 - **Utility files**
   - [`.editorconfig`](.editorconfig), [`.gitignore`](.gitignore), [`.gitattributes`](.gitattributes)
   - [Renovate bot configuration](renovate.json)
@@ -77,7 +77,7 @@
 2. Checkout locally
 3. Run [`./init.sh`](init.sh) to replace `yournamespace`, `yourproject`,
    `Your Name` strings with your own and choose the features.<br/>
-   ![init](.scaffold/docs/static/img/init.gif)
+   ![init](.scaffold/assets/init.svg)
 
 ### Non-interactive setup
 

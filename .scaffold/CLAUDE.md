@@ -305,6 +305,34 @@ npm run spellcheck # CSpell validation
 npm run build # Build static site
 ```
 
+## Terminal recordings
+
+The `init.sh` walkthrough shown in `README.md` and on the getscaffold.dev site
+is a single asciinema recording rendered two ways by
+`.scaffold/assets/update-assets.php`:
+
+- `.scaffold/assets/init.svg` - an animated SVG embedded in `README.md`
+  (GitHub renders animated SVG but cannot run JavaScript).
+- `.scaffold/docs/static/img/init.cast` - an asciicast played by the
+  `AsciinemaPlayer` component in `.scaffold/docs/content/README.mdx`.
+
+Regenerate both after changing `init.sh` or its prompts:
+
+```bash
+php .scaffold/assets/update-assets.php
+```
+
+The generator records `./init.sh` against a disposable `git stash create` export
+of the working tree, so it captures uncommitted `init.sh` changes and never
+touches the real tree. It needs `asciinema`, `expect`, `node`, and `npm`;
+svg-term is installed on demand into the git-ignored
+`.scaffold/assets/node_modules`.
+
+The pure cast helpers are unit-tested in
+`.scaffold/tests/phpunit/src/UpdateAssetsTest.php`, which also guards that the
+`AsciinemaPlayer` component stays byte-identical between `docs/` and
+`.scaffold/docs/`.
+
 ## CI/CD for the Template
 
 GitHub Actions workflows test the **scaffold template itself**:

@@ -12,7 +12,8 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "spellcheck": "cspell content/*.mdx content/**/*.mdx",
-    "test": "npm run spellcheck"
+    "test": "jest && npm run spellcheck",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@docusaurus/core": "__VERSION__",
@@ -28,9 +29,19 @@
     "react-dom": "__VERSION__"
   },
   "devDependencies": {
+    "@babel/core": "__VERSION__",
+    "@babel/preset-env": "__VERSION__",
+    "@babel/preset-react": "__VERSION__",
     "@docusaurus/module-type-aliases": "__VERSION__",
     "@docusaurus/types": "__VERSION__",
-    "cspell": "__VERSION__"
+    "@testing-library/dom": "__VERSION__",
+    "@testing-library/jest-dom": "__VERSION__",
+    "@testing-library/react": "__VERSION__",
+    "babel-jest": "__VERSION__",
+    "cspell": "__VERSION__",
+    "identity-obj-proxy": "__VERSION__",
+    "jest": "__VERSION__",
+    "jest-environment-jsdom": "__VERSION__"
   },
   "browserslist": {
     "production": [

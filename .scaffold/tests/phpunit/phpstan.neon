@@ -9,6 +9,9 @@ parameters:
   paths:
     - src
 
+  scanFiles:
+    - ../../assets/update-assets.php
+
   excludePaths:
     - vendor/*
     - node_modules/*

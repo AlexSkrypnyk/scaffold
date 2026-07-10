@@ -30,6 +30,10 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
       '.logs',
       '.phpunit.cache',
       '.claude',
+      // Docusaurus build output and cache - transient artifacts that must never
+      // leak into the generated project or its fixtures.
+      'build',
+      '.docusaurus',
     ]);
 
     // The template ships a shared '.claude/settings.json'; personal overrides
