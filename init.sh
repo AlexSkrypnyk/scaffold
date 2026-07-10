@@ -521,7 +521,7 @@ process_claude_settings() {
         print prev
       }
     }
-  ' "${file}" > "${file}.tmp" && mv "${file}.tmp" "${file}"
+  ' "${file}" >"${file}.tmp" && mv "${file}.tmp" "${file}"
 }
 
 process_readme() {

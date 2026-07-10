@@ -151,6 +151,11 @@ composer test    # InitTest snapshot suite
   omit parameter docblocks, but annotate any `mixed` value (e.g. a data-provider
   row) with `@param list<string>` so phpstan level 9 stays clean.
 
+- **Shell scripts must pass `shfmt`.** The `Shell` and `Test Scaffold` CI jobs
+  run `shfmt -i 2 -ci -s` (via `luizm/action-sh-checker`) over `init.sh` and the
+  `*.sh` / `.bats` files, and it is strict about redirect spacing (`>"$f"`, not
+  `> "$f"`). Format shell edits to match before pushing.
+
 - **Use the maintainer helper libraries, never Symfony or raw PHP.** File work
   goes through `alexskrypnyk/file` (`File::copyIfExists()`, `File::dir()`,
   `File::exists()`, `File::dump()`, `File::remove()`, ...); test scaffolding
