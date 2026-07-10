@@ -21,7 +21,7 @@
 # ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 #
 # Non-interactive one-liner (for AI agents and automation):
-# curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+# curl -fsSL https://getscaffold.dev/init.sh | \
 #   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 #
 # When run without the template present (for example piped from curl in an
@@ -35,6 +35,10 @@
 
 set -euo pipefail
 [ "${SCRIPT_DEBUG-}" = "1" ] && set -x
+
+# Scaffold version. Rewritten to the release tag when the script is published
+# for download from getscaffold.dev; stays "dev" in a plain checkout.
+SCAFFOLD_VERSION="dev"
 
 # Identity values. Populated from options or interactive prompts.
 namespace=""
@@ -642,7 +646,7 @@ unspecified choices use their defaults, and --namespace, --name and --author
 are required.
 
 One-liner (non-interactive):
-  curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+  curl -fsSL https://getscaffold.dev/init.sh | \
     bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 
 When run without the template present (e.g. piped from curl in an empty
@@ -682,6 +686,7 @@ Other:
                                  template is absent (default: latest release).
   --yes, -y                      Run non-interactively using defaults.
   --help, -h                     Show this help and exit.
+  --version                      Print the version ("dev" unless released).
 USAGE
 }
 
@@ -758,6 +763,10 @@ parse_args() {
       --yes | -y) interactive=0 ;;
       --help | -h)
         usage
+        exit 0
+        ;;
+      --version)
+        echo "${SCAFFOLD_VERSION}"
         exit 0
         ;;
       *)

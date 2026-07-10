@@ -87,10 +87,10 @@ Pass options instead of answering prompts to initialise without any interaction 
 ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-The same works as a one-liner straight from GitHub, with no prior checkout - run it in an **empty directory** and the script downloads the Scaffold into the current directory before initialising it:
+The same works as a one-liner straight from getscaffold.dev, with no prior checkout - run it in an **empty directory** and the script downloads the Scaffold into the current directory before initialising it:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
+curl -fsSL https://getscaffold.dev/init.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 

@@ -308,6 +308,12 @@ WORKFLOW
   assert_output_contains "Usage: ./init.sh"
 }
 
+@test "parse_args prints the version for --version" {
+  run parse_args --version
+  assert_success
+  assert_output "dev"
+}
+
 @test "require_identity fails when identity is missing" {
   run require_identity
   assert_failure
