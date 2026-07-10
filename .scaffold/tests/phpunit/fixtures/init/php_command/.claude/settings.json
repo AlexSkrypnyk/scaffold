@@ -1,0 +1,8 @@
+@@ -7,7 +7,6 @@
+       "Bash(./vendor/bin/phpstan:*)",
+       "Bash(./vendor/bin/rector:*)",
+       "Bash(./vendor/bin/phpunit:*)",
+-      "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
+       "Bash(npm:*)"
+     ]
+   }

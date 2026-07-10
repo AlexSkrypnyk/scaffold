@@ -1,1 +1,5 @@
 .expected
+
+# Track the generated '.claude/settings.json' fixtures even when a developer's
+# global gitignore excludes '.claude' directories.
+!.claude/

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\Scaffold\Tests;
 
+use AlexSkrypnyk\File\File;
 use AlexSkrypnyk\PhpunitHelpers\Traits\ProcessTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\SerializableClosureTrait;
 use AlexSkrypnyk\PhpunitHelpers\Traits\TuiTrait;
@@ -30,6 +31,12 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
       '.phpunit.cache',
       '.claude',
     ]);
+
+    // The template ships a shared '.claude/settings.json'; personal overrides
+    // in '.claude/settings.local.json' are git-ignored and must never leak into
+    // a generated project, so copy only the shared file (the bulk copy above
+    // skips the whole '.claude' directory to keep local overrides out).
+    File::copyIfExists(static::locationsRealpath('../../../') . '/.claude/settings.json', static::$sut . '/.claude/settings.json');
 
     // Change the current working directory to the 'system under test'.
     chdir(static::$sut);
