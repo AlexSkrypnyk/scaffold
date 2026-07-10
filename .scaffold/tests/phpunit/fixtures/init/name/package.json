@@ -5,7 +5,7 @@
      "version": "__VERSION__",
 -    "description": "Provides force-crystal functionality.",
 +    "description": "Provides star-forge functionality.",
-     "license": "GPL-2.0-or-later",
+     "license": "GPL-3.0-or-later",
      "author": {
 -        "name": "Luke Skywalker",
 -        "email": "force-crystal@yodashut.com",

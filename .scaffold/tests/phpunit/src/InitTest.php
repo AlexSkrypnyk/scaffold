@@ -186,6 +186,40 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
+   * The initialised project keeps a LICENSE matching its declared metadata.
+   *
+   * init.sh must not delete LICENSE: without it GitHub cannot detect the
+   * project's license and the README badge renders "not identified", while
+   * composer.json and package.json still declare GPL-3.0-or-later. A
+   * regression here must fail loudly rather than being silently re-baselined
+   * by update-snapshots.
+   */
+  public function testInitKeepsLicense(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $license_path = self::$sut . DIRECTORY_SEPARATOR . 'LICENSE';
+    $this->assertFileExists($license_path);
+    $license = (string) file_get_contents($license_path);
+    $this->assertStringContainsString('GNU GENERAL PUBLIC LICENSE', $license);
+    $this->assertStringContainsString('Version 3', $license);
+
+    $composer = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'composer.json');
+    $this->assertStringContainsString('"license": "GPL-3.0-or-later"', $composer);
+
+    $package = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'package.json');
+    $this->assertStringContainsString('"license": "GPL-3.0-or-later"', $package);
+  }
+
+  /**
    * A project generated with Actions linting must pass the zizmor audit.
    *
    * Mirrors the audit the shipped "Test Actions" workflow runs, using the

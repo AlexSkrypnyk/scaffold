@@ -4,7 +4,7 @@
 -    "description": "Provides force-crystal functionality.",
 +    "name": "jeditemple/star-forge",
 +    "description": "Provides star-forge functionality.",
-     "license": "GPL-2.0-or-later",
+     "license": "GPL-3.0-or-later",
      "type": "library",
      "authors": [
          {
