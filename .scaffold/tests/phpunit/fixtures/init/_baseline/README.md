@@ -93,4 +93,4 @@ To pull the latest infrastructure from the template into this project, ask
 Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
 
 ---
-_This repository was created using the [force-crystal](https://getforce-crystal.dev/) project template_
+_This repository was created using the [Scaffold](https://getscaffold.dev/) project template_

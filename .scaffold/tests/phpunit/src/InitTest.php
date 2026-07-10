@@ -161,6 +161,31 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
+   * The initialised project keeps the Scaffold attribution footer intact.
+   *
+   * The bulk `scaffold` -> project rewrite in init.sh would otherwise
+   * mangle the README footer link text and domain into a project-named URL
+   * that does not exist. The phrase is token-protected, so a regression must
+   * fail loudly rather than being silently re-baselined.
+   */
+  public function testInitPreservesAttributionFooter(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $readme = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'README.md');
+    $this->assertStringContainsString('_This repository was created using the [Scaffold](https://getscaffold.dev/) project template_', $readme);
+    $this->assertStringNotContainsString('getacme-app.dev', $readme);
+  }
+
+  /**
    * A project generated with Actions linting must pass the zizmor audit.
    *
    * Mirrors the audit the shipped "Test Actions" workflow runs, using the

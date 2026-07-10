@@ -584,10 +584,16 @@ process_internal() {
   replace_string_content "Alex Skrypnyk" "${author}"
 
   remove_string_content "Generic project scaffold template"
-  replace_string_content "https://getscaffold.dev/ project scaffold template" "__ATTRIBUTION__"
+
+  # Shield the attribution footer from the bulk rename below so its link
+  # text and domain keep naming Scaffold. The needle is a grep/sed regex:
+  # it starts after the "[" (a leading "[Scaffold]" would be a character
+  # class) and escapes the "." so it matches the literal domain. The restore
+  # value is a plain replacement, so it needs neither.
+  replace_string_content "Scaffold](https://getscaffold\.dev/) project template" "__ATTRIBUTION__"
   replace_string_content "Scaffold" "${project}"
   replace_string_content "scaffold" "${project}"
-  replace_string_content "__ATTRIBUTION__" "https://getscaffold.dev/ project scaffold template"
+  replace_string_content "__ATTRIBUTION__" "Scaffold](https://getscaffold.dev/) project template"
 
   restore_skill_references
 
