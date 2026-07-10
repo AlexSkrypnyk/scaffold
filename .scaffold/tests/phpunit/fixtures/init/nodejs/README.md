@@ -1,4 +1,12 @@
-@@ -30,10 +30,7 @@
+@@ -9,7 +9,6 @@
+ 
+ [![GitHub Issues](https://img.shields.io/github/issues/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/issues)
+ [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/pulls)
+-[![Test PHP](https://github.com/yodashut/force-crystal/actions/workflows/test-php.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-php.yml)
+ [![Test Node.js](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml)
+ [![Test Shell](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml)
+ [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
+@@ -30,10 +29,7 @@
  ## Installation
  
  
@@ -9,7 +17,7 @@
      npm install @yodashut/force-crystal
  
  
-@@ -44,10 +41,7 @@
+@@ -44,10 +40,7 @@
  ## Usage
  
  
@@ -20,7 +28,7 @@
      node_modules/.bin/force-crystal
  
  
-@@ -56,21 +50,7 @@
+@@ -56,21 +49,7 @@
  
  
  
