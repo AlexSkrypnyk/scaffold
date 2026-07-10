@@ -508,20 +508,7 @@ process_claude_settings() {
   fi
 
   # Drop a trailing comma left on the final array element after any removals.
-  awk '
-    NR > 1 {
-      if ($0 ~ /^[[:space:]]*\]/) {
-        sub(/,[[:space:]]*$/, "", prev)
-      }
-      print prev
-    }
-    { prev = $0 }
-    END {
-      if (NR > 0) {
-        print prev
-      }
-    }
-  ' "${file}" >"${file}.tmp" && mv "${file}.tmp" "${file}"
+  awk 'NR>1{if($0~/^ *]/)sub(/,$/,"",prev);print prev}{prev=$0}END{if(NR>0)print prev}' "${file}" >"${file}.tmp" && mv "${file}.tmp" "${file}"
 }
 
 process_readme() {
