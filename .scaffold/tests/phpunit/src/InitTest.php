@@ -217,6 +217,9 @@ final class InitTest extends UnitTestCase {
 
     $package = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'package.json');
     $this->assertStringContainsString('"license": "GPL-3.0-or-later"', $package);
+
+    $bats_package = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'bats' . DIRECTORY_SEPARATOR . 'package.json');
+    $this->assertStringContainsString('"license": "GPL-3.0-or-later"', $bats_package);
   }
 
   /**
