@@ -586,10 +586,11 @@ process_internal() {
   remove_string_content "Generic project scaffold template"
 
   # Shield the attribution footer from the bulk rename below so its link
-  # text and domain keep naming Scaffold. The needle starts after the "["
-  # because the helper matches via grep/sed regex, where a leading
-  # "[Scaffold]" is a character class that never matches the literal text.
-  replace_string_content "Scaffold](https://getscaffold.dev/) project template" "__ATTRIBUTION__"
+  # text and domain keep naming Scaffold. The needle is a grep/sed regex:
+  # it starts after the "[" (a leading "[Scaffold]" would be a character
+  # class) and escapes the "." so it matches the literal domain. The restore
+  # value is a plain replacement, so it needs neither.
+  replace_string_content "Scaffold](https://getscaffold\.dev/) project template" "__ATTRIBUTION__"
   replace_string_content "Scaffold" "${project}"
   replace_string_content "scaffold" "${project}"
   replace_string_content "__ATTRIBUTION__" "Scaffold](https://getscaffold.dev/) project template"
