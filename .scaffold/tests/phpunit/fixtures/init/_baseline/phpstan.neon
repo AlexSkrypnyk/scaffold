@@ -8,6 +8,7 @@ parameters:
 
   paths:
     - src
+    - force-crystal
     - tests/phpunit
 
   excludePaths:

@@ -1,0 +1,9 @@
+@@ -15,7 +15,7 @@
+     <arg name="colors"/>
+ 
+     <file>src</file>
+-    <file>force-crystal</file>
++    <file>star-forge</file>
+     <file>tests/phpunit</file>
+ 
+     <!-- Allow long array lines in tests. -->
