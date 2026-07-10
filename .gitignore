@@ -5,7 +5,6 @@
 #;< PHP_PHAR
 /.build
 #;> PHP_PHAR
-/.logs
 /.phpunit.cache
 /composer.lock
 /vendor
@@ -16,6 +15,9 @@
 /package-lock.json
 /yarn.lock
 #;> NODEJS
+
+# Code coverage and test logs.
+/.logs
 
 # Temporary AI agent and developer artifacts (plans, scratch output, reports).
 /.artifacts/

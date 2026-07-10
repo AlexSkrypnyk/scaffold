@@ -1,0 +1,42 @@
+---
+title: Linting
+sidebar_position: 3
+---
+
+# Linting
+
+Code linting is the automated checking of source code for programmatic and
+stylistic errors. This is done by running a program called a "linter" against
+the code base. Linters are used to identify common coding mistakes, enforce a
+coding standard, and offer simple suggestions for code optimization. They can be
+integrated into the development process as a step in automated build systems or
+as plugins for text editors and IDEs. By catching errors early in the
+development process, linting helps to improve the quality of code and can make
+the debugging process more efficient.
+
+## Usage
+
+To lint code, run `npm run lint` command.
+
+To fix linting errors, run `npm run lint-fix`.
+
+## ESLint
+
+This template provides integration with [ESLint](https://eslint.org/), which
+analyzes JavaScript files and detects problematic patterns and violations of a
+defined set of coding standards.
+
+The [`eslint.config.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/eslint.config.js)
+file contains a template ruleset built on the ESLint recommended rules, serving
+as an initial foundation for further customization of coding standards.
+
+## Prettier
+
+This template provides integration with [Prettier](https://prettier.io/), an
+opinionated code formatter that enforces a consistent style by parsing the code
+and reprinting it according to its own rules.
+
+Prettier is configured through the `prettier` key in
+[`package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/package.json)
+and runs as part of the `lint` and `lint-fix` commands, so formatting stays
+consistent alongside the ESLint checks.
