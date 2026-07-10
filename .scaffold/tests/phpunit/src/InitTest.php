@@ -208,8 +208,8 @@ final class InitTest extends UnitTestCase {
     $this->assertFileDoesNotExist($claude_dir . DIRECTORY_SEPARATOR . 'settings.local.json');
 
     $content = (string) file_get_contents($claude_dir . DIRECTORY_SEPARATOR . 'settings.json');
-    // Decoding without errors also proves the file stays valid JSON (no dangling
-    // comma) after rules are trimmed.
+    // Decoding without errors proves the file is valid JSON (no dangling
+    // comma) after trimming.
     $this->assertJson($content);
 
     foreach ($present as $rule) {

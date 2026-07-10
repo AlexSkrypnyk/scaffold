@@ -128,31 +128,47 @@ Same pattern used in `phpcs.xml` (`<file>php-script.php</file>`).
   - Purpose: Validate `shell-command.sh` functionality
   - Includes: TUI testing helpers, mocking system via `run_steps()`
 
-### Test Code Conventions
+### Rules for Template Changes
 
-The init test suite lives in `.scaffold/tests/phpunit/` and is built on the
-maintainer's own helper packages. New tests must read like the existing ones:
+The init/template machinery has its OWN test suite in `.scaffold/tests/phpunit/`,
+separate from the repo root, with its own `composer.json`, `phpcs.xml`,
+`phpstan.neon`, and `vendor/`.
 
-- **Filesystem operations use `alexskrypnyk/file`, never Symfony `Filesystem`
-  or raw PHP.** Reach for the `AlexSkrypnyk\File\File` static API instead of
-  `copy()`, `file_get_contents()`, `mkdir()`, `unlink()`, or
-  `new \Symfony\Component\Filesystem\Filesystem()`:
-  - Copy: `File::copy()`, `File::copyIfExists()`
-  - Read/write: `File::read()`, `File::dump()`, `File::append()`
-  - Query: `File::exists()`, `File::dir()`, `File::scandir()`,
-    `File::contains()`
-  - Mutate: `File::mkdir()`, `File::remove()`, `File::renameInDir()`,
-    `File::replaceContentInDir()`, `File::removeTokenInDir()`
+- **Run the suite that matches your change.** Repo-root `composer lint` /
+  `composer test` cover ONLY the example application (`src/`, `tests/`) and pass
+  even when the template is broken. A green root lint is NOT proof the init suite
+  is green - any change to `init.sh`, template files, or fixtures must be
+  validated from the init suite:
 
-- **Use the helper traits composed by `UnitTestCase`; do not re-implement
-  their behavior:**
-  - `alexskrypnyk/phpunit-helpers`: `LocationsTrait` (`locationsCopy()`,
-    `locationsRealpath()`, the `self::$sut` / `self::$tmp` dirs), `ProcessTrait`
-    (`processRun()`, `assertProcessSuccessful()`,
-    `assertProcessOutputContains()`), `TuiTrait` (drives interactive prompts),
-    and `SerializableClosureTrait`.
-  - `alexskrypnyk/snapshot`: `SnapshotTrait` (`assertSnapshotMatchesBaseline()`)
-    plus the `update-snapshots` binary used by `composer update-snapshots`.
+```bash
+cd .scaffold/tests/phpunit
+composer lint    # phpcs (Drupal standard), phpstan level 9, rector
+composer test    # InitTest snapshot suite
+```
+
+- **Coding standard is Drupal.** Comment lines wrap at 80 characters
+  (`Drupal.Files.LineLength.TooLong`); code lines have no length limit. Tests may
+  omit parameter docblocks, but annotate any `mixed` value (e.g. a data-provider
+  row) with `@param list<string>` so phpstan level 9 stays clean.
+
+- **Use the maintainer helper libraries, never Symfony or raw PHP.** File work
+  goes through `alexskrypnyk/file` (`File::copyIfExists()`, `File::dir()`,
+  `File::exists()`, `File::dump()`, `File::remove()`, ...); test scaffolding
+  comes from `alexskrypnyk/phpunit-helpers` traits on `UnitTestCase`
+  (`LocationsTrait` -> `locationsCopy()` / `self::$sut`; `ProcessTrait` ->
+  `processRun()` / `assertProcess*()`; `TuiTrait` for interactive prompts) and
+  `alexskrypnyk/snapshot` (`SnapshotTrait`, `update-snapshots`).
+
+- **After changing template files, regenerate fixtures** with
+  `composer update-snapshots` from `.scaffold/tests/phpunit` (see "Updating
+  Fixtures"). It auto-commits the regenerated fixtures itself, so review the diff
+  before running it.
+
+- **Gotcha: a global gitignore of `.claude` / `.artifacts` silently drops fixture
+  dirs.** Fixture scenarios ship `.claude/settings.json`; an unanchored
+  `~/.gitignore` `.claude` rule makes `git add` skip them with no error.
+  `fixtures/.gitignore` carries a `!.claude/` negation to override it - keep it,
+  and confirm staged files with `git ls-files --others --exclude-standard`.
 
 ### Running Template Tests
 
