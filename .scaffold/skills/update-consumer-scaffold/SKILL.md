@@ -91,8 +91,8 @@ checkout for the full list).
 
 **Custom names** (only when they differ from the project name):
 
-- `--php-command-name=<file>` - the PHP CLI command file (the one wrapping
-  `src/app.php`).
+- `--php-command-name=<file>` - the PHP CLI command file (the Symfony Console
+  application entry point).
 - `--php-script-name=<file>` - the single-file PHP script.
 - `--shell-command-name=<file>` - the `*.sh` file name without the extension.
 - `--docker-image-name=<image>` - read from the `Dockerfile`/CI, defaulting to

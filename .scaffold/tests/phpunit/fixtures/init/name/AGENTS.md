@@ -11,12 +11,19 @@
  Multi-command CLI application structure:
  
  - **Location:** `src/Command/` directory
--- **Entry point:** `force-crystal` (wraps `src/app.php`)
-+- **Entry point:** `star-forge` (wraps `src/app.php`)
+-- **Entry point:** `force-crystal`
++- **Entry point:** `star-forge`
  - **Use for:** Complex applications with multiple commands, shared logic, OOP
    architecture
  
-@@ -35,8 +35,8 @@
+@@ -29,14 +29,14 @@
+ 
+ 1. Create class in `src/Command/YourCommand.php` extending
+    `Symfony\Component\Console\Command\Command`
+-2. Register in `force-crystal`: `$application->add(new YourCommand());`
++2. Register in `star-forge`: `$application->add(new YourCommand());`
+ 3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
+ 
  
  ### Namespace Structure
  

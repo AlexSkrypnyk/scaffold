@@ -9,6 +9,7 @@ parameters:
   paths:
     #;< PHP_COMMAND
     - src
+    - php-command
     #;> PHP_COMMAND
     #;< !PHP_COMMAND
     - php-script

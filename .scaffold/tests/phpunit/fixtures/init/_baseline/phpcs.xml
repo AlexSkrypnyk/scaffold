@@ -15,6 +15,7 @@
     <arg name="colors"/>
 
     <file>src</file>
+    <file>force-crystal</file>
     <file>tests/phpunit</file>
 
     <!-- Allow long array lines in tests. -->

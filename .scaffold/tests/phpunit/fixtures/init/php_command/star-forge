@@ -1,12 +1,39 @@
 #!/usr/bin/env php
 <?php
 
-foreach ([$GLOBALS['_composer_autoload_path'] ?? NULL, __DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
-  if ($file && file_exists($file)) {
+/**
+ * @file
+ * Main entry point for the application.
+ */
+
+declare(strict_types=1);
+
+use Symfony\Component\Console\Application;
+use YodasHut\App\Command\JokeCommand;
+use YodasHut\App\Command\SayHelloCommand;
+
+foreach ([
+  $GLOBALS['_composer_autoload_path'] ?? NULL,
+  __DIR__ . '/../../autoload.php',
+  __DIR__ . '/../vendor/autoload.php',
+  __DIR__ . '/vendor/autoload.php',
+] as $file) {
+  if (is_string($file) && file_exists($file)) {
     require_once $file;
     unset($file);
     break;
   }
 }
 
-require __DIR__ . '/src/app.php';
+// @codeCoverageIgnoreStart
+$application = new Application('ForceCrystal', '@force-crystal-version@');
+
+$command = new JokeCommand();
+$application->add($command);
+$application->setDefaultCommand((string) $command->getName());
+
+$command = new SayHelloCommand();
+$application->add($command);
+
+$application->run();
+// @codeCoverageIgnoreEnd
