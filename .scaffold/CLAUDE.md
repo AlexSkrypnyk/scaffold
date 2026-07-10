@@ -29,6 +29,10 @@ The initialization script performs three main operations:
 
 3. **Cleanup** - Removes `.scaffold/` directory and template-specific files
 
+### Curl bootstrap
+
+When `init.sh` runs without the template present (for example fetched and piped straight from `curl` into an empty directory), it downloads the Scaffold archive into the current directory, extracts it with `tar --strip-components=1`, and re-executes the on-disk copy so init proceeds normally. Presence of the `.scaffold/` directory is the sentinel for "template already here". The archive URL is resolved in precedence order: the `SCAFFOLD_ARCHIVE_URL` environment variable, the `--ref=<tag|branch|commit>` option, then the latest GitHub release (falling back to the `main` branch). The re-exec reconnects stdin to `/dev/tty` in interactive mode so prompts work despite the pipe, and bootstrapping refuses a non-empty directory. The curl-bootstrap PHPUnit tests (`testInitViaCurlBootstrapsIntoEmptyDir`, `testInitViaCurlBootstrapRefusesNonEmptyDir`) stay off the network by pointing `SCAFFOLD_ARCHIVE_URL` at a local `file://` tarball built from the SUT.
+
 ### Token System for Conditional Content
 
 Content blocks can be conditionally included/excluded using special tokens:

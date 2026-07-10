@@ -24,6 +24,11 @@
 # curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
 #   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 #
+# When run without the template present (for example piped from curl in an
+# empty directory), the script downloads the Scaffold into the current
+# directory and then initializes it. The directory must be empty. Piping with
+# no options prompts interactively; pass options to run unattended.
+#
 # Run "./init.sh --help" for the full list of options.
 #
 # shellcheck disable=SC2162,SC2015
@@ -59,6 +64,10 @@ use_docs=""
 use_test_actions=""
 use_schedule=""
 remove_self=""
+
+# Ref (tag, branch, or commit) to bootstrap the template from when the script is
+# run without the template present. Empty means "use the latest release".
+archive_ref=""
 
 # Whether to run interactively. Disabled as soon as any option is passed.
 interactive=1
@@ -636,6 +645,11 @@ One-liner (non-interactive):
   curl -fsSL https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/init.sh | \
     bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 
+When run without the template present (e.g. piped from curl in an empty
+directory), the script downloads the Scaffold into the current directory first,
+then initialises it. The directory must be empty. Piping with no options prompts
+interactively. Set SCAFFOLD_ARCHIVE_URL to bootstrap from a specific archive URL.
+
 Identity (required in non-interactive mode):
   --namespace=VALUE              Project namespace in PascalCase (e.g. AcmeApp).
   --name=VALUE                   Project name in kebab-case (e.g. acme-app).
@@ -664,6 +678,8 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --keep                         Keep this init script (default: removed).
 
 Other:
+  --ref=VALUE                    Bootstrap from a tag, branch or commit when the
+                                 template is absent (default: latest release).
   --yes, -y                      Run non-interactively using defaults.
   --help, -h                     Show this help and exit.
 USAGE
@@ -736,6 +752,8 @@ parse_args() {
       --no-schedule) use_schedule="n" ;;
 
       --keep) remove_self="n" ;;
+
+      --ref=*) archive_ref="${1#*=}" ;;
 
       --yes | -y) interactive=0 ;;
       --help | -h)
@@ -965,6 +983,114 @@ collect_noninteractive() {
 }
 
 #-------------------------------------------------------------------------------
+# TEMPLATE BOOTSTRAP
+#-------------------------------------------------------------------------------
+
+##
+# Check whether the Scaffold template is present in the current directory.
+#
+# The '.scaffold' directory ships with the template and is removed once init
+# completes, so its presence means "the template is here, initialise in place".
+#
+template_present() {
+  [ -d ".scaffold" ]
+}
+
+##
+# Check whether the current directory is empty, including dotfiles.
+#
+dir_is_empty() {
+  [ -z "$(ls -A)" ]
+}
+
+##
+# Resolve the URL of the template archive to download.
+#
+# Precedence: an explicit SCAFFOLD_ARCHIVE_URL wins (an exact archive URL, also
+# the seam tests use to inject a local file); then --ref pins to a tag, branch,
+# or commit; otherwise the latest published release is used, falling back to the
+# default branch when the repository has no releases.
+#
+# @return string Archive URL.
+#
+resolve_archive_url() {
+  if [ -n "${SCAFFOLD_ARCHIVE_URL:-}" ]; then
+    echo "${SCAFFOLD_ARCHIVE_URL}"
+    return 0
+  fi
+
+  if [ -n "${archive_ref}" ]; then
+    echo "https://github.com/AlexSkrypnyk/scaffold/archive/${archive_ref}.tar.gz"
+    return 0
+  fi
+
+  local tag
+  tag="$(curl -fsSL "https://api.github.com/repos/AlexSkrypnyk/scaffold/releases/latest" 2>/dev/null | grep '"tag_name":' | head -n 1 | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' || true)"
+
+  if [ -n "${tag}" ]; then
+    echo "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/${tag}.tar.gz"
+    return 0
+  fi
+
+  echo "https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz"
+}
+
+##
+# Download and extract the template into the current directory, then re-run.
+#
+# Runs only when the template is absent (for example when this script was
+# fetched and piped straight from 'curl'). Requires an empty directory so
+# nothing is clobbered. After extraction the freshly written on-disk script is
+# re-executed with stdin reconnected to the terminal, so interactive prompts
+# work even though this instance was fed through a pipe. Does not return.
+#
+bootstrap_template() {
+  if ! command -v tar >/dev/null 2>&1; then
+    echo "Error: 'tar' is required to bootstrap the template." >&2
+    exit 1
+  fi
+
+  if ! dir_is_empty; then
+    echo "Error: current directory is not empty. Bootstrapping requires an empty directory." >&2
+    exit 1
+  fi
+
+  local url
+  url="$(resolve_archive_url)"
+
+  echo "Downloading Scaffold from ${url}"
+
+  if ! curl -fsSL "${url}" -o scaffold.tar.gz; then
+    echo "Error: failed to download the template archive from ${url}." >&2
+    exit 1
+  fi
+
+  if ! tar -xzf scaffold.tar.gz --strip-components=1; then
+    echo "Error: failed to extract the template archive." >&2
+    rm -f scaffold.tar.gz
+    exit 1
+  fi
+
+  rm -f scaffold.tar.gz
+
+  if ! template_present; then
+    echo "Error: the downloaded archive is not a Scaffold template." >&2
+    exit 1
+  fi
+
+  # Re-run the freshly extracted script as a normal on-disk invocation so init
+  # proceeds against the downloaded files. In interactive mode reconnect stdin to
+  # the terminal (a piped stdin is already at EOF) when one is actually
+  # reachable; other modes keep the inherited stdin so non-interactive and CI
+  # runs, where /dev/tty exists but cannot be opened, are unaffected.
+  if [ "${interactive}" = "1" ] && : 2>/dev/null </dev/tty; then
+    exec bash "./init.sh" "$@" </dev/tty
+  fi
+
+  exec bash "./init.sh" "$@"
+}
+
+#-------------------------------------------------------------------------------
 # MAIN FUNCTION
 #-------------------------------------------------------------------------------
 
@@ -1047,6 +1173,12 @@ main() {
   parse_args "$@"
 
   check_dependencies || exit 1
+
+  # When the template is absent (for example this script was fetched and piped
+  # straight from 'curl'), download it into the current directory and re-run.
+  if ! template_present; then
+    bootstrap_template "$@"
+  fi
 
   if [ "${interactive}" = "1" ]; then
     collect_interactive
