@@ -128,6 +128,32 @@ Same pattern used in `phpcs.xml` (`<file>php-script.php</file>`).
   - Purpose: Validate `shell-command.sh` functionality
   - Includes: TUI testing helpers, mocking system via `run_steps()`
 
+### Test Code Conventions
+
+The init test suite lives in `.scaffold/tests/phpunit/` and is built on the
+maintainer's own helper packages. New tests must read like the existing ones:
+
+- **Filesystem operations use `alexskrypnyk/file`, never Symfony `Filesystem`
+  or raw PHP.** Reach for the `AlexSkrypnyk\File\File` static API instead of
+  `copy()`, `file_get_contents()`, `mkdir()`, `unlink()`, or
+  `new \Symfony\Component\Filesystem\Filesystem()`:
+  - Copy: `File::copy()`, `File::copyIfExists()`
+  - Read/write: `File::read()`, `File::dump()`, `File::append()`
+  - Query: `File::exists()`, `File::dir()`, `File::scandir()`,
+    `File::contains()`
+  - Mutate: `File::mkdir()`, `File::remove()`, `File::renameInDir()`,
+    `File::replaceContentInDir()`, `File::removeTokenInDir()`
+
+- **Use the helper traits composed by `UnitTestCase`; do not re-implement
+  their behavior:**
+  - `alexskrypnyk/phpunit-helpers`: `LocationsTrait` (`locationsCopy()`,
+    `locationsRealpath()`, the `self::$sut` / `self::$tmp` dirs), `ProcessTrait`
+    (`processRun()`, `assertProcessSuccessful()`,
+    `assertProcessOutputContains()`), `TuiTrait` (drives interactive prompts),
+    and `SerializableClosureTrait`.
+  - `alexskrypnyk/snapshot`: `SnapshotTrait` (`assertSnapshotMatchesBaseline()`)
+    plus the `update-snapshots` binary used by `composer update-snapshots`.
+
 ### Running Template Tests
 
 ```bash
