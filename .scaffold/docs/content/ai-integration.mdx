@@ -1,0 +1,50 @@
+---
+title: AI integration
+sidebar_position: 7
+---
+
+# AI integration
+
+This template ships configuration that lets AI coding agents work with a
+generated project out of the box: shared guidance about the project and a
+pre-approved list of the commands the project uses.
+
+## `AGENTS.md`
+
+The `AGENTS.md` file provides agent-agnostic guidance about the project - its
+architecture, the commands used to lint, test and build it, and the coding
+conventions to follow. It follows the [AGENTS.md](https://agents.md/) convention
+supported by many AI coding tools.
+
+This template provides an [`AGENTS.md`](https://github.com/AlexSkrypnyk/scaffold/blob/main/AGENTS.md)
+tailored to the features selected during initialization.
+
+## `CLAUDE.md`
+
+The `CLAUDE.md` file is the entry point read by [Claude Code](https://www.claude.com/product/claude-code).
+It only includes `AGENTS.md`, so there is a single source of guidance shared
+across agents.
+
+## `.claude/settings.json`
+
+The `.claude/settings.json` file lists the project commands that Claude Code is
+allowed to run without asking for confirmation each time - for example linting,
+testing and building. It is committed to the repository so the whole team shares
+the same pre-approved list.
+
+The list is derived from the commands documented in `AGENTS.md`. During
+initialization, `init.sh` trims the list to the features you selected, so a
+project without Docker, for instance, does not pre-approve Docker commands.
+
+## `.claude/settings.local.json`
+
+The `.claude/settings.local.json` file holds personal permission overrides. It
+is git-ignored, so it is never shared with the team or shipped with the project.
+Use it for machine-specific or experimental permissions.
+
+## `.artifacts`
+
+The `.artifacts` directory is a scratch location for temporary AI and developer
+artifacts - generated plans, notes, reports and other throwaway output. It is
+git-ignored and never committed, which keeps transient files out of the
+repository while giving agents and developers a consistent place to write them.

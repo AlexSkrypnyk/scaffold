@@ -128,6 +128,53 @@ Same pattern used in `phpcs.xml` (`<file>php-script.php</file>`).
   - Purpose: Validate `shell-command.sh` functionality
   - Includes: TUI testing helpers, mocking system via `run_steps()`
 
+### Rules for Template Changes
+
+The init/template machinery has its OWN test suite in `.scaffold/tests/phpunit/`,
+separate from the repo root, with its own `composer.json`, `phpcs.xml`,
+`phpstan.neon`, and `vendor/`.
+
+- **Run the suite that matches your change.** Repo-root `composer lint` /
+  `composer test` cover ONLY the example application (`src/`, `tests/`) and pass
+  even when the template is broken. A green root lint is NOT proof the init suite
+  is green - any change to `init.sh`, template files, or fixtures must be
+  validated from the init suite:
+
+```bash
+cd .scaffold/tests/phpunit
+composer lint    # phpcs (Drupal standard), phpstan level 9, rector
+composer test    # InitTest snapshot suite
+```
+
+- **Coding standard is Drupal.** Comment lines wrap at 80 characters
+  (`Drupal.Files.LineLength.TooLong`); code lines have no length limit. Tests may
+  omit parameter docblocks, but annotate any `mixed` value (e.g. a data-provider
+  row) with `@param list<string>` so phpstan level 9 stays clean.
+
+- **Shell scripts must pass `shfmt`.** The `Shell` and `Test Scaffold` CI jobs
+  run `shfmt -i 2 -ci -s` (via `luizm/action-sh-checker`) over `init.sh` and the
+  `*.sh` / `.bats` files, and it is strict about redirect spacing (`>"$f"`, not
+  `> "$f"`). Format shell edits to match before pushing.
+
+- **Use the maintainer helper libraries, never Symfony or raw PHP.** File work
+  goes through `alexskrypnyk/file` (`File::copyIfExists()`, `File::dir()`,
+  `File::exists()`, `File::dump()`, `File::remove()`, ...); test scaffolding
+  comes from `alexskrypnyk/phpunit-helpers` traits on `UnitTestCase`
+  (`LocationsTrait` -> `locationsCopy()` / `self::$sut`; `ProcessTrait` ->
+  `processRun()` / `assertProcess*()`; `TuiTrait` for interactive prompts) and
+  `alexskrypnyk/snapshot` (`SnapshotTrait`, `update-snapshots`).
+
+- **After changing template files, regenerate fixtures** with
+  `composer update-snapshots` from `.scaffold/tests/phpunit` (see "Updating
+  Fixtures"). It auto-commits the regenerated fixtures itself, so review the diff
+  before running it.
+
+- **Gotcha: a global gitignore of `.claude` / `.artifacts` silently drops fixture
+  dirs.** Fixture scenarios ship `.claude/settings.json`; an unanchored
+  `~/.gitignore` `.claude` rule makes `git add` skip them with no error.
+  `fixtures/.gitignore` carries a `!.claude/` negation to override it - keep it,
+  and confirm staged files with `git ls-files --others --exclude-standard`.
+
 ### Running Template Tests
 
 ```bash

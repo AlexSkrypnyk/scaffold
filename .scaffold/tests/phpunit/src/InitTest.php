@@ -184,6 +184,81 @@ final class InitTest extends UnitTestCase {
     $this->assertProcessSuccessful();
   }
 
+  /**
+   * The shared Claude settings ship and are trimmed to the selected features.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to init.sh.
+   * @param list<string> $present
+   *   Permission rules that must be present in the settings file.
+   * @param list<string> $absent
+   *   Permission rules that must be absent from the settings file.
+   */
+  #[DataProvider('dataProviderClaudeSettings')]
+  public function testInitClaudeSettings(array $arguments, array $present, array $absent): void {
+    self::$fixtures = NULL;
+
+    $arguments = array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+    $this->assertProcessSuccessful();
+
+    $claude_dir = self::$sut . DIRECTORY_SEPARATOR . '.claude';
+    $this->assertFileExists($claude_dir . DIRECTORY_SEPARATOR . 'settings.json');
+    // Personal overrides must never leak into a generated project.
+    $this->assertFileDoesNotExist($claude_dir . DIRECTORY_SEPARATOR . 'settings.local.json');
+
+    $content = (string) file_get_contents($claude_dir . DIRECTORY_SEPARATOR . 'settings.json');
+    // Decoding without errors proves the file is valid JSON (no dangling
+    // comma) after trimming.
+    $this->assertJson($content);
+
+    foreach ($present as $rule) {
+      $this->assertStringContainsString('"' . $rule . '"', $content);
+    }
+    foreach ($absent as $rule) {
+      $this->assertStringNotContainsString('"' . $rule . '"', $content);
+    }
+
+    $gitignore = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . '.gitignore');
+    $this->assertStringContainsString('!/.claude/', $gitignore);
+    $this->assertStringContainsString('/.claude/settings.local.json', $gitignore);
+    $this->assertStringContainsString('/.artifacts/', $gitignore);
+  }
+
+  public static function dataProviderClaudeSettings(): \Iterator {
+    // Docker is off by default, so its rules are trimmed unless enabled.
+    yield 'defaults' => [
+      [],
+      ['Bash(composer:*)', 'Bash(./vendor/bin/phpunit:*)', 'Bash(./tests/bats/node_modules/bats/bin/bats:*)', 'Bash(npm:*)'],
+      ['Bash(docker build:*)', 'Bash(docker run:*)'],
+    ];
+    yield 'with docker' => [
+      ['--docker'],
+      ['Bash(docker build:*)', 'Bash(docker run:*)'],
+      [],
+    ];
+    yield 'no php' => [
+      ['--no-php'],
+      ['Bash(./tests/bats/node_modules/bats/bin/bats:*)', 'Bash(npm:*)'],
+      ['Bash(composer:*)', 'Bash(./vendor/bin/phpcs:*)', 'Bash(./vendor/bin/phpunit:*)'],
+    ];
+    yield 'npm survives via docs without nodejs' => [
+      ['--no-nodejs'],
+      ['Bash(npm:*)'],
+      [],
+    ];
+    yield 'npm trimmed without nodejs and docs' => [
+      ['--no-nodejs', '--no-docs'],
+      [],
+      ['Bash(npm:*)'],
+    ];
+    yield 'no languages' => [
+      ['--no-php', '--no-nodejs', '--no-shell', '--no-docs'],
+      [],
+      ['Bash(composer:*)', 'Bash(npm:*)', 'Bash(./tests/bats/node_modules/bats/bin/bats:*)'],
+    ];
+  }
+
   public static function dataProviderInitNonInteractive(): \Iterator {
     $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
 

@@ -483,6 +483,34 @@ remove_schedule() {
 # PROCESSING FUNCTIONS
 #-------------------------------------------------------------------------------
 
+##
+# Trim Claude Code permission rules to match the selected features.
+#
+# The template ships '.claude/settings.json' with the full command allow-list.
+# Rules for features that were not selected are removed so that a generated
+# project only pre-approves commands it can actually run.
+#
+process_claude_settings() {
+  local file=".claude/settings.json"
+  [ -f "${file}" ] || return 0
+
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+
+  [ "${use_php:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/composer:/d' -e '/phpcs:/d' -e '/phpcbf:/d' -e '/phpstan:/d' -e '/rector:/d' -e '/phpunit:/d' "${file}"
+  [ "${use_shell:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/bats:/d' "${file}"
+  [ "${use_docker:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/docker build:/d' -e '/docker run:/d' "${file}"
+
+  # 'npm' is shared by the NodeJS feature and the documentation site, so keep it
+  # while either is present.
+  if [ "${use_nodejs:-n}" != "y" ] && [ "${use_docs:-n}" != "y" ]; then
+    sed "${sed_opts[@]}" -e '/npm:/d' "${file}"
+  fi
+
+  # Drop a trailing comma left on the final array element after any removals.
+  awk 'NR>1{if($0~/^ *]/)sub(/,$/,"",prev);print prev}{prev=$0}END{if(NR>0)print prev}' "${file}" >"${file}.tmp" && mv "${file}.tmp" "${file}"
+}
+
 process_readme() {
   mv README.dist.md "README.md" >/dev/null 2>&1 || true
 
@@ -988,6 +1016,8 @@ process_project() {
   [ "${use_docs}" != "y" ] && remove_docs
   [ "${use_test_actions}" != "y" ] && remove_test_actions
   [ "${use_schedule}" != "y" ] && remove_schedule
+
+  process_claude_settings
 
   cleanup_renovate_managers
 

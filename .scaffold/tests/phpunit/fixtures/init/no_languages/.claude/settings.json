@@ -1,0 +1,14 @@
+@@ -1,13 +1,6 @@
+ {
+   "permissions": {
+     "allow": [
+-      "Bash(composer:*)",
+-      "Bash(./vendor/bin/phpcs:*)",
+-      "Bash(./vendor/bin/phpcbf:*)",
+-      "Bash(./vendor/bin/phpstan:*)",
+-      "Bash(./vendor/bin/rector:*)",
+-      "Bash(./vendor/bin/phpunit:*)",
+-      "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
+       "Bash(npm:*)"
+     ]
+   }

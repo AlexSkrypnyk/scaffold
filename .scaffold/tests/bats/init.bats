@@ -373,3 +373,159 @@ WORKFLOW
   assert_success
   assert_output_contains "Use scheduled builds             : n"
 }
+
+create_claude_settings() {
+  mkdir -p "${1}/.claude"
+  cat >"${1}/.claude/settings.json" <<'SETTINGS'
+{
+  "permissions": {
+    "allow": [
+      "Bash(composer:*)",
+      "Bash(./vendor/bin/phpcs:*)",
+      "Bash(./vendor/bin/phpcbf:*)",
+      "Bash(./vendor/bin/phpstan:*)",
+      "Bash(./vendor/bin/rector:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
+      "Bash(npm:*)",
+      "Bash(docker build:*)",
+      "Bash(docker run:*)"
+    ]
+  }
+}
+SETTINGS
+}
+
+@test "process_claude_settings keeps every rule when all features are selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/claude_all"
+  mkdir -p "${tmpdir}"
+  create_claude_settings "${tmpdir}"
+
+  use_php="y"
+  use_shell="y"
+  use_nodejs="y"
+  use_docs="y"
+  use_docker="y"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_claude_settings
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/.claude/settings.json" "composer:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "bats:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "npm:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "docker build:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "docker run:"
+}
+
+@test "process_claude_settings removes PHP rules when PHP is not selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/claude_no_php"
+  mkdir -p "${tmpdir}"
+  create_claude_settings "${tmpdir}"
+
+  use_php="n"
+  use_shell="y"
+  use_nodejs="y"
+  use_docs="y"
+  use_docker="y"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_claude_settings
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/.claude/settings.json" "composer:"
+  assert_file_not_contains "${tmpdir}/.claude/settings.json" "phpstan:"
+  assert_file_not_contains "${tmpdir}/.claude/settings.json" "phpunit:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "bats:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "npm:"
+}
+
+@test "process_claude_settings removes the bats rule when shell is not selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/claude_no_shell"
+  mkdir -p "${tmpdir}"
+  create_claude_settings "${tmpdir}"
+
+  use_php="y"
+  use_shell="n"
+  use_nodejs="y"
+  use_docs="y"
+  use_docker="y"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_claude_settings
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/.claude/settings.json" "bats:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "composer:"
+}
+
+@test "process_claude_settings removes Docker rules when Docker is not selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/claude_no_docker"
+  mkdir -p "${tmpdir}"
+  create_claude_settings "${tmpdir}"
+
+  use_php="y"
+  use_shell="y"
+  use_nodejs="y"
+  use_docs="y"
+  use_docker="n"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_claude_settings
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/.claude/settings.json" "docker build:"
+  assert_file_not_contains "${tmpdir}/.claude/settings.json" "docker run:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "npm:"
+}
+
+@test "process_claude_settings keeps npm when docs is selected without NodeJS" {
+  local tmpdir="${BATS_TEST_TMPDIR}/claude_docs_npm"
+  mkdir -p "${tmpdir}"
+  create_claude_settings "${tmpdir}"
+
+  use_php="y"
+  use_shell="y"
+  use_nodejs="n"
+  use_docs="y"
+  use_docker="y"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_claude_settings
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/.claude/settings.json" "npm:"
+}
+
+@test "process_claude_settings removes npm when neither NodeJS nor docs is selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/claude_no_npm"
+  mkdir -p "${tmpdir}"
+  create_claude_settings "${tmpdir}"
+
+  use_php="y"
+  use_shell="y"
+  use_nodejs="n"
+  use_docs="n"
+  use_docker="y"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_claude_settings
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/.claude/settings.json" "npm:"
+  assert_file_contains "${tmpdir}/.claude/settings.json" "composer:"
+}
+
+@test "process_claude_settings is a no-op when the settings file is absent" {
+  local tmpdir="${BATS_TEST_TMPDIR}/claude_absent"
+  mkdir -p "${tmpdir}"
+
+  use_php="n"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run process_claude_settings
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_file_not_exists "${tmpdir}/.claude/settings.json"
+}

@@ -12,5 +12,5 @@
 -/package-lock.json
 -/yarn.lock
  
- # Claude Code fetches the project update skill on demand; do not commit it.
- /.claude/skills/update-consumer-scaffold/
+ # Temporary AI agent and developer artifacts (plans, scratch output, reports).
+ /.artifacts/
