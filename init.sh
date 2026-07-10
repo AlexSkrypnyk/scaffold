@@ -1062,6 +1062,7 @@ bootstrap_template() {
 
   if ! curl -fsSL "${url}" -o scaffold.tar.gz; then
     echo "Error: failed to download the template archive from ${url}." >&2
+    rm -f scaffold.tar.gz
     exit 1
   fi
 
