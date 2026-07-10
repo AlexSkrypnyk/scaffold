@@ -33,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['8.2', '8.3', '8.4', '8.5']
+        php-versions: ['8.3', '8.4', '8.5']
         deps: ['normal', 'lowest']
 
     steps:
@@ -69,7 +69,7 @@ jobs:
           composer normalize --dry-run
 
       - name: Check coding standards
-        if: matrix.php-versions == '8.3' && matrix.deps == 'normal'
+        if: matrix.php-versions == '8.4' && matrix.deps == 'normal'
         run: composer lint
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
@@ -78,7 +78,7 @@ jobs:
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Check code coverage threshold
-        if: matrix.php-versions == '8.3' && matrix.deps == 'normal'
+        if: matrix.php-versions == '8.4' && matrix.deps == 'normal'
         run: |
           RATE=$(grep -o 'line-rate="[0-9.]*"' .logs/cobertura.xml | head -1 | tr -cd '0-9.')
           PERCENT=$(awk "BEGIN {printf \"%.2f\", $RATE*100}")
@@ -92,7 +92,7 @@ jobs:
           CI_CODE_COVERAGE_THRESHOLD: ${{ vars.CI_CODE_COVERAGE_THRESHOLD || '80' }}
 
       - name: Post coverage summary as PR comment
-        if: matrix.php-versions == '8.3' && matrix.deps == 'normal' && github.event_name == 'pull_request'
+        if: matrix.php-versions == '8.4' && matrix.deps == 'normal' && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@__HASH__ # __VERSION__
         with:
           message: |
@@ -112,7 +112,7 @@ jobs:
 
       - name: Upload test results to Codecov
         uses: codecov/test-results-action@__HASH__ # __VERSION__
-        if: matrix.php-versions == '8.3' && matrix.deps == 'normal' && env.CODECOV_TOKEN != ''
+        if: matrix.php-versions == '8.4' && matrix.deps == 'normal' && env.CODECOV_TOKEN != ''
         with:
           files: .logs/junit.xml
           fail_ci_if_error: true
@@ -121,7 +121,7 @@ jobs:
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@__HASH__ # __VERSION__
-        if: matrix.php-versions == '8.3' && matrix.deps == 'normal' && env.CODECOV_TOKEN != ''
+        if: matrix.php-versions == '8.4' && matrix.deps == 'normal' && env.CODECOV_TOKEN != ''
         with:
           files: .logs/cobertura.xml
           fail_ci_if_error: true
@@ -152,7 +152,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@__HASH__ # __VERSION__
         with:
-          php-version: 8.3
+          php-version: 8.4
 
       - name: Install dependencies
         run: composer install

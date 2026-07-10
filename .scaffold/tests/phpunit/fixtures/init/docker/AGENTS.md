@@ -112,9 +112,9 @@
 -  - Config: `phpstan.neon`
 -  - Ignores: Untyped iterables in tests/data providers
 -
--3. **Rector** - PHP 8.2/8.3 modernization + code quality
+-3. **Rector** - PHP 8.3 modernization + code quality
 -  - Config: `rector.php`
--  - Sets: PHP_82, PHP_83, CODE_QUALITY, CODING_STYLE, DEAD_CODE,
+-  - Sets: PHP_83, CODE_QUALITY, CODING_STYLE, DEAD_CODE,
 -    TYPE_DECLARATION
 -
 -### Coding Conventions
@@ -155,7 +155,7 @@
 -
 -GitHub Actions workflows test across:
 -
--- PHP versions: 8.2, 8.3
+-- PHP versions: 8.3, 8.4
 -- Separate jobs: lint, test, coverage upload (Codecov)
 -
 -Key workflows:
