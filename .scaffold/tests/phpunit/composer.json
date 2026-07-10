@@ -17,7 +17,7 @@
         "source": "https://github.com/alexskrypnyk/scaffold"
     },
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "alexskrypnyk/file": "^0.17",
         "alexskrypnyk/phpunit-helpers": "^0.4.1",
         "alexskrypnyk/snapshot": "^0.2.1",

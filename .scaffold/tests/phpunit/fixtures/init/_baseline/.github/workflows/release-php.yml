@@ -34,7 +34,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@__HASH__ # __VERSION__
         with:
-          php-version: 8.3
+          php-version: 8.4
 
       - name: Install dependencies
         run: composer install
