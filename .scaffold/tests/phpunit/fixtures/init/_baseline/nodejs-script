@@ -1,0 +1,127 @@
+#!/usr/bin/env node
+
+/**
+ * @file
+ * NodeJS CLI script template.
+ *
+ * -----------------------------------------------------------------------------
+ * NodeJS script template for single-file CLI scripts without dependency on
+ * external packages.
+ *
+ * To adopt script template:
+ * - Replace "NodeJS CLI script template" with your script human name.
+ * - Replace "nodejs-script" with your script file name.
+ * - Update arguments count check to suit your needs.
+ * - Update printHelp() function with your content.
+ * - Copy '/tests/nodejs' directory into your project and update
+ *   script.test.js to a script file name.
+ * - Remove this block of comments.
+ * -----------------------------------------------------------------------------
+ *
+ * Environment variables:
+ * - SCRIPT_QUIET: Set to '1' to suppress verbose messages.
+ * - SCRIPT_RUN_SKIP: Set to '1' to skip running of the script. Useful when
+ *   unit-testing or requiring this file from other files.
+ *
+ * Usage:
+ * @code
+ * ./nodejs-script value/of/argument
+ * @endcode
+ */
+
+'use strict';
+
+const path = require('node:path');
+
+/**
+ * Internal buffer of verbose messages.
+ *
+ * @type {string[]}
+ */
+const buffer = [];
+
+/**
+ * Main functionality.
+ *
+ * @param {string[]} argv
+ *   Array of arguments.
+ * @param {number} argc
+ *   Number of arguments.
+ */
+function main(argv, argc) {
+  if (['help', '--help', '-h', '-?'].some((flag) => argv.includes(flag))) {
+    printHelp();
+
+    return;
+  }
+
+  if (argc < 2 || argc > 2) {
+    throw new Error('Please provide a value of the first argument.');
+  }
+
+  // Add your logic here.
+  verbose(`Would execute script business logic with argument ${argv[1]}.`);
+}
+
+/**
+ * Print help.
+ */
+function printHelp() {
+  const scriptName = path.basename(__filename);
+  const out = `NodeJS CLI script template.
+---------------------------
+
+Arguments:
+  value/of/argument     Value of the first argument.
+
+Options:
+  --help                This help.
+
+Examples:
+  node ${scriptName} value/of/argument
+`;
+
+  verbose(out);
+}
+
+/**
+ * Show a verbose message and record messages into internal buffer.
+ *
+ * @param {string} string
+ *   Message to print.
+ *
+ * @return {string[]}
+ *   Array of messages.
+ */
+function verbose(string) {
+  buffer.push(string);
+
+  // Treat an unset or '0' value as "not quiet", mirroring a loose emptiness
+  // check, so that only an explicit non-'0' value suppresses the output.
+  const quiet = process.env.SCRIPT_QUIET;
+  if (!quiet || quiet === '0') {
+    /* c8 ignore next */
+    process.stdout.write(buffer[buffer.length - 1]);
+  }
+
+  return buffer;
+}
+
+// Entrypoint.
+//
+/* c8 ignore start */
+if (require.main === module && process.env.SCRIPT_RUN_SKIP !== '1') {
+  try {
+    // Drop the Node executable and keep the script path as the first element,
+    // so that argv[1] is the first user-provided argument.
+    const argv = process.argv.slice(1);
+    // The function should not provide an exit code but rather throw errors.
+    main(argv, argv.length);
+  } catch (error) {
+    verbose(`\nERROR: ${error.message}\n`);
+    process.exitCode = 1;
+  }
+}
+/* c8 ignore stop */
+
+module.exports = { main, printHelp, verbose };

@@ -1,4 +1,4 @@
-@@ -1,16 +1,16 @@
+@@ -1,21 +1,21 @@
  {
 -    "name": "@yodashut/force-crystal",
 +    "name": "@jeditemple/star-forge",
@@ -22,3 +22,9 @@
      "directories": {
          "test": "tests"
      },
+     "bin": {
+-        "force-crystal": "./nodejs-script"
++        "star-forge": "./nodejs-script"
+     },
+     "scripts": {
+         "lint": "eslint nodejs-script tests/nodejs eslint.config.js && prettier --check nodejs-script \"tests/nodejs/**/*.js\" eslint.config.js",

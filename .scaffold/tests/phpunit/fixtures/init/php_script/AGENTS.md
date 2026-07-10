@@ -49,7 +49,7 @@
  ### Namespace Structure
  
  - Source code: `YodasHut\App\`
-@@ -75,22 +88,10 @@
+@@ -127,22 +140,10 @@
  ```
  
  
@@ -72,7 +72,7 @@
  # Clean and reinstall dependencies
  composer reset # removes vendor/, vendor-bin/, composer.lock
  composer install
-@@ -139,15 +140,6 @@
+@@ -191,15 +192,6 @@
  - Data providers: `#[DataProvider('providerMethodName')]`
  
  
@@ -88,7 +88,7 @@
  ## CI/CD
  
  GitHub Actions workflows test across:
-@@ -158,10 +150,6 @@
+@@ -210,10 +202,6 @@
  Key workflows:
  
  - `.github/workflows/test-php.yml` - PHP testing

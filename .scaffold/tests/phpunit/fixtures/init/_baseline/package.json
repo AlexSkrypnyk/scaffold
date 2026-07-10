@@ -14,16 +14,38 @@
     "directories": {
         "test": "tests"
     },
+    "bin": {
+        "force-crystal": "./nodejs-script"
+    },
     "scripts": {
-        "build": "echo Would run build",
-        "lint": "echo Would run code lint",
-        "lint-fix": "echo Would run code lint fix",
-        "test": "echo Would run tests",
+        "lint": "eslint nodejs-script tests/nodejs eslint.config.js && prettier --check nodejs-script \"tests/nodejs/**/*.js\" eslint.config.js",
+        "lint-fix": "eslint --fix nodejs-script tests/nodejs eslint.config.js && prettier --write nodejs-script \"tests/nodejs/**/*.js\" eslint.config.js",
+        "test": "node --test tests/nodejs/*.test.js",
+        "test-coverage": "c8 node --test tests/nodejs/*.test.js",
         "reset": "rm -Rf node_modules package-lock.json"
     },
     "engines": {
         "npm": "__VERSION__",
         "node": "__VERSION__"
     },
-    "dependencies": {}
+    "dependencies": {},
+    "devDependencies": {
+        "@eslint/js": "__VERSION__",
+        "c8": "__VERSION__",
+        "eslint": "__VERSION__",
+        "eslint-config-prettier": "__VERSION__",
+        "globals": "__VERSION__",
+        "prettier": "__VERSION__"
+    },
+    "prettier": {
+        "singleQuote": true,
+        "overrides": [
+            {
+                "files": "nodejs-script",
+                "options": {
+                    "parser": "babel"
+                }
+            }
+        ]
+    }
 }

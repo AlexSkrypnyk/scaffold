@@ -1,4 +1,4 @@
-@@ -11,162 +11,6 @@
+@@ -11,215 +11,6 @@
  testing, code quality tools, and CI/CD workflows.
  
  
@@ -63,6 +63,58 @@
 -
 -# Run specific test method
 -./vendor/bin/phpunit --filter testMethodName
+-```
+-
+-
+-## NodeJS Application Architecture
+-
+-### Standalone Single-File Script
+-
+-Single-file CLI script structure:
+-
+-- **Location:** `nodejs-script` file (or custom name)
+-- **Dependencies:** None - self-contained
+-- **Use for:** Simple utilities, deployment scripts, one-off tasks
+-
+-### Environment Variables
+-
+-- `SCRIPT_QUIET=1` - Suppress output (useful in tests)
+-- `SCRIPT_RUN_SKIP=1` - Skip execution (useful when requiring file)
+-
+-### Testing Standalone Scripts
+-
+-The script uses a testable pattern:
+-
+-- Business logic in `main()` function
+-- Output via `verbose()` with internal buffer
+-- Set `SCRIPT_QUIET=1` in tests, then assert on `verbose()` return value
+-
+-Example test:
+-
+-```js
+-const assert = require('node:assert');
+-
+-process.env.SCRIPT_QUIET = '1';
+-process.env.SCRIPT_RUN_SKIP = '1';
+-const { main, verbose } = require('./nodejs-script');
+-main(['nodejs-script', 'arg1'], 2);
+-assert.ok(verbose('').some((line) => line.includes('expected')));
+-```
+-
+-### Commands
+-
+-```bash
+-# Run all linters (ESLint, Prettier)
+-npm run lint
+-
+-# Auto-fix code style issues
+-npm run lint-fix
+-
+-# Run all tests
+-npm run test
+-
+-# Run tests with coverage (reports in .logs/)
+-npm run test-coverage
 -```
 -
 -
@@ -156,6 +208,7 @@
 -
 -
 -- `.github/workflows/test-nodejs.yml` - NodeJS testing
+-- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
 -
 -
  ## Documentation
