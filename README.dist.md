@@ -12,7 +12,7 @@
 [![Test PHP](https://github.com/yournamespace/yourproject/actions/workflows/test-php.yml/badge.svg)](https://github.com/yournamespace/yourproject/actions/workflows/test-php.yml)
 [![Test Node.js](https://github.com/yournamespace/yourproject/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/yournamespace/yourproject/actions/workflows/test-nodejs.yml)
 [![Test Shell](https://github.com/yournamespace/yourproject/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yournamespace/yourproject/actions/workflows/test-shell.yml)
-[![codecov](https://codecov.io/gh/yournamespace/yourproject/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/yournamespace/yourproject)
+[![codecov](https://codecov.io/gh/yournamespace/yourproject/graph/badge.svg)](https://codecov.io/gh/yournamespace/yourproject)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yournamespace/yourproject)
 ![LICENSE](https://img.shields.io/github/license/yournamespace/yourproject)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
