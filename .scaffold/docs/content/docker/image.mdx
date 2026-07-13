@@ -1,0 +1,41 @@
+---
+title: Image
+sidebar_position: 2
+---
+
+# Image
+
+The Docker support centers on a small, self-contained image built from a minimal
+base image and a dedicated entrypoint script.
+
+## Dockerfile
+
+The included [`Dockerfile`](https://github.com/AlexSkrypnyk/scaffold/blob/main/Dockerfile)
+uses a minimal Alpine Linux base image with Bash installed. It follows OCI image
+labeling conventions and uses a dedicated entrypoint script.
+
+```dockerfile
+FROM alpine:3
+
+RUN apk add --no-cache bash
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+```
+
+## Entrypoint
+
+The [`entrypoint.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/entrypoint.sh)
+script enforces strict shell options (`set -euo pipefail`) and forwards
+arguments to the container command.
+
+## Building and running
+
+```bash
+# Build the image
+docker build -t yournamespace/yourproject .
+
+# Run the container
+docker run --rm yournamespace/yourproject
+```

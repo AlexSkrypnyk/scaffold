@@ -34,7 +34,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@__HASH__ # __VERSION__
         with:
-          images: yodashut/force-crystal
+          images: ${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@__HASH__ # __VERSION__

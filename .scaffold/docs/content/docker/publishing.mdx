@@ -1,0 +1,43 @@
+---
+title: Publishing
+sidebar_position: 5
+---
+
+# Publishing
+
+The scaffold publishes multi-architecture (`linux/amd64`, `linux/arm64`) images
+to a container registry in two ways: a rolling `canary` image on every merge to
+`main`, and an immutable image on every tagged release.
+
+## Canary images
+
+On a merge to `main`, the [testing](testing) workflow builds and pushes an image
+tagged `canary` once the tests pass. This provides a bleeding-edge build in
+between tagged releases. The canary push runs only on `main`, so pull requests
+and forks never publish an image.
+
+## Tagged releases
+
+The [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml)
+workflow runs on tag pushes. It:
+
+1. Sets up QEMU and Docker Buildx for multi-architecture builds
+2. Authenticates with Docker Hub
+3. Builds and pushes multi-arch images tagged from the release metadata
+
+## Registry credentials
+
+Both publishing paths require the following repository secrets:
+
+- `DOCKER_USER` - Docker Hub username
+- `DOCKER_PASS` - Docker Hub access token
+
+Set these in your repository's **Settings > Secrets and variables > Actions**.
+
+## Overriding the image name
+
+By default the image is published under the name chosen during initialization.
+To publish elsewhere without editing the workflows (for example, to push to a
+throwaway repository while testing the pipeline end to end), set a `DOCKER_IMAGE`
+repository or organization **variable** to the target image name. When it is
+unset, the default name is used.

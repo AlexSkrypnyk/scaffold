@@ -1,4 +1,4 @@
-@@ -11,213 +11,33 @@
+@@ -11,213 +11,35 @@
  testing, code quality tools, and CI/CD workflows.
  
  
@@ -77,11 +77,14 @@
 +### CI/CD
  
 -## NodeJS Application Architecture
-+- `.github/workflows/test-docker.yml` - Build and lint Docker image
++- `.github/workflows/test-docker.yml` - Build and lint the Docker image, and push a `canary`-tagged image on merge to `main`
 +- `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag
  
 -### Standalone Single-File Script
--
++Docker Hub credentials are stored as repository secrets:
++- `DOCKER_USER` - Docker Hub username
++- `DOCKER_PASS` - Docker Hub access token
+ 
 -Single-file CLI script structure:
 -
 -- **Location:** `nodejs-script` file (or custom name)
@@ -221,9 +224,7 @@
 -
 -- `.github/workflows/test-nodejs.yml` - NodeJS testing
 -- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
-+Docker Hub credentials are stored as repository secrets:
-+- `DOCKER_USER` - Docker Hub username
-+- `DOCKER_PASS` - Docker Hub access token
++Override the published image name (release and canary) by setting the `DOCKER_IMAGE` repository or organization variable; it defaults to `yodashut/force-crystal`.
  
  
  ## Documentation
