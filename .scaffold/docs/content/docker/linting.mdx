@@ -1,0 +1,21 @@
+---
+title: Linting
+sidebar_position: 3
+---
+
+# Linting
+
+The Dockerfile is linted using [Hadolint](https://github.com/hadolint/hadolint),
+a Dockerfile linter that helps enforce best practices and catch common mistakes
+before an image is built.
+
+## Usage
+
+Lint the Dockerfile locally:
+
+```bash
+hadolint Dockerfile
+```
+
+Linting also runs automatically in CI as part of the [testing](testing)
+workflow, so pull requests are checked before they are merged.

@@ -1,0 +1,20 @@
+---
+title: Testing
+sidebar_position: 4
+---
+
+# Testing
+
+The [`test-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docker.yml)
+workflow validates the image on every push to `main` and on every pull request.
+It:
+
+1. Lints the Dockerfile with Hadolint
+2. Builds the image using Docker Buildx
+3. Runs the container to verify it starts correctly
+
+Because the image is built and run on every pull request, a change that breaks
+the build or the entrypoint is caught before it is merged.
+
+On a merge to `main`, once these checks pass, the same workflow also publishes a
+`canary` image. See [Publishing](publishing) for details.
