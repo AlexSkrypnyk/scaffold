@@ -621,3 +621,64 @@ SETTINGS
   assert_success
   assert_equal "${output}" "https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz"
 }
+
+create_template_tarball() {
+  local out="${1}"
+  local with_scaffold="${2:-1}"
+  local src="${BATS_TEST_TMPDIR}/tpl-src"
+  rm -rf "${src}"
+  mkdir -p "${src}/pkg"
+  touch "${src}/pkg/composer.json"
+  if [ "${with_scaffold}" = "1" ]; then
+    mkdir -p "${src}/pkg/.scaffold"
+    touch "${src}/pkg/.scaffold/README.md"
+  fi
+  tar -czf "${out}" -C "${src}" pkg
+}
+
+@test "fetch_and_stage_template promotes a valid archive" {
+  local archive="${BATS_TEST_TMPDIR}/valid.tar.gz"
+  create_template_tarball "${archive}" 1
+
+  local target="${BATS_TEST_TMPDIR}/valid-target"
+  mkdir -p "${target}"
+
+  pushd "${target}" >/dev/null || return 1
+  run fetch_and_stage_template "file://${archive}"
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_dir_exists "${target}/.scaffold"
+  assert_file_exists "${target}/composer.json"
+  assert_dir_not_exists "${target}/.scaffold-bootstrap"
+}
+
+@test "fetch_and_stage_template rejects an archive without .scaffold" {
+  local archive="${BATS_TEST_TMPDIR}/invalid.tar.gz"
+  create_template_tarball "${archive}" 0
+
+  local target="${BATS_TEST_TMPDIR}/invalid-target"
+  mkdir -p "${target}"
+
+  pushd "${target}" >/dev/null || return 1
+  run fetch_and_stage_template "file://${archive}"
+  popd >/dev/null || return 1
+
+  assert_failure
+  assert_output_contains "not a Scaffold template"
+  assert_dir_not_exists "${target}/.scaffold-bootstrap"
+  assert_file_not_exists "${target}/composer.json"
+}
+
+@test "fetch_and_stage_template fails when the download fails" {
+  local target="${BATS_TEST_TMPDIR}/download-fail-target"
+  mkdir -p "${target}"
+
+  pushd "${target}" >/dev/null || return 1
+  run fetch_and_stage_template "file://${BATS_TEST_TMPDIR}/missing.tar.gz"
+  popd >/dev/null || return 1
+
+  assert_failure
+  assert_output_contains "failed to download"
+  assert_dir_not_exists "${target}/.scaffold-bootstrap"
+}

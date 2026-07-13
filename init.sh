@@ -1051,11 +1051,59 @@ resolve_archive_url() {
 }
 
 ##
-# Download and extract the template into the current directory, then re-run.
+# Download, extract, validate, and promote the template into the current dir.
+#
+# The archive is staged in a sub-directory and only promoted once it is
+# confirmed to contain '.scaffold', so a failed download, a partial extraction,
+# or an archive that is not a Scaffold leaves the current directory clean
+# instead of tripping the empty-directory guard on the next attempt.
+#
+# @param $1 string Archive URL to download.
+# @return int 0 when the template was promoted, non-zero on any failure.
+#
+fetch_and_stage_template() {
+  local url="${1}"
+  local staging=".scaffold-bootstrap"
+
+  rm -rf "${staging}"
+  mkdir -p "${staging}"
+
+  if ! curl -fsSL "${url}" -o "${staging}/scaffold.tar.gz"; then
+    echo "Error: failed to download the template archive from ${url}." >&2
+    rm -rf "${staging}"
+    return 1
+  fi
+
+  if ! tar -xzf "${staging}/scaffold.tar.gz" -C "${staging}" --strip-components=1; then
+    echo "Error: failed to extract the template archive." >&2
+    rm -rf "${staging}"
+    return 1
+  fi
+
+  rm -f "${staging}/scaffold.tar.gz"
+
+  if [ ! -d "${staging}/.scaffold" ]; then
+    echo "Error: the downloaded archive is not a Scaffold template." >&2
+    rm -rf "${staging}"
+    return 1
+  fi
+
+  # Promote the validated staged contents (including dotfiles) into the current
+  # directory, then remove the now-empty staging directory.
+  local entry
+  for entry in "${staging}"/* "${staging}"/.[!.]*; do
+    [ -e "${entry}" ] || continue
+    mv "${entry}" .
+  done
+  rm -rf "${staging}"
+}
+
+##
+# Download the template into the current directory, then re-run in place.
 #
 # Runs only when the template is absent (for example when this script was
 # fetched and piped straight from 'curl'). Requires an empty directory so
-# nothing is clobbered. After extraction the freshly written on-disk script is
+# nothing is clobbered. After the download the freshly written on-disk script is
 # re-executed with stdin reconnected to the terminal, so interactive prompts
 # work even though this instance was fed through a pipe. Does not return.
 #
@@ -1075,45 +1123,7 @@ bootstrap_template() {
 
   echo "Downloading Scaffold from ${url}"
 
-  # Download and extract into a staging directory so a failed download, a
-  # partial extraction, or an archive that is not a Scaffold cannot leave debris
-  # in the current directory - which would otherwise trip the empty-directory
-  # guard on the next attempt and force a manual cleanup.
-  local staging=".scaffold-bootstrap"
-  rm -rf "${staging}"
-  mkdir -p "${staging}"
-
-  if ! curl -fsSL "${url}" -o "${staging}/scaffold.tar.gz"; then
-    echo "Error: failed to download the template archive from ${url}." >&2
-    rm -rf "${staging}"
-    exit 1
-  fi
-
-  if ! tar -xzf "${staging}/scaffold.tar.gz" -C "${staging}" --strip-components=1; then
-    echo "Error: failed to extract the template archive." >&2
-    rm -rf "${staging}"
-    exit 1
-  fi
-
-  rm -f "${staging}/scaffold.tar.gz"
-
-  if [ ! -d "${staging}/.scaffold" ]; then
-    echo "Error: the downloaded archive is not a Scaffold template." >&2
-    rm -rf "${staging}"
-    exit 1
-  fi
-
-  # Promote the validated staged contents (including dotfiles) into the current
-  # directory, then remove the now-empty staging directory.
-  local entry
-  for entry in "${staging}"/* "${staging}"/.[!.]*; do
-    [ -e "${entry}" ] || continue
-    mv "${entry}" .
-  done
-  rm -rf "${staging}"
-
-  if ! template_present; then
-    echo "Error: the downloaded archive is not a Scaffold template." >&2
+  if ! fetch_and_stage_template "${url}"; then
     exit 1
   fi
 
