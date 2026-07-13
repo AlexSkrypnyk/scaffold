@@ -100,7 +100,7 @@ curl -fsSL https://getscaffold.dev/init.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-The latest release is used by default; pass `--ref=<tag|branch|commit>` to pin a specific version. Run `./init.sh --help` for the full list of options.
+The latest release is used by default; to pin a specific tag, branch, or commit, pass `--ref` to the script after `bash -s --` (for example `bash -s -- --ref=1.2.3`). Run `./init.sh --help` for the full list of options.
 
 ## Updating a generated project
 
