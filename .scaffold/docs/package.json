@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "copy-init": "cp ../../init.sh static/init.sh",
+    "prestart": "npm run copy-init",
     "start": "docusaurus start",
+    "prebuild": "npm run copy-init",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "clear": "docusaurus clear",

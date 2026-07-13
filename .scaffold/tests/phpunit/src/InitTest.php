@@ -132,6 +132,158 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
+   * The script bootstraps the template when piped into an empty directory.
+   *
+   * With no template present, init.sh downloads and extracts the Scaffold into
+   * the current directory, then initialises it. The archive is injected via
+   * SCAFFOLD_ARCHIVE_URL so the test never reaches the network.
+   */
+  public function testInitViaCurlBootstrapsIntoEmptyDir(): void {
+    self::$fixtures = NULL;
+
+    // Build a template archive from the pristine SUT copy. GitHub archives nest
+    // everything under a top-level directory, so archive the SUT under its own
+    // basename and strip that component on extraction, exactly as init.sh does
+    // against a real GitHub tarball.
+    $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
+    $this->processRun('tar', ['-czf', $archive, '-C', dirname(self::$sut), basename(self::$sut)]);
+    $this->assertProcessSuccessful();
+
+    $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'bootstrap-target');
+
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $script = sprintf(
+      'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
+      escapeshellarg($url),
+      escapeshellarg('Curl Author'),
+    );
+
+    $this->processCwd = $target;
+    $this->processRun('bash', ['-c', $script], [], ['SCAFFOLD_ARCHIVE_URL' => 'file://' . $archive]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Downloading Scaffold from');
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    // The template was downloaded and initialised in the target directory.
+    $composer_path = $target . DIRECTORY_SEPARATOR . 'composer.json';
+    $this->assertFileExists($composer_path);
+    $composer = (string) file_get_contents($composer_path);
+    $this->assertStringContainsString('CurlNs', $composer);
+    $this->assertStringNotContainsString('YourNamespace', $composer);
+
+    // The downloaded archive and the template marker are cleaned up by init.
+    $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'scaffold.tar.gz');
+    $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.scaffold');
+  }
+
+  /**
+   * Bootstrapping refuses to run in a directory that already has files.
+   *
+   * A non-empty current directory must abort before anything is downloaded, so
+   * pre-existing files are never clobbered.
+   */
+  public function testInitViaCurlBootstrapRefusesNonEmptyDir(): void {
+    self::$fixtures = NULL;
+
+    $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
+    $this->processRun('tar', ['-czf', $archive, '-C', dirname(self::$sut), basename(self::$sut)]);
+    $this->assertProcessSuccessful();
+
+    $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'nonempty-target');
+    File::dump($target . DIRECTORY_SEPARATOR . 'keep.txt', 'existing');
+
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $script = sprintf(
+      'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
+      escapeshellarg($url),
+      escapeshellarg('Curl Author'),
+    );
+
+    $this->processCwd = $target;
+    $this->processRun('bash', ['-c', $script], [], ['SCAFFOLD_ARCHIVE_URL' => 'file://' . $archive]);
+
+    $this->assertProcessFailed();
+    $this->assertProcessErrorOutputContains('current directory is not empty');
+
+    // The stray file is untouched and no template was extracted.
+    $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'keep.txt');
+    $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.scaffold');
+    $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'composer.json');
+  }
+
+  /**
+   * Piping with no options bootstraps, then reaches interactive prompting.
+   *
+   * `curl ... | bash` with no options must download and extract the template
+   * and then re-run to prompt the user. The test environment has no terminal,
+   * so the prompt has nothing to read and the run aborts cleanly - proving the
+   * bootstrap completed and control reached the interactive collector (a real
+   * user with a terminal answers the prompts instead).
+   */
+  public function testInitViaCurlBootstrapsThenPromptsWithoutOptions(): void {
+    self::$fixtures = NULL;
+
+    $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
+    $this->processRun('tar', ['-czf', $archive, '-C', dirname(self::$sut), basename(self::$sut)]);
+    $this->assertProcessSuccessful();
+
+    $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'prompt-target');
+
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $script = sprintf('set -o pipefail; curl -fsSL %s | bash', escapeshellarg($url));
+
+    $this->processCwd = $target;
+    $this->processRun('bash', ['-c', $script], [], ['SCAFFOLD_ARCHIVE_URL' => 'file://' . $archive]);
+
+    // No terminal to read prompts from, so the interactive run aborts cleanly.
+    $this->assertProcessFailed();
+    $this->assertProcessErrorOutputContains('No input available');
+
+    // The template was still downloaded and extracted before prompting.
+    $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'composer.json');
+    $this->assertDirectoryExists($target . DIRECTORY_SEPARATOR . 'src');
+  }
+
+  /**
+   * An archive without a '.scaffold' leaves the target directory clean.
+   *
+   * The download is staged and validated before anything is promoted, so an
+   * archive that is not a Scaffold (or a partial extraction) must abort without
+   * leaving debris that would trip the empty-directory guard on a retry.
+   */
+  public function testInitViaCurlBootstrapCleansUpInvalidArchive(): void {
+    self::$fixtures = NULL;
+
+    // An archive that extracts to content but has no '.scaffold' directory.
+    $fake = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'not-a-scaffold');
+    File::dump($fake . DIRECTORY_SEPARATOR . 'hello.txt', 'hi');
+    $archive = self::$tmp . DIRECTORY_SEPARATOR . 'not-scaffold.tar.gz';
+    $this->processRun('tar', ['-czf', $archive, '-C', dirname($fake), basename($fake)]);
+    $this->assertProcessSuccessful();
+
+    $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'invalid-target');
+
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $script = sprintf(
+      'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
+      escapeshellarg($url),
+      escapeshellarg('Curl Author'),
+    );
+
+    $this->processCwd = $target;
+    $this->processRun('bash', ['-c', $script], [], ['SCAFFOLD_ARCHIVE_URL' => 'file://' . $archive]);
+
+    $this->assertProcessFailed();
+    $this->assertProcessErrorOutputContains('not a Scaffold template');
+
+    // No staging directory and no extracted debris remain in the target.
+    $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.scaffold-bootstrap');
+    $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'hello.txt');
+    $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'composer.json');
+  }
+
+  /**
    * The initialised project keeps the updater skill pointing upstream.
    *
    * The bulk `scaffold` -> project rewrite in init.sh would otherwise

@@ -57,6 +57,13 @@ jobs:
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "Release version: $version"
 
+      - name: Bake version into init.sh
+        working-directory: ${{ github.workspace }}
+        run: |
+          escaped=$(printf '%s' "${RELEASE_VERSION}" | sed -e 's/[\\&|]/\\&/g')
+          sed -i "s|^SCAFFOLD_VERSION=\"dev\"|SCAFFOLD_VERSION=\"${escaped}\"|" init.sh
+          grep '^SCAFFOLD_VERSION=' init.sh
+
       - name: Build documentation site
         run: npm run build
         working-directory: '${{ github.workspace }}/.scaffold/docs'

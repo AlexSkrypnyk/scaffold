@@ -3,8 +3,10 @@
 # Unit tests for init.sh.
 #
 # Variables under test are assigned by the sourced init.sh, which shellcheck
-# does not follow, so disable "unassigned variable" (SC2154) here.
-# shellcheck disable=SC2034,SC2154
+# does not follow, so disable "unassigned variable" (SC2154) here. The 'curl'
+# mocks are invoked indirectly by init.sh functions under 'run' and cannot be
+# traced statically, so "function never invoked" (SC2329) is disabled too.
+# shellcheck disable=SC2034,SC2154,SC2329
 
 load _helper
 load "../../../init.sh"
@@ -306,6 +308,12 @@ WORKFLOW
   assert_output_contains "Usage: ./init.sh"
 }
 
+@test "parse_args prints the version for --version" {
+  run parse_args --version
+  assert_success
+  assert_output "dev"
+}
+
 @test "require_identity fails when identity is missing" {
   run require_identity
   assert_failure
@@ -528,4 +536,149 @@ SETTINGS
 
   assert_success
   assert_file_not_exists "${tmpdir}/.claude/settings.json"
+}
+
+@test "parse_args --ref sets the bootstrap ref" {
+  parse_args --ref=1.2.3
+  assert_equal "${archive_ref}" "1.2.3"
+}
+
+@test "template_present detects the .scaffold directory" {
+  local tmpdir="${BATS_TEST_TMPDIR}/template_present"
+  mkdir -p "${tmpdir}/.scaffold"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run template_present
+  popd >/dev/null || return 1
+
+  assert_success
+}
+
+@test "template_present fails when .scaffold is absent" {
+  local tmpdir="${BATS_TEST_TMPDIR}/template_absent"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run template_present
+  popd >/dev/null || return 1
+
+  assert_failure
+}
+
+@test "dir_is_empty is true for an empty directory" {
+  local tmpdir="${BATS_TEST_TMPDIR}/empty"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run dir_is_empty
+  popd >/dev/null || return 1
+
+  assert_success
+}
+
+@test "dir_is_empty is false when a dotfile is present" {
+  local tmpdir="${BATS_TEST_TMPDIR}/dotfile"
+  mkdir -p "${tmpdir}"
+  touch "${tmpdir}/.hidden"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run dir_is_empty
+  popd >/dev/null || return 1
+
+  assert_failure
+}
+
+@test "resolve_archive_url prefers SCAFFOLD_ARCHIVE_URL" {
+  SCAFFOLD_ARCHIVE_URL="file:///tmp/local.tar.gz"
+  archive_ref="1.2.3"
+  run resolve_archive_url
+  assert_success
+  assert_equal "${output}" "file:///tmp/local.tar.gz"
+}
+
+@test "resolve_archive_url builds an archive URL from --ref" {
+  SCAFFOLD_ARCHIVE_URL=""
+  archive_ref="feature-x"
+  run resolve_archive_url
+  assert_success
+  assert_equal "${output}" "https://github.com/AlexSkrypnyk/scaffold/archive/feature-x.tar.gz"
+}
+
+@test "resolve_archive_url uses the latest release tag by default" {
+  SCAFFOLD_ARCHIVE_URL=""
+  archive_ref=""
+  curl() { echo '{"tag_name": "9.9.9"}'; }
+  run resolve_archive_url
+  assert_success
+  assert_equal "${output}" "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/9.9.9.tar.gz"
+}
+
+@test "resolve_archive_url falls back to main when no release is found" {
+  SCAFFOLD_ARCHIVE_URL=""
+  archive_ref=""
+  curl() { return 1; }
+  run resolve_archive_url
+  assert_success
+  assert_equal "${output}" "https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz"
+}
+
+create_template_tarball() {
+  local out="${1}"
+  local with_scaffold="${2:-1}"
+  local src="${BATS_TEST_TMPDIR}/tpl-src"
+  rm -rf "${src}"
+  mkdir -p "${src}/pkg"
+  touch "${src}/pkg/composer.json"
+  if [ "${with_scaffold}" = "1" ]; then
+    mkdir -p "${src}/pkg/.scaffold"
+    touch "${src}/pkg/.scaffold/README.md"
+  fi
+  tar -czf "${out}" -C "${src}" pkg
+}
+
+@test "fetch_and_stage_template promotes a valid archive" {
+  local archive="${BATS_TEST_TMPDIR}/valid.tar.gz"
+  create_template_tarball "${archive}" 1
+
+  local target="${BATS_TEST_TMPDIR}/valid-target"
+  mkdir -p "${target}"
+
+  pushd "${target}" >/dev/null || return 1
+  run fetch_and_stage_template "file://${archive}"
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_dir_exists "${target}/.scaffold"
+  assert_file_exists "${target}/composer.json"
+  assert_dir_not_exists "${target}/.scaffold-bootstrap"
+}
+
+@test "fetch_and_stage_template rejects an archive without .scaffold" {
+  local archive="${BATS_TEST_TMPDIR}/invalid.tar.gz"
+  create_template_tarball "${archive}" 0
+
+  local target="${BATS_TEST_TMPDIR}/invalid-target"
+  mkdir -p "${target}"
+
+  pushd "${target}" >/dev/null || return 1
+  run fetch_and_stage_template "file://${archive}"
+  popd >/dev/null || return 1
+
+  assert_failure
+  assert_output_contains "not a Scaffold template"
+  assert_dir_not_exists "${target}/.scaffold-bootstrap"
+  assert_file_not_exists "${target}/composer.json"
+}
+
+@test "fetch_and_stage_template fails when the download fails" {
+  local target="${BATS_TEST_TMPDIR}/download-fail-target"
+  mkdir -p "${target}"
+
+  pushd "${target}" >/dev/null || return 1
+  run fetch_and_stage_template "file://${BATS_TEST_TMPDIR}/missing.tar.gz"
+  popd >/dev/null || return 1
+
+  assert_failure
+  assert_output_contains "failed to download"
+  assert_dir_not_exists "${target}/.scaffold-bootstrap"
 }
