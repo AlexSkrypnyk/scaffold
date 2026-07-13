@@ -1241,6 +1241,11 @@ main() {
 # Run main only when the script is executed, not when it is sourced (e.g. by
 # the BATS unit tests). When piped through 'bash -s' the script has no source
 # file, so "${BASH_SOURCE[0]}" is empty - that case must still run.
+#
+# main is the final statement, which also bounds the effect of a truncated
+# 'curl ... | bash' download: every file and network operation lives inside a
+# function that only main invokes, so a cut-off download performs no real work -
+# at most the harmless top-level variable and option setup before it hits EOF.
 if [ -z "${BASH_SOURCE[0]:-}" ] || [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   main "$@"
 fi
