@@ -213,6 +213,39 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
+   * Piping with no options bootstraps, then reaches interactive prompting.
+   *
+   * `curl ... | bash` with no options must download and extract the template
+   * and then re-run to prompt the user. The test environment has no terminal,
+   * so the prompt has nothing to read and the run aborts cleanly - proving the
+   * bootstrap completed and control reached the interactive collector (a real
+   * user with a terminal answers the prompts instead).
+   */
+  public function testInitViaCurlBootstrapsThenPromptsWithoutOptions(): void {
+    self::$fixtures = NULL;
+
+    $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
+    $this->processRun('tar', ['-czf', $archive, '-C', dirname(self::$sut), basename(self::$sut)]);
+    $this->assertProcessSuccessful();
+
+    $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'prompt-target');
+
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $script = sprintf('set -o pipefail; curl -fsSL %s | bash', escapeshellarg($url));
+
+    $this->processCwd = $target;
+    $this->processRun('bash', ['-c', $script], [], ['SCAFFOLD_ARCHIVE_URL' => 'file://' . $archive]);
+
+    // No terminal to read prompts from, so the interactive run aborts cleanly.
+    $this->assertProcessFailed();
+    $this->assertProcessErrorOutputContains('No input available');
+
+    // The template was still downloaded and extracted before prompting.
+    $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'composer.json');
+    $this->assertDirectoryExists($target . DIRECTORY_SEPARATOR . 'src');
+  }
+
+  /**
    * The initialised project keeps the updater skill pointing upstream.
    *
    * The bulk `scaffold` -> project rewrite in init.sh would otherwise

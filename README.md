@@ -87,14 +87,20 @@ Pass options instead of answering prompts to initialise without any interaction 
 ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-The same works as a one-liner straight from getscaffold.dev, with no prior checkout - run it in an **empty directory** and the script downloads the Scaffold into the current directory before initialising it:
+The same works as a one-liner straight from getscaffold.dev, with no prior checkout - run it in an **empty directory** and the script downloads the Scaffold into the current directory, then prompts you for the details:
+
+```bash
+curl -fsSL https://getscaffold.dev/init.sh | bash
+```
+
+To stay fully unattended, pass the details as options instead:
 
 ```bash
 curl -fsSL https://getscaffold.dev/init.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-Piping with no options prompts interactively for every choice. The latest release is used by default; pass `--ref=<tag|branch|commit>` to pin a specific version. Run `./init.sh --help` for the full list of options.
+The latest release is used by default; pass `--ref=<tag|branch|commit>` to pin a specific version. Run `./init.sh --help` for the full list of options.
 
 ## Updating a generated project
 

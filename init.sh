@@ -17,6 +17,9 @@
 # Interactive prompt:
 # ./init.sh
 #
+# Interactive one-liner (downloads Scaffold, then prompts):
+# curl -fsSL https://getscaffold.dev/init.sh | bash
+#
 # Non-interactive:
 # ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 #
@@ -644,6 +647,9 @@ With no options the script runs interactively and prompts for every choice.
 Passing any option switches to non-interactive mode: prompts are skipped,
 unspecified choices use their defaults, and --namespace, --name and --author
 are required.
+
+One-liner (interactive - downloads Scaffold, then prompts):
+  curl -fsSL https://getscaffold.dev/init.sh | bash
 
 One-liner (non-interactive):
   curl -fsSL https://getscaffold.dev/init.sh | \
