@@ -307,12 +307,14 @@ docker run --rm -i hadolint/hadolint < Dockerfile
 
 ### CI/CD
 
-- `.github/workflows/test-docker.yml` - Build and lint Docker image
+- `.github/workflows/test-docker.yml` - Build and lint the Docker image, and push a `canary`-tagged image on merge to `main`
 - `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag
 
 Docker Hub credentials are stored as repository secrets:
 - `DOCKER_USER` - Docker Hub username
 - `DOCKER_PASS` - Docker Hub access token
+
+Override the published image name (release and canary) by setting the `DOCKER_IMAGE` repository or organization variable; it defaults to `yournamespace/yourproject`.
 
 [//]: # (#;> DOCKER)
 
