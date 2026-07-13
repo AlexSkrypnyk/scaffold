@@ -29,7 +29,7 @@
  ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
  
  </div>
-@@ -30,11 +30,11 @@
+@@ -30,7 +30,7 @@
  ## Installation
  
  
@@ -38,12 +38,7 @@
  
  
  
--    npm install @yodashut/force-crystal
-+    npm install @jeditemple/star-forge
- 
- 
- 
-@@ -44,15 +44,15 @@
+@@ -44,7 +44,7 @@
  ## Usage
  
  
@@ -52,8 +47,7 @@
  
  
  
--    node_modules/.bin/force-crystal
-+    node_modules/.bin/star-forge
+@@ -52,7 +52,7 @@
  
  
  

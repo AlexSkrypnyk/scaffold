@@ -379,9 +379,14 @@ remove_php_script() {
 
 remove_nodejs() {
   rm -f package.json >/dev/null || true
-  rm -f package.lock >/dev/null || true
+  rm -f package-lock.json >/dev/null || true
   rm -f yarn.lock >/dev/null || true
   rm -Rf node_modules >/dev/null || true
+
+  rm -f nodejs-script >/dev/null || true
+  rm -f eslint.config.js >/dev/null || true
+  rm -f .c8rc.json >/dev/null || true
+  rm -Rf tests/nodejs >/dev/null || true
 
   remove_string_content_line "\/.npmignore" ".gitattributes"
 

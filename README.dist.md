@@ -43,7 +43,7 @@
 
 [//]: # (#;< NODEJS)
 
-    npm install @yournamespace/yourproject
+Download the latest release from GitHub releases page.
 
 [//]: # (#;> NODEJS)
 
@@ -63,7 +63,7 @@ Download the latest release from GitHub releases page.
 
 [//]: # (#;< NODEJS)
 
-    node_modules/.bin/yourproject
+    ./nodejs-script value/of/argument
 
 [//]: # (#;> NODEJS)
 

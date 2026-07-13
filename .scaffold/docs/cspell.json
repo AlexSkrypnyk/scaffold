@@ -9,7 +9,10 @@
     "words": [
         "Claude",
         "Cobertura",
+        "ESLint",
         "GHSA",
+        "LCOV",
+        "Prettier",
         "asciicast",
         "asciinema",
         "autoloader",

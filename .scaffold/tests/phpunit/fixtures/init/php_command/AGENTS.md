@@ -16,7 +16,7 @@
  3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
  
  
-@@ -75,12 +75,6 @@
+@@ -127,12 +127,6 @@
  ```
  
  
@@ -29,7 +29,7 @@
  ### Building
  
  
-@@ -139,15 +133,6 @@
+@@ -191,15 +185,6 @@
  - Data providers: `#[DataProvider('providerMethodName')]`
  
  
@@ -45,7 +45,7 @@
  ## CI/CD
  
  GitHub Actions workflows test across:
-@@ -159,9 +144,6 @@
+@@ -211,9 +196,6 @@
  
  - `.github/workflows/test-php.yml` - PHP testing
  - `.github/workflows/release-php.yml` - PHAR packaging and release

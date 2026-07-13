@@ -1,0 +1,44 @@
+---
+title: Testing
+sidebar_position: 4
+---
+
+# Testing
+
+This template provides configuration and example tests for your project built
+on the Node.js built-in test runner.
+
+## Node.js test runner
+
+[`node --test`](https://nodejs.org/api/test.html) is the test runner built into
+Node.js. It requires no additional dependencies and provides everything needed
+to write unit and functional tests, including assertions via the `node:assert`
+module and test isolation across files.
+
+Running the following command will execute all the tests:
+
+```bash
+npm run test
+```
+
+Tests live in the [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs)
+directory. Any file matching `*.test.js` is picked up automatically.
+
+## Coverage
+
+The template is configured to generate code coverage reports using
+[`c8`](https://github.com/bcoe/c8), which collects native V8 coverage and
+renders it in multiple formats.
+
+The [`.c8rc.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.c8rc.json)
+file configures coverage to be generated in text, LCOV and Cobertura
+(`cobertura-coverage.xml`) formats under the `.logs` directory. The Cobertura
+report is a machine-readable report useful for integrating with other tools.
+This template [provides a GitHub Action](../ci/test) that uses this report to
+publish code coverage.
+
+To generate the coverage reports, run the following command:
+
+```bash
+npm run test-coverage
+```

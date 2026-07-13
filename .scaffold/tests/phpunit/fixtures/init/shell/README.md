@@ -14,7 +14,7 @@
  
 -
 -
-     npm install @yodashut/force-crystal
+ Download the latest release from GitHub releases page.
  
  
 @@ -44,10 +40,7 @@
@@ -25,7 +25,7 @@
  
 -
 -
-     node_modules/.bin/force-crystal
+     ./nodejs-script value/of/argument
  
  
 @@ -56,21 +49,7 @@

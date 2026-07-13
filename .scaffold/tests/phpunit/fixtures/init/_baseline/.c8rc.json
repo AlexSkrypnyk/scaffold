@@ -1,0 +1,16 @@
+{
+    "all": false,
+    "include": [
+        "nodejs-script"
+    ],
+    "extension": [
+        "",
+        ".js"
+    ],
+    "reporter": [
+        "text",
+        "lcov",
+        "cobertura"
+    ],
+    "reports-dir": ".logs"
+}

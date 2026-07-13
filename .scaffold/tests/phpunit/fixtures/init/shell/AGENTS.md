@@ -1,4 +1,4 @@
-@@ -11,134 +11,12 @@
+@@ -11,70 +11,6 @@
  testing, code quality tools, and CI/CD workflows.
  
  
@@ -34,7 +34,7 @@
 -
 -### Code Quality
 -
- ```bash
+-```bash
 -# Run all linters (PHPCS, PHPStan, Rector)
 -composer lint
 -
@@ -66,9 +66,10 @@
 -```
 -
 -
--```bash
- # Shell script tests
- ./tests/bats/node_modules/bats/bin/bats tests/bats/
+ ## NodeJS Application Architecture
+ 
+ ### Standalone Single-File Script
+@@ -133,64 +69,6 @@
  ```
  
  
@@ -133,7 +134,7 @@
  ### Shell Script Testing with BATS
  
  Shell script tests use BATS:
-@@ -146,19 +24,6 @@
+@@ -198,19 +76,6 @@
  - Tests in `tests/bats/` with `.bats` extension
  - Helper functions in `tests/bats/_helper.bash`
  - Coverage exclusions: `# LCOV_EXCL_START` / `# LCOV_EXCL_END`
