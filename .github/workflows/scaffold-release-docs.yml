@@ -60,7 +60,8 @@ jobs:
       - name: Bake version into init.sh
         working-directory: ${{ github.workspace }}
         run: |
-          sed -i "s|^SCAFFOLD_VERSION=\"dev\"|SCAFFOLD_VERSION=\"${RELEASE_VERSION}\"|" init.sh
+          escaped=$(printf '%s' "${RELEASE_VERSION}" | sed -e 's/[\\&|]/\\&/g')
+          sed -i "s|^SCAFFOLD_VERSION=\"dev\"|SCAFFOLD_VERSION=\"${escaped}\"|" init.sh
           grep '^SCAFFOLD_VERSION=' init.sh
 
       - name: Build documentation site
