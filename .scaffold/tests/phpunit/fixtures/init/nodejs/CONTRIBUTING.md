@@ -1,32 +1,12 @@
-@@ -6,10 +6,7 @@
- ## Installation
+@@ -4,11 +4,6 @@
+ setting up a local environment and running the linting and tests.
  
  
 -    composer install
- 
--
--
-     npm install
- 
- 
-@@ -20,10 +17,7 @@
- ## Linting
- 
- 
 -    composer lint
- 
--
--
-     npm run lint
- 
- 
-@@ -33,9 +27,6 @@
- 
- 
- ## Testing
--
--
 -    composer test
+-
+-
  
- 
- 
+     npm install
+     npm run lint

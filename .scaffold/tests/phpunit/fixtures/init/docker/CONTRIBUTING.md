@@ -1,43 +1,21 @@
-@@ -6,42 +6,14 @@
- ## Installation
+@@ -4,20 +4,4 @@
+ setting up a local environment and running the linting and tests.
  
  
 -    composer install
- 
- 
--
--    npm install
--
--
--
--    npm ci --prefix tests/bats
--
--
- ## Linting
- 
- 
 -    composer lint
- 
- 
--
--    npm run lint
--
--
--
--    shellcheck force-crystal.sh tests/bats/*.bash tests/bats/*.bats
--    shfmt -i 2 -ci -s -d force-crystal.sh tests/bats/*.bash tests/bats/*.bats
--
--
- ## Testing
- 
- 
 -    composer test
 -
 -
 -
+-    npm install
+-    npm run lint
 -    npm run test
 -
 -
 -
+-    npm ci --prefix tests/bats
+-    shellcheck force-crystal.sh tests/bats/*.bash tests/bats/*.bats
+-    shfmt -i 2 -ci -s -d force-crystal.sh tests/bats/*.bash tests/bats/*.bats
 -    ./tests/bats/node_modules/.bin/bats tests/bats
  
