@@ -28,25 +28,19 @@
      ./nodejs-script value/of/argument
  
  
-@@ -56,21 +49,7 @@
+@@ -54,15 +47,6 @@
  
+     ./force-crystal.sh
  
- 
+-
+-
 -### CLI options
 -
 -| Name        | Default value | Description                        |
 -|-------------|---------------|------------------------------------|
 -| `arg1`      |               | Description of the first argument. |
 -| `--option1` | `default1`    | Option with a default value.       |
--| `--option2` | None          | Option wihtout a value.            |
--
--
- ## Maintenance
--
--
--    composer install
--    composer lint
--    composer test
+-| `--option2` | None          | Option without a value.            |
  
  
- 
+ ## Contributing
