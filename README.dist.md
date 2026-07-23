@@ -81,37 +81,14 @@ Download the latest release from GitHub releases page.
 |-------------|---------------|------------------------------------|
 | `arg1`      |               | Description of the first argument. |
 | `--option1` | `default1`    | Option with a default value.       |
-| `--option2` | None          | Option wihtout a value.            |
+| `--option2` | None          | Option without a value.            |
 
 [//]: # (#;> PHP)
 
-## Maintenance
+## Contributing
 
-[//]: # (#;< PHP)
-
-    composer install
-    composer lint
-    composer test
-
-[//]: # (#;> PHP)
-
-[//]: # (#;< NODEJS)
-
-    npm install
-    npm run lint
-    npm run test
-
-[//]: # (#;> NODEJS)
-
-[//]: # (#;< SHELL)
-
-    shellcheck shell-command.sh tests/bats/*.bash tests/bats/*.bats
-    shfmt -i 2 -ci -s -d shell-command.sh tests/bats/*.bash tests/bats/*.bats
-
-    npm ci --prefix tests/bats
-    ./tests/bats/node_modules/.bin/bats tests/bats
-
-[//]: # (#;> SHELL)
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the
+linting and testing commands.
 
 ## Updating
 

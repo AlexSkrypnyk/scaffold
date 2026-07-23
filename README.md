@@ -43,7 +43,7 @@
     and [publish](.github/workflows/release-php.yml) PHP as [PHAR](box.json)
 - **NodeJS**
   - [`package.json`](package.json)
-  - CI config to [build and test](.github/workflows/test-nodehs.yml) and test
+  - CI config to [build and test](.github/workflows/test-nodejs.yml) and test
     for NodeJS
 - **Docker**
   - [`Dockerfile`](Dockerfile) with minimal Alpine-based image and [`entrypoint.sh`](entrypoint.sh)
@@ -52,11 +52,11 @@
   - CI config to [publish](.github/workflows/release-docker.yml) multi-arch
     images (`linux/amd64`, `linux/arm64`) to Docker Hub
 - **CI**
-  - [Release drafter](.github/workflows/release-drafter.yml)
+  - [Release drafter](.github/workflows/draft-release-notes.yml)
   - Release asset packaging and upload
   - [PR auto-assign](.github/workflows/assign-author.yml)
 - **Documentation**
-  - [Readme with badges](README.dist.md) and [generated logo](logo.png)
+  - [Readme with badges](README.dist.md) and [contributing guide](CONTRIBUTING.dist.md), plus a [generated logo](logo.png)
   - [Scaffold](docs) for the documentation site using [Docusaurus](https://docusaurus.io/)
   - Spell check with [CSpell](https://cspell.org/)
   - [Terminal recorder](.scaffold/assets/update-assets.php) rendering an animated SVG plus an [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component
