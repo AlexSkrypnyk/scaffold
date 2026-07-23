@@ -43,8 +43,7 @@
     and [publish](.github/workflows/release-php.yml) PHP as [PHAR](box.json)
 - **NodeJS**
   - [`package.json`](package.json)
-  - CI config to [build and test](.github/workflows/test-nodejs.yml) and test
-    for NodeJS
+  - CI config to [build and test](.github/workflows/test-nodejs.yml) for NodeJS
 - **Docker**
   - [`Dockerfile`](Dockerfile) with minimal Alpine-based image and [`entrypoint.sh`](entrypoint.sh)
   - CI config to [lint and test](.github/workflows/test-docker.yml) Docker
