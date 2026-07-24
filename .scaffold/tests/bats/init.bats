@@ -538,6 +538,20 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/.claude/settings.json"
 }
 
+@test "process_contributing promotes the distributable CONTRIBUTING file" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_contributing"
+  mkdir -p "${tmpdir}"
+  echo "Contributing guide" >"${tmpdir}/CONTRIBUTING.dist.md"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_contributing
+  popd >/dev/null || return 1
+
+  assert_file_exists "${tmpdir}/CONTRIBUTING.md"
+  assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
+  assert_file_contains "${tmpdir}/CONTRIBUTING.md" "Contributing guide"
+}
+
 @test "parse_args --ref sets the bootstrap ref" {
   parse_args --ref=1.2.3
   assert_equal "${archive_ref}" "1.2.3"
