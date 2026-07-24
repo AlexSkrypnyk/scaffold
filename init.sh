@@ -547,6 +547,16 @@ process_readme() {
 }
 
 ##
+# Promote the distributable CONTRIBUTING guide to its final name.
+#
+# Scaffold keeps its own CONTRIBUTING.md; CONTRIBUTING.dist.md is the guide that
+# ships to generated projects, mirroring the README.dist.md handling.
+#
+process_contributing() {
+  mv CONTRIBUTING.dist.md "CONTRIBUTING.md" >/dev/null 2>&1 || true
+}
+
+##
 # Replace the self-update skill references with placeholder tokens.
 #
 # The initialised project must keep instructions that point at the upstream
@@ -1207,6 +1217,8 @@ process_project() {
   cleanup_renovate_managers
 
   process_readme "${project}"
+
+  process_contributing
 
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 

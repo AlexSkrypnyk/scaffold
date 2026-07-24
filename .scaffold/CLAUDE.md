@@ -3,7 +3,7 @@
 This file provides guidance for **maintaining and developing the scaffold
 template itself**, not for projects created from it.
 
-> **⚠️ MAINTENANCE MODE**: This file contains guidance for **maintaining the Scafoold template itself**.
+> **⚠️ MAINTENANCE MODE**: This file contains guidance for **maintaining the Scaffold template itself**.
 >
 > For working with **custom projects created from this template**, see the main project guide: `../CLAUDE.md`
 

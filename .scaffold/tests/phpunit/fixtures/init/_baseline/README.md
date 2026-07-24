@@ -62,30 +62,13 @@ Download the latest release from GitHub releases page.
 |-------------|---------------|------------------------------------|
 | `arg1`      |               | Description of the first argument. |
 | `--option1` | `default1`    | Option with a default value.       |
-| `--option2` | None          | Option wihtout a value.            |
+| `--option2` | None          | Option without a value.            |
 
 
-## Maintenance
+## Contributing
 
-
-    composer install
-    composer lint
-    composer test
-
-
-
-    npm install
-    npm run lint
-    npm run test
-
-
-
-    shellcheck force-crystal.sh tests/bats/*.bash tests/bats/*.bats
-    shfmt -i 2 -ci -s -d force-crystal.sh tests/bats/*.bash tests/bats/*.bats
-
-    npm ci --prefix tests/bats
-    ./tests/bats/node_modules/.bin/bats tests/bats
-
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the
+linting and testing commands.
 
 ## Updating
 

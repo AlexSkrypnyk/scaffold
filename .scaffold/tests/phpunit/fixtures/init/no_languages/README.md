@@ -8,7 +8,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -30,61 +27,17 @@
+@@ -30,39 +27,12 @@
  ## Installation
  
  
@@ -28,8 +28,8 @@
  
 -    vendor/bin/force-crystal
  
- 
- 
+-
+-
 -    ./nodejs-script value/of/argument
 -
 -
@@ -44,29 +44,7 @@
 -|-------------|---------------|------------------------------------|
 -| `arg1`      |               | Description of the first argument. |
 -| `--option1` | `default1`    | Option with a default value.       |
--| `--option2` | None          | Option wihtout a value.            |
--
--
- ## Maintenance
+-| `--option2` | None          | Option without a value.            |
  
  
--    composer install
--    composer lint
--    composer test
--
--
--
--    npm install
--    npm run lint
--    npm run test
--
--
--
--    shellcheck force-crystal.sh tests/bats/*.bash tests/bats/*.bats
--    shfmt -i 2 -ci -s -d force-crystal.sh tests/bats/*.bash tests/bats/*.bats
--
--    npm ci --prefix tests/bats
--    ./tests/bats/node_modules/.bin/bats tests/bats
- 
- 
- ## Updating
+ ## Contributing

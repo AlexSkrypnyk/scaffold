@@ -16,28 +16,13 @@
  ## Usage
  
  
-@@ -52,10 +48,7 @@
+@@ -50,9 +46,6 @@
  
+     ./nodejs-script value/of/argument
  
- 
+-
+-
 -    ./force-crystal.sh
  
--
--
- ### CLI options
- 
- | Name        | Default value | Description                        |
-@@ -78,13 +71,6 @@
-     npm run lint
-     npm run test
- 
--
--
--    shellcheck force-crystal.sh tests/bats/*.bash tests/bats/*.bats
--    shfmt -i 2 -ci -s -d force-crystal.sh tests/bats/*.bash tests/bats/*.bats
--
--    npm ci --prefix tests/bats
--    ./tests/bats/node_modules/.bin/bats tests/bats
  
  
- ## Updating
