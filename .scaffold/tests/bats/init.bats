@@ -552,6 +552,32 @@ SETTINGS
   assert_file_contains "${tmpdir}/CONTRIBUTING.md" "Contributing guide"
 }
 
+@test "process_project runs the full flow and promotes the dist docs" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n# /docs            export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_exists "${tmpdir}/README.md"
+  assert_file_not_exists "${tmpdir}/README.dist.md"
+  assert_file_exists "${tmpdir}/CONTRIBUTING.md"
+  assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
+}
+
 @test "parse_args --ref sets the bootstrap ref" {
   parse_args --ref=1.2.3
   assert_equal "${archive_ref}" "1.2.3"
