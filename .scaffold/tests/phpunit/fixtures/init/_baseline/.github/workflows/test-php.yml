@@ -111,10 +111,11 @@ jobs:
           if-no-files-found: error
 
       - name: Upload test results to Codecov
-        uses: codecov/test-results-action@__HASH__ # __VERSION__
+        uses: codecov/codecov-action@__HASH__ # __VERSION__
         if: matrix.php-versions == '8.4' && matrix.deps == 'normal' && env.CODECOV_TOKEN != ''
         with:
           files: .logs/junit.xml
+          report_type: test_results
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
