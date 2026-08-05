@@ -11,7 +11,7 @@ setup() {
   # Setup libraries.
   export BATS_LIB_PATH="${BATS_TEST_DIRNAME}/node_modules"
   bats_load_library bats-helpers
-  setup_mock
+  mock_setup
 
   # Print debug information if "--verbose-run" is passed.
   # LCOV_EXCL_START

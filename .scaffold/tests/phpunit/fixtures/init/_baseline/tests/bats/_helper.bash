@@ -22,7 +22,7 @@ setup() {
   bats_load_library bats-helpers
 
   # Setup command mocking.
-  setup_mock
+  mock_setup
 
   # Current directory where the test is run from.
   # shellcheck disable=SC2155
@@ -37,7 +37,7 @@ setup() {
 
   # Copy codebase at the last commit into the BUILD_DIR.
   # Tests requiring to work with the copy of the codebase should opt-in using
-  # BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1.
+  # BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1.
   # Note that during development of tests the local changes need to be
   # committed.
   fixture_export_codebase "${BUILD_DIR}" "${ROOT_DIR}"
