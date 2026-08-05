@@ -11,7 +11,7 @@
  # shellcheck disable=SC2030,SC2031,SC2034
  
 @@ -12,7 +12,7 @@
- export BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
+ export BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
  
  # Script file for TUI testing.
 -export SCRIPT_FILE="force-crystal.sh"
