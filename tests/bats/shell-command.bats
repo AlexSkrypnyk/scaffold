@@ -9,7 +9,7 @@
 
 load _helper
 
-export BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
+export BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
 
 # Script file for TUI testing.
 export SCRIPT_FILE="shell-command.sh"
@@ -42,7 +42,7 @@ export SCRIPT_FILE="shell-command.sh"
     '@curl -sL https://official-joke-api.appspot.com/jokes/mocked_topic/random # [{"type":"mocked_topic","setup":"mocked_setup","punchline":"mocked_punchline","id":251}]'
   )
 
-  mocks="$(run_steps "setup")"
+  mocks="$(steps_run "setup")"
 
   export SHOULD_PROCEED=y
   tui_run mocked_topic
@@ -50,5 +50,5 @@ export SCRIPT_FILE="shell-command.sh"
   assert_output_contains "mocked_setup"
   assert_output_contains "mocked_punchline"
 
-  run_steps "assert" "${mocks[@]}"
+  steps_run "assert" "${mocks[@]}"
 }

@@ -130,7 +130,7 @@ Same pattern used in `phpcs.xml` (`<file>php-script.php</file>`).
 3. **BATS Tests** - Test shell scripts
   - Location: `tests/bats/`
   - Purpose: Validate `shell-command.sh` functionality
-  - Includes: TUI testing helpers, mocking system via `run_steps()`
+  - Includes: TUI testing helpers, mocking system via `steps_run()`
 
 ### Rules for Template Changes
 
@@ -198,8 +198,8 @@ composer test-coverage
 The scaffold includes advanced BATS testing utilities:
 
 - **TUI Testing** - `tui_run()` function simulates interactive input
-- **Command Mocking** - `run_steps()` system mocks external commands
-- **Fixture Exports** - `BATS_FIXTURE_EXPORT_CODEBASE_ENABLED=1`
+- **Command Mocking** - `steps_run()` system mocks external commands
+- **Fixture Exports** - `BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1`
 
 Example from `tests/bats/shell-command.bats`:
 
@@ -208,13 +208,13 @@ Example from `tests/bats/shell-command.bats`:
   declare -a STEPS=(
     '@curl -sL https://api.example.com # [{"data":"mocked"}]'
   )
-  mocks="$(run_steps "setup")"
+  mocks="$(steps_run "setup")"
 
   tui_run topic_name
   assert_success
   assert_output_contains "mocked"
 
-  run_steps "assert" "${mocks[@]}"
+  steps_run "assert" "${mocks[@]}"
 }
 ```
 
