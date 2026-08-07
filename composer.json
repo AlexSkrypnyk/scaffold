@@ -18,7 +18,7 @@
     },
     "require": {
         "php": ">=8.3",
-        "symfony/console": "^7.4.15"
+        "symfony/console": "^7.4.16"
     },
     "require-dev": {
         "alexskrypnyk/phpunit-helpers": "^0.16.0",
