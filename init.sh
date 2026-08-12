@@ -711,6 +711,7 @@ process_internal() {
   uncomment_line ".gitattributes" "\/.github"
   uncomment_line ".gitattributes" "\/.gitignore"
   uncomment_line ".gitattributes" "\/docs"
+  uncomment_line ".gitattributes" "\/logo.png"
   uncomment_line ".gitattributes" "\/tests"
   uncomment_line ".gitattributes" "\/phpcs.xml"
   uncomment_line ".gitattributes" "\/phpstan.neon"

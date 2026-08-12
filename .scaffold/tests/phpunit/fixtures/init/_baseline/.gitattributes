@@ -5,6 +5,7 @@
 /.github         export-ignore
 /.gitignore      export-ignore
 /docs            export-ignore
+/logo.png        export-ignore
 /tests           export-ignore
 /phpcs.xml       export-ignore
 /phpstan.neon    export-ignore
