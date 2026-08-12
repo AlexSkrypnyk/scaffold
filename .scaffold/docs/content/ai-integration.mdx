@@ -9,6 +9,8 @@ This template ships configuration that lets AI coding agents work with a
 generated project out of the box: shared guidance about the project and a
 pre-approved list of the commands the project uses.
 
+Shipping it is optional: the "Use AI agents" option during initialization (on by default; `--ai` / `--no-ai` non-interactively) controls it, and opting out removes `CLAUDE.md`, `AGENTS.md` and the whole `.claude/` directory from the generated project.
+
 ## `AGENTS.md`
 
 The `AGENTS.md` file provides agent-agnostic guidance about the project - its
@@ -48,3 +50,23 @@ The `.artifacts` directory is a scratch location for temporary AI and developer
 artifacts - generated plans, notes, reports and other throwaway output. It is
 git-ignored and never committed, which keeps transient files out of the
 repository while giving agents and developers a consistent place to write them.
+
+## Architecture documentation
+
+The template can also ship AI-maintained architecture documentation: a narrative walkthrough of how the generated project works, with diagrams, kept in `docs/architecture/` and derived from the project's actual source code.
+
+During initialization, when AI agents are enabled, `init.sh` asks which diagram format to use: `mermaid` (the default), `plantuml`, or `none` to skip the feature. Non-interactively, pass `--ai-arch-docs[=mermaid|plantuml|none]` (the bare flag means `mermaid`) or `--no-ai-arch-docs`; `--no-ai` disables AI agents entirely and forces the architecture docs off.
+
+When enabled, the generated project ships:
+
+- `.claude/skills/update-architecture-docs/SKILL.md` - a committed Claude Code skill that generates and maintains `docs/architecture/README.md`.
+- `docs/architecture/README.md` - a seed stub that the first skill run replaces with generated content.
+- An "Architecture Documentation" section in `AGENTS.md` that instructs agents to refresh the documentation after structural changes.
+
+Generation is agent-driven and manual: asking an agent to "update architecture docs" makes it analyze the actual codebase and write `docs/architecture/README.md` as a narrative walkthrough with a component diagram and flow diagrams traced from the real entry points. After any structural change, the standing `AGENTS.md` instruction tells agents to update the documentation in the same pass. The content derives from the source code: if the documentation and the code disagree, the code wins.
+
+The `mermaid` format is the default because it needs no toolchain: diagrams are fenced Mermaid blocks inside the markdown, and GitHub renders them natively and theme-aware.
+
+The `plantuml` format keeps committed `.puml` sources rendered to committed light `.svg` files with `plantuml -tsvg docs/architecture/*.puml`. The skill runs `plantuml -version` before rendering; when PlantUML is not installed, it stops rendering and reports that to the user with install instructions (`brew install plantuml` on macOS, `apt-get install plantuml` on Debian/Ubuntu). `.claude/settings.json` keeps a `Bash(plantuml:*)` permission only in this variant.
+
+Architecture documentation is independent of the documentation site option: initializing with `--no-docs` removes the Docusaurus site but preserves `docs/architecture/`.

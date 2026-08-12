@@ -51,6 +51,7 @@ Content blocks can be conditionally included/excluded using special tokens:
 
 - `init.sh` calls `remove_tokens_with_content()` for disabled features
 - Uses `sed` to delete lines between `#;< TOKEN` and `#;> TOKEN` markers
+- Removal prefix-matches token names (removing `AI` also removes `AI_ARCH_DOCS*` blocks), so blocks of the same token family must be siblings, never nested
 - Prefix `!` inverts the condition
 - After removal, `remove_special_comments()` cleans up remaining `#;` markers
 
@@ -61,6 +62,10 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
+- `AI` - AI agents configuration (`CLAUDE.md`, `AGENTS.md`, `.claude/`)
+- `AI_ARCH_DOCS` - AI architecture documentation in `docs/architecture/` (preserved by `remove_docs()` when the docs site is disabled)
+- `AI_ARCH_DOCS_MERMAID` - Mermaid-specific sections of the `update-architecture-docs` skill
+- `AI_ARCH_DOCS_PLANTUML` - PlantUML-specific sections of the `update-architecture-docs` skill
 
 **Token usage locations:**
 
@@ -242,6 +247,7 @@ Each test scenario in `InitTest.php` validates a specific configuration:
 - `no_languages` - No languages selected
 - Feature toggles: `no_release_drafter`, `no_pr_autoassign`, `no_funding`,
   `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`
+- AI options: `no_ai`, `ai_arch_docs_plantuml`, `no_ai_arch_docs`, `no_docs_no_ai_arch_docs`
 
 #### Running Init Tests
 
