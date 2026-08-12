@@ -517,6 +517,11 @@ TOKENS
   assert_equal "${interactive}" "0"
 }
 
+@test "parse_args --ref sets the bootstrap ref" {
+  parse_args --ref=1.2.3
+  assert_equal "${archive_ref}" "1.2.3"
+}
+
 @test "parse_args fails on conflicting PHP sub-modes" {
   run parse_args --php-command --php-script
   assert_failure
@@ -833,11 +838,6 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/README.dist.md"
   assert_file_exists "${tmpdir}/CONTRIBUTING.md"
   assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
-}
-
-@test "parse_args --ref sets the bootstrap ref" {
-  parse_args --ref=1.2.3
-  assert_equal "${archive_ref}" "1.2.3"
 }
 
 @test "template_present detects the .scaffold directory" {
