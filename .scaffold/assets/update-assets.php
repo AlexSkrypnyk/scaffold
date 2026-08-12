@@ -54,7 +54,7 @@ define('RECORD_AUTHOR', 'Alex');
  * Build the expect script that drives init.sh's interactive prompts.
  *
  * Types the three identity answers and accepts the default for every remaining
- * yes/no and name prompt, mirroring a "keep everything" run.
+ * prompt, mirroring a "keep everything" run.
  *
  * @param string $workspace_dir
  *   Directory holding the disposable copy of init.sh.
@@ -129,6 +129,8 @@ expect "Use Renovate" { accept_default }
 expect "Use docs" { accept_default }
 expect "Use GitHub Actions linting" { accept_default }
 expect "Use scheduled builds" { accept_default }
+expect "Use AI agents" { accept_default }
+expect "AI architecture docs" { accept_default }
 expect "Remove this script" { accept_default }
 expect "Proceed with project init" { accept_default }
 
