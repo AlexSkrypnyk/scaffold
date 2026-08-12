@@ -70,6 +70,8 @@ use_renovate=""
 use_docs=""
 use_test_actions=""
 use_schedule=""
+use_ai=""
+use_ai_arch_docs=""
 remove_self=""
 
 # Ref (tag, branch, or commit) to bootstrap the template from when the script is
@@ -268,6 +270,41 @@ ask_yesno() {
 
   read -p "${prompt} [$([ "${default}" = "Y" ] && echo "Y/n" || echo "y/N")]: " result
   result="$(echo "${result:-${default}}" | tr '[:upper:]' '[:lower:]')"
+  echo "${result}"
+}
+
+##
+# Prompt user to choose one of the allowed values.
+#
+# @param $1 string Prompt text
+# @param $2 string Default value
+# @param $3 string Space-separated allowed values
+# @return string Chosen value
+#
+ask_choice() {
+  local label="${1}"
+  local default="${2}"
+  local options="${3}"
+  local choices
+  local result
+
+  choices="$(echo "${options}" | tr ' ' '/')"
+
+  while :; do
+    if ! read -p "${label} (${choices}) [${default}]: " result; then
+      # Stdin reached EOF with no value. This happens when the script is piped
+      # (e.g. 'curl ... | bash') without options, so there is nothing to read.
+      if [[ -n ${default} ]]; then
+        result="${default}"
+        break
+      fi
+      echo "Error: No input available for '${label}'. Pass options (run with --help) or run interactively." >&2
+      exit 1
+    fi
+    result="$(echo "${result:-${default}}" | tr '[:upper:]' '[:lower:]')"
+    [[ ${result} != *" "* ]] && [[ " ${options} " == *" ${result} "* ]] && break
+  done
+
   echo "${result}"
 }
 
@@ -483,11 +520,36 @@ cleanup_renovate_managers() {
   fi
 }
 
+remove_ai() {
+  rm -f CLAUDE.md || true
+  rm -f AGENTS.md || true
+  rm -Rf .claude || true
+
+  remove_tokens_with_content "AI"
+}
+
+remove_ai_arch_docs() {
+  rm -Rf .claude/skills/update-architecture-docs || true
+  rm -Rf docs/architecture || true
+
+  # Prefix match also removes AI_ARCH_DOCS_MERMAID and AI_ARCH_DOCS_PLANTUML.
+  remove_tokens_with_content "AI_ARCH_DOCS"
+}
+
 remove_docs() {
-  rm -Rf docs || true
+  if [ -d docs/architecture ]; then
+    # Keep the AI architecture docs: they are independent of the docs site.
+    mv docs/architecture .architecture-preserve-tmp
+    rm -Rf docs || true
+    mkdir -p docs
+    mv .architecture-preserve-tmp docs/architecture
+  else
+    rm -Rf docs || true
+    remove_string_content_line "\/docs" ".gitattributes"
+  fi
+
   rm -f .github/workflows/test-docs.yml || true
   rm -f .github/workflows/release-docs.yml || true
-  remove_string_content_line "\/docs" ".gitattributes"
 }
 
 remove_test_actions() {
@@ -503,6 +565,17 @@ remove_schedule() {
 #-------------------------------------------------------------------------------
 # PROCESSING FUNCTIONS
 #-------------------------------------------------------------------------------
+
+##
+# Keep only the selected diagram format in the AI architecture docs.
+#
+process_ai_arch_docs() {
+  case "${use_ai_arch_docs:-none}" in
+    mermaid) remove_tokens_with_content "AI_ARCH_DOCS_PLANTUML" ;;
+    plantuml) remove_tokens_with_content "AI_ARCH_DOCS_MERMAID" ;;
+    none) ;;
+  esac
+}
 
 ##
 # Trim Claude Code permission rules to match the selected features.
@@ -521,6 +594,7 @@ process_claude_settings() {
   [ "${use_php:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/composer:/d' -e '/phpcs:/d' -e '/phpcbf:/d' -e '/phpstan:/d' -e '/rector:/d' -e '/phpunit:/d' "${file}"
   [ "${use_shell:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/bats:/d' "${file}"
   [ "${use_docker:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/docker build:/d' -e '/docker run:/d' "${file}"
+  [ "${use_ai_arch_docs:-none}" != "plantuml" ] && sed "${sed_opts[@]}" -e '/plantuml:/d' "${file}"
 
   # 'npm' is shared by the NodeJS feature and the documentation site, so keep it
   # while either is present.
@@ -700,6 +774,10 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --docs, --no-docs              Documentation site.
   --test-actions, --no-test-actions  GitHub Actions linting (default: off).
   --schedule, --no-schedule      Daily scheduled build (default: on).
+  --ai, --no-ai                  AI agents configuration (default: on).
+  --ai-arch-docs[=VALUE]         AI architecture docs: mermaid, plantuml or
+                                 none (default: mermaid).
+  --no-ai-arch-docs              Disable AI architecture docs.
   --keep                         Keep this init script (default: removed).
 
 Other:
@@ -776,6 +854,22 @@ parse_args() {
       --no-test-actions) use_test_actions="n" ;;
       --schedule) use_schedule="y" ;;
       --no-schedule) use_schedule="n" ;;
+
+      --ai) use_ai="y" ;;
+      --no-ai) use_ai="n" ;;
+      --ai-arch-docs) use_ai_arch_docs="mermaid" ;;
+      --ai-arch-docs=*)
+        use_ai_arch_docs="${1#*=}"
+        case "${use_ai_arch_docs}" in
+          mermaid | plantuml | none) ;;
+          *)
+            echo "Error: Invalid value for --ai-arch-docs: ${use_ai_arch_docs}. Allowed values: mermaid, plantuml, none." >&2
+            echo "Run with --help for usage." >&2
+            exit 1
+            ;;
+        esac
+        ;;
+      --no-ai-arch-docs) use_ai_arch_docs="none" ;;
 
       --keep) remove_self="n" ;;
 
@@ -864,6 +958,7 @@ apply_noninteractive_defaults() {
   : "${use_docs:=y}"
   : "${use_test_actions:=n}"
   : "${use_schedule:=y}"
+  : "${use_ai:=y}"
   : "${remove_self:=y}"
 
   if [ "${use_php}" = "y" ]; then
@@ -894,6 +989,12 @@ apply_noninteractive_defaults() {
 
   [ "${use_shell}" = "y" ] && : "${shell_command_name:=${project}}"
   [ "${use_docker}" = "y" ] && : "${docker_image_name:=$(to_lowercase "${namespace}")/${project}}"
+
+  if [ "${use_ai}" = "y" ]; then
+    : "${use_ai_arch_docs:=mermaid}"
+  else
+    use_ai_arch_docs="none"
+  fi
 
   return 0
 }
@@ -926,6 +1027,8 @@ print_summary() {
   echo "Use Docs                         : ${use_docs}"
   echo "Use GitHub Actions linting       : ${use_test_actions}"
   echo "Use scheduled builds             : ${use_schedule}"
+  echo "Use AI agents                    : ${use_ai}"
+  echo "AI architecture docs             : ${use_ai_arch_docs:-none}"
   echo "Remove this script               : ${remove_self}"
   echo "---------------------------------"
   echo
@@ -985,6 +1088,12 @@ collect_interactive() {
   use_docs="$(ask_yesno "Use docs")"
   use_test_actions="$(ask_yesno "Use GitHub Actions linting" "N")"
   use_schedule="$(ask_yesno "Use scheduled builds")"
+
+  use_ai="$(ask_yesno "Use AI agents")"
+  if [ "${use_ai}" = "y" ]; then
+    use_ai_arch_docs="$(ask_choice "AI architecture docs" "mermaid" "mermaid plantuml none")"
+  fi
+
   remove_self="$(ask_yesno "Remove this script")"
 
   print_summary
@@ -1208,6 +1317,9 @@ process_project() {
   [ "${use_funding}" != "y" ] && remove_funding
   [ "${use_pr_template}" != "y" ] && remove_pr_template
   [ "${use_renovate}" != "y" ] && remove_renovate
+  [ "${use_ai}" != "y" ] && remove_ai
+  [ "${use_ai_arch_docs:-none}" = "none" ] && remove_ai_arch_docs
+  process_ai_arch_docs
   [ "${use_docs}" != "y" ] && remove_docs
   [ "${use_test_actions}" != "y" ] && remove_test_actions
   [ "${use_schedule}" != "y" ] && remove_schedule

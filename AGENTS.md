@@ -332,6 +332,18 @@ npm run spellcheck # CSpell validation
 
 Documentation deploys automatically on releases via GitHub Actions.
 
+[//]: # (#;< AI_ARCH_DOCS)
+
+## Architecture Documentation
+
+Architecture documentation lives in `docs/architecture/`. It is generated and maintained by an AI agent via the `update-architecture-docs` skill in `.claude/skills/update-architecture-docs/SKILL.md`.
+
+After any structural change to the codebase, update it by invoking the skill (say "update architecture docs").
+
+The content is derived from the source code. If the documentation and the code disagree, the code wins.
+
+[//]: # (#;> AI_ARCH_DOCS)
+
 ## Updating from the template
 
 This project was generated from a template and can pull the template's latest
