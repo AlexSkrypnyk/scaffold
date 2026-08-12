@@ -9,12 +9,12 @@
  * external packages.
  *
  * To adopt script template:
- * - Replace "NodeJS CLI script template" with your script human name.
- * - Replace "nodejs-script" with your script file name.
- * - Update arguments count check to suit your needs.
- * - Update printHelp() function with your content.
- * - Copy '/tests/nodejs' directory into your project and update
- *   script.test.js to a script file name.
+ * - Replace "NodeJS CLI script template" with the script's human name.
+ * - Replace "nodejs-script" with the script's file name.
+ * - Update the argument count check as needed.
+ * - Update the printHelp() content.
+ * - Copy '/tests/nodejs' directory into the project and update
+ *   script.test.js to the script's file name.
  * - Remove this block of comments.
  * -----------------------------------------------------------------------------
  *
@@ -59,7 +59,7 @@ function main(argv, argc) {
     throw new Error('Please provide a value of the first argument.');
   }
 
-  // Add your logic here.
+  // Add the script logic here.
   verbose(`Would execute script business logic with argument ${argv[1]}.`);
 }
 
@@ -96,8 +96,8 @@ Examples:
 function verbose(string) {
   buffer.push(string);
 
-  // Treat an unset or '0' value as "not quiet", mirroring a loose emptiness
-  // check, so that only an explicit non-'0' value suppresses the output.
+  // Treat an unset or '0' value as not quiet, so only an explicit non-'0'
+  // value suppresses the output.
   const quiet = process.env.SCRIPT_QUIET;
   if (!quiet || quiet === '0') {
     /* c8 ignore next */
@@ -107,15 +107,13 @@ function verbose(string) {
   return buffer;
 }
 
-// Entrypoint.
-//
 /* c8 ignore start */
 if (require.main === module && process.env.SCRIPT_RUN_SKIP !== '1') {
   try {
     // Drop the Node executable and keep the script path as the first element,
     // so that argv[1] is the first user-provided argument.
     const argv = process.argv.slice(1);
-    // The function should not provide an exit code but rather throw errors.
+    // main() throws on error instead of returning an exit code.
     main(argv, argv.length);
   } catch (error) {
     verbose(`\nERROR: ${error.message}\n`);
