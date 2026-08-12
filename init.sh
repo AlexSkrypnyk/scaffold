@@ -540,6 +540,8 @@ remove_docs() {
   if [ -d docs/content/architecture ]; then
     # Keep the AI architecture docs: relocate them from the site content
     # tree to docs/architecture and rewrite path references to match.
+    # 'mv' would nest into a pre-existing destination directory.
+    rm -Rf .architecture-preserve-tmp || true
     mv docs/content/architecture .architecture-preserve-tmp
     rm -Rf docs || true
     mkdir -p docs

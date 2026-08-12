@@ -344,6 +344,8 @@ TOKENS
   touch "${tmpdir}/.github/workflows/test-docs.yml"
   touch "${tmpdir}/.github/workflows/release-docs.yml"
   printf '# /docs            export-ignore\n# /tests           export-ignore\n' >"${tmpdir}/.gitattributes"
+  mkdir -p "${tmpdir}/.architecture-preserve-tmp"
+  touch "${tmpdir}/.architecture-preserve-tmp/stale.txt"
 
   pushd "${tmpdir}" >/dev/null || return 1
   remove_docs
@@ -353,6 +355,8 @@ TOKENS
   assert_file_contains "${tmpdir}/docs/architecture/README.md" "arch content"
   assert_file_not_exists "${tmpdir}/docs/docusaurus.config.js"
   assert_dir_not_exists "${tmpdir}/.architecture-preserve-tmp"
+  assert_file_not_exists "${tmpdir}/docs/architecture/stale.txt"
+  assert_dir_not_exists "${tmpdir}/docs/architecture/architecture"
   run ls -A "${tmpdir}/docs"
   assert_output "architecture"
   assert_file_contains "${tmpdir}/AGENTS.md" "docs/architecture"
