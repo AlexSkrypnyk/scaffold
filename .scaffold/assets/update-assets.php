@@ -281,9 +281,9 @@ function main(): void {
   }
   finally {
     removeDir($workspace_dir);
-    cleanupFile($expect_script);
-    cleanupFile($cast_file);
-    cleanupFile($svg_input);
+    removeFile($expect_script);
+    removeFile($cast_file);
+    removeFile($svg_input);
   }
 
   verbose('Done.');
@@ -297,7 +297,7 @@ function checkDependencies(): void {
   $missing = [];
 
   foreach ($deps as $dep) {
-    $path = trim((string) shell_exec('command -v ' . escapeshellarg($dep) . ' 2>/dev/null'));
+    $path = trim((string) shell_exec(sprintf('command -v %s 2>/dev/null', escapeshellarg($dep))));
     if ($path === '') {
       $missing[] = $dep;
     }
@@ -439,7 +439,7 @@ function removeDir(string $directory): void {
  * @param string $file
  *   Path to the file to remove.
  */
-function cleanupFile(string $file): void {
+function removeFile(string $file): void {
   if (is_file($file)) {
     unlink($file);
   }
