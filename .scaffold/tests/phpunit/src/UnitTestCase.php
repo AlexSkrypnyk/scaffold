@@ -36,11 +36,13 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
       '.docusaurus',
     ]);
 
-    // The template ships a shared '.claude/settings.json'; personal overrides
-    // in '.claude/settings.local.json' are git-ignored and must never leak into
-    // a generated project, so copy only the shared file (the bulk copy above
+    // The template ships a shared '.claude/settings.json' and the
+    // 'update-architecture-docs' skill; personal overrides in
+    // '.claude/settings.local.json' are git-ignored and must never leak into a
+    // generated project, so copy only the shipped files (the bulk copy above
     // skips the whole '.claude' directory to keep local overrides out).
     File::copyIfExists(static::locationsRealpath('../../../') . '/.claude/settings.json', static::$sut . '/.claude/settings.json');
+    File::copyIfExists(static::locationsRealpath('../../../') . '/.claude/skills/update-architecture-docs/SKILL.md', static::$sut . '/.claude/skills/update-architecture-docs/SKILL.md');
 
     // Change the current working directory to the 'system under test'.
     chdir(static::$sut);
