@@ -309,10 +309,9 @@ final class InitTest extends UnitTestCase {
   public function testInitViaCurlBootstrapsIntoEmptyDir(): void {
     self::$fixtures = NULL;
 
-    // Build a template archive from the pristine SUT copy. GitHub archives nest
-    // everything under a top-level directory, so archive the SUT under its own
-    // basename and strip that component on extraction, exactly as init.sh does
-    // against a real GitHub tarball.
+    // GitHub archives nest everything under a top-level directory, so the
+    // pristine SUT copy is archived under its own basename. init.sh strips
+    // that component on extraction, as with a real GitHub tarball.
     $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
     $this->processRun('tar', ['-czf', $archive, '-C', dirname(self::$sut), basename(self::$sut)]);
     $this->assertProcessSuccessful();
@@ -348,8 +347,8 @@ final class InitTest extends UnitTestCase {
   /**
    * Bootstrapping refuses to run in a directory that already has files.
    *
-   * A non-empty current directory must abort before anything is downloaded, so
-   * pre-existing files are never clobbered.
+   * The run must abort before anything is downloaded when the current
+   * directory is not empty, so pre-existing files are never clobbered.
    */
   public function testInitViaCurlBootstrapRefusesNonEmptyDir(): void {
     self::$fixtures = NULL;
@@ -385,9 +384,9 @@ final class InitTest extends UnitTestCase {
    *
    * `curl ... | bash` with no options must download and extract the template
    * and then re-run to prompt the user. The test environment has no terminal,
-   * so the prompt has nothing to read and the run aborts cleanly - proving the
-   * bootstrap completed and control reached the interactive collector (a real
-   * user with a terminal answers the prompts instead).
+   * so the prompt has nothing to read and the run aborts cleanly. The clean
+   * abort proves the bootstrap completed and control reached the interactive
+   * collector; a real user with a terminal answers the prompts instead.
    */
   public function testInitViaCurlBootstrapsThenPromptsWithoutOptions(): void {
     self::$fixtures = NULL;
@@ -416,9 +415,10 @@ final class InitTest extends UnitTestCase {
   /**
    * An archive without a '.scaffold' leaves the target directory clean.
    *
-   * The download is staged and validated before anything is promoted, so an
-   * archive that is not a Scaffold (or a partial extraction) must abort without
-   * leaving debris that would trip the empty-directory guard on a retry.
+   * The download is staged and validated before anything is promoted. An
+   * archive that is not a Scaffold (or a partial extraction) must abort the
+   * run without leaving debris that would trip the empty-directory guard on
+   * a retry.
    */
   public function testInitViaCurlBootstrapCleansUpInvalidArchive(): void {
     self::$fixtures = NULL;
@@ -456,8 +456,8 @@ final class InitTest extends UnitTestCase {
    *
    * The bulk `scaffold` -> project rewrite in init.sh would otherwise
    * mangle the self-update skill URL, name, and trigger. They are
-   * token-protected, so a regression here must fail loudly rather than
-   * being silently re-baselined.
+   * token-protected, so a regression here must fail rather than be
+   * silently re-baselined.
    */
   public function testInitPreservesUpdateSkillReferences(): void {
     self::$fixtures = NULL;
@@ -486,7 +486,7 @@ final class InitTest extends UnitTestCase {
    * The bulk `scaffold` -> project rewrite in init.sh would otherwise
    * mangle the README footer link text and domain into a project-named URL
    * that does not exist. The phrase is token-protected, so a regression must
-   * fail loudly rather than being silently re-baselined.
+   * fail rather than be silently re-baselined.
    */
   public function testInitPreservesAttributionFooter(): void {
     self::$fixtures = NULL;
@@ -511,8 +511,8 @@ final class InitTest extends UnitTestCase {
    * init.sh must not delete LICENSE: without it GitHub cannot detect the
    * project's license and the README badge renders "not identified", while
    * composer.json and package.json still declare GPL-3.0-or-later. A
-   * regression here must fail loudly rather than being silently re-baselined
-   * by update-snapshots.
+   * regression here must fail rather than be silently re-baselined by
+   * update-snapshots.
    */
   public function testInitKeepsLicense(): void {
     self::$fixtures = NULL;

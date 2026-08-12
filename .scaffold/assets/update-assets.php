@@ -31,7 +31,6 @@
 
 declare(strict_types=1);
 
-// Terminal dimensions for the recording.
 define('TERMINAL_COLS', 80);
 define('TERMINAL_ROWS', 24);
 
@@ -459,7 +458,6 @@ function verbose(string $message): void {
   fwrite(STDOUT, $message . PHP_EOL);
 }
 
-// Entrypoint.
 if (getenv('SCRIPT_RUN_SKIP') !== '1' && PHP_SAPI === 'cli' && empty($_SERVER['REMOTE_ADDR'])) {
   ini_set('display_errors', '1');
 

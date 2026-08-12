@@ -10,8 +10,6 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 
 /**
- * Class ExampleScriptFunctionalTest.
- *
  * Functional tests for php-script.
  */
 #[CoversFunction('main')]

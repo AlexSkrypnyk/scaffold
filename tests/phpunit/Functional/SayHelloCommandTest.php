@@ -12,9 +12,7 @@ use PHPUnit\Framework\TestCase;
 use YourNamespace\App\Command\SayHelloCommand;
 
 /**
- * Class SayHelloCommandTest.
- *
- * This is a unit test for the SayHelloCommand class.
+ * Unit test for the SayHelloCommand class.
  */
 #[CoversMethod(SayHelloCommand::class, 'execute')]
 #[CoversMethod(SayHelloCommand::class, 'configure')]

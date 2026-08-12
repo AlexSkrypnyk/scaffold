@@ -13,10 +13,8 @@
 set -euo pipefail
 [ "${SCRIPT_DEBUG-}" = "1" ] && set -x
 
-# URL endpoint to fetch the data from.
 URL_ENDPOINT="${JOKE_URL_ENDPOINT:-https://official-joke-api.appspot.com/jokes/__TOPIC__/random}"
 
-# Topic.
 topic="${1-}"
 
 # Flag to bypass the prompt to proceed.
@@ -87,9 +85,7 @@ main() {
   echo
 
   response="$(curl -sL "${url}")"
-  # Extract 'setup'
   setup=$(echo "${response}" | sed -E 's/.*"setup":"([^"]+)".*/\1/')
-  # Extract 'punchline'
   punchline=$(echo "${response}" | sed -E 's/.*"punchline":"([^"]+)".*/\1/')
 
   echo "$setup"

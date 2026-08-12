@@ -7,8 +7,6 @@ namespace YourNamespace\App\Tests\Functional;
 use YourNamespace\App\Tests\Unit\ScriptUnitTestCase;
 
 /**
- * Class ScriptFunctionalTestCase.
- *
  * Base class to functional test scripts.
  */
 abstract class ScriptFunctionalTestCase extends ScriptUnitTestCase {
@@ -29,9 +27,7 @@ abstract class ScriptFunctionalTestCase extends ScriptUnitTestCase {
 
   protected function setUp(): void {
     parent::setUp();
-    // Allow script to run.
     putenv('SCRIPT_RUN_SKIP=0');
-    // Log output into stdout.
     putenv('SCRIPT_QUIET=0');
   }
 

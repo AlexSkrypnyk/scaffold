@@ -12,34 +12,28 @@
 setup() {
   [ ! -d ".git" ] && echo "Tests must be run from the repository root directory." && exit 1
 
-  # For a list of available variables see:
+  # Available BATS variables:
   # @see https://bats-core.readthedocs.io/en/stable/writing-tests.html#special-variables
 
-  # Register a path to libraries.
   export BATS_LIB_PATH="${BATS_TEST_DIRNAME}/node_modules"
 
-  # Load 'bats-helpers' library.
   bats_load_library bats-helpers
 
-  # Setup command mocking.
   mock_setup
 
-  # Current directory where the test is run from.
   # shellcheck disable=SC2155
   export CUR_DIR="$(pwd)"
 
   # Project directory root (where .git is located).
   export ROOT_DIR="${CUR_DIR}"
 
-  # Directory where the shell command script will be running in.
+  # Directory where the shell command script runs.
   export BUILD_DIR="${BUILD_DIR:-"${BATS_TEST_TMPDIR//\/\//\/}/shell-$(date +%s)"}"
   fixture_prepare_dir "${BUILD_DIR}"
 
-  # Copy codebase at the last commit into the BUILD_DIR.
-  # Tests requiring to work with the copy of the codebase should opt-in using
-  # BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1.
-  # Note that during development of tests the local changes need to be
-  # committed.
+  # Copy the codebase at the last commit into BUILD_DIR. Tests that work with
+  # the copy opt in with BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1.
+  # During test development, local changes must be committed.
   fixture_export_codebase "${BUILD_DIR}" "${ROOT_DIR}"
 
   # Print debug information if "--verbose-run" is passed.
@@ -56,6 +50,5 @@ setup() {
 }
 
 teardown() {
-  # Move back to the original directory.
   popd >/dev/null || cd "${CUR_DIR}" || exit 1
 }

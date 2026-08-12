@@ -111,7 +111,6 @@ if (PHP_SAPI != 'cli' || !empty($_SERVER['REMOTE_ADDR'])) {
   die('This script can be only ran from the command line.');
 }
 
-// Allow to skip the script run.
 if (getenv('SCRIPT_RUN_SKIP') != 1) {
   set_error_handler(function (int $severity, string $message, string $file, int $line): bool {
     if (!(error_reporting() & $severity)) {
@@ -125,7 +124,7 @@ if (getenv('SCRIPT_RUN_SKIP') != 1) {
   try {
     $argv = is_array($_SERVER['argv'] ?? NULL) ? array_filter($_SERVER['argv'], 'is_string') : [];
     $argc = is_scalar($_SERVER['argc'] ?? NULL) ? (int) $_SERVER['argc'] : 0;
-    // The function should not provide an exit code but rather throw exceptions.
+    // main() throws exceptions instead of returning an exit code.
     main($argv, $argc);
   }
   catch (\ErrorException $exception) {

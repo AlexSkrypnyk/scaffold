@@ -8,8 +8,6 @@ use AlexSkrypnyk\PhpunitHelpers\Traits\AssertArrayTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class ScriptUnitTestCase.
- *
  * Base class to unit test scripts.
  */
 abstract class ScriptUnitTestCase extends TestCase {
@@ -27,9 +25,8 @@ abstract class ScriptUnitTestCase extends TestCase {
    * {@inheritdoc}
    */
   protected function setUp(): void {
-    // Prevent script from running.
     putenv('SCRIPT_RUN_SKIP=1');
-    // Log output into internal buffer instead of stdout so we can assert it.
+    // Log output into internal buffer instead of stdout so tests can assert it.
     putenv('SCRIPT_QUIET=1');
 
     if (!is_readable(static::$script)) {

@@ -142,7 +142,6 @@ to_lowercase() {
   echo "${1}" | tr '[:upper:]' '[:lower:]'
 }
 
-# Convert to PascalCase for project names (brief one-liner)
 to_pascalcase() { echo "${1}" | awk -F'[-_ ]' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); } 1' OFS=''; }
 
 #-------------------------------------------------------------------------------
@@ -312,8 +311,6 @@ ask_choice() {
 # INPUT VALIDATION FUNCTIONS
 #-------------------------------------------------------------------------------
 
-##
-# Check if required commands are available.
 check_dependencies() {
   local missing=() required=("sed" "grep" "tr" "awk" "curl")
   for cmd in "${required[@]}"; do command -v "${cmd}" >/dev/null 2>&1 || missing+=("${cmd}"); done
@@ -321,8 +318,6 @@ check_dependencies() {
   return 0
 }
 
-##
-# Validate namespace format (PascalCase).
 validate_namespace() {
   [[ ${1} =~ ^[A-Z][a-zA-Z0-9]*$ ]] || {
     echo "Error: Namespace must be PascalCase (e.g., MyNamespace)" >&2
@@ -330,8 +325,6 @@ validate_namespace() {
   }
 }
 
-##
-# Validate project name format (lowercase with hyphens).
 validate_project_name() {
   [[ ${1} =~ ^[a-z0-9-]+$ ]] && [[ ! ${1} =~ ^- ]] && [[ ! ${1} =~ -$ ]] || {
     echo "Error: Project name must be lowercase with hyphens (e.g., my-project)" >&2
@@ -339,8 +332,6 @@ validate_project_name() {
   }
 }
 
-##
-# Validate author name (non-empty).
 validate_author() {
   [ -n "${1}" ] || {
     echo "Error: Author name cannot be empty" >&2
@@ -348,9 +339,6 @@ validate_author() {
   }
 }
 
-##
-# Ensure the PHP sub-mode selection is not contradictory.
-#
 validate_php_mode() {
   if [ "${use_php_command}" = "y" ] && [ "${use_php_script}" = "y" ]; then
     echo "Error: --php-command and --php-script cannot be used together." >&2
@@ -649,9 +637,9 @@ process_contributing() {
 # Replace the self-update skill references with placeholder tokens.
 #
 # The initialised project must keep instructions that point at the upstream
-# template repository rather than at the project's own namespace, so these
-# references are hidden behind tokens before the bulk replacements run and put
-# back afterwards by restore_skill_references().
+# template repository rather than at the project's own namespace. These
+# references are hidden behind tokens before the bulk replacements run and
+# put back afterwards by restore_skill_references().
 #
 protect_skill_references() {
   replace_string_content "https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md" "__SCAFFOLD_SKILL_URL__"
@@ -691,8 +679,8 @@ process_internal() {
 
   protect_skill_references
 
-  # Replace any existing necessary placeholders using a real value with
-  # tokens used in further replacements.
+  # Replace the real repository name with the placeholder token used in the
+  # replacements below.
   replace_string_content "AlexSkrypnyk/scaffold" "yournamespace/yourproject"
 
   replace_string_content "YourNamespace" "${namespace}"
@@ -739,9 +727,6 @@ process_internal() {
 # ARGUMENT PARSING
 #-------------------------------------------------------------------------------
 
-##
-# Print usage information.
-#
 usage() {
   cat <<'USAGE'
 Usage: ./init.sh [OPTIONS]
@@ -916,9 +901,6 @@ parse_args() {
 # INPUT COLLECTION
 #-------------------------------------------------------------------------------
 
-##
-# Ensure required identity values are present in non-interactive mode.
-#
 require_identity() {
   local missing=()
   [ -z "${namespace}" ] && missing+=("--namespace")
@@ -1005,9 +987,6 @@ apply_noninteractive_defaults() {
   return 0
 }
 
-##
-# Print the selected configuration.
-#
 print_summary() {
   echo
   echo "            Summary"
@@ -1040,9 +1019,6 @@ print_summary() {
   echo
 }
 
-##
-# Collect configuration through interactive prompts.
-#
 collect_interactive() {
   echo "Please follow the prompts to adjust your project configuration"
   echo
@@ -1114,9 +1090,6 @@ collect_interactive() {
   fi
 }
 
-##
-# Collect configuration from options, falling back to defaults.
-#
 collect_noninteractive() {
   require_identity
 
@@ -1151,10 +1124,10 @@ dir_is_empty() {
 ##
 # Resolve the URL of the template archive to download.
 #
-# Precedence: an explicit SCAFFOLD_ARCHIVE_URL wins (an exact archive URL, also
-# the seam tests use to inject a local file); then --ref pins to a tag, branch,
-# or commit; otherwise the latest published release is used, falling back to the
-# default branch when the repository has no releases.
+# Precedence: an explicit SCAFFOLD_ARCHIVE_URL wins (an exact archive URL);
+# then --ref pins to a tag, branch, or commit; otherwise the latest published
+# release is used, falling back to the default branch when the repository has
+# no releases.
 #
 # @return string Archive URL.
 #
@@ -1184,7 +1157,7 @@ resolve_archive_url() {
 # Download, extract, validate, and promote the template into the current dir.
 #
 # The archive is staged in a sub-directory and only promoted once it is
-# confirmed to contain '.scaffold', so a failed download, a partial extraction,
+# confirmed to contain '.scaffold'. A failed download, a partial extraction,
 # or an archive that is not a Scaffold leaves the current directory clean
 # instead of tripping the empty-directory guard on the next attempt.
 #
@@ -1340,10 +1313,10 @@ process_project() {
 
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 
-  # Remove this init script. "${BASH_SOURCE[0]}" is the script's own path when
-  # run as a file, and is empty (or a bare shell name) when piped through
-  # 'curl ... | bash', so only a real on-disk script is removed - never the
-  # interpreter (e.g. "/bin/bash" when invoked as 'curl ... | /bin/bash -s').
+  # "${BASH_SOURCE[0]}" is the script's own path when run as a file, and is
+  # empty (or a bare shell name) when piped through 'curl ... | bash'. Only a
+  # real on-disk script is removed - never the interpreter (e.g. "/bin/bash"
+  # when invoked as 'curl ... | /bin/bash -s').
   local script_path="${BASH_SOURCE[0]:-}"
   if [ "${remove_self}" != "n" ] && [ -n "${script_path}" ] && [ -f "${script_path}" ]; then
     rm -- "${script_path}" || true
@@ -1373,14 +1346,15 @@ main() {
   process_project
 }
 
-# Run main only when the script is executed, not when it is sourced (e.g. by
-# the BATS unit tests). When piped through 'bash -s' the script has no source
-# file, so "${BASH_SOURCE[0]}" is empty - that case must still run.
+# Run main only when the script is executed, not when it is sourced. When
+# piped through 'bash -s' the script has no source file, so
+# "${BASH_SOURCE[0]}" is empty - that case must still run.
 #
 # main is the final statement, which also bounds the effect of a truncated
-# 'curl ... | bash' download: every file and network operation lives inside a
-# function that only main invokes, so a cut-off download performs no real work -
-# at most the harmless top-level variable and option setup before it hits EOF.
+# 'curl ... | bash' download. Every file and network operation lives inside a
+# function that only main invokes, so a cut-off download performs no real
+# work - at most the harmless top-level variable and option setup before it
+# hits EOF.
 if [ -z "${BASH_SOURCE[0]:-}" ] || [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   main "$@"
 fi

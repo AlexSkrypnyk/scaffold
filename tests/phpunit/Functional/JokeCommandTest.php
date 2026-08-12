@@ -13,9 +13,7 @@ use PHPUnit\Framework\TestCase;
 use YourNamespace\App\Command\JokeCommand;
 
 /**
- * Class JokeCommandTest.
- *
- * This is a unit test for the JokeCommand class.
+ * Unit test for the JokeCommand class.
  */
 #[CoversMethod(JokeCommand::class, 'execute')]
 #[CoversMethod(JokeCommand::class, 'configure')]
