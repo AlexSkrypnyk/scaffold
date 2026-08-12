@@ -138,6 +138,13 @@ convert_string() {
   esac
 }
 
+to_lowercase() {
+  echo "${1}" | tr '[:upper:]' '[:lower:]'
+}
+
+# Convert to PascalCase for project names (brief one-liner)
+to_pascalcase() { echo "${1}" | awk -F'[-_ ]' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); } 1' OFS=''; }
+
 #-------------------------------------------------------------------------------
 # FILE OPERATION FUNCTIONS
 #-------------------------------------------------------------------------------
@@ -158,13 +165,6 @@ replace_string_content() {
   grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "$(pwd)" | xargs sed "${sed_opts[@]}" "s!${needle}!${replacement}!g" || true
   set -e
 }
-
-to_lowercase() {
-  echo "${1}" | tr '[:upper:]' '[:lower:]'
-}
-
-# Convert to PascalCase for project names (brief one-liner)
-to_pascalcase() { echo "${1}" | awk -F'[-_ ]' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); } 1' OFS=''; }
 
 remove_string_content() {
   local token="${1}"
@@ -346,6 +346,16 @@ validate_author() {
     echo "Error: Author name cannot be empty" >&2
     return 1
   }
+}
+
+##
+# Ensure the PHP sub-mode selection is not contradictory.
+#
+validate_php_mode() {
+  if [ "${use_php_command}" = "y" ] && [ "${use_php_script}" = "y" ]; then
+    echo "Error: --php-command and --php-script cannot be used together." >&2
+    return 1
+  fi
 }
 
 #-------------------------------------------------------------------------------
@@ -900,16 +910,6 @@ parse_args() {
   done
 
   validate_php_mode || exit 1
-}
-
-##
-# Ensure the PHP sub-mode selection is not contradictory.
-#
-validate_php_mode() {
-  if [ "${use_php_command}" = "y" ] && [ "${use_php_script}" = "y" ]; then
-    echo "Error: --php-command and --php-script cannot be used together." >&2
-    return 1
-  fi
 }
 
 #-------------------------------------------------------------------------------
