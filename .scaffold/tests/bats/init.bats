@@ -272,8 +272,8 @@ TOKENS
   local tmpdir="${BATS_TEST_TMPDIR}/remove_ai_arch_docs"
   mkdir -p "${tmpdir}/.claude/skills/update-architecture-docs"
   touch "${tmpdir}/.claude/skills/update-architecture-docs/SKILL.md"
-  mkdir -p "${tmpdir}/docs/architecture"
-  touch "${tmpdir}/docs/architecture/README.md"
+  mkdir -p "${tmpdir}/docs/content/architecture"
+  touch "${tmpdir}/docs/content/architecture/README.md"
   create_ai_arch_docs_tokens "${tmpdir}"
 
   pushd "${tmpdir}" >/dev/null || return 1
@@ -281,7 +281,7 @@ TOKENS
   popd >/dev/null || return 1
 
   assert_dir_not_exists "${tmpdir}/.claude/skills/update-architecture-docs"
-  assert_dir_not_exists "${tmpdir}/docs/architecture"
+  assert_dir_not_exists "${tmpdir}/docs/content/architecture"
   assert_file_not_contains "${tmpdir}/AGENTS.md" "feature content"
   assert_file_not_contains "${tmpdir}/AGENTS.md" "mermaid content"
   assert_file_not_contains "${tmpdir}/AGENTS.md" "plantuml content"
@@ -340,11 +340,12 @@ TOKENS
   assert_file_contains "${tmpdir}/AGENTS.md" "plantuml content"
 }
 
-@test "remove_docs preserves the architecture docs when present" {
+@test "remove_docs relocates the architecture docs when present" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_docs_preserve"
-  mkdir -p "${tmpdir}/docs/architecture"
-  echo "arch content" >"${tmpdir}/docs/architecture/README.md"
+  mkdir -p "${tmpdir}/docs/content/architecture"
+  echo "arch content" >"${tmpdir}/docs/content/architecture/README.md"
   touch "${tmpdir}/docs/docusaurus.config.js"
+  echo "Architecture documentation lives in docs/content/architecture/." >"${tmpdir}/AGENTS.md"
   mkdir -p "${tmpdir}/.github/workflows"
   touch "${tmpdir}/.github/workflows/test-docs.yml"
   touch "${tmpdir}/.github/workflows/release-docs.yml"
@@ -360,6 +361,8 @@ TOKENS
   assert_dir_not_exists "${tmpdir}/.architecture-preserve-tmp"
   run ls -A "${tmpdir}/docs"
   assert_output "architecture"
+  assert_file_contains "${tmpdir}/AGENTS.md" "docs/architecture"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "docs/content/architecture"
   assert_file_not_exists "${tmpdir}/.github/workflows/test-docs.yml"
   assert_file_not_exists "${tmpdir}/.github/workflows/release-docs.yml"
   assert_file_contains "${tmpdir}/.gitattributes" "/docs"

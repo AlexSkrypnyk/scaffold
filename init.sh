@@ -530,19 +530,21 @@ remove_ai() {
 
 remove_ai_arch_docs() {
   rm -Rf .claude/skills/update-architecture-docs || true
-  rm -Rf docs/architecture || true
+  rm -Rf docs/content/architecture || true
 
   # Prefix match also removes AI_ARCH_DOCS_MERMAID and AI_ARCH_DOCS_PLANTUML.
   remove_tokens_with_content "AI_ARCH_DOCS"
 }
 
 remove_docs() {
-  if [ -d docs/architecture ]; then
-    # Keep the AI architecture docs: they are independent of the docs site.
-    mv docs/architecture .architecture-preserve-tmp
+  if [ -d docs/content/architecture ]; then
+    # Keep the AI architecture docs: relocate them from the site content
+    # tree to docs/architecture and rewrite path references to match.
+    mv docs/content/architecture .architecture-preserve-tmp
     rm -Rf docs || true
     mkdir -p docs
     mv .architecture-preserve-tmp docs/architecture
+    replace_string_content "docs/content/architecture" "docs/architecture"
   else
     rm -Rf docs || true
     remove_string_content_line "\/docs" ".gitattributes"
