@@ -24,7 +24,7 @@ final class InitTest extends UnitTestCase {
     ?SerializableClosure $before = NULL,
     ?SerializableClosure $after = NULL,
   ): void {
-    self::$fixtures = static::locationsFixtureDir();
+    self::$fixtures = self::locationsFixtureDir();
 
     if ($before instanceof SerializableClosure) {
       $before = self::cu($before);
@@ -408,7 +408,7 @@ final class InitTest extends UnitTestCase {
    * @param list<string> $absent
    *   Permission rules that must be absent from the settings file.
    */
-  #[DataProvider('dataProviderClaudeSettings')]
+  #[DataProvider('dataProviderInitClaudeSettings')]
   public function testInitClaudeSettings(array $arguments, array $present, array $absent): void {
     self::$fixtures = NULL;
 
@@ -439,7 +439,7 @@ final class InitTest extends UnitTestCase {
     $this->assertStringContainsString('/.artifacts/', $gitignore);
   }
 
-  public static function dataProviderClaudeSettings(): \Iterator {
+  public static function dataProviderInitClaudeSettings(): \Iterator {
     // Docker is off by default, so its rules are trimmed unless enabled.
     // Mermaid is the default diagram format, so the PlantUML rule is trimmed
     // unless that format is selected.
