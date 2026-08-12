@@ -295,10 +295,8 @@ TOKENS
   mkdir -p "${tmpdir}"
   create_ai_arch_docs_tokens "${tmpdir}"
 
-  use_ai_arch_docs="mermaid"
-
   pushd "${tmpdir}" >/dev/null || return 1
-  process_ai_arch_docs
+  use_ai_arch_docs="mermaid" process_ai_arch_docs
   popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/AGENTS.md" "feature content"
@@ -312,10 +310,8 @@ TOKENS
   mkdir -p "${tmpdir}"
   create_ai_arch_docs_tokens "${tmpdir}"
 
-  use_ai_arch_docs="plantuml"
-
   pushd "${tmpdir}" >/dev/null || return 1
-  process_ai_arch_docs
+  use_ai_arch_docs="plantuml" process_ai_arch_docs
   popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/AGENTS.md" "feature content"
@@ -330,10 +326,8 @@ TOKENS
   create_ai_arch_docs_tokens "${tmpdir}"
 
   pushd "${tmpdir}" >/dev/null || return 1
-  use_ai_arch_docs=""
-  process_ai_arch_docs
-  use_ai_arch_docs="none"
-  process_ai_arch_docs
+  use_ai_arch_docs="" process_ai_arch_docs
+  use_ai_arch_docs="none" process_ai_arch_docs
   popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/AGENTS.md" "mermaid content"
