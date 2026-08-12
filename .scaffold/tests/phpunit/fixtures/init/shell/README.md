@@ -6,7 +6,7 @@
  [![Test Node.js](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml)
  [![Test Shell](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml)
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
-@@ -30,10 +29,7 @@
+@@ -31,10 +30,7 @@
  ## Installation
  
  
@@ -17,7 +17,7 @@
  Download the latest release from GitHub releases page.
  
  
-@@ -44,10 +40,7 @@
+@@ -45,10 +41,7 @@
  ## Usage
  
  
@@ -28,7 +28,7 @@
      ./nodejs-script value/of/argument
  
  
-@@ -54,15 +47,6 @@
+@@ -55,15 +48,6 @@
  
      ./force-crystal.sh
  
