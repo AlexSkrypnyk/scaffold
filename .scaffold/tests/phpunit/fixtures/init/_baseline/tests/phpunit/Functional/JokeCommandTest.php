@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
 use YodasHut\App\Command\JokeCommand;
 
 /**
- * Unit test for the JokeCommand class.
+ * Functional test for the JokeCommand class.
  */
 #[CoversMethod(JokeCommand::class, 'execute')]
 #[CoversMethod(JokeCommand::class, 'configure')]

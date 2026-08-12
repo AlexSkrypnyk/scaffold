@@ -15,4 +15,4 @@
 +use JediTemple\App\Command\JokeCommand;
  
  /**
-  * Unit test for the JokeCommand class.
+  * Functional test for the JokeCommand class.

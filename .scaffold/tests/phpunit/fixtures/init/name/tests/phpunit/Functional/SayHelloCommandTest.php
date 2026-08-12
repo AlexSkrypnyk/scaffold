@@ -15,4 +15,4 @@
 +use JediTemple\App\Command\SayHelloCommand;
  
  /**
-  * Unit test for the SayHelloCommand class.
+  * Functional test for the SayHelloCommand class.
