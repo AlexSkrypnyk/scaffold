@@ -11,8 +11,8 @@
 load _helper
 load "../../../init.sh"
 
-@test "Test all conversions" {
-  input="I am a_string-With spaces 13"
+@test "convert_string converts to each conversion type" {
+  local input="I am a_string-With spaces 13"
 
   TEST_CASES=(
     "$input" "file_name" "i_am_a_string-with_spaces_13"
@@ -36,7 +36,7 @@ load "../../../init.sh"
   dataprovider_run "convert_string" 3
 }
 
-@test "Test to_pascalcase conversions" {
+@test "to_pascalcase converts strings to PascalCase" {
   TEST_CASES=(
     "my-awesome-project" "MyAwesomeProject"
     "my_awesome_project" "MyAwesomeProject"
@@ -129,7 +129,7 @@ RENOVATE
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": []'
 }
 
-@test "cleanup_renovate_managers removes empty matchManagers block" {
+@test "remove_renovate_managers removes empty matchManagers block" {
   local tmpdir="${BATS_TEST_TMPDIR}/cleanup"
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
@@ -137,7 +137,7 @@ RENOVATE
   pushd "${tmpdir}" >/dev/null || return 1
   remove_php
   remove_nodejs
-  cleanup_renovate_managers
+  remove_renovate_managers
   popd >/dev/null || return 1
 
   assert_file_not_contains "${tmpdir}/renovate.json" '"matchManagers"'
@@ -145,14 +145,14 @@ RENOVATE
   assert_file_contains "${tmpdir}/renovate.json" '"matchPackageNames"'
 }
 
-@test "cleanup_renovate_managers no-ops when matchManagers is not empty" {
+@test "remove_renovate_managers no-ops when matchManagers is not empty" {
   local tmpdir="${BATS_TEST_TMPDIR}/cleanup_noop"
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
   pushd "${tmpdir}" >/dev/null || return 1
   remove_php
-  cleanup_renovate_managers
+  remove_renovate_managers
   popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
@@ -167,18 +167,18 @@ Invoke the update-consumer-scaffold skill
 ask Claude Code to "update scaffold"
 AGENTS
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   protect_skill_references
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL_URL__'
   assert_file_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL_NAME__'
   assert_file_contains "${tmpdir}/AGENTS.md" '__SCAFFOLD_SKILL_TRIGGER__'
   assert_file_not_contains "${tmpdir}/AGENTS.md" 'AlexSkrypnyk/scaffold'
 
-  pushd "${tmpdir}" >/dev/null || exit 1
+  pushd "${tmpdir}" >/dev/null || return 1
   restore_skill_references
-  popd >/dev/null || exit 1
+  popd >/dev/null || return 1
 
   assert_file_contains "${tmpdir}/AGENTS.md" 'https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main/.scaffold/skills/update-consumer-scaffold/SKILL.md'
   assert_file_contains "${tmpdir}/AGENTS.md" 'Invoke the update-consumer-scaffold skill'
@@ -320,7 +320,7 @@ TOKENS
   assert_file_not_contains "${tmpdir}/AGENTS.md" "AI_ARCH_DOCS_MERMAID"
 }
 
-@test "process_ai_arch_docs keeps both formats when the feature is off" {
+@test "process_ai_arch_docs keeps both formats when none is selected" {
   local tmpdir="${BATS_TEST_TMPDIR}/process_arch_none"
   mkdir -p "${tmpdir}"
   create_ai_arch_docs_tokens "${tmpdir}"
@@ -554,7 +554,7 @@ TOKENS
   assert_output_contains "Missing required option"
 }
 
-@test "normalize_inputs canonicalises identity values" {
+@test "normalize_inputs canonicalizes identity values" {
   namespace="Acme App"
   project="Acme App"
   author="Jane Doe"
@@ -573,7 +573,7 @@ TOKENS
   assert_output_contains "acme-app"
 }
 
-@test "collect_noninteractive honours the script sub-mode" {
+@test "collect_noninteractive honors the script sub-mode" {
   parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --php-script
   run collect_noninteractive
   assert_success
@@ -781,7 +781,7 @@ SETTINGS
   assert_file_contains "${tmpdir}/.claude/settings.json" "composer:"
 }
 
-@test "process_claude_settings is a no-op when the settings file is absent" {
+@test "process_claude_settings no-ops when the settings file is absent" {
   local tmpdir="${BATS_TEST_TMPDIR}/claude_absent"
   mkdir -p "${tmpdir}"
 
@@ -890,7 +890,7 @@ SETTINGS
   archive_ref="1.2.3"
   run resolve_archive_url
   assert_success
-  assert_equal "${output}" "file:///tmp/local.tar.gz"
+  assert_output "file:///tmp/local.tar.gz"
 }
 
 @test "resolve_archive_url builds an archive URL from --ref" {
@@ -898,7 +898,7 @@ SETTINGS
   archive_ref="feature-x"
   run resolve_archive_url
   assert_success
-  assert_equal "${output}" "https://github.com/AlexSkrypnyk/scaffold/archive/feature-x.tar.gz"
+  assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/feature-x.tar.gz"
 }
 
 @test "resolve_archive_url uses the latest release tag by default" {
@@ -907,7 +907,7 @@ SETTINGS
   curl() { echo '{"tag_name": "9.9.9"}'; }
   run resolve_archive_url
   assert_success
-  assert_equal "${output}" "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/9.9.9.tar.gz"
+  assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/9.9.9.tar.gz"
 }
 
 @test "resolve_archive_url falls back to main when no release is found" {
@@ -916,13 +916,13 @@ SETTINGS
   curl() { return 1; }
   run resolve_archive_url
   assert_success
-  assert_equal "${output}" "https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz"
+  assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz"
 }
 
 create_template_tarball() {
   local out="${1}"
   local with_scaffold="${2:-1}"
-  local src="${BATS_TEST_TMPDIR}/tpl-src"
+  local src="${BATS_TEST_TMPDIR}/template_src"
   rm -rf "${src}"
   mkdir -p "${src}/pkg"
   touch "${src}/pkg/composer.json"
@@ -937,7 +937,7 @@ create_template_tarball() {
   local archive="${BATS_TEST_TMPDIR}/valid.tar.gz"
   create_template_tarball "${archive}" 1
 
-  local target="${BATS_TEST_TMPDIR}/valid-target"
+  local target="${BATS_TEST_TMPDIR}/valid_target"
   mkdir -p "${target}"
 
   pushd "${target}" >/dev/null || return 1
@@ -950,11 +950,11 @@ create_template_tarball() {
   assert_dir_not_exists "${target}/.scaffold-bootstrap"
 }
 
-@test "fetch_and_stage_template rejects an archive without .scaffold" {
+@test "fetch_and_stage_template fails on an archive without .scaffold" {
   local archive="${BATS_TEST_TMPDIR}/invalid.tar.gz"
   create_template_tarball "${archive}" 0
 
-  local target="${BATS_TEST_TMPDIR}/invalid-target"
+  local target="${BATS_TEST_TMPDIR}/invalid_target"
   mkdir -p "${target}"
 
   pushd "${target}" >/dev/null || return 1
@@ -968,7 +968,7 @@ create_template_tarball() {
 }
 
 @test "fetch_and_stage_template fails when the download fails" {
-  local target="${BATS_TEST_TMPDIR}/download-fail-target"
+  local target="${BATS_TEST_TMPDIR}/download_fail_target"
   mkdir -p "${target}"
 
   pushd "${target}" >/dev/null || return 1

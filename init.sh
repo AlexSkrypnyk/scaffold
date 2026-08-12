@@ -109,8 +109,8 @@ interactive=1
 # @return string Converted string
 #
 convert_string() {
-  input_string="$1"
-  conversion_type="$2"
+  local input_string="${1}"
+  local conversion_type="${2}"
 
   case "${conversion_type}" in
     "file_name" | "route_path" | "deployment_id")
@@ -155,7 +155,7 @@ replace_string_content() {
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   set +e
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "$(pwd)" | xargs sed "${sed_opts[@]}" "s!$needle!$replacement!g" || true
+  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "$(pwd)" | xargs sed "${sed_opts[@]}" "s!${needle}!${replacement}!g" || true
   set -e
 }
 
@@ -227,29 +227,29 @@ remove_special_comments() {
 # @return string User input or default value
 #
 ask() {
-  local label="$1"
-  local prompt="$1"
+  local label="${1}"
+  local prompt="${1}"
   local default="${2-}"
   local result=""
 
-  if [[ -n $default ]]; then
+  if [ -n "${default}" ]; then
     prompt="${prompt} [${default}]: "
   else
     prompt="${prompt}: "
   fi
 
-  while [[ -z ${result} ]]; do
+  while [ -z "${result}" ]; do
     if ! read -p "${prompt}" result; then
       # Stdin reached EOF with no value. This happens when the script is piped
       # (e.g. 'curl ... | bash') without options, so there is nothing to read.
-      if [[ -n $default ]]; then
+      if [ -n "${default}" ]; then
         result="${default}"
         break
       fi
       echo "Error: No input available for '${label}'. Pass options (run with --help) or run interactively." >&2
       exit 1
     fi
-    if [[ -n $default && -z ${result} ]]; then
+    if [ -n "${default}" ] && [ -z "${result}" ]; then
       result="${default}"
     fi
   done
@@ -269,7 +269,7 @@ ask_yesno() {
   local result
 
   read -p "${prompt} [$([ "${default}" = "Y" ] && echo "Y/n" || echo "y/N")]: " result
-  result="$(echo "${result:-${default}}" | tr '[:upper:]' '[:lower:]')"
+  result="$(to_lowercase "${result:-${default}}")"
   echo "${result}"
 }
 
@@ -294,14 +294,14 @@ ask_choice() {
     if ! read -p "${label} (${choices}) [${default}]: " result; then
       # Stdin reached EOF with no value. This happens when the script is piped
       # (e.g. 'curl ... | bash') without options, so there is nothing to read.
-      if [[ -n ${default} ]]; then
+      if [ -n "${default}" ]; then
         result="${default}"
         break
       fi
       echo "Error: No input available for '${label}'. Pass options (run with --help) or run interactively." >&2
       exit 1
     fi
-    result="$(echo "${result:-${default}}" | tr '[:upper:]' '[:lower:]')"
+    result="$(to_lowercase "${result:-${default}}")"
     [[ ${result} != *" "* ]] && [[ " ${options} " == *" ${result} "* ]] && break
   done
 
@@ -357,9 +357,9 @@ remove_php() {
   remove_php_command_build
   remove_php_script
 
-  rm -f composer.json >/dev/null || true
-  rm -f composer.lock >/dev/null || true
-  rm -Rf vendor >/dev/null || true
+  rm -f composer.json || true
+  rm -f composer.lock || true
+  rm -Rf vendor || true
   rm -Rf tests/phpunit || true
   rm -f phpcs.xml || true
   rm -f phpstan.neon || true
@@ -396,11 +396,11 @@ remove_php() {
 }
 
 remove_php_command() {
-  rm -Rf php-command || true
+  rm -f php-command || true
   rm -Rf src || true
-  rm -Rf tests/phpunit/Functional/ApplicationFunctionalTestCase.php || true
-  rm -Rf tests/phpunit/Functional/JokeCommandTest.php || true
-  rm -Rf tests/phpunit/Functional/SayHelloCommandTest.php || true
+  rm -f tests/phpunit/Functional/ApplicationFunctionalTestCase.php || true
+  rm -f tests/phpunit/Functional/JokeCommandTest.php || true
+  rm -f tests/phpunit/Functional/SayHelloCommandTest.php || true
   rm -f docs/content/php/php-command.mdx || true
 
   remove_tokens_with_content "PHP_COMMAND"
@@ -410,8 +410,8 @@ remove_php_command() {
 }
 
 remove_php_command_build() {
-  rm -Rf box.json || true
-  rm -Rf docs/content/ci/php-packaging.mdx || true
+  rm -f box.json || true
+  rm -f docs/content/ci/php-packaging.mdx || true
   remove_tokens_with_content "PHP_PHAR"
 }
 
@@ -420,7 +420,6 @@ remove_php_script() {
   rm -f php-script || true
   rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Unit/ScriptUnitTestCase.php || true
-  rm -f tests/phpunit/Unit/ExampleScriptUnitTest.php || true
   rm -f tests/phpunit/Functional/ScriptFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/ExampleScriptFunctionalTest.php || true
   remove_tokens_with_content "!PHP_COMMAND"
@@ -431,15 +430,15 @@ remove_php_script() {
 }
 
 remove_nodejs() {
-  rm -f package.json >/dev/null || true
-  rm -f package-lock.json >/dev/null || true
-  rm -f yarn.lock >/dev/null || true
-  rm -Rf node_modules >/dev/null || true
+  rm -f package.json || true
+  rm -f package-lock.json || true
+  rm -f yarn.lock || true
+  rm -Rf node_modules || true
 
-  rm -f nodejs-script >/dev/null || true
-  rm -f eslint.config.js >/dev/null || true
-  rm -f .c8rc.json >/dev/null || true
-  rm -Rf tests/nodejs >/dev/null || true
+  rm -f nodejs-script || true
+  rm -f eslint.config.js || true
+  rm -f .c8rc.json || true
+  rm -Rf tests/nodejs || true
 
   remove_string_content_line "\/.npmignore" ".gitattributes"
 
@@ -465,7 +464,7 @@ remove_nodejs() {
 }
 
 remove_shell() {
-  rm -f shell-command.sh >/dev/null || true
+  rm -f shell-command.sh || true
   rm -Rf tests/bats || true
 
   rm -f .github/workflows/test-shell.yml || true
@@ -474,8 +473,8 @@ remove_shell() {
 }
 
 remove_docker() {
-  rm -f Dockerfile >/dev/null || true
-  rm -f entrypoint.sh >/dev/null || true
+  rm -f Dockerfile || true
+  rm -f entrypoint.sh || true
 
   rm -f .github/workflows/test-docker.yml || true
   rm -f .github/workflows/release-docker.yml || true
@@ -485,7 +484,7 @@ remove_docker() {
 
 remove_release_drafter() {
   rm -f .github/workflows/draft-release-notes.yml || true
-  rm -f .github/release-drafter.yml
+  rm -f .github/release-drafter.yml || true
   remove_tokens_with_content "RELEASEDRAFTER"
 }
 
@@ -506,7 +505,7 @@ remove_renovate() {
   remove_tokens_with_content "RENOVATE"
 }
 
-cleanup_renovate_managers() {
+remove_renovate_managers() {
   if [ -f renovate.json ] && grep -q '"matchManagers": \[\]' renovate.json; then
     local sed_opts
     sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
@@ -611,17 +610,19 @@ process_claude_settings() {
 }
 
 process_readme() {
+  local project="${1}"
+
   mv README.dist.md "README.md" >/dev/null 2>&1 || true
 
   # Update placeholder image URL and alt text in README.md
-  replace_string_content 'text=Yourproject' "text=${1// /+}"
-  replace_string_content 'alt="Yourproject logo"' "alt=\"${1} logo\""
+  replace_string_content 'text=Yourproject' "text=${project// /+}"
+  replace_string_content 'alt="Yourproject logo"' "alt=\"${project} logo\""
 
-  curl "https://placehold.jp/000000/ffffff/200x200.png?text=${1// /+}&css=%7B%22border-radius%22%3A%22%20100px%22%7D" >logo.tmp.png || true
+  curl "https://placehold.jp/000000/ffffff/200x200.png?text=${project// /+}&css=%7B%22border-radius%22%3A%22%20100px%22%7D" >logo.tmp.png || true
   if [ -s "logo.tmp.png" ]; then
     mv logo.tmp.png "logo.png" >/dev/null 2>&1 || true
   fi
-  rm logo.tmp.png >/dev/null 2>&1 || true
+  rm -f logo.tmp.png || true
 }
 
 ##
@@ -666,10 +667,10 @@ process_internal() {
 
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
-  rm -f SECURITY.md >/dev/null || true
-  rm -Rf ".scaffold" >/dev/null || true
-  rm -f ".github/workflows/scaffold-test.yml" >/dev/null || true
-  rm -f ".github/workflows/scaffold-release-docs.yml" >/dev/null || true
+  rm -f SECURITY.md || true
+  rm -Rf ".scaffold" || true
+  rm -f ".github/workflows/scaffold-test.yml" || true
+  rm -f ".github/workflows/scaffold-release-docs.yml" || true
 
   # The scaffold-only release workflow is always removed, so drop its companion
   # zizmor suppression entry too. Guarded because zizmor.yml is absent when
@@ -898,7 +899,7 @@ parse_args() {
     shift
   done
 
-  validate_php_mode
+  validate_php_mode || exit 1
 }
 
 ##
@@ -907,7 +908,7 @@ parse_args() {
 validate_php_mode() {
   if [ "${use_php_command}" = "y" ] && [ "${use_php_script}" = "y" ]; then
     echo "Error: --php-command and --php-script cannot be used together." >&2
-    exit 1
+    return 1
   fi
 }
 
@@ -1194,18 +1195,18 @@ fetch_and_stage_template() {
   local url="${1}"
   local staging=".scaffold-bootstrap"
 
-  rm -rf "${staging}"
+  rm -Rf "${staging}"
   mkdir -p "${staging}"
 
   if ! curl -fsSL "${url}" -o "${staging}/scaffold.tar.gz"; then
     echo "Error: failed to download the template archive from ${url}." >&2
-    rm -rf "${staging}"
+    rm -Rf "${staging}"
     return 1
   fi
 
   if ! tar -xzf "${staging}/scaffold.tar.gz" -C "${staging}" --strip-components=1; then
     echo "Error: failed to extract the template archive." >&2
-    rm -rf "${staging}"
+    rm -Rf "${staging}"
     return 1
   fi
 
@@ -1213,7 +1214,7 @@ fetch_and_stage_template() {
 
   if [ ! -d "${staging}/.scaffold" ]; then
     echo "Error: the downloaded archive is not a Scaffold template." >&2
-    rm -rf "${staging}"
+    rm -Rf "${staging}"
     return 1
   fi
 
@@ -1224,7 +1225,7 @@ fetch_and_stage_template() {
     [ -e "${entry}" ] || continue
     mv "${entry}" .
   done
-  rm -rf "${staging}"
+  rm -Rf "${staging}"
 }
 
 ##
@@ -1288,7 +1289,7 @@ process_project() {
       mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
       remove_php_script "${php_command_name}"
     else
-      remove_php_command "${php_command_name}"
+      remove_php_command
       remove_php_command_build
 
       if [ "${use_php_script:-n}" = "y" ]; then
@@ -1331,7 +1332,7 @@ process_project() {
 
   process_claude_settings
 
-  cleanup_renovate_managers
+  remove_renovate_managers
 
   process_readme "${project}"
 
