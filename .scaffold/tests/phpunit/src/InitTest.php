@@ -58,6 +58,137 @@ final class InitTest extends UnitTestCase {
     }
   }
 
+  public static function dataProviderInit(): \Iterator {
+    yield self::BASELINE_DATASET => [
+        [],
+    ];
+    yield 'name' => [
+        [
+          'namespace' => 'JediTemple',
+          'project' => 'star-forge',
+          'author' => 'Obi-Wan Kenobi',
+        ],
+    ];
+    yield 'php command' => [
+        [
+          'use_php' => self::$tuiYes,
+          'use_php_command' => self::$tuiYes,
+          'php_command_name' => 'star-forge',
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
+        ],
+    ];
+    yield 'php script' => [
+        [
+          'use_php' => self::$tuiYes,
+          'use_php_command' => self::$tuiNo,
+          'use_php_script' => self::$tuiYes,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
+        ],
+    ];
+    yield 'nodejs' => [
+        [
+          'use_php' => self::$tuiNo,
+          'use_nodejs' => self::$tuiYes,
+          'use_shell' => self::$tuiNo,
+        ],
+    ];
+    yield 'shell' => [
+        [
+          'use_php' => self::$tuiNo,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiYes,
+        ],
+    ];
+    yield 'no languages' => [
+        [
+          'use_php' => self::$tuiNo,
+          'use_php_command' => self::TUI_SKIP,
+          'php_command_name' => self::TUI_SKIP,
+          'use_php_command_build' => self::TUI_SKIP,
+          'use_php_script' => self::TUI_SKIP,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
+        ],
+    ];
+    yield 'docker' => [
+        [
+          'use_php' => self::$tuiNo,
+          'use_php_command' => self::TUI_SKIP,
+          'php_command_name' => self::TUI_SKIP,
+          'use_php_command_build' => self::TUI_SKIP,
+          'use_php_script' => self::TUI_SKIP,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
+          'use_docker' => self::$tuiYes,
+          'docker_image_name' => self::TUI_DEFAULT,
+        ],
+    ];
+    yield 'no release drafter' => [
+        [
+          'use_release_drafter' => self::$tuiNo,
+        ],
+    ];
+    yield 'no pr autoassign' => [
+        [
+          'use_pr_autoassign' => self::$tuiNo,
+        ],
+    ];
+    yield 'no funding' => [
+        [
+          'use_funding' => self::$tuiNo,
+        ],
+    ];
+    yield 'no pr template' => [
+        [
+          'use_pr_template' => self::$tuiNo,
+        ],
+    ];
+    yield 'no renovate' => [
+        [
+          'use_renovate' => self::$tuiNo,
+        ],
+    ];
+    yield 'no docs' => [
+        [
+          'use_docs' => self::$tuiNo,
+        ],
+    ];
+    yield 'test actions' => [
+        [
+          'use_test_actions' => self::$tuiYes,
+        ],
+    ];
+    yield 'no schedule' => [
+        [
+          'use_schedule' => self::$tuiNo,
+        ],
+    ];
+    yield 'no ai' => [
+        [
+          'use_ai' => self::$tuiNo,
+          'use_ai_arch_docs' => self::TUI_SKIP,
+        ],
+    ];
+    yield 'ai arch docs plantuml' => [
+        [
+          'use_ai_arch_docs' => 'plantuml',
+        ],
+    ];
+    yield 'no ai arch docs' => [
+        [
+          'use_ai_arch_docs' => 'none',
+        ],
+    ];
+    yield 'no docs no ai arch docs' => [
+        [
+          'use_docs' => self::$tuiNo,
+          'use_ai_arch_docs' => 'none',
+        ],
+    ];
+  }
+
   /**
    * Non-interactive runs must produce the same result as interactive defaults.
    */
@@ -83,6 +214,43 @@ final class InitTest extends UnitTestCase {
     $diffs = File::dir($fixtures_init . DIRECTORY_SEPARATOR . $diffs_name);
 
     $this->assertSnapshotMatchesBaseline(self::$sut, $baseline, $diffs);
+  }
+
+  public static function dataProviderInitNonInteractive(): \Iterator {
+    $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
+
+    yield 'all defaults' => [
+      $identity,
+      self::BASELINE_DIR,
+    ];
+    yield 'no docs' => [
+      array_merge($identity, ['--no-docs']),
+      'no_docs',
+    ];
+    yield 'test actions' => [
+      array_merge($identity, ['--test-actions']),
+      'test_actions',
+    ];
+    yield 'no schedule' => [
+      array_merge($identity, ['--no-schedule']),
+      'no_schedule',
+    ];
+    yield 'no ai' => [
+      array_merge($identity, ['--no-ai']),
+      'no_ai',
+    ];
+    yield 'ai arch docs plantuml' => [
+      array_merge($identity, ['--ai-arch-docs=plantuml']),
+      'ai_arch_docs_plantuml',
+    ];
+    yield 'no ai arch docs' => [
+      array_merge($identity, ['--no-ai-arch-docs']),
+      'no_ai_arch_docs',
+    ];
+    yield 'no docs no ai arch docs' => [
+      array_merge($identity, ['--no-docs', '--no-ai-arch-docs']),
+      'no_docs_no_ai_arch_docs',
+    ];
   }
 
   /**
@@ -382,13 +550,13 @@ final class InitTest extends UnitTestCase {
    * manual check.
    */
   public function testInitTestActionsPassesZizmor(): void {
+    self::$fixtures = NULL;
+
     $zizmor = (new ExecutableFinder())->find('zizmor');
 
     if (!is_string($zizmor)) {
       $this->markTestSkipped('The "zizmor" binary is not available.');
     }
-
-    self::$fixtures = NULL;
 
     $arguments = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker', '--test-actions'];
     $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
@@ -491,174 +659,6 @@ final class InitTest extends UnitTestCase {
 
     $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . '.claude' . DIRECTORY_SEPARATOR . 'settings.json');
     $this->assertDirectoryDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . '.claude');
-  }
-
-  public static function dataProviderInitNonInteractive(): \Iterator {
-    $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
-
-    yield 'all defaults' => [
-      $identity,
-      self::BASELINE_DIR,
-    ];
-    yield 'no docs' => [
-      array_merge($identity, ['--no-docs']),
-      'no_docs',
-    ];
-    yield 'test actions' => [
-      array_merge($identity, ['--test-actions']),
-      'test_actions',
-    ];
-    yield 'no schedule' => [
-      array_merge($identity, ['--no-schedule']),
-      'no_schedule',
-    ];
-    yield 'no ai' => [
-      array_merge($identity, ['--no-ai']),
-      'no_ai',
-    ];
-    yield 'ai arch docs plantuml' => [
-      array_merge($identity, ['--ai-arch-docs=plantuml']),
-      'ai_arch_docs_plantuml',
-    ];
-    yield 'no ai arch docs' => [
-      array_merge($identity, ['--no-ai-arch-docs']),
-      'no_ai_arch_docs',
-    ];
-    yield 'no docs no ai arch docs' => [
-      array_merge($identity, ['--no-docs', '--no-ai-arch-docs']),
-      'no_docs_no_ai_arch_docs',
-    ];
-  }
-
-  public static function dataProviderInit(): \Iterator {
-    yield self::BASELINE_DATASET => [
-        [],
-    ];
-    yield 'name' => [
-        [
-          'namespace' => 'JediTemple',
-          'project' => 'star-forge',
-          'author' => 'Obi-Wan Kenobi',
-        ],
-    ];
-    yield 'php command' => [
-        [
-          'use_php' => self::$tuiYes,
-          'use_php_command' => self::$tuiYes,
-          'php_command_name' => 'star-forge',
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-        ],
-    ];
-    yield 'php script' => [
-        [
-          'use_php' => self::$tuiYes,
-          'use_php_command' => self::$tuiNo,
-          'use_php_script' => self::$tuiYes,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-        ],
-    ];
-    yield 'nodejs' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_nodejs' => self::$tuiYes,
-          'use_shell' => self::$tuiNo,
-        ],
-    ];
-    yield 'shell' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiYes,
-        ],
-    ];
-    yield 'no languages' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_php_command' => self::TUI_SKIP,
-          'php_command_name' => self::TUI_SKIP,
-          'use_php_command_build' => self::TUI_SKIP,
-          'use_php_script' => self::TUI_SKIP,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-        ],
-    ];
-    yield 'docker' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_php_command' => self::TUI_SKIP,
-          'php_command_name' => self::TUI_SKIP,
-          'use_php_command_build' => self::TUI_SKIP,
-          'use_php_script' => self::TUI_SKIP,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-          'use_docker' => self::$tuiYes,
-          'docker_image_name' => self::TUI_DEFAULT,
-        ],
-    ];
-    yield 'no release drafter' => [
-        [
-          'use_release_drafter' => self::$tuiNo,
-        ],
-    ];
-    yield 'no pr autoassign' => [
-        [
-          'use_pr_autoassign' => self::$tuiNo,
-        ],
-    ];
-    yield 'no funding' => [
-        [
-          'use_funding' => self::$tuiNo,
-        ],
-    ];
-    yield 'no pr template' => [
-        [
-          'use_pr_template' => self::$tuiNo,
-        ],
-    ];
-    yield 'no renovate' => [
-        [
-          'use_renovate' => self::$tuiNo,
-        ],
-    ];
-    yield 'no docs' => [
-        [
-          'use_docs' => self::$tuiNo,
-        ],
-    ];
-    yield 'test actions' => [
-        [
-          'use_test_actions' => self::$tuiYes,
-        ],
-    ];
-    yield 'no schedule' => [
-        [
-          'use_schedule' => self::$tuiNo,
-        ],
-    ];
-    yield 'no ai' => [
-        [
-          'use_ai' => self::$tuiNo,
-          'use_ai_arch_docs' => self::TUI_SKIP,
-        ],
-    ];
-    yield 'ai arch docs plantuml' => [
-        [
-          'use_ai_arch_docs' => 'plantuml',
-        ],
-    ];
-    yield 'no ai arch docs' => [
-        [
-          'use_ai_arch_docs' => 'none',
-        ],
-    ];
-    yield 'no docs no ai arch docs' => [
-        [
-          'use_docs' => self::$tuiNo,
-          'use_ai_arch_docs' => 'none',
-        ],
-    ];
   }
 
   protected static function defaultAnswers(): array {
