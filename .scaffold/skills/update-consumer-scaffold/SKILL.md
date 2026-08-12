@@ -87,7 +87,11 @@ checkout for the full list).
 | `--funding`                 | `.github/FUNDING.yml` exists                                |
 | `--pr-template`             | `.github/PULL_REQUEST_TEMPLATE.md` exists                   |
 | `--renovate`                | `renovate.json` exists                                      |
-| `--docs`                    | `docs/` directory exists                                    |
+| `--docs`                    | `docs/docusaurus.config.js` exists                          |
+| `--ai` / `--no-ai`          | `CLAUDE.md` or `AGENTS.md` exists                           |
+| `--ai-arch-docs[=VALUE]`    | `.claude/skills/update-architecture-docs/SKILL.md` exists   |
+
+For `--ai-arch-docs`, probe the shipped skill file to pick the value: when `.claude/skills/update-architecture-docs/SKILL.md` is absent, pass `--no-ai-arch-docs`; when `grep -q 'plantuml -tsvg' .claude/skills/update-architecture-docs/SKILL.md` matches, pass `--ai-arch-docs=plantuml`; otherwise pass `--ai-arch-docs=mermaid`.
 
 **Custom names** (only when they differ from the project name):
 

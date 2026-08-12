@@ -6,7 +6,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -38,9 +37,6 @@
+@@ -39,9 +38,6 @@
  
  
  
@@ -16,7 +16,7 @@
  ## Usage
  
  
-@@ -50,9 +46,6 @@
+@@ -51,9 +47,6 @@
  
      ./nodejs-script value/of/argument
  

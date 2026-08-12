@@ -10,7 +10,8 @@
       "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
       "Bash(npm:*)",
       "Bash(docker build:*)",
-      "Bash(docker run:*)"
+      "Bash(docker run:*)",
+      "Bash(plantuml:*)"
     ]
   }
 }

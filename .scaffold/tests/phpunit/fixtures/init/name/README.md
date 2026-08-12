@@ -29,7 +29,7 @@
  ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
  
  </div>
-@@ -30,7 +30,7 @@
+@@ -31,7 +31,7 @@
  ## Installation
  
  
@@ -38,7 +38,7 @@
  
  
  
-@@ -44,7 +44,7 @@
+@@ -45,7 +45,7 @@
  ## Usage
  
  
@@ -47,7 +47,7 @@
  
  
  
-@@ -52,7 +52,7 @@
+@@ -53,7 +53,7 @@
  
  
  

@@ -441,14 +441,21 @@ final class InitTest extends UnitTestCase {
 
   public static function dataProviderClaudeSettings(): \Iterator {
     // Docker is off by default, so its rules are trimmed unless enabled.
+    // Mermaid is the default diagram format, so the PlantUML rule is trimmed
+    // unless that format is selected.
     yield 'defaults' => [
       [],
       ['Bash(composer:*)', 'Bash(./vendor/bin/phpunit:*)', 'Bash(./tests/bats/node_modules/bats/bin/bats:*)', 'Bash(npm:*)'],
-      ['Bash(docker build:*)', 'Bash(docker run:*)'],
+      ['Bash(docker build:*)', 'Bash(docker run:*)', 'Bash(plantuml:*)'],
     ];
     yield 'with docker' => [
       ['--docker'],
       ['Bash(docker build:*)', 'Bash(docker run:*)'],
+      [],
+    ];
+    yield 'ai arch docs plantuml' => [
+      ['--ai-arch-docs=plantuml'],
+      ['Bash(plantuml:*)'],
       [],
     ];
     yield 'no php' => [
@@ -473,6 +480,19 @@ final class InitTest extends UnitTestCase {
     ];
   }
 
+  /**
+   * Disabling AI agents removes the Claude settings with the '.claude' dir.
+   */
+  public function testInitClaudeSettingsRemovedWithoutAi(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', ['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe', '--no-ai']);
+    $this->assertProcessSuccessful();
+
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . '.claude' . DIRECTORY_SEPARATOR . 'settings.json');
+    $this->assertDirectoryDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . '.claude');
+  }
+
   public static function dataProviderInitNonInteractive(): \Iterator {
     $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
 
@@ -491,6 +511,22 @@ final class InitTest extends UnitTestCase {
     yield 'no schedule' => [
       array_merge($identity, ['--no-schedule']),
       'no_schedule',
+    ];
+    yield 'no ai' => [
+      array_merge($identity, ['--no-ai']),
+      'no_ai',
+    ];
+    yield 'ai arch docs plantuml' => [
+      array_merge($identity, ['--ai-arch-docs=plantuml']),
+      'ai_arch_docs_plantuml',
+    ];
+    yield 'no ai arch docs' => [
+      array_merge($identity, ['--no-ai-arch-docs']),
+      'no_ai_arch_docs',
+    ];
+    yield 'no docs no ai arch docs' => [
+      array_merge($identity, ['--no-docs', '--no-ai-arch-docs']),
+      'no_docs_no_ai_arch_docs',
     ];
   }
 
@@ -601,6 +637,28 @@ final class InitTest extends UnitTestCase {
           'use_schedule' => self::$tuiNo,
         ],
     ];
+    yield 'no ai' => [
+        [
+          'use_ai' => self::$tuiNo,
+          'use_ai_arch_docs' => self::TUI_SKIP,
+        ],
+    ];
+    yield 'ai arch docs plantuml' => [
+        [
+          'use_ai_arch_docs' => 'plantuml',
+        ],
+    ];
+    yield 'no ai arch docs' => [
+        [
+          'use_ai_arch_docs' => 'none',
+        ],
+    ];
+    yield 'no docs no ai arch docs' => [
+        [
+          'use_docs' => self::$tuiNo,
+          'use_ai_arch_docs' => 'none',
+        ],
+    ];
   }
 
   protected static function defaultAnswers(): array {
@@ -625,6 +683,8 @@ final class InitTest extends UnitTestCase {
       'use_docs' => self::TUI_DEFAULT,
       'use_test_actions' => self::TUI_DEFAULT,
       'use_schedule' => self::TUI_DEFAULT,
+      'use_ai' => self::TUI_DEFAULT,
+      'use_ai_arch_docs' => self::TUI_DEFAULT,
       'remove_self' => self::TUI_DEFAULT,
     ];
   }

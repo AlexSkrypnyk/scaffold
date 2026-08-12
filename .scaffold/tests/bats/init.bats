@@ -225,6 +225,203 @@ WORKFLOW
   assert_file_contains "${tmpdir}/.github/workflows/test-php.yml" "push:"
 }
 
+@test "remove_ai removes the AI agent files and strips the AI token block" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_ai"
+  mkdir -p "${tmpdir}/.claude"
+  touch "${tmpdir}/CLAUDE.md"
+  touch "${tmpdir}/AGENTS.md"
+  echo '{}' >"${tmpdir}/.claude/settings.json"
+  cat >"${tmpdir}/.gitignore" <<'GITIGNORE'
+/vendor
+#;< AI
+!/.claude/
+#;> AI
+/node_modules
+GITIGNORE
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_ai
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/CLAUDE.md"
+  assert_file_not_exists "${tmpdir}/AGENTS.md"
+  assert_dir_not_exists "${tmpdir}/.claude"
+  assert_file_not_contains "${tmpdir}/.gitignore" ".claude"
+  assert_file_not_contains "${tmpdir}/.gitignore" "AI"
+  assert_file_contains "${tmpdir}/.gitignore" "/vendor"
+  assert_file_contains "${tmpdir}/.gitignore" "/node_modules"
+}
+
+create_ai_arch_docs_tokens() {
+  cat >"${1}/AGENTS.md" <<'TOKENS'
+before content
+#;< AI_ARCH_DOCS
+feature content
+#;> AI_ARCH_DOCS
+#;< AI_ARCH_DOCS_MERMAID
+mermaid content
+#;> AI_ARCH_DOCS_MERMAID
+#;< AI_ARCH_DOCS_PLANTUML
+plantuml content
+#;> AI_ARCH_DOCS_PLANTUML
+after content
+TOKENS
+}
+
+@test "remove_ai_arch_docs removes the skill and docs dirs and strips all token blocks" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_ai_arch_docs"
+  mkdir -p "${tmpdir}/.claude/skills/update-architecture-docs"
+  touch "${tmpdir}/.claude/skills/update-architecture-docs/SKILL.md"
+  mkdir -p "${tmpdir}/docs/content/architecture"
+  touch "${tmpdir}/docs/content/architecture/README.md"
+  create_ai_arch_docs_tokens "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_ai_arch_docs
+  popd >/dev/null || return 1
+
+  assert_dir_not_exists "${tmpdir}/.claude/skills/update-architecture-docs"
+  assert_dir_not_exists "${tmpdir}/docs/content/architecture"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "feature content"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "mermaid content"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "plantuml content"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "AI_ARCH_DOCS"
+  assert_file_contains "${tmpdir}/AGENTS.md" "before content"
+  assert_file_contains "${tmpdir}/AGENTS.md" "after content"
+}
+
+@test "process_ai_arch_docs keeps Mermaid and strips PlantUML when mermaid is selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_arch_mermaid"
+  mkdir -p "${tmpdir}"
+  create_ai_arch_docs_tokens "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  use_ai_arch_docs="mermaid" process_ai_arch_docs
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/AGENTS.md" "feature content"
+  assert_file_contains "${tmpdir}/AGENTS.md" "mermaid content"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "plantuml content"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "AI_ARCH_DOCS_PLANTUML"
+}
+
+@test "process_ai_arch_docs keeps PlantUML and strips Mermaid when plantuml is selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_arch_plantuml"
+  mkdir -p "${tmpdir}"
+  create_ai_arch_docs_tokens "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  use_ai_arch_docs="plantuml" process_ai_arch_docs
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/AGENTS.md" "feature content"
+  assert_file_contains "${tmpdir}/AGENTS.md" "plantuml content"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "mermaid content"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "AI_ARCH_DOCS_MERMAID"
+}
+
+@test "process_ai_arch_docs keeps both formats when the feature is off" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_arch_none"
+  mkdir -p "${tmpdir}"
+  create_ai_arch_docs_tokens "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  use_ai_arch_docs="" process_ai_arch_docs
+  use_ai_arch_docs="none" process_ai_arch_docs
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/AGENTS.md" "mermaid content"
+  assert_file_contains "${tmpdir}/AGENTS.md" "plantuml content"
+}
+
+@test "remove_docs relocates the architecture docs when present" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_docs_preserve"
+  mkdir -p "${tmpdir}/docs/content/architecture"
+  echo "arch content" >"${tmpdir}/docs/content/architecture/README.md"
+  touch "${tmpdir}/docs/docusaurus.config.js"
+  echo "Architecture documentation lives in docs/content/architecture/." >"${tmpdir}/AGENTS.md"
+  mkdir -p "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/workflows/test-docs.yml"
+  touch "${tmpdir}/.github/workflows/release-docs.yml"
+  printf '# /docs            export-ignore\n# /tests           export-ignore\n' >"${tmpdir}/.gitattributes"
+  mkdir -p "${tmpdir}/.architecture-preserve-tmp"
+  touch "${tmpdir}/.architecture-preserve-tmp/stale.txt"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_docs
+  popd >/dev/null || return 1
+
+  assert_file_exists "${tmpdir}/docs/architecture/README.md"
+  assert_file_contains "${tmpdir}/docs/architecture/README.md" "arch content"
+  assert_file_not_exists "${tmpdir}/docs/docusaurus.config.js"
+  assert_dir_not_exists "${tmpdir}/.architecture-preserve-tmp"
+  assert_file_not_exists "${tmpdir}/docs/architecture/stale.txt"
+  assert_dir_not_exists "${tmpdir}/docs/architecture/architecture"
+  run ls -A "${tmpdir}/docs"
+  assert_output "architecture"
+  assert_file_contains "${tmpdir}/AGENTS.md" "docs/architecture"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "docs/content/architecture"
+  assert_file_not_exists "${tmpdir}/.github/workflows/test-docs.yml"
+  assert_file_not_exists "${tmpdir}/.github/workflows/release-docs.yml"
+  assert_file_contains "${tmpdir}/.gitattributes" "/docs"
+}
+
+@test "remove_docs removes docs fully when the architecture docs are absent" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_docs_full"
+  mkdir -p "${tmpdir}/docs"
+  touch "${tmpdir}/docs/docusaurus.config.js"
+  mkdir -p "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/workflows/test-docs.yml"
+  touch "${tmpdir}/.github/workflows/release-docs.yml"
+  printf '# /docs            export-ignore\n# /tests           export-ignore\n' >"${tmpdir}/.gitattributes"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_docs
+  popd >/dev/null || return 1
+
+  assert_dir_not_exists "${tmpdir}/docs"
+  assert_file_not_exists "${tmpdir}/.github/workflows/test-docs.yml"
+  assert_file_not_exists "${tmpdir}/.github/workflows/release-docs.yml"
+  assert_file_not_contains "${tmpdir}/.gitattributes" "/docs"
+  assert_file_contains "${tmpdir}/.gitattributes" "/tests"
+}
+
+@test "ask_choice returns the default on empty input" {
+  run ask_choice "AI architecture docs" "mermaid" "mermaid plantuml none" <<<''
+  assert_success
+  assert_output "mermaid"
+}
+
+@test "ask_choice accepts a valid value" {
+  run ask_choice "AI architecture docs" "mermaid" "mermaid plantuml none" <<<'plantuml'
+  assert_success
+  assert_output "plantuml"
+}
+
+@test "ask_choice lowercases the input" {
+  run ask_choice "AI architecture docs" "mermaid" "mermaid plantuml none" <<<'PLANTUML'
+  assert_success
+  assert_output "plantuml"
+}
+
+@test "ask_choice re-prompts on invalid input until a valid value is given" {
+  run ask_choice "AI architecture docs" "mermaid" "mermaid plantuml none" <<<$'bogus\nplantuml'
+  assert_success
+  assert_output "plantuml"
+}
+
+@test "ask_choice re-prompts on multi-word input" {
+  run ask_choice "AI architecture docs" "mermaid" "mermaid plantuml none" <<<$'mermaid plantuml\nnone'
+  assert_success
+  assert_output "none"
+}
+
+@test "ask_choice returns the default on EOF" {
+  run ask_choice "AI architecture docs" "mermaid" "mermaid plantuml none" </dev/null
+  assert_success
+  assert_output "mermaid"
+}
+
 @test "parse_args without arguments keeps interactive mode" {
   parse_args
   assert_equal "${interactive}" "1"
@@ -280,6 +477,36 @@ WORKFLOW
   assert_equal "${use_schedule}" "n"
 }
 
+@test "parse_args --ai enables AI agents" {
+  parse_args --ai
+  assert_equal "${use_ai}" "y"
+}
+
+@test "parse_args --no-ai disables AI agents" {
+  parse_args --no-ai
+  assert_equal "${use_ai}" "n"
+}
+
+@test "parse_args --ai-arch-docs selects the default Mermaid format" {
+  parse_args --ai-arch-docs
+  assert_equal "${use_ai_arch_docs}" "mermaid"
+}
+
+@test "parse_args --ai-arch-docs=plantuml selects the PlantUML format" {
+  parse_args --ai-arch-docs=plantuml
+  assert_equal "${use_ai_arch_docs}" "plantuml"
+}
+
+@test "parse_args --ai-arch-docs=none disables AI architecture docs" {
+  parse_args --ai-arch-docs=none
+  assert_equal "${use_ai_arch_docs}" "none"
+}
+
+@test "parse_args --no-ai-arch-docs disables AI architecture docs" {
+  parse_args --no-ai-arch-docs
+  assert_equal "${use_ai_arch_docs}" "none"
+}
+
 @test "parse_args --keep preserves the script" {
   parse_args --keep
   assert_equal "${remove_self}" "n"
@@ -300,6 +527,13 @@ WORKFLOW
   run parse_args --unknown
   assert_failure
   assert_output_contains "Unknown option"
+}
+
+@test "parse_args fails on an invalid --ai-arch-docs value" {
+  run parse_args --ai-arch-docs=bogus
+  assert_failure
+  assert_output_contains "Error: Invalid value for --ai-arch-docs: bogus. Allowed values: mermaid, plantuml, none."
+  assert_output_contains "Run with --help for usage."
 }
 
 @test "parse_args prints usage for --help" {
@@ -380,6 +614,29 @@ WORKFLOW
   run collect_noninteractive
   assert_success
   assert_output_contains "Use scheduled builds             : n"
+}
+
+@test "collect_noninteractive keeps AI agents on by default" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use AI agents                    : y"
+  assert_output_contains "AI architecture docs             : mermaid"
+}
+
+@test "collect_noninteractive disables AI agents and architecture docs on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-ai
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use AI agents                    : n"
+  assert_output_contains "AI architecture docs             : none"
+}
+
+@test "collect_noninteractive selects the PlantUML architecture docs on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --ai-arch-docs=plantuml
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "AI architecture docs             : plantuml"
 }
 
 create_claude_settings() {

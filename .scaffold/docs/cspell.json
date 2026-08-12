@@ -27,6 +27,7 @@
         "softprops",
         "tmate",
         "toshimaru",
+        "tsvg",
         "zizmor"
     ],
     "overrides": [

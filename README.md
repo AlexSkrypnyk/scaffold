@@ -67,6 +67,7 @@
   - Init shell script to chose features
 - **AI agents**
   - [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) guidance for AI coding agents
+  - Optional AI-maintained [architecture documentation](docs/content/architecture/README.md) with Mermaid or PlantUML diagrams, generated and kept current by the bundled [`update-architecture-docs`](.claude/skills/update-architecture-docs/SKILL.md) skill
   - Bundled [`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md)
     skill that updates a generated project to the latest scaffold release
 

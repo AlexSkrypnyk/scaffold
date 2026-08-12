@@ -22,11 +22,13 @@
 # Temporary AI agent and developer artifacts (plans, scratch output, reports).
 /.artifacts/
 
+#;< AI
 # Claude Code settings are shared; personal overrides stay local.
 !/.claude/
 /.claude/settings.local.json
 # Claude Code fetches the project update skill on demand; do not commit it.
 /.claude/skills/update-consumer-scaffold/
+#;> AI
 #;< META
 /.scaffold-coverage-html
 #;> META
