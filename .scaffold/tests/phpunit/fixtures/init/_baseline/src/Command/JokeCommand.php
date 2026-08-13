@@ -12,9 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Joke command.
  *
- * Allows to get a random joke.
- *
- * @package YodasHut\App\Command
+ * Retrieves a random joke.
  */
 class JokeCommand extends Command {
 

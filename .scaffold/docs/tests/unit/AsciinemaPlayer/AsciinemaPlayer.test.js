@@ -517,7 +517,6 @@ describe('AsciinemaPlayer Component', () => {
 
   describe('Library Integration', () => {
     beforeEach(() => {
-      // Clean up window/document for each test if they exist.
       if (typeof window !== 'undefined' && window.AsciinemaPlayer) {
         delete window.AsciinemaPlayer;
       }
@@ -533,14 +532,12 @@ describe('AsciinemaPlayer Component', () => {
       // Wait for useEffect.
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Should add CSS link.
       const cssLink = document.head.querySelector(
         'link[href*="asciinema-player.css"]'
       );
       expect(cssLink).toBeInTheDocument();
       expect(cssLink.rel).toBe('stylesheet');
 
-      // Should add JS script.
       const jsScript = document.head.querySelector(
         'script[src*="asciinema-player.min.js"]'
       );
@@ -548,7 +545,6 @@ describe('AsciinemaPlayer Component', () => {
     });
 
     test('does not duplicate CSS links', async () => {
-      // First render.
       render(
         <AsciinemaPlayer
           src="/fixtures/test-cast.json"
@@ -557,7 +553,6 @@ describe('AsciinemaPlayer Component', () => {
       );
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Second render.
       render(
         <AsciinemaPlayer
           src="/fixtures/test-cast.json"
@@ -566,7 +561,6 @@ describe('AsciinemaPlayer Component', () => {
       );
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Should only have one CSS link.
       const cssLinks = document.head.querySelectorAll(
         'link[href*="asciinema-player.css"]'
       );
@@ -581,19 +575,15 @@ describe('AsciinemaPlayer Component', () => {
 
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Simulate library not existing initially.
       expect(window.AsciinemaPlayer).toBeUndefined();
 
-      // Find the script and simulate its onload.
       const script = document.head.querySelector(
         'script[src*="asciinema-player.min.js"]'
       );
       expect(script).toBeInTheDocument();
 
-      // Mock the library being available after script loads.
       window.AsciinemaPlayer = { create: mockCreate };
 
-      // Trigger the onload handler.
       if (script.onload) {
         script.onload();
       }
@@ -618,7 +608,6 @@ describe('AsciinemaPlayer Component', () => {
     test('creates player when library already exists', async () => {
       const mockCreate = jest.fn();
 
-      // Pre-load the library.
       window.AsciinemaPlayer = { create: mockCreate };
 
       const { container } = render(
@@ -655,7 +644,6 @@ describe('AsciinemaPlayer Component', () => {
       const mockCreate = jest.fn();
       window.AsciinemaPlayer = { create: mockCreate };
 
-      // With poster but no startAt.
       const { rerender, container } = render(
         <AsciinemaPlayer src="/fixtures/test-cast.json" poster="npt:1:00" />
       );
@@ -679,7 +667,6 @@ describe('AsciinemaPlayer Component', () => {
 
       jest.clearAllMocks();
 
-      // With startAt but no poster.
       rerender(<AsciinemaPlayer src="/fixtures/test-cast.json" startAt={30} />);
 
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -703,7 +690,6 @@ describe('AsciinemaPlayer Component', () => {
     test('handles errors during library loading', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      // Force an error by making querySelector throw.
       const originalQuerySelector = document.querySelector;
       document.querySelector = jest.fn().mockImplementation(() => {
         throw new Error('Mock error');
@@ -715,16 +701,13 @@ describe('AsciinemaPlayer Component', () => {
 
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Should still render the container.
       expect(container.firstChild).toBeInTheDocument();
 
-      // Should log the error.
       expect(consoleSpy).toHaveBeenCalledWith(
         'Failed to load Asciinema player:',
         expect.any(Error)
       );
 
-      // Restore.
       document.querySelector = originalQuerySelector;
       consoleSpy.mockRestore();
     });
@@ -737,16 +720,13 @@ describe('AsciinemaPlayer Component', () => {
 
       await new Promise(resolve => setTimeout(resolve, 50));
 
-      // Find the script and simulate its onload (library not yet available).
       const script = document.head.querySelector(
         'script[src*="asciinema-player.min.js"]'
       );
       expect(script).toBeInTheDocument();
 
-      // Mock the library being available after script loads.
       window.AsciinemaPlayer = { create: mockCreate };
 
-      // Trigger the onload handler to cover the startAt assignment.
       if (script.onload) {
         script.onload();
       }

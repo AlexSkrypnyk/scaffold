@@ -7,12 +7,3 @@
  
  use Symfony\Component\Console\Command\Command;
  use Symfony\Component\Console\Input\InputInterface;
-@@ -14,7 +14,7 @@
-  *
-  * Allows to get a random joke.
-  *
-- * @package YodasHut\App\Command
-+ * @package JediTemple\App\Command
-  */
- class JokeCommand extends Command {
- 

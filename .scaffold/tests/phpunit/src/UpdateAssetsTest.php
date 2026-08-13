@@ -51,7 +51,7 @@ final class UpdateAssetsTest extends TestCase {
 
     $header = json_decode($lines[0], TRUE);
     if (!is_array($header)) {
-      $this->fail('Sanitised cast header is not valid JSON.');
+      $this->fail('Sanitized cast header is not valid JSON.');
     }
 
     $this->assertSame('./init.sh', $header['command']);

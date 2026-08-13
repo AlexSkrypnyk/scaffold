@@ -15,4 +15,4 @@
 +use JediTemple\App\Command\SayHelloCommand;
  
  /**
-  * Class SayHelloCommandTest.
+  * Functional test for the SayHelloCommand class.

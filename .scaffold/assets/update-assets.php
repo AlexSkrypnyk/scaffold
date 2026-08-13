@@ -31,7 +31,6 @@
 
 declare(strict_types=1);
 
-// Terminal dimensions for the recording.
 define('TERMINAL_COLS', 80);
 define('TERMINAL_ROWS', 24);
 
@@ -281,9 +280,9 @@ function main(): void {
   }
   finally {
     removeDir($workspace_dir);
-    cleanupFile($expect_script);
-    cleanupFile($cast_file);
-    cleanupFile($svg_input);
+    removeFile($expect_script);
+    removeFile($cast_file);
+    removeFile($svg_input);
   }
 
   verbose('Done.');
@@ -297,7 +296,7 @@ function checkDependencies(): void {
   $missing = [];
 
   foreach ($deps as $dep) {
-    $path = trim((string) shell_exec('command -v ' . escapeshellarg($dep) . ' 2>/dev/null'));
+    $path = trim((string) shell_exec(sprintf('command -v %s 2>/dev/null', escapeshellarg($dep))));
     if ($path === '') {
       $missing[] = $dep;
     }
@@ -439,7 +438,7 @@ function removeDir(string $directory): void {
  * @param string $file
  *   Path to the file to remove.
  */
-function cleanupFile(string $file): void {
+function removeFile(string $file): void {
   if (is_file($file)) {
     unlink($file);
   }
@@ -459,7 +458,6 @@ function verbose(string $message): void {
   fwrite(STDOUT, $message . PHP_EOL);
 }
 
-// Entrypoint.
 if (getenv('SCRIPT_RUN_SKIP') !== '1' && PHP_SAPI === 'cli' && empty($_SERVER['REMOTE_ADDR'])) {
   ini_set('display_errors', '1');
 

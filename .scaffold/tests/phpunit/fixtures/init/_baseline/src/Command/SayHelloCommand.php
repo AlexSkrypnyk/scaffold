@@ -10,10 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Say hello command.
- *
- * Allows to say hello.
- *
- * @package YodasHut\App\Command
  */
 class SayHelloCommand extends Command {
 

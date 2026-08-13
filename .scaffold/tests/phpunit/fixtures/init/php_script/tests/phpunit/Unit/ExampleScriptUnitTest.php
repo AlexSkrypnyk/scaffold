@@ -9,8 +9,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Class ExampleScriptUnitTest.
- *
  * Unit tests for force-crystal.
  */
 #[CoversFunction('main')]
