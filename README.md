@@ -36,6 +36,8 @@
     and [traits](tests/phpunit/Traits)
   - [Simple single-file script scaffold](php-script)
     with [unit tests](tests/phpunit/Functional) (with coverage)
+  - Class library scaffold - the tooling with no entry point, for packages that
+    ship only classes
   - Code quality tools with
     configurations: [PHP Code Sniffer](phpcs.xml),
     [PHPStan](phpstan.neon), [Rector](rector.php)

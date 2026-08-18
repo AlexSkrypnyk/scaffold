@@ -78,6 +78,7 @@ checkout for the full list).
 | `--php` / `--no-php`        | `composer.json` exists                                      |
 | `--php-command`             | `src/` directory exists with command classes                |
 | `--php-script`              | a single-file PHP bin exists and there is no `src/`         |
+| `--no-php-command --no-php-script` | `composer.json` has no `bin` section - a class-only library |
 | `--phar` / `--no-phar`      | `box.json` exists                                           |
 | `--nodejs` / `--no-nodejs`  | `package.json` exists                                       |
 | `--shell` / `--no-shell`    | a `*.sh` command file and `tests/bats/` exist               |
@@ -197,6 +198,12 @@ Example for a shell-only project with a custom command name and no docs:
 ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php --no-nodejs --shell --shell-command-name=acme --no-docs
 ```
 
+Example for a class-only PHP library with no entry point:
+
+```bash
+./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" --php --no-php-command --no-php-script --no-nodejs --no-shell
+```
+
 Build the command from the Step 1 detection. Do not pass `--keep`: the refreshed
 `init.sh` should be removed exactly as it was on the initial setup.
 
@@ -229,7 +236,9 @@ Use `git status` and `git diff` to review everything. Pay attention to:
   genuinely retired by the new Scaffold version, not project files that should
   have been restored in Step 7.
 - **New files**: review new template files and remove example stubs the project
-  does not need (e.g. example commands or tests it never used).
+  does not need (e.g. example commands or tests it never used). A library
+  project keeps `src/Example.php` and `tests/phpunit/Unit/ExampleUnitTest.php`
+  only until it has classes of its own.
 - **README.md**: re-apply any structural changes from the template while keeping
   the project's own content.
 
