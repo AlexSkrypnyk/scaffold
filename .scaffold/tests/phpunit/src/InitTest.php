@@ -665,11 +665,13 @@ final class InitTest extends UnitTestCase {
   /**
    * Consumer-owned files under '.claude' survive an init run byte-for-byte.
    *
-   * The update flow keeps the consumer's '.claude' across its wipe and then
-   * extracts the template on top, so init.sh runs over a tree holding both
-   * template-owned and consumer-owned files. Sweeping the consumer's agent
-   * configuration rewrote the fetched update skill to name the consumer's own
-   * repository, so a later run would pull the wrong project.
+   * The update flow keeps the consumer's '.claude' across its wipe, then
+   * extracts the template on top. init.sh then runs over a tree holding both
+   * template-owned and consumer-owned files.
+   *
+   * A sweep that reaches the consumer-owned '.claude' tree rewrites the
+   * fetched update skill to name the consumer's own repository. The next
+   * update then pulls the wrong project.
    *
    * @param string $path
    *   Path of the consumer-owned file, relative to '.claude'.
@@ -710,7 +712,7 @@ final class InitTest extends UnitTestCase {
    * Every string init.sh sweeps for, in a consumer-owned file.
    *
    * Each line carries a needle from process_internal() or a token marker the
-   * block and comment helpers act on, so any helper that reaches this file
+   * block and comment helpers act on. Any helper that reaches this file
    * changes it.
    */
   protected static function consumerClaudeContent(): string {
@@ -719,6 +721,7 @@ final class InitTest extends UnitTestCase {
       '',
       'gh release list --repo AlexSkrypnyk/scaffold --limit 5',
       'The scaffold template lives at [getscaffold.dev](https://getscaffold.dev).',
+      'This skill scaffolds new data-flow diagrams traced from src/.',
       'Run ./php-command, ./php-script and ./shell-command.sh.',
       'Namespace YourNamespace in yournamespace/yourproject, titled Yourproject.',
       'Authored by Your Name, maintained by Alex Skrypnyk.',
@@ -733,12 +736,11 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
-   * Template-owned '.claude' files are still processed by the sweep helpers.
+   * Template-owned '.claude' files are processed by the sweep helpers.
    *
-   * Excluding '.claude' from the sweep must not overshoot: the shipped
-   * 'update-architecture-docs' skill carries the diagram-format token blocks,
-   * so the unselected format must be gone and no raw '#;' marker or
-   * unsubstituted placeholder may survive anywhere under '.claude'.
+   * The shipped 'update-architecture-docs' skill carries the diagram-format
+   * token blocks. The unselected format is removed, and no raw '#;' marker or
+   * unsubstituted placeholder survives under '.claude'.
    *
    * @param list<string> $arguments
    *   Command-line arguments passed to init.sh.
@@ -762,8 +764,8 @@ final class InitTest extends UnitTestCase {
     $this->assertStringContainsString($present, $content);
     $this->assertStringNotContainsString($absent, $content);
 
-    // The allowlist of swept template paths only holds while no other shipped
-    // '.claude' file needs a substitution. Assert it rather than trust it.
+    // The allowlist holds only while no other shipped '.claude' file needs a
+    // substitution.
     $finder = (new Finder())->files()->in(self::$sut . DIRECTORY_SEPARATOR . '.claude')->ignoreDotFiles(FALSE);
     $placeholders = ['#;', 'YourNamespace', 'yournamespace', 'yourproject', 'Yourproject', 'Your Name'];
 
@@ -780,6 +782,36 @@ final class InitTest extends UnitTestCase {
 
     yield 'mermaid by default' => [[], $mermaid, $plantuml];
     yield 'plantuml when selected' => [['--ai-arch-docs=plantuml'], $plantuml, $mermaid];
+  }
+
+  /**
+   * The word 'scaffold' survives outside the template's self-references.
+   *
+   * The rename targets the repository path, the updater skill references and
+   * the attribution footer. A bare-word sweep reaches ordinary prose and
+   * paths that merely contain the word, and rewrites those too.
+   */
+  public function testInitKeepsOrdinaryScaffoldWord(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    // A path into the bats binary, which has no relation to the project name.
+    $bats = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'bats' . DIRECTORY_SEPARATOR . 'shell-command.bats');
+    $this->assertStringContainsString('./tests/bats/node_modules/.bin/bats', $bats);
+    $this->assertStringNotContainsString('acme-app/tests/node_modules', $bats);
+
+    // Prose naming the template the project was generated from.
+    $agents = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'AGENTS.md');
+    $this->assertStringContainsString('created from the Scaffold template', $agents);
+    $this->assertStringNotContainsString('created from the acme-app template', $agents);
   }
 
   protected static function defaultAnswers(): array {

@@ -6,7 +6,7 @@ code in this repository.
 
 ## Project Overview
 
-This project was created from the force-crystal template and provides a foundation
+This project was created from the Scaffold template and provides a foundation
 for Shell scripts, PHP CLI applications, and/or NodeJS projects with integrated
 testing, code quality tools, and CI/CD workflows.
 
