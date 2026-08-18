@@ -437,6 +437,13 @@ remove_php_command_build() {
   remove_tokens_with_content "PHP_PHAR"
 }
 
+##
+# Remove the list of files the release workflow attaches to a tag.
+#
+remove_php_release_files() {
+  remove_tokens_with_content "PHP_RELEASE_FILES"
+}
+
 remove_php_script() {
   local new_name="${1:-php-script}"
   rm -f php-script || true
@@ -634,6 +641,7 @@ process_php_library() {
   remove_php_command_build
   remove_php_script
   remove_php_entrypoint
+  remove_php_release_files
 }
 
 ##
@@ -1333,7 +1341,11 @@ process_project() {
   if [ "${use_php}" = "y" ]; then
 
     if [ "${use_php_command}" = "y" ]; then
-      [ "${use_php_command_build:-n}" != "y" ] && remove_php_command_build
+      if [ "${use_php_command_build:-n}" != "y" ]; then
+        remove_php_command_build
+        remove_php_release_files
+      fi
+
       replace_string_content "php-command" "${php_command_name}"
       mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
       remove_php_script "${php_command_name}"

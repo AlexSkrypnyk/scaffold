@@ -63,6 +63,9 @@ Content blocks can be conditionally included/excluded using special tokens:
   points; `!PHP_SCRIPT` marks what the command app and the library share (the
   `src` directory), `!PHP_LIBRARY` what the two entry points share
 - `PHP_PHAR` - PHAR packaging
+- `PHP_RELEASE_FILES` - The `files:` key of the release workflow, kept only when
+  the project builds an artifact to attach to the tag. Dropped for a class
+  library and for a command app built without a PHAR
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
@@ -290,7 +293,7 @@ Each test scenario in `InitTest.php` validates a specific configuration:
   language selections
 - `no_languages` - No languages selected
 - Feature toggles: `no_release_drafter`, `no_pr_autoassign`, `no_funding`,
-  `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`
+  `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`, `no_phar`
 - AI options: `no_ai`, `ai_arch_docs_plantuml`, `no_ai_arch_docs`, `no_docs_no_ai_arch_docs`
 
 #### Running Init Tests
