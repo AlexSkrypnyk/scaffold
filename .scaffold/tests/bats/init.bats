@@ -959,6 +959,66 @@ SETTINGS
   assert_file_not_contains "${tmpdir}/composer.json" '"bin"'
 }
 
+create_release_workflow() {
+  mkdir -p "${1}/.github/workflows"
+  cat >"${1}/.github/workflows/release-php.yml" <<'RELEASE'
+      - name: Set release version
+        run: echo "Release version"
+      # yamllint disable-line #;< PHP_PHAR
+      - name: Build PHAR
+        run: composer build
+      # yamllint disable-line #;> PHP_PHAR
+      - name: Create Release
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          # yamllint disable-line #;< PHP_RELEASE_FILES
+          files: |
+            #;< PHP_PHAR
+            ./.build/php-command.phar
+            #;> PHP_PHAR
+            #;< PHP_SCRIPT
+            php-script
+            #;> PHP_SCRIPT
+          # yamllint disable-line #;> PHP_RELEASE_FILES
+RELEASE
+}
+
+@test "process_project drops the release artifact list when the command app skips the PHAR" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_no_phar"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n# /docs            export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
+  create_composer_json "${tmpdir}"
+  create_release_workflow "${tmpdir}"
+  echo '{"main": "php-command"}' >"${tmpdir}/box.json"
+  echo "<?php // command" >"${tmpdir}/php-command"
+  echo "<?php // script" >"${tmpdir}/php-script"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_php="y"
+  use_php_command="y"
+  use_php_command_build="n"
+  php_command_name="acme-app"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/box.json"
+  assert_file_exists "${tmpdir}/acme-app"
+  assert_file_contains "${tmpdir}/.github/workflows/release-php.yml" "tag_name"
+  assert_file_not_contains "${tmpdir}/.github/workflows/release-php.yml" "files:"
+  assert_file_not_contains "${tmpdir}/.github/workflows/release-php.yml" "Build PHAR"
+}
+
 @test "collect_interactive declines both entry points without asking for a script name" {
   run collect_interactive <<<"$(printf 'AcmeApp\nacme-app\nJane Doe\ny\nn\nn\n')"
 
