@@ -669,9 +669,9 @@ final class InitTest extends UnitTestCase {
    * extracts the template on top. init.sh then runs over a tree holding both
    * template-owned and consumer-owned files.
    *
-   * A sweep that reaches the consumer's agent configuration renames the
-   * fetched update skill to the consumer's own repository. The next update
-   * then pulls the wrong project.
+   * A sweep that reaches the consumer-owned '.claude' tree rewrites the
+   * fetched update skill to name the consumer's own repository. The next
+   * update then pulls the wrong project.
    *
    * @param string $path
    *   Path of the consumer-owned file, relative to '.claude'.
