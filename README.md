@@ -42,7 +42,8 @@
     configurations: [PHP Code Sniffer](phpcs.xml),
     [PHPStan](phpstan.neon), [Rector](rector.php)
   - CI config to [Lint, test](.github/workflows/test-php.yml)
-    and [publish](.github/workflows/release-php.yml) PHP as [PHAR](box.json)
+    and [publish](.github/workflows/release-php.yml) PHP, packaging the command
+    app as a [PHAR](box.json)
 - **NodeJS**
   - [`package.json`](package.json)
   - CI config to [build and test](.github/workflows/test-nodejs.yml) for NodeJS
