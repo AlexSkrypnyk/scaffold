@@ -158,6 +158,49 @@ RENOVATE
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
 }
 
+create_composer_json() {
+  cat >"${1}/composer.json" <<'COMPOSER'
+{
+    "name": "yournamespace/yourproject",
+    "type": "library",
+    "bin": [
+        "php-command",
+        "php-script"
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}
+COMPOSER
+}
+
+@test "remove_php_entrypoint drops the composer bin section" {
+  local tmpdir="${BATS_TEST_TMPDIR}/entrypoint"
+  mkdir -p "${tmpdir}"
+  create_composer_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_php_entrypoint
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/composer.json" '"bin"'
+  assert_file_not_contains "${tmpdir}/composer.json" 'php-command'
+  assert_file_not_contains "${tmpdir}/composer.json" 'php-script'
+  assert_file_contains "${tmpdir}/composer.json" '"type": "library"'
+  assert_file_contains "${tmpdir}/composer.json" '"sort-packages": true'
+}
+
+@test "remove_php_entrypoint is a no-op without a composer.json" {
+  local tmpdir="${BATS_TEST_TMPDIR}/entrypoint_no_composer"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_php_entrypoint
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/composer.json"
+}
+
 @test "protect_skill_references and restore_skill_references round-trip" {
   local tmpdir="${BATS_TEST_TMPDIR}/skill_refs"
   mkdir -p "${tmpdir}"
@@ -445,6 +488,16 @@ TOKENS
   assert_equal "${use_php_script}" "y"
 }
 
+@test "parse_args --no-php-command declines the command sub-mode" {
+  parse_args --no-php-command
+  assert_equal "${use_php_command}" "n"
+}
+
+@test "parse_args --no-php-script declines the script sub-mode" {
+  parse_args --no-php-script
+  assert_equal "${use_php_script}" "n"
+}
+
 @test "parse_args --php-command-name implies the command sub-mode" {
   parse_args --php-command-name=mycli
   assert_equal "${php_command_name}" "mycli"
@@ -583,6 +636,34 @@ TOKENS
   run collect_noninteractive
   assert_success
   assert_output_contains "Use simple script              : y"
+}
+
+@test "collect_noninteractive falls back to the script when only the command app is declined" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php-command
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use CLI command app            : n"
+  assert_output_contains "Use simple script              : y"
+  assert_output_contains "Simple script name           : acme-app"
+}
+
+@test "collect_noninteractive keeps the command app when only the script is declined" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php-script
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use CLI command app            : y"
+  assert_output_contains "Use simple script              : n"
+}
+
+@test "collect_noninteractive selects the library when both entry points are declined" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php-command --no-php-script
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use PHP                          : y"
+  assert_output_contains "Use CLI command app            : n"
+  assert_output_contains "CLI command name             : <unset>"
+  assert_output_contains "Build PHAR                   : n"
+  assert_output_contains "Use simple script              : n"
 }
 
 @test "collect_noninteractive disables features on request" {
