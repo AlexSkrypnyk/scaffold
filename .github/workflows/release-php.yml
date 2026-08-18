@@ -39,7 +39,6 @@ jobs:
       - name: Install dependencies
         run: composer install
 
-      # yamllint disable-line #;< PHP_PHAR
       - name: Set release version
         env:
           INPUTS_VERSION: ${{ github.event.inputs.version }}
@@ -48,7 +47,11 @@ jobs:
           version="${INPUTS_VERSION:-${REF_NAME}}"
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "Release version: $version"
-          sed -i "s/\"yourproject-version\": \"development\"/\"yourproject-version\": \"${version}\"/g" box.json
+
+      # yamllint disable-line #;< PHP_PHAR
+      - name: Set PHAR version
+        run: |
+          sed -i "s/\"yourproject-version\": \"development\"/\"yourproject-version\": \"${RELEASE_VERSION}\"/g" box.json
 
       - name: Build PHAR
         run: composer build

@@ -47,7 +47,10 @@ jobs:
           version="${INPUTS_VERSION:-${REF_NAME}}"
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "Release version: $version"
-          sed -i "s/\"force-crystal-version\": \"development\"/\"force-crystal-version\": \"${version}\"/g" box.json
+
+      - name: Set PHAR version
+        run: |
+          sed -i "s/\"force-crystal-version\": \"development\"/\"force-crystal-version\": \"${RELEASE_VERSION}\"/g" box.json
 
       - name: Build PHAR
         run: composer build
