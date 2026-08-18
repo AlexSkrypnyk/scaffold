@@ -94,10 +94,14 @@ Content blocks can be conditionally included/excluded using special tokens:
 
 ### Sweep scope and the `.claude` allowlist
 
-Every helper above, plus `remove_tokens_with_content()` and
-`remove_special_comments()`, gets its file list from `sweep_files()`. It searches
-the project root recursively, skipping `.git`, `.idea`, `.claude`, `vendor` and
-`node_modules`, then searches the template-owned `.claude` paths explicitly:
+Five helpers sweep the project for a needle and edit whatever they find:
+`replace_string_content()`, `remove_string_content()`,
+`remove_string_content_line()`, `remove_tokens_with_content()` and
+`remove_special_comments()`. All five get their file list from `sweep_files()`.
+(`uncomment_line()` is not one of them - it edits the single file named in its
+argument.) `sweep_files()` searches the project root recursively, skipping
+`.git`, `.idea`, `.claude`, `vendor` and `node_modules`, then searches the
+template-owned `.claude` paths explicitly:
 
 - `.claude/settings.json`
 - `.claude/skills/update-architecture-docs`
