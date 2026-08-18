@@ -1,7 +1,8 @@
-@@ -134,39 +134,3 @@
+@@ -133,40 +133,3 @@
+         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
          uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
          timeout-minutes: 30
- 
+-
 -  build-php:
 -    name: Build PHAR
 -    runs-on: ubuntu-latest
