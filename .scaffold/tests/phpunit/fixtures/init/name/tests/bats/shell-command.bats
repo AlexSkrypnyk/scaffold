@@ -1,15 +1,11 @@
-@@ -1,9 +1,9 @@
+@@ -1,6 +1,6 @@
  #!/usr/bin/env bats
  #
 -# Test force-crystal.sh functionality.
 +# Test star-forge.sh functionality.
  #
  # Example usage:
--# ./.force-crystal/tests/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/bats
-+# ./.star-forge/tests/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/bats
- #
- # shellcheck disable=SC2030,SC2031,SC2034
- 
+ # ./tests/bats/node_modules/.bin/bats --no-tempdir-cleanup --formatter tap --filter-tags smoke tests/bats
 @@ -12,7 +12,7 @@
  export BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1
  

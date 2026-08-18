@@ -1,12 +1,3 @@
-@@ -6,7 +6,7 @@
- 
- ## Project Overview
- 
--This project was created from the force-crystal template and provides a foundation
-+This project was created from the star-forge template and provides a foundation
- for Shell scripts, PHP CLI applications, and/or NodeJS projects with integrated
- testing, code quality tools, and CI/CD workflows.
- 
 @@ -19,7 +19,7 @@
  Multi-command CLI application structure:
  

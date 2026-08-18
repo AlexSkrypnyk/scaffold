@@ -784,6 +784,36 @@ final class InitTest extends UnitTestCase {
     yield 'plantuml when selected' => [['--ai-arch-docs=plantuml'], $plantuml, $mermaid];
   }
 
+  /**
+   * The word 'scaffold' survives outside the template's self-references.
+   *
+   * The rename targets the repository path, the updater skill references and
+   * the attribution footer. A bare-word sweep reaches ordinary prose and
+   * paths that merely contain the word, and rewrites those too.
+   */
+  public function testInitKeepsOrdinaryScaffoldWord(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    // A path into the bats binary, which has no relation to the project name.
+    $bats = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'bats' . DIRECTORY_SEPARATOR . 'shell-command.bats');
+    $this->assertStringContainsString('./tests/bats/node_modules/.bin/bats', $bats);
+    $this->assertStringNotContainsString('acme-app/tests/node_modules', $bats);
+
+    // Prose naming the template the project was generated from.
+    $agents = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'AGENTS.md');
+    $this->assertStringContainsString('created from the Scaffold template', $agents);
+    $this->assertStringNotContainsString('created from the acme-app template', $agents);
+  }
+
   protected static function defaultAnswers(): array {
     return [
       'namespace' => 'YodasHut',
