@@ -611,7 +611,8 @@ final class InitTest extends UnitTestCase {
 
     $readme = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'README.md');
     $this->assertStringNotContainsString('vendor/bin/acme-app', $readme);
-    $this->assertStringContainsString('use AcmeApp\App\YourClass;', $readme);
+    $this->assertStringContainsString('use AcmeApp\App\Example;', $readme);
+    $this->assertStringContainsString("->greet('World')", $readme);
   }
 
   /**

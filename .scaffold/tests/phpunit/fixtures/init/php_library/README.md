@@ -3,8 +3,8 @@
  
  
 -    vendor/bin/force-crystal
-+    use YodasHut\App\YourClass;
-+    $result = (new YourClass())->run();
++    use YodasHut\App\Example;
++    echo (new Example())->greet('World');
  
  
  

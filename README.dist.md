@@ -66,8 +66,8 @@ Download the latest release from GitHub releases page.
 [//]: # (#;> !PHP_LIBRARY)
 [//]: # (#;< PHP_LIBRARY)
 
-    use YourNamespace\App\YourClass;
-    $result = (new YourClass())->run();
+    use YourNamespace\App\Example;
+    echo (new Example())->greet('World');
 
 [//]: # (#;> PHP_LIBRARY)
 [//]: # (#;> PHP)
