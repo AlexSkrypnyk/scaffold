@@ -1,4 +1,4 @@
-@@ -11,213 +11,35 @@
+@@ -11,214 +11,35 @@
  testing, code quality tools, and CI/CD workflows.
  
  
@@ -216,7 +216,8 @@
 -Key workflows:
 -
 -- `.github/workflows/test-php.yml` - PHP testing
--- `.github/workflows/release-php.yml` - PHAR packaging and release
+-- `.github/workflows/release-php.yml` - GitHub release on a tag
+-  - Builds the PHAR and attaches it to the release
 -
 -
 -- `.github/workflows/test-shell.yml` - Shell script testing

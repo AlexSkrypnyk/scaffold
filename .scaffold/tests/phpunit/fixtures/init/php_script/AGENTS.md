@@ -88,11 +88,11 @@
  ## CI/CD
  
  GitHub Actions workflows test across:
-@@ -210,10 +202,6 @@
- Key workflows:
+@@ -211,10 +203,6 @@
  
  - `.github/workflows/test-php.yml` - PHP testing
--- `.github/workflows/release-php.yml` - PHAR packaging and release
+ - `.github/workflows/release-php.yml` - GitHub release on a tag
+-  - Builds the PHAR and attaches it to the release
 -
 -
 -- `.github/workflows/test-shell.yml` - Shell script testing

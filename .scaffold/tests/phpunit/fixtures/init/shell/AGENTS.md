@@ -134,7 +134,7 @@
  ### Shell Script Testing with BATS
  
  Shell script tests use BATS:
-@@ -198,19 +76,6 @@
+@@ -198,20 +76,6 @@
  - Tests in `tests/bats/` with `.bats` extension
  - Helper functions in `tests/bats/_helper.bash`
  - Coverage exclusions: `# LCOV_EXCL_START` / `# LCOV_EXCL_END`
@@ -150,7 +150,8 @@
 -Key workflows:
 -
 -- `.github/workflows/test-php.yml` - PHP testing
--- `.github/workflows/release-php.yml` - PHAR packaging and release
+-- `.github/workflows/release-php.yml` - GitHub release on a tag
+-  - Builds the PHAR and attaches it to the release
  
  
  - `.github/workflows/test-shell.yml` - Shell script testing
