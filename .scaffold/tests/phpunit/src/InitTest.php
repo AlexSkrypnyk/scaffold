@@ -8,6 +8,7 @@ use AlexSkrypnyk\File\File;
 use AlexSkrypnyk\Snapshot\Replacer\Replacer;
 use Laravel\SerializableClosure\SerializableClosure;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\ExecutableFinder;
 
 /**
@@ -659,6 +660,126 @@ final class InitTest extends UnitTestCase {
 
     $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . '.claude' . DIRECTORY_SEPARATOR . 'settings.json');
     $this->assertDirectoryDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . '.claude');
+  }
+
+  /**
+   * Consumer-owned files under '.claude' survive an init run byte-for-byte.
+   *
+   * The update flow keeps the consumer's '.claude' across its wipe and then
+   * extracts the template on top, so init.sh runs over a tree holding both
+   * template-owned and consumer-owned files. Sweeping the consumer's agent
+   * configuration rewrote the fetched update skill to name the consumer's own
+   * repository, so a later run would pull the wrong project.
+   *
+   * @param string $path
+   *   Path of the consumer-owned file, relative to '.claude'.
+   */
+  #[DataProvider('dataProviderInitPreservesConsumerClaudeFiles')]
+  public function testInitPreservesConsumerClaudeFiles(string $path): void {
+    self::$fixtures = NULL;
+
+    $claude_dir = self::$sut . DIRECTORY_SEPARATOR . '.claude';
+    $file = $claude_dir . DIRECTORY_SEPARATOR . $path;
+    $planted = self::consumerClaudeContent();
+    File::dump($file, $planted);
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+      '--php-command-name=acme-cli',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $this->assertSame($planted, (string) file_get_contents($file));
+  }
+
+  public static function dataProviderInitPreservesConsumerClaudeFiles(): \Iterator {
+    // The skill the consumer fetches on demand to run the next update.
+    yield 'update skill' => ['skills/update-consumer-scaffold/SKILL.md'];
+    // Personal Claude Code overrides, git-ignored and never template-owned.
+    yield 'local settings' => ['settings.local.json'];
+    // A skill and an agent the consumer wrote themselves.
+    yield 'consumer skill' => ['skills/acme-deploy/SKILL.md'];
+    yield 'consumer agent' => ['agents/acme-reviewer.md'];
+  }
+
+  /**
+   * Every string init.sh sweeps for, in a consumer-owned file.
+   *
+   * Each line carries a needle from process_internal() or a token marker the
+   * block and comment helpers act on, so any helper that reaches this file
+   * changes it.
+   */
+  protected static function consumerClaudeContent(): string {
+    return implode("\n", [
+      '# Update Scaffold',
+      '',
+      'gh release list --repo AlexSkrypnyk/scaffold --limit 5',
+      'The scaffold template lives at [getscaffold.dev](https://getscaffold.dev).',
+      'Run ./php-command, ./php-script and ./shell-command.sh.',
+      'Namespace YourNamespace in yournamespace/yourproject, titled Yourproject.',
+      'Authored by Your Name, maintained by Alex Skrypnyk.',
+      'Generic project scaffold template',
+      '',
+      '#;< PHP',
+      'A PHP-only note.',
+      '#;> PHP',
+      '#; A bare marker.',
+      '',
+    ]);
+  }
+
+  /**
+   * Template-owned '.claude' files are still processed by the sweep helpers.
+   *
+   * Excluding '.claude' from the sweep must not overshoot: the shipped
+   * 'update-architecture-docs' skill carries the diagram-format token blocks,
+   * so the unselected format must be gone and no raw '#;' marker or
+   * unsubstituted placeholder may survive anywhere under '.claude'.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to init.sh.
+   * @param string $present
+   *   Heading of the diagram-format section that must survive.
+   * @param string $absent
+   *   Heading of the diagram-format section that must be removed.
+   */
+  #[DataProvider('dataProviderInitProcessesShippedClaudeFiles')]
+  public function testInitProcessesShippedClaudeFiles(array $arguments, string $present, string $absent): void {
+    self::$fixtures = NULL;
+
+    $arguments = array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $skill = self::$sut . DIRECTORY_SEPARATOR . '.claude' . DIRECTORY_SEPARATOR . 'skills' . DIRECTORY_SEPARATOR . 'update-architecture-docs' . DIRECTORY_SEPARATOR . 'SKILL.md';
+    $content = (string) file_get_contents($skill);
+    $this->assertStringContainsString($present, $content);
+    $this->assertStringNotContainsString($absent, $content);
+
+    // The allowlist of swept template paths only holds while no other shipped
+    // '.claude' file needs a substitution. Assert it rather than trust it.
+    $finder = (new Finder())->files()->in(self::$sut . DIRECTORY_SEPARATOR . '.claude')->ignoreDotFiles(FALSE);
+    $placeholders = ['#;', 'YourNamespace', 'yournamespace', 'yourproject', 'Yourproject', 'Your Name'];
+
+    foreach ($finder as $file) {
+      foreach ($placeholders as $placeholder) {
+        $this->assertStringNotContainsString($placeholder, $file->getContents(), sprintf('Unprocessed "%s" in shipped .claude file "%s".', $placeholder, $file->getRelativePathname()));
+      }
+    }
+  }
+
+  public static function dataProviderInitProcessesShippedClaudeFiles(): \Iterator {
+    $mermaid = '## Diagram format: Mermaid';
+    $plantuml = '## Diagram format: PlantUML';
+
+    yield 'mermaid by default' => [[], $mermaid, $plantuml];
+    yield 'plantuml when selected' => [['--ai-arch-docs=plantuml'], $plantuml, $mermaid];
   }
 
   protected static function defaultAnswers(): array {

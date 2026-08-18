@@ -149,8 +149,36 @@ to_pascalcase() { echo "${1}" | awk -F'[-_ ]' '{for(i=1;i<=NF;i++) $i=toupper(su
 #-------------------------------------------------------------------------------
 
 ##
+# List the files containing a needle, restricted to template-owned paths.
+#
+# '.claude' is excluded from the recursive search. An update run merges a new
+# template into a tree that already carries the consumer's own agent
+# configuration - skills, agents and local settings this script does not own -
+# and sweeping those rewrites them: the fetched update skill ends up naming the
+# consumer's repository instead of the template's, so the next update pulls the
+# wrong project. The '.claude' paths the template itself ships are searched
+# explicitly, because they still carry tokens that must be processed. Shipping
+# another file under '.claude' means listing it here.
+#
+# @param $1 string Needle (string to find)
+# @param $2 string Path relative to the project root to search instead of the
+#                  whole tree (optional)
+#
+sweep_files() {
+  local needle="${1}"
+  local target="${2:-}"
+
+  if [ -n "${target}" ]; then
+    grep -rIl "${needle}" "$(pwd)/${target}" 2>/dev/null || true
+    return 0
+  fi
+
+  grep -rIl --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir=".claude" --exclude-dir="vendor" --exclude-dir="node_modules" "${needle}" "$(pwd)" || true
+  grep -rIl "${needle}" "$(pwd)/.claude/settings.json" "$(pwd)/.claude/skills/update-architecture-docs" 2>/dev/null || true
+}
+
+##
 # Replace all occurrences of a string in files.
-# Searches recursively, excluding common directories.
 #
 # @param $1 string Needle (string to find)
 # @param $2 string Replacement (string to replace with)
@@ -160,24 +188,22 @@ replace_string_content() {
   local replacement="${2}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  set +e
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${needle}" "$(pwd)" | xargs sed "${sed_opts[@]}" "s!${needle}!${replacement}!g" || true
-  set -e
+  sweep_files "${needle}" | xargs sed "${sed_opts[@]}" "s!${needle}!${replacement}!g" || true
 }
 
 remove_string_content() {
   local token="${1}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
+  sweep_files "${token}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
 }
 
 remove_string_content_line() {
   local token="${1}"
-  local target="${2:-.}"
+  local target="${2:-}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)/${target}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+  sweep_files "${token}" "${target}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
 ##
@@ -196,7 +222,7 @@ remove_tokens_with_content() {
   local token="${1}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  grep -rI --include=".*" --include="*" --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "#;> $token" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
+  sweep_files "#;> $token" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
 }
 
 uncomment_line() {
@@ -211,7 +237,7 @@ remove_special_comments() {
   local token="#;"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  grep -rI --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir="vendor" --exclude-dir="node_modules" -l "${token}" "$(pwd)" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+  sweep_files "${token}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
 #-------------------------------------------------------------------------------
