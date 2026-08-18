@@ -7,13 +7,15 @@ parameters:
   level: 9
 
   paths:
-    #;< PHP_COMMAND
+    #;< !PHP_SCRIPT
     - src
+    #;> !PHP_SCRIPT
+    #;< PHP_COMMAND
     - php-command
     #;> PHP_COMMAND
-    #;< !PHP_COMMAND
+    #;< PHP_SCRIPT
     - php-script
-    #;> !PHP_COMMAND
+    #;> PHP_SCRIPT
     - tests/phpunit
 
   excludePaths:

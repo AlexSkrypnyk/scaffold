@@ -34,7 +34,7 @@ sequenceDiagram
 ```
 
 [//]: # (#;> PHP_COMMAND)
-[//]: # (#;< !PHP_COMMAND)
+[//]: # (#;< PHP_SCRIPT)
 
 ### Single-file script
 
@@ -53,7 +53,14 @@ flowchart TB
     logic --> out[verbose messages, silenced by SCRIPT_QUIET]
 ```
 
-[//]: # (#;> !PHP_COMMAND)
+[//]: # (#;> PHP_SCRIPT)
+[//]: # (#;< PHP_LIBRARY)
+
+### Class library
+
+The PHP stack has no entry point: it is a class library consumed by other projects through Composer. Classes live in `src/` and are autoloaded PSR-4 under the `YourNamespace\App` namespace, starting from the `Example` placeholder and its unit test. The flows through them are documented here as the library grows.
+
+[//]: # (#;> PHP_LIBRARY)
 
 PHP code is verified by PHPUnit tests in `tests/phpunit/` (unit tests with mocks in `Unit/`, integration tests against the real file system in `Functional/`) and by a three-layer quality stack: PHP_CodeSniffer, PHPStan, and Rector, wired as `composer lint` and `composer test`.
 

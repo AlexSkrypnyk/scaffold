@@ -22,12 +22,12 @@
             restrictWarnings="true"
             ignoreIndirectDeprecations="true">
         <include>
-            <!-- #;< PHP_COMMAND -->
+            <!-- #;< !PHP_SCRIPT -->
             <directory>src</directory>
-            <!-- #;> PHP_COMMAND -->
-            <!-- #;< !PHP_COMMAND -->
+            <!-- #;> !PHP_SCRIPT -->
+            <!-- #;< PHP_SCRIPT -->
             <file>php-script</file>
-            <!-- #;> !PHP_COMMAND -->
+            <!-- #;> PHP_SCRIPT -->
         </include>
         <exclude>
             <directory>tests</directory>

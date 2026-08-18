@@ -59,9 +59,17 @@ Download the latest release from GitHub releases page.
 ## Usage
 
 [//]: # (#;< PHP)
+[//]: # (#;< !PHP_LIBRARY)
 
     vendor/bin/yourproject
 
+[//]: # (#;> !PHP_LIBRARY)
+[//]: # (#;< PHP_LIBRARY)
+
+    use YourNamespace\App\YourClass;
+    $result = (new YourClass())->run();
+
+[//]: # (#;> PHP_LIBRARY)
 [//]: # (#;> PHP)
 
 [//]: # (#;< NODEJS)
@@ -77,6 +85,7 @@ Download the latest release from GitHub releases page.
 [//]: # (#;> SHELL)
 
 [//]: # (#;< PHP)
+[//]: # (#;< !PHP_LIBRARY)
 
 ### CLI options
 
@@ -86,6 +95,7 @@ Download the latest release from GitHub releases page.
 | `--option1` | `default1`    | Option with a default value.       |
 | `--option2` | None          | Option without a value.            |
 
+[//]: # (#;> !PHP_LIBRARY)
 [//]: # (#;> PHP)
 
 ## Contributing
