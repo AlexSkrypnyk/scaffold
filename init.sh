@@ -151,14 +151,9 @@ to_pascalcase() { echo "${1}" | awk -F'[-_ ]' '{for(i=1;i<=NF;i++) $i=toupper(su
 ##
 # List the files containing a needle, restricted to template-owned paths.
 #
-# '.claude' is excluded from the recursive search. An update run merges a new
-# template into a tree that already carries the consumer's own agent
-# configuration - skills, agents and local settings this script does not own -
-# and sweeping those rewrites them: the fetched update skill ends up naming the
-# consumer's repository instead of the template's, so the next update pulls the
-# wrong project. The '.claude' paths the template itself ships are searched
-# explicitly, because they still carry tokens that must be processed. Shipping
-# another file under '.claude' means listing it here.
+# '.claude' holds both template-owned and consumer-owned files, so it is
+# excluded from the recursive search and its shipped paths are searched
+# explicitly.
 #
 # @param $1 string Needle (string to find)
 # @param $2 string Path relative to the project root to search instead of the
