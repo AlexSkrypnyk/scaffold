@@ -44,7 +44,7 @@ To add a Symfony Console command:
 3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
 
 [//]: # (#;> PHP_COMMAND)
-[//]: # (#;< !PHP_COMMAND)
+[//]: # (#;< PHP_SCRIPT)
 
 ### Standalone Single-File Script
 
@@ -77,7 +77,24 @@ $output = main(['php-script', 'arg1'], 2);
 $this->assertStringContainsString('expected', implode("\n", $output));
 ```
 
-[//]: # (#;> !PHP_COMMAND)
+[//]: # (#;> PHP_SCRIPT)
+[//]: # (#;< PHP_LIBRARY)
+
+### Class Library
+
+This project ships classes only - there is no CLI entry point:
+
+- **Location:** `src/` directory, autoloaded PSR-4
+- **Consumed by:** other projects, via `composer require`
+- **Use for:** packages such as test contexts, extensions, plugins and
+  interface implementations
+
+Add classes under `src/` and cover each one with a test in
+`tests/phpunit/Unit/`. The shipped `Example` class and its unit test are a
+placeholder pair to replace with the library's own code; keep at least one
+class, as the linters report an error when the project holds no PHP file.
+
+[//]: # (#;> PHP_LIBRARY)
 
 ### Namespace Structure
 

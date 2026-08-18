@@ -375,6 +375,9 @@ remove_php() {
   remove_php_command
   remove_php_command_build
   remove_php_script
+  remove_php_classes
+  remove_php_library
+  remove_php_entrypoint
 
   rm -f composer.json || true
   rm -f composer.lock || true
@@ -416,7 +419,7 @@ remove_php() {
 
 remove_php_command() {
   rm -f php-command || true
-  rm -Rf src || true
+  rm -Rf src/Command || true
   rm -f tests/phpunit/Functional/ApplicationFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/JokeCommandTest.php || true
   rm -f tests/phpunit/Functional/SayHelloCommandTest.php || true
@@ -441,11 +444,46 @@ remove_php_script() {
   rm -f tests/phpunit/Unit/ScriptUnitTestCase.php || true
   rm -f tests/phpunit/Functional/ScriptFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/ExampleScriptFunctionalTest.php || true
-  remove_tokens_with_content "!PHP_COMMAND"
-  remove_tokens_with_content "!PHP_PHAR"
+  remove_tokens_with_content "PHP_SCRIPT"
   remove_string_content_line '"php-script"'
 
   replace_string_content '"'"${new_name}"'",' '"'"${new_name}"'"'
+}
+
+##
+# Remove the class source directory and the tooling references to it.
+#
+remove_php_classes() {
+  rm -Rf src || true
+
+  remove_tokens_with_content "!PHP_SCRIPT"
+}
+
+##
+# Remove the class-library example and notes from a project with an entry point.
+#
+remove_php_library() {
+  rm -f src/Example.php || true
+  rm -f tests/phpunit/Unit/ExampleUnitTest.php || true
+
+  remove_tokens_with_content "PHP_LIBRARY"
+}
+
+##
+# Remove the declaration and the documentation of an executable entry point.
+#
+remove_php_entrypoint() {
+  remove_tokens_with_content "!PHP_LIBRARY"
+
+  [ -f composer.json ] || return 0
+
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+  # An empty "bin" array passes 'composer validate' but fails the
+  # 'composer normalize' check the shipped workflow runs. Both ends of the
+  # range are anchored so an unexpected layout removes nothing instead of
+  # swallowing the keys that follow.
+  sed "${sed_opts[@]}" -e '/^ *"bin": \[$/,/^ *\],$/d' composer.json
 }
 
 remove_nodejs() {
@@ -587,6 +625,16 @@ remove_schedule() {
 #-------------------------------------------------------------------------------
 # PROCESSING FUNCTIONS
 #-------------------------------------------------------------------------------
+
+##
+# Reduce the PHP stack to a class library with no entry point.
+#
+process_php_library() {
+  remove_php_command
+  remove_php_command_build
+  remove_php_script
+  remove_php_entrypoint
+}
 
 ##
 # Keep only the selected diagram format in the AI architecture docs.
@@ -769,7 +817,11 @@ Identity (required in non-interactive mode):
 Features (enabled by default unless noted; use --no-<name> to disable):
   --php, --no-php                PHP support.
   --php-command                  Use the Symfony CLI command app (default).
+  --no-php-command               Do not use the Symfony CLI command app.
   --php-script                   Use a single-file script instead of the app.
+  --no-php-script                Do not use a single-file script. Combined with
+                                 --no-php-command, scaffolds a class library
+                                 with the PHP tooling and no entry point.
   --php-command-name=VALUE       CLI command file name (default: project name).
   --php-script-name=VALUE        Script file name (default: project name).
   --phar, --no-phar              Build a PHAR (default: on).
@@ -821,7 +873,9 @@ parse_args() {
       --php) use_php="y" ;;
       --no-php) use_php="n" ;;
       --php-command) use_php_command="y" ;;
+      --no-php-command) use_php_command="n" ;;
       --php-script) use_php_script="y" ;;
+      --no-php-script) use_php_script="n" ;;
       --php-command-name=*)
         php_command_name="${1#*=}"
         use_php_command="y"
@@ -962,7 +1016,7 @@ apply_noninteractive_defaults() {
 
   if [ "${use_php}" = "y" ]; then
     if [ "${use_php_script}" = "y" ]; then
-      use_php_command="n"
+      : "${use_php_command:=n}"
     else
       : "${use_php_command:=y}"
     fi
@@ -973,10 +1027,17 @@ apply_noninteractive_defaults() {
       use_php_script="n"
       php_script_name="<unset>"
     else
+      # Declining the command app offers the script next, as the prompts do;
+      # declining both leaves a class library with no entry point.
       : "${use_php_script:=y}"
-      : "${php_script_name:=${project}}"
       use_php_command_build="n"
       php_command_name="<unset>"
+
+      if [ "${use_php_script}" = "y" ]; then
+        : "${php_script_name:=${project}}"
+      else
+        php_script_name="<unset>"
+      fi
     fi
   else
     use_php_command="n"
@@ -1055,9 +1116,13 @@ collect_interactive() {
       php_script_name="<unset>"
     else
       use_php_script="$(ask_yesno "  Use simple script")"
-      php_script_name=$(ask "    CLI script name" "${project}")
       php_command_name="<unset>"
+      php_script_name="<unset>"
       use_php_command_build="n"
+
+      if [ "${use_php_script}" = "y" ]; then
+        php_script_name=$(ask "    CLI script name" "${project}")
+      fi
     fi
   fi
 
@@ -1272,16 +1337,16 @@ process_project() {
       replace_string_content "php-command" "${php_command_name}"
       mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
       remove_php_script "${php_command_name}"
-    else
+      remove_php_library
+    elif [ "${use_php_script:-n}" = "y" ]; then
       remove_php_command
       remove_php_command_build
-
-      if [ "${use_php_script:-n}" = "y" ]; then
-        replace_string_content "php-script" "${php_script_name}"
-        mv "php-script" "${php_script_name}" >/dev/null 2>&1 || true
-      else
-        remove_php_script "${php_script_name}"
-      fi
+      remove_php_classes
+      remove_php_library
+      replace_string_content "php-script" "${php_script_name}"
+      mv "php-script" "${php_script_name}" >/dev/null 2>&1 || true
+    else
+      process_php_library
     fi
   else
     remove_php

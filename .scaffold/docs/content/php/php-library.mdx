@@ -1,0 +1,42 @@
+---
+title: PHP Library
+sidebar_position: 4
+---
+
+# Library
+
+A Composer package that ships classes and no executable - a Behat context, a
+PHPUnit extension, a framework plugin, a PSR implementation - needs the PHP
+tooling without an entry point.
+
+Decline both PHP entry points to get it:
+
+```bash
+./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" \
+  --php --no-php-command --no-php-script
+```
+
+Interactively, answer "n" to both `Use CLI command app` and `Use simple script`.
+
+## What you get
+
+- `composer.json` with the PSR-4 autoloader and no `bin` section
+- `src/Example.php` and `tests/phpunit/Unit/ExampleUnitTest.php` - a single
+  placeholder class and its test
+- PHP_CodeSniffer, PHPStan and Rector configuration scanning `src` and
+  `tests/phpunit`
+- PHPUnit configuration with coverage over `src`
+- The `Test PHP` and `Release PHP` workflows, the latter creating a release for
+  each tag without attaching an artifact
+
+Neither `php-command` nor `php-script` is generated, and neither is `box.json`
+or the PHAR build, so a class-only package has nothing to unpick afterwards.
+
+## Getting started
+
+Replace `Example` with the library's own classes under `src/` - they are
+autoloaded as `AcmeApp\App\` - and cover each one with a test in
+`tests/phpunit/Unit/`.
+
+Keep at least one class: PHP_CodeSniffer and PHPStan both report an error when
+they are pointed at a project that holds no PHP file at all.

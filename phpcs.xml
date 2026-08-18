@@ -14,13 +14,15 @@
     <arg value="p"/>
     <arg name="colors"/>
 
-    <!-- #;< PHP_COMMAND -->
+    <!-- #;< !PHP_SCRIPT -->
     <file>src</file>
+    <!-- #;> !PHP_SCRIPT -->
+    <!-- #;< PHP_COMMAND -->
     <file>php-command</file>
     <!-- #;> PHP_COMMAND -->
-    <!-- #;< !PHP_COMMAND -->
+    <!-- #;< PHP_SCRIPT -->
     <file>php-script</file>
-    <!-- #;> !PHP_COMMAND -->
+    <!-- #;> PHP_SCRIPT -->
     <file>tests/phpunit</file>
 
     <!-- Allow long array lines in tests. -->

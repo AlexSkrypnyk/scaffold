@@ -1,4 +1,4 @@
-@@ -48,21 +48,10 @@
+@@ -48,21 +48,8 @@
            echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
            echo "Release version: $version"
  
@@ -18,6 +18,5 @@
          uses: softprops/action-gh-release@__HASH__ # __VERSION__
          with:
            tag_name: ${{ env.RELEASE_VERSION }}
-           files: |
+-          files: |
 -            ./.build/force-crystal.phar
-+            force-crystal

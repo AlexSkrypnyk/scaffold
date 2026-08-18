@@ -88,6 +88,17 @@ final class InitTest extends UnitTestCase {
           'use_shell' => self::$tuiNo,
         ],
     ];
+    yield 'php library' => [
+        [
+          'use_php' => self::$tuiYes,
+          'use_php_command' => self::$tuiNo,
+          // Declining the command app skips its name and PHAR prompts, and
+          // declining the script skips its name prompt.
+          'php_command_name' => self::TUI_SKIP,
+          'use_php_command_build' => self::TUI_SKIP,
+          'use_php_script' => self::$tuiNo,
+        ],
+    ];
     yield 'nodejs' => [
         [
           'use_php' => self::$tuiNo,
@@ -223,6 +234,10 @@ final class InitTest extends UnitTestCase {
     yield 'all defaults' => [
       $identity,
       self::BASELINE_DIR,
+    ];
+    yield 'php library' => [
+      array_merge($identity, ['--no-php-command', '--no-php-script']),
+      'php_library',
     ];
     yield 'no docs' => [
       array_merge($identity, ['--no-docs']),
@@ -541,6 +556,63 @@ final class InitTest extends UnitTestCase {
 
     $bats_package = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'bats' . DIRECTORY_SEPARATOR . 'package.json');
     $this->assertStringContainsString('"license": "GPL-3.0-or-later"', $bats_package);
+  }
+
+  /**
+   * Declining both PHP entry points leaves the tooling and no stubs.
+   *
+   * A class-only package has no command and no script, so init.sh must
+   * generate neither - while keeping 'src' in the linting and test
+   * configuration and dropping the 'composer.json' bin section, which
+   * 'composer normalize' rejects once it is empty.
+   */
+  public function testInitPhpLibraryShipsNoEntryPoint(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+      '--php',
+      '--no-php-command',
+      '--no-php-script',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'acme-app');
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'php-command');
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'php-script');
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'box.json');
+    $this->assertDirectoryDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Command');
+
+    // PHPCS and PHPStan both fail when pointed at a project with no PHP file,
+    // so the mode ships one placeholder class and its test.
+    $this->assertFileExists(self::$sut . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Example.php');
+    $this->assertFileExists(self::$sut . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'phpunit' . DIRECTORY_SEPARATOR . 'Unit' . DIRECTORY_SEPARATOR . 'ExampleUnitTest.php');
+
+    $composer = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'composer.json');
+    $this->assertJson($composer);
+    $this->assertStringNotContainsString('"bin"', $composer);
+    $this->assertStringContainsString('"AcmeApp\\\\App\\\\": "src/"', $composer);
+
+    $phpcs = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'phpcs.xml');
+    $this->assertStringContainsString('<file>src</file>', $phpcs);
+    $this->assertStringNotContainsString('<file>acme-app</file>', $phpcs);
+
+    $phpstan = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'phpstan.neon');
+    $this->assertStringContainsString('- src', $phpstan);
+    $this->assertStringNotContainsString('- acme-app', $phpstan);
+
+    $phpunit = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'phpunit.xml');
+    $this->assertStringContainsString('<directory>src</directory>', $phpunit);
+    $this->assertStringNotContainsString('<file>acme-app</file>', $phpunit);
+
+    $readme = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'README.md');
+    $this->assertStringNotContainsString('vendor/bin/acme-app', $readme);
+    $this->assertStringContainsString('use AcmeApp\App\Example;', $readme);
+    $this->assertStringContainsString("->greet('World')", $readme);
   }
 
   /**

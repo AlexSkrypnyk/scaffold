@@ -36,11 +36,14 @@
     and [traits](tests/phpunit/Traits)
   - [Simple single-file script scaffold](php-script)
     with [unit tests](tests/phpunit/Functional) (with coverage)
+  - Class library scaffold - the tooling with no entry point, for packages that
+    ship only classes
   - Code quality tools with
     configurations: [PHP Code Sniffer](phpcs.xml),
     [PHPStan](phpstan.neon), [Rector](rector.php)
   - CI config to [Lint, test](.github/workflows/test-php.yml)
-    and [publish](.github/workflows/release-php.yml) PHP as [PHAR](box.json)
+    and [publish](.github/workflows/release-php.yml) PHP, packaging the command
+    app as a [PHAR](box.json)
 - **NodeJS**
   - [`package.json`](package.json)
   - CI config to [build and test](.github/workflows/test-nodejs.yml) for NodeJS

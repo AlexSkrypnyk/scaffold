@@ -59,6 +59,10 @@ Content blocks can be conditionally included/excluded using special tokens:
 
 - `PHP_COMMAND` - Symfony Console application features
 - `PHP_SCRIPT` - Standalone script features
+- `PHP_LIBRARY` - Class-library features, selected by declining both PHP entry
+  points; `!PHP_SCRIPT` marks what the command app and the library share (the
+  `src` directory), `!PHP_LIBRARY` what the two entry points share
+- `PHP_PHAR` - PHAR packaging
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
@@ -124,9 +128,10 @@ is modified at all.
 
 ## PHP Template Features
 
-### Dual Implementation Pattern
+### PHP Modes
 
-The template provides two PHP patterns simultaneously:
+The template carries every PHP pattern at once and `init.sh` keeps the selected
+one:
 
 1. **`src/` + `php-command`** - Symfony Console app
   - Multi-command structure
@@ -137,6 +142,15 @@ The template provides two PHP patterns simultaneously:
   - Zero dependencies
   - Self-contained bootstrap
   - Testable via `SCRIPT_RUN_SKIP=1`
+
+3. **`src/Example.php`** - Class library
+  - Selected by declining both entry points (`--no-php-command
+    --no-php-script`, or "n" to both prompts)
+  - Ships the tooling with no entry point: `process_php_library()` drops the
+    `bin` section from `composer.json`
+  - Keeps one placeholder class and its unit test, because PHPCS and PHPStan
+    both error out when pointed at a project holding no PHP file
+  - The other two modes drop that pair in `remove_php_library()`
 
 **Key Challenge:** PHP_CodeSniffer cannot scan files without `.php` extension.
 
@@ -272,8 +286,8 @@ Each test scenario in `InitTest.php` validates a specific configuration:
 
 - `_baseline` - Default configuration (all features enabled)
 - `name` - Custom namespace/project/author names
-- `php_command`, `php_script`, `nodejs`, `shell` - Individual language
-  selections
+- `php_command`, `php_script`, `php_library`, `nodejs`, `shell` - Individual
+  language selections
 - `no_languages` - No languages selected
 - Feature toggles: `no_release_drafter`, `no_pr_autoassign`, `no_funding`,
   `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`
