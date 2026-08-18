@@ -921,6 +921,53 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
 }
 
+@test "process_project scaffolds a class library when both entry points are declined" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_library"
+  mkdir -p "${tmpdir}/src/Command"
+  mkdir -p "${tmpdir}/tests/phpunit/Unit"
+  printf '# /.editorconfig   export-ignore\n# /docs            export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
+  create_composer_json "${tmpdir}"
+  echo "<?php // command" >"${tmpdir}/php-command"
+  echo "<?php // script" >"${tmpdir}/php-script"
+  echo "<?php // library" >"${tmpdir}/src/Example.php"
+  echo "<?php // joke" >"${tmpdir}/src/Command/JokeCommand.php"
+  echo "<?php // library test" >"${tmpdir}/tests/phpunit/Unit/ExampleUnitTest.php"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_php="y"
+  use_php_command="n"
+  use_php_script="n"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/php-command"
+  assert_file_not_exists "${tmpdir}/php-script"
+  assert_dir_not_exists "${tmpdir}/src/Command"
+  assert_file_exists "${tmpdir}/src/Example.php"
+  assert_file_exists "${tmpdir}/tests/phpunit/Unit/ExampleUnitTest.php"
+  assert_file_not_contains "${tmpdir}/composer.json" '"bin"'
+}
+
+@test "collect_interactive declines both entry points without asking for a script name" {
+  run collect_interactive <<<"$(printf 'AcmeApp\nacme-app\nJane Doe\ny\nn\nn\n')"
+
+  assert_success
+  assert_output_contains "Use CLI command app            : n"
+  assert_output_contains "Use simple script              : n"
+  assert_output_not_contains "CLI script name"
+}
+
 @test "template_present detects the .scaffold directory" {
   local tmpdir="${BATS_TEST_TMPDIR}/template_present"
   mkdir -p "${tmpdir}/.scaffold"
