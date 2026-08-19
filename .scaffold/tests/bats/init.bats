@@ -116,6 +116,40 @@ RENOVATE
   assert_file_contains "${tmpdir}/renovate.json" '"matchDepNames": ["php"]'
 }
 
+create_zizmor_yml() {
+  cat >"${1}/zizmor.yml" <<'ZIZMOR'
+rules:
+  superfluous-actions:
+    ignore:
+      - release-php.yml
+      - release-nodejs.yml
+ZIZMOR
+}
+
+@test "remove_nodejs drops the release workflow zizmor suppression entry" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_nodejs_zizmor"
+  mkdir -p "${tmpdir}"
+  create_zizmor_yml "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_nodejs
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/zizmor.yml" "release-nodejs.yml"
+  assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
+}
+
+@test "remove_zizmor_entry is a no-op without a zizmor.yml" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_zizmor_absent"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_zizmor_entry "release-php.yml"
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/zizmor.yml"
+}
+
 @test "remove_php then remove_nodejs empties matchManagers" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_both"
   mkdir -p "${tmpdir}"
@@ -957,6 +991,98 @@ SETTINGS
   assert_file_exists "${tmpdir}/src/Example.php"
   assert_file_exists "${tmpdir}/tests/phpunit/Unit/ExampleUnitTest.php"
   assert_file_not_contains "${tmpdir}/composer.json" '"bin"'
+}
+
+create_release_workflow() {
+  mkdir -p "${1}/.github/workflows"
+  cat >"${1}/.github/workflows/release-php.yml" <<'RELEASE'
+      - name: Set release version
+        run: echo "Release version"
+      # yamllint disable-line #;< PHP_PHAR
+      - name: Build PHAR
+        run: composer build
+
+      # yamllint disable-line #;> PHP_PHAR
+      - name: Create Release
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          files: |
+            #;< PHP_PHAR
+            ./.build/php-command.phar
+            #;> PHP_PHAR
+            #;< PHP_SCRIPT
+            php-script
+            #;> PHP_SCRIPT
+RELEASE
+}
+
+create_release_project() {
+  local tmpdir="${1}"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n# /docs            export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
+  create_composer_json "${tmpdir}"
+  create_release_workflow "${tmpdir}"
+  create_zizmor_yml "${tmpdir}"
+  echo '{"main": "php-command"}' >"${tmpdir}/box.json"
+  echo "<?php // command" >"${tmpdir}/php-command"
+  echo "<?php // script" >"${tmpdir}/php-script"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_php="y"
+  # Keeps 'zizmor.yml' in the tree so the suppression entries stay assertable,
+  # and keeps the Node.js entry as a control for the PHP one.
+  use_test_actions="y"
+  use_nodejs="y"
+}
+
+@test "process_project removes the release workflow when the command app skips the PHAR" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_no_phar"
+  create_release_project "${tmpdir}"
+
+  use_php_command="y"
+  use_php_command_build="n"
+  php_command_name="acme-app"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/box.json"
+  assert_file_exists "${tmpdir}/acme-app"
+  assert_file_not_exists "${tmpdir}/.github/workflows/release-php.yml"
+  assert_file_not_contains "${tmpdir}/zizmor.yml" "release-php.yml"
+  assert_file_contains "${tmpdir}/zizmor.yml" "release-nodejs.yml"
+}
+
+@test "process_project keeps the release workflow when the script is the release asset" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_script_release"
+  create_release_project "${tmpdir}"
+
+  use_php_command="n"
+  use_php_script="y"
+  php_script_name="acme-app"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_exists "${tmpdir}/.github/workflows/release-php.yml"
+  assert_file_contains "${tmpdir}/.github/workflows/release-php.yml" "files:"
+  assert_file_contains "${tmpdir}/.github/workflows/release-php.yml" "acme-app"
+  assert_file_not_contains "${tmpdir}/.github/workflows/release-php.yml" "Build PHAR"
+  assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
 }
 
 @test "collect_interactive declines both entry points without asking for a script name" {

@@ -99,6 +99,11 @@ final class InitTest extends UnitTestCase {
           'use_php_script' => self::$tuiNo,
         ],
     ];
+    yield 'no phar' => [
+        [
+          'use_php_command_build' => self::$tuiNo,
+        ],
+    ];
     yield 'nodejs' => [
         [
           'use_php' => self::$tuiNo,
@@ -238,6 +243,10 @@ final class InitTest extends UnitTestCase {
     yield 'php library' => [
       array_merge($identity, ['--no-php-command', '--no-php-script']),
       'php_library',
+    ];
+    yield 'no phar' => [
+      array_merge($identity, ['--no-phar']),
+      'no_phar',
     ];
     yield 'no docs' => [
       array_merge($identity, ['--no-docs']),

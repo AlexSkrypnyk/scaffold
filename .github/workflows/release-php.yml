@@ -60,13 +60,12 @@ jobs:
         run: |
           ./.build/php-command.phar --version
           ./.build/php-command.phar || exit 1
-      # yamllint disable-line #;> PHP_PHAR
 
+      # yamllint disable-line #;> PHP_PHAR
       - name: Create Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           tag_name: ${{ env.RELEASE_VERSION }}
-          # yamllint disable-line #;< !PHP_LIBRARY
           files: |
             #;< PHP_PHAR
             ./.build/php-command.phar
@@ -74,4 +73,3 @@ jobs:
             #;< PHP_SCRIPT
             php-script
             #;> PHP_SCRIPT
-          # yamllint disable-line #;> !PHP_LIBRARY
