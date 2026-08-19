@@ -202,6 +202,20 @@ remove_string_content_line() {
 }
 
 ##
+# Drop a workflow's suppression entries from the zizmor configuration.
+#
+# 'zizmor.yml' is absent when Actions linting is not selected, and grepping a
+# missing file errors.
+#
+# @param $1 string Workflow file name
+#
+remove_zizmor_entry() {
+  [ -f zizmor.yml ] || return 0
+
+  remove_string_content_line "${1}" "zizmor.yml"
+}
+
+##
 # Remove tokens and their enclosed content from files.
 # Tokens use format: #;< TOKEN ... #;> TOKEN
 #
@@ -378,6 +392,7 @@ remove_php() {
   remove_php_classes
   remove_php_library
   remove_php_entrypoint
+  remove_php_release
 
   rm -f composer.json || true
   rm -f composer.lock || true
@@ -397,7 +412,6 @@ remove_php() {
   remove_string_content_line "\/rector.php" ".gitattributes"
 
   rm -f .github/workflows/test-php.yml || true
-  rm -f .github/workflows/release-php.yml || true
 
   remove_tokens_with_content "PHP"
 
@@ -438,10 +452,14 @@ remove_php_command_build() {
 }
 
 ##
-# Remove the list of files the release workflow attaches to a tag.
+# Remove the release workflow, which exists only to attach an asset to a tag.
 #
-remove_php_release_files() {
-  remove_tokens_with_content "PHP_RELEASE_FILES"
+remove_php_release() {
+  rm -f .github/workflows/release-php.yml || true
+
+  remove_zizmor_entry "release-php.yml"
+
+  remove_tokens_with_content "PHP_RELEASE"
 }
 
 remove_php_script() {
@@ -508,6 +526,8 @@ remove_nodejs() {
 
   rm -f .github/workflows/test-nodejs.yml || true
   rm -f .github/workflows/release-nodejs.yml || true
+
+  remove_zizmor_entry "release-nodejs.yml"
 
   remove_tokens_with_content "NODEJS"
 
@@ -641,7 +661,7 @@ process_php_library() {
   remove_php_command_build
   remove_php_script
   remove_php_entrypoint
-  remove_php_release_files
+  remove_php_release
 }
 
 ##
@@ -747,12 +767,7 @@ process_internal() {
   rm -f ".github/workflows/scaffold-test.yml" || true
   rm -f ".github/workflows/scaffold-release-docs.yml" || true
 
-  # The scaffold-only release workflow is always removed, so drop its companion
-  # zizmor suppression entry too. Guarded because zizmor.yml is absent when
-  # Actions linting is not selected, and grepping a missing file errors.
-  if [ -f zizmor.yml ]; then
-    remove_string_content_line "scaffold-release-docs.yml" "zizmor.yml"
-  fi
+  remove_zizmor_entry "scaffold-release-docs.yml"
 
   protect_skill_references
 
@@ -1343,7 +1358,7 @@ process_project() {
     if [ "${use_php_command}" = "y" ]; then
       if [ "${use_php_command_build:-n}" != "y" ]; then
         remove_php_command_build
-        remove_php_release_files
+        remove_php_release
       fi
 
       replace_string_content "php-command" "${php_command_name}"

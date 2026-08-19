@@ -285,10 +285,12 @@ GitHub Actions workflows test across:
 Key workflows:
 
 - `.github/workflows/test-php.yml` - PHP testing
-- `.github/workflows/release-php.yml` - GitHub release on a tag
+[//]: # (#;< PHP_RELEASE)
+- `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
 [//]: # (#;< PHP_PHAR)
-  - Builds the PHAR and attaches it to the release
+  - Builds the PHAR to attach
 [//]: # (#;> PHP_PHAR)
+[//]: # (#;> PHP_RELEASE)
 
 [//]: # (#;> PHP)
 [//]: # (#;< SHELL)

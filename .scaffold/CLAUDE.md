@@ -63,9 +63,10 @@ Content blocks can be conditionally included/excluded using special tokens:
   points; `!PHP_SCRIPT` marks what the command app and the library share (the
   `src` directory), `!PHP_LIBRARY` what the two entry points share
 - `PHP_PHAR` - PHAR packaging
-- `PHP_RELEASE_FILES` - The `files:` key of the release workflow, kept only when
-  the project builds an artifact to attach to the tag. Dropped for a class
-  library and for a command app built without a PHAR
+- `PHP_RELEASE` - Documentation of `release-php.yml`, which exists only to attach
+  an asset to a tag. `remove_php_release()` deletes the workflow, its `zizmor.yml`
+  suppression entries and these blocks for the two modes that release no asset: a
+  class library, and a command app built without a PHAR
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
