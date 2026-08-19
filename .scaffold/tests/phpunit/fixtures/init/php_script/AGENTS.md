@@ -91,8 +91,8 @@
 @@ -211,10 +203,6 @@
  
  - `.github/workflows/test-php.yml` - PHP testing
- - `.github/workflows/release-php.yml` - GitHub release on a tag
--  - Builds the PHAR and attaches it to the release
+ - `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
+-  - Builds the PHAR to attach
 -
 -
 -- `.github/workflows/test-shell.yml` - Shell script testing

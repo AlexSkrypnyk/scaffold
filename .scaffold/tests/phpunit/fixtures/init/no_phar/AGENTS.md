@@ -11,11 +11,12 @@
  # Clean and reinstall dependencies
  composer reset # removes vendor/, vendor-bin/, composer.lock
  composer install
-@@ -211,7 +205,6 @@
+@@ -210,8 +204,6 @@
+ Key workflows:
  
  - `.github/workflows/test-php.yml` - PHP testing
- - `.github/workflows/release-php.yml` - GitHub release on a tag
--  - Builds the PHAR and attaches it to the release
+-- `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
+-  - Builds the PHAR to attach
  
  
  - `.github/workflows/test-shell.yml` - Shell script testing
