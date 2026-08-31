@@ -29,7 +29,7 @@
         "ergebnis/composer-normalize": "^2.52.0",
         "mikey179/vfsstream": "^1.6.12",
         "opis/closure": "^4.5.0",
-        "phpstan/phpstan": "^2.2.11",
+        "phpstan/phpstan": "^2.2.12",
         "phpunit/phpunit": "^11.5.56",
         "rector/rector": "^2.6.5"
     },
