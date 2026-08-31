@@ -18,7 +18,7 @@
     },
     "require": {
         "php": ">=8.3",
-        "symfony/console": "^7.4.17"
+        "symfony/console": "^7.4.18"
     },
     "require-dev": {
         "alexskrypnyk/phpunit-helpers": "^0.16.0",
@@ -31,7 +31,7 @@
         "opis/closure": "^4.5.0",
         "phpstan/phpstan": "^2.2.10",
         "phpunit/phpunit": "^11.5.56",
-        "rector/rector": "^2.6.4"
+        "rector/rector": "^2.6.5"
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
