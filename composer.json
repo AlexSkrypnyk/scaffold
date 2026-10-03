@@ -18,7 +18,7 @@
     },
     "require": {
         "php": ">=8.3",
-        "symfony/console": "^7.4.19"
+        "symfony/console": "^7.4.20"
     },
     "require-dev": {
         "alexskrypnyk/phpunit-helpers": "^0.16.0",
@@ -26,10 +26,10 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2.1",
         "drevops/phpcs-standard": "^0.7",
         "drupal/coder": "^9.0.1",
-        "ergebnis/composer-normalize": "^2.53.0",
+        "ergebnis/composer-normalize": "^2.54.0",
         "mikey179/vfsstream": "^1.6.12",
         "opis/closure": "^4.5.0",
-        "phpstan/phpstan": "^2.2.14",
+        "phpstan/phpstan": "^2.2.16",
         "phpunit/phpunit": "^11.5.56",
         "rector/rector": "^2.6.7"
     },
