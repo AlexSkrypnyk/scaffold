@@ -12,19 +12,19 @@ This document is generated and maintained by an AI agent via the `update-archite
 
 ### Console application
 
-The PHP stack is a Symfony Console application. The `php-command` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
+The PHP stack is a Symfony Console application. The `bin/php-command` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
 
 Commands live in the `YourNamespace\App\Command` namespace, autoloaded PSR-4 from `src/`. `JokeCommand` accepts a `--topic` option, fetches a random joke from a public API, and prints the setup and punchline; any fetch or decode error is reported and returned as a command failure. `SayHelloCommand` is a minimal second command showing the multi-command structure.
 
 ```mermaid
-%% Traced from: php-command, src/Command/JokeCommand.php.
+%% Traced from: bin/php-command, src/Command/JokeCommand.php.
 sequenceDiagram
     participant User
-    participant Entry as php-command
+    participant Entry as bin/php-command
     participant App as Symfony Console Application
     participant Joke as JokeCommand
     participant API as official-joke-api.appspot.com
-    User->>Entry: ./php-command joke --topic=general
+    User->>Entry: ./bin/php-command joke --topic=general
     Entry->>App: run()
     App->>Joke: execute(input, output)
     Joke->>API: GET /jokes/{topic}/random

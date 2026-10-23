@@ -5,7 +5,7 @@ sidebar_position: 2
 
 # CLI Command
 
-The [`php-command`](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-command)
+The [`bin/php-command`](https://github.com/AlexSkrypnyk/scaffold/blob/main/bin/php-command)
 serves as an advanced foundation for developing robust CLI applications.
 Leveraging the capabilities of
 the [Symfony Console component](https://symfony.com/doc/current/components/console.html),
@@ -68,7 +68,7 @@ The `JokeCommand` command:
 This is a more complex command that demonstrates how to handle arguments and
 options, as well as how to make external API calls.
 
-Both commands are registered in the `php-command` file and can be tested with
+Both commands are registered in the `bin/php-command` file and can be tested with
 unit tests.
 
 This template provides a robust set of unit tests to get you started.
@@ -78,7 +78,7 @@ This template provides a robust set of unit tests to get you started.
 In the CLI application, two key components build the overall structure:
 
 1. **Bootstrap file**: This
-   is [the script](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-command)
+   is [the script](https://github.com/AlexSkrypnyk/scaffold/blob/main/bin/php-command)
    that initializes your application. It looks for Composer's autoload file to
    include all dependencies, then initializes the Symfony Console Application
    object. You add commands to it, like `JokeCommand` and `SayHelloCommand`, and
@@ -111,7 +111,7 @@ existing code with your own.
 Lastly, you can update unit tests in the `tests/phpunit/Command` directory.
 
 You can then run your script from the command line
-using `./php-command`.
+using `./bin/php-command`.
 
 ## Authoring tests
 

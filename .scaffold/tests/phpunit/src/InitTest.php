@@ -591,7 +591,7 @@ final class InitTest extends UnitTestCase {
     $this->assertProcessOutputContains('Initialization complete.');
 
     $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'acme-app');
-    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'php-command');
+    $this->assertDirectoryDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'bin');
     $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'php-script');
     $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'box.json');
     $this->assertDirectoryDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Command');
