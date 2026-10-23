@@ -55,7 +55,7 @@ Composer is configured with the following settings:
     | `advisories.audit` | `"fail"` | `composer audit` fails when an installed package has a known advisory. |
     | `abandoned.audit` | `"report"` | `composer audit` lists abandoned packages and still passes. |
 
-  Composer older than 2.10 ignores the `policy` section without a warning. To prevent that, `require-dev` declares `"composer": ">=2.10"`, so an older Composer refuses to install the project. The constraint sits in `require-dev` because `config` applies only to the root project, so packages that depend on yours keep their own Composer version.
+  Composer older than 2.10 ignores the `policy` section without a warning. To prevent that, `require-dev` declares `"composer": ">=2.10.2"`, so an older Composer refuses to install the project. The floor is 2.10.2 because earlier 2.10 releases have a known advisory. The constraint sits in `require-dev` because `config` applies only to the root project, so packages that depend on yours keep their own Composer version. `composer install --no-dev` skips the check, so it applies to `composer update` and to installs that include development dependencies.
 
   To allow a specific advisory after you review it, add its ID and your reason to `ignore-id`:
 

@@ -23,7 +23,7 @@
     "require-dev": {
         "alexskrypnyk/phpunit-helpers": "^0.16.0",
         "bamarni/composer-bin-plugin": "^1.9.1",
-        "composer": ">=2.10",
+        "composer": ">=2.10.2",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2.1",
         "drevops/phpcs-standard": "^0.7",
         "drupal/coder": "^9.0.1",
