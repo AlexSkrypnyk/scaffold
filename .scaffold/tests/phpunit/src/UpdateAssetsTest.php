@@ -31,14 +31,14 @@ final class UpdateAssetsTest extends TestCase {
   public function testBuildInitExpectScript(): void {
     $script = buildInitExpectScript('/work/ws', 'MyNs', 'myproj', 'Jane');
 
-    $this->assertStringContainsString('cd "/work/ws"', $script);
-    $this->assertStringContainsString('send_user "' . STEP_MARKER . '"', $script);
-    $this->assertStringContainsString('send -- "$text\r"', $script);
-    $this->assertStringContainsString('expect "$label*: " { answer $text }', $script);
+    $this->assertStringContainsString('cd "/work/ws"', (string) $script);
+    $this->assertStringContainsString('send_user "' . STEP_MARKER . '"', (string) $script);
+    $this->assertStringContainsString('send -- "$text\r"', (string) $script);
+    $this->assertStringContainsString('expect "$label*: " { answer $text }', (string) $script);
     $this->assertSame(1, substr_count($script, 'send_user'), 'Only the answer proc writes the step marker.');
-    $this->assertStringNotContainsString('send -h', $script);
-    $this->assertStringNotContainsString('send_human', $script);
-    $this->assertStringNotContainsString('sleep', $script);
+    $this->assertStringNotContainsString('send -h', (string) $script);
+    $this->assertStringNotContainsString('send_human', (string) $script);
+    $this->assertStringNotContainsString('sleep', (string) $script);
 
     $session = implode("\n", [
       'expect "\$ " { answer "./init.sh" }',
@@ -68,7 +68,7 @@ final class UpdateAssetsTest extends TestCase {
       'expect "\$ " { answer "exit" }',
       'expect eof',
     ]);
-    $this->assertStringContainsString($session, $script, 'Every prompt is answered through the answer proc, in order.');
+    $this->assertStringContainsString($session, (string) $script, 'Every prompt is answered through the answer proc, in order.');
   }
 
   public function testSanitizeCastCleansHeaderAndPaths(): void {
@@ -92,9 +92,9 @@ final class UpdateAssetsTest extends TestCase {
     $this->assertArrayNotHasKey('timestamp', $header);
     $this->assertArrayNotHasKey('env', $header);
     $this->assertCount(4, $lines, 'Empty lines are dropped and events are kept.');
-    $this->assertStringNotContainsString('/work/ws', $result);
-    $this->assertStringContainsString('/home/user/project', $result);
-    $this->assertStringContainsString('/home/user end', $result);
+    $this->assertStringNotContainsString('/work/ws', (string) $result);
+    $this->assertStringContainsString('/home/user/project', (string) $result);
+    $this->assertStringContainsString('/home/user end', (string) $result);
     $this->assertStringEndsWith("\"]\n", $result);
   }
 
