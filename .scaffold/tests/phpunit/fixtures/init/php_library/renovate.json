@@ -1,0 +1,13 @@
+@@ -7,6 +7,12 @@
+     "branchPrefix": "deps/",
+     "packageRules": [
+         {
++            "matchManagers": ["composer"],
++            "matchFileNames": ["composer.json"],
++            "matchDepTypes": ["require"],
++            "enabled": false
++        },
++        {
+             "matchDepNames": ["php"],
+             "matchManagers": ["composer"],
+             "enabled": false
