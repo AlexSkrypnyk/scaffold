@@ -612,18 +612,20 @@ remove_renovate_managers() {
 disable_renovate_require_updates() {
   [ -f renovate.json ] || return 0
 
-  # BSD 'sed a\' strips leading whitespace from the appended text.
-  awk '
-    { print }
-    /"packageRules": \[/ {
-      print "        {"
-      print "            \"matchManagers\": [\"composer\"],"
-      print "            \"matchFileNames\": [\"composer.json\"],"
-      print "            \"matchDepTypes\": [\"require\"],"
-      print "            \"enabled\": false"
-      print "        },"
-    }
-  ' renovate.json >renovate.json.tmp
+  local rule
+  # 'read -d' exits non-zero at the end of the heredoc.
+  IFS= read -r -d '' rule <<'RULE' || true
+        {
+            "matchManagers": ["composer"],
+            "matchFileNames": ["composer.json"],
+            "matchDepTypes": ["require"],
+            "enabled": false
+        },
+RULE
+
+  # BSD 'sed a\' strips leading whitespace from the appended text, and awk
+  # rejects a newline in a '-v' value, so the rule travels through ENVIRON.
+  RULE="${rule}" awk '{ print } /"packageRules": \[/ { printf "%s", ENVIRON["RULE"] }' renovate.json >renovate.json.tmp
   mv renovate.json.tmp renovate.json
 }
 
