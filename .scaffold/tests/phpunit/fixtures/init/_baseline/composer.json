@@ -23,6 +23,7 @@
     "require-dev": {
         "alexskrypnyk/phpunit-helpers": "__VERSION__",
         "bamarni/composer-bin-plugin": "__VERSION__",
+        "composer": "__VERSION__",
         "dealerdirect/phpcodesniffer-composer-installer": "__VERSION__",
         "drevops/phpcs-standard": "__VERSION__",
         "drupal/coder": "__VERSION__",
