@@ -6,7 +6,12 @@
          "composer": "__VERSION__",
          "dealerdirect/phpcodesniffer-composer-installer": "__VERSION__",
          "drevops/phpcs-standard": "__VERSION__",
-@@ -54,7 +53,6 @@
+@@ -50,11 +49,10 @@
+         ]
+     },
+     "bin": [
+-        "bin/force-crystal"
++        "force-crystal"
      ],
      "config": {
          "allow-plugins": {
