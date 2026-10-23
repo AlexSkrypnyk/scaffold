@@ -1,18 +1,30 @@
-@@ -1,14 +1,9 @@
+@@ -1,25 +1,13 @@
  {
    "permissions": {
      "allow": [
--      "Bash(composer:*)",
+-      "Bash(composer install)",
+-      "Bash(composer lint)",
+-      "Bash(composer lint-fix)",
+-      "Bash(composer test)",
+-      "Bash(composer test-coverage)",
 -      "Bash(./vendor/bin/phpcs:*)",
 -      "Bash(./vendor/bin/phpcbf:*)",
 -      "Bash(./vendor/bin/phpstan:*)",
 -      "Bash(./vendor/bin/rector:*)",
 -      "Bash(./vendor/bin/phpunit:*)",
 -      "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
--      "Bash(npm:*)"
-+      "Bash(npm:*)",
-+      "Bash(docker build:*)",
-+      "Bash(docker run:*)"
+       "Bash(npm install)",
+-      "Bash(npm run lint)",
+-      "Bash(npm run lint-fix)",
+-      "Bash(npm run test)",
+-      "Bash(npm run test-coverage)",
+       "Bash(npm start)",
+       "Bash(npm run build)",
+-      "Bash(npm run spellcheck)"
++      "Bash(npm run spellcheck)",
++      "Bash(docker build -t yodashut/force-crystal .)",
++      "Bash(docker run --rm yodashut/force-crystal)",
++      "Bash(docker run --rm -i hadolint/hadolint:*)"
      ]
    }
  }
