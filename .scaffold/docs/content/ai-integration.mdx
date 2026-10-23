@@ -38,6 +38,14 @@ The list is derived from the commands documented in `AGENTS.md`. During
 initialization, `init.sh` trims the list to the features you selected, so a
 project without Docker, for instance, does not pre-approve Docker commands.
 
+Commands that run repository-defined scripts, install packages or start
+containers are pre-approved only in their documented form, such as
+`Bash(composer test)` or `Bash(npm run lint)`. Claude Code still asks before
+`composer run <script>`, `npm exec` or a `docker run` with other arguments.
+Single-purpose tools such as `./vendor/bin/phpunit` and `plantuml` accept any
+arguments, so `./vendor/bin/phpunit --filter testName` runs without a prompt.
+Add any other command you want pre-approved to `.claude/settings.local.json`.
+
 ## `.claude/settings.local.json`
 
 The `.claude/settings.local.json` file holds personal permission overrides. It

@@ -741,40 +741,54 @@ final class InitTest extends UnitTestCase {
     // Docker is off by default, so its rules are trimmed unless enabled.
     // Mermaid is the default diagram format, so the PlantUML rule is trimmed
     // unless that format is selected.
+    // Commands that run repository scripts, install packages or start
+    // containers are allowed only in their documented form, so the open-ended
+    // wildcards are absent in every case.
+    $wildcards = ['Bash(composer:*)', 'Bash(npm:*)', 'Bash(docker build:*)', 'Bash(docker run:*)'];
+    $composer = ['Bash(composer install)', 'Bash(composer lint)', 'Bash(composer lint-fix)', 'Bash(composer test)', 'Bash(composer test-coverage)'];
+    $npm_nodejs = ['Bash(npm run lint)', 'Bash(npm run lint-fix)', 'Bash(npm run test)', 'Bash(npm run test-coverage)'];
+    $npm_docs = ['Bash(npm start)', 'Bash(npm run build)', 'Bash(npm run spellcheck)'];
+    $docker = ['Bash(docker build -t acmeapp/acme-app .)', 'Bash(docker run --rm acmeapp/acme-app)', 'Bash(docker run --rm -i hadolint/hadolint:*)'];
+
     yield 'defaults' => [
       [],
-      ['Bash(composer:*)', 'Bash(./vendor/bin/phpunit:*)', 'Bash(./tests/bats/node_modules/bats/bin/bats:*)', 'Bash(npm:*)'],
-      ['Bash(docker build:*)', 'Bash(docker run:*)', 'Bash(plantuml:*)'],
+      [...$composer, 'Bash(./vendor/bin/phpunit:*)', 'Bash(./tests/bats/node_modules/bats/bin/bats:*)', 'Bash(npm install)', ...$npm_nodejs, ...$npm_docs],
+      [...$wildcards, ...$docker, 'Bash(plantuml:*)'],
     ];
     yield 'with docker' => [
       ['--docker'],
-      ['Bash(docker build:*)', 'Bash(docker run:*)'],
-      [],
+      $docker,
+      [...$wildcards, 'Bash(docker build -t yournamespace/yourproject .)'],
     ];
     yield 'ai arch docs plantuml' => [
       ['--ai-arch-docs=plantuml'],
       ['Bash(plantuml:*)'],
-      [],
+      $wildcards,
     ];
     yield 'no php' => [
       ['--no-php'],
-      ['Bash(./tests/bats/node_modules/bats/bin/bats:*)', 'Bash(npm:*)'],
-      ['Bash(composer:*)', 'Bash(./vendor/bin/phpcs:*)', 'Bash(./vendor/bin/phpunit:*)'],
+      ['Bash(./tests/bats/node_modules/bats/bin/bats:*)', 'Bash(npm install)'],
+      [...$wildcards, ...$composer, 'Bash(./vendor/bin/phpcs:*)', 'Bash(./vendor/bin/phpunit:*)'],
     ];
-    yield 'npm survives via docs without nodejs' => [
+    yield 'docs npm rules survive without nodejs' => [
       ['--no-nodejs'],
-      ['Bash(npm:*)'],
-      [],
+      ['Bash(npm install)', ...$npm_docs],
+      [...$wildcards, ...$npm_nodejs],
+    ];
+    yield 'nodejs npm rules survive without docs' => [
+      ['--no-docs'],
+      ['Bash(npm install)', ...$npm_nodejs],
+      [...$wildcards, ...$npm_docs],
     ];
     yield 'npm trimmed without nodejs and docs' => [
       ['--no-nodejs', '--no-docs'],
       [],
-      ['Bash(npm:*)'],
+      [...$wildcards, 'Bash(npm install)', ...$npm_nodejs, ...$npm_docs],
     ];
     yield 'no languages' => [
       ['--no-php', '--no-nodejs', '--no-shell', '--no-docs'],
       [],
-      ['Bash(composer:*)', 'Bash(npm:*)', 'Bash(./tests/bats/node_modules/bats/bin/bats:*)'],
+      [...$wildcards, ...$composer, 'Bash(npm install)', 'Bash(./tests/bats/node_modules/bats/bin/bats:*)'],
     ];
   }
 

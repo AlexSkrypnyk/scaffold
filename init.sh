@@ -716,15 +716,17 @@ process_claude_settings() {
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
 
-  [ "${use_php:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/composer:/d' -e '/phpcs:/d' -e '/phpcbf:/d' -e '/phpstan:/d' -e '/rector:/d' -e '/phpunit:/d' "${file}"
+  [ "${use_php:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/"Bash(composer /d' -e '/phpcs:/d' -e '/phpcbf:/d' -e '/phpstan:/d' -e '/rector:/d' -e '/phpunit:/d' "${file}"
   [ "${use_shell:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/bats:/d' "${file}"
-  [ "${use_docker:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/docker build:/d' -e '/docker run:/d' "${file}"
+  [ "${use_nodejs:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/"Bash(npm run lint/d' -e '/"Bash(npm run test/d' "${file}"
+  [ "${use_docs:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/"Bash(npm start)"/d' -e '/"Bash(npm run build)"/d' -e '/"Bash(npm run spellcheck)"/d' "${file}"
+  [ "${use_docker:-n}" != "y" ] && sed "${sed_opts[@]}" -e '/"Bash(docker /d' "${file}"
   [ "${use_ai_arch_docs:-none}" != "plantuml" ] && sed "${sed_opts[@]}" -e '/plantuml:/d' "${file}"
 
-  # 'npm' is shared by the NodeJS feature and the documentation site, so keep it
-  # while either is present.
+  # 'npm install' is shared by the NodeJS feature and the documentation site, so
+  # keep it while either is present.
   if [ "${use_nodejs:-n}" != "y" ] && [ "${use_docs:-n}" != "y" ]; then
-    sed "${sed_opts[@]}" -e '/npm:/d' "${file}"
+    sed "${sed_opts[@]}" -e '/"Bash(npm install)"/d' "${file}"
   fi
 
   # Drop a trailing comma left on the final array element after any removals.
