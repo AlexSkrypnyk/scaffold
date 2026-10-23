@@ -5,7 +5,7 @@ sidebar_position: 2
 
 # CLI Command
 
-The [`php-command`](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-command)
+The [`bin/php-command`](https://github.com/AlexSkrypnyk/scaffold/blob/main/bin/php-command)
 serves as an advanced foundation for developing robust CLI applications.
 Leveraging the capabilities of
 the [Symfony Console component](https://symfony.com/doc/current/components/console.html),
@@ -68,7 +68,7 @@ The `JokeCommand` command:
 This is a more complex command that demonstrates how to handle arguments and
 options, as well as how to make external API calls.
 
-Both commands are registered in the `php-command` file and can be tested with
+Both commands are registered in the `bin/php-command` file and can be tested with
 unit tests.
 
 This template provides a robust set of unit tests to get you started.
@@ -78,7 +78,7 @@ This template provides a robust set of unit tests to get you started.
 In the CLI application, two key components build the overall structure:
 
 1. **Bootstrap file**: This
-   is [the script](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-command)
+   is [the script](https://github.com/AlexSkrypnyk/scaffold/blob/main/bin/php-command)
    that initializes your application. It looks for Composer's autoload file to
    include all dependencies, then initializes the Symfony Console Application
    object. You add commands to it, like `JokeCommand` and `SayHelloCommand`, and
@@ -111,7 +111,7 @@ existing code with your own.
 Lastly, you can update unit tests in the `tests/phpunit/Command` directory.
 
 You can then run your script from the command line
-using `./php-command`.
+using `./bin/php-command`.
 
 ## Authoring tests
 
@@ -138,17 +138,44 @@ are two examples of Unit tests for `SayHelloCommand` and `JokeCommand` commands.
 
 ## Distribution
 
-Distribution of CLI applications is a bit more complex than that of web.
-While web applications can be distributed as source code, CLI applications
-are usually distributed as a single executable file. This is called a PHAR file.
+A CLI application ships as a PHAR file, as a Composer package or as both. The
+template supports all 3 from 1 layout:
 
-This template provides a `composer build` command and GitHub action for building
-a PHAR file. See [PHP Packaging](/ci/php-packaging) for more details.
+- The application code lives in `src/`.
+- 1 thin launcher, `bin/php-command`, loads the Composer autoloader and runs
+  the application.
+- `composer.json` lists the launcher under `bin`.
 
-An alternative approach is to use your command as a Composer package.
-Once published to the Packagist.org, the Composer packages registry, the command
-binary file will be available to be called from within Composer scripts.
+The `bin/<name>` launcher is the layout Composer, Box, PHP-Scoper and Rector
+use for their own executables.
 
-This template provides a configuration entry within `composer.json` that would
-place the command bootstrap file in the `vendor/bin` directory of the project
-requiring the command as dependency.
+### As a PHAR
+
+A PHAR is a single executable file that bundles the application and its
+dependencies. Users need only PHP to run it.
+
+`composer build` compiles the PHAR into `dist/php-command.phar`. Git ignores
+`dist`, so the PHAR is never committed. The release workflow uploads it as a
+release asset. See [PHP Packaging](/ci/php-packaging) for the Box
+configuration.
+
+### As a Composer package
+
+Publish the project to Packagist.org, the Composer package registry. Composer
+links every `bin` entry into the `vendor/bin` directory of the project that
+requires the package, so that project runs `vendor/bin/php-command`.
+
+The launcher looks for the requiring project's autoloader before its own, so
+it runs both as a dependency and from its own checkout.
+
+### As both
+
+Keep the single launcher. Composer links `bin/php-command`, and Box compiles
+the same file into the PHAR, so a change to the launcher reaches both builds.
+
+### PHAR through Composer
+
+Some tools, such as PHPStan, commit the built PHAR to their Composer package
+and point a small `bin/` launcher at it. Composer users then get the compiled
+build instead of the source. The template ships the source through Composer:
+`dist` is git-ignored, so the PHAR stays out of the package.

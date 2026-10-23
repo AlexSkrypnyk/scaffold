@@ -3,7 +3,7 @@
 
 #;< PHP
 #;< PHP_PHAR
-/.build
+/dist
 #;> PHP_PHAR
 /.phpunit.cache
 /composer.lock

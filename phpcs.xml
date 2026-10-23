@@ -18,7 +18,7 @@
     <file>src</file>
     <!-- #;> !PHP_SCRIPT -->
     <!-- #;< PHP_COMMAND -->
-    <file>php-command</file>
+    <file>bin/php-command</file>
     <!-- #;> PHP_COMMAND -->
     <!-- #;< PHP_SCRIPT -->
     <file>php-script</file>

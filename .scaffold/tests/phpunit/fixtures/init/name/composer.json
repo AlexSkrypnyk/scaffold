@@ -46,8 +46,8 @@
          ]
      },
      "bin": [
--        "force-crystal"
-+        "star-forge"
+-        "bin/force-crystal"
++        "bin/star-forge"
      ],
      "config": {
          "allow-plugins": {

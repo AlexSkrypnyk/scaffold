@@ -248,7 +248,7 @@ create_composer_json() {
     "name": "yournamespace/yourproject",
     "type": "library",
     "bin": [
-        "php-command",
+        "bin/php-command",
         "php-script"
     ],
     "config": {
@@ -1014,7 +1014,8 @@ SETTINGS
   echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
   create_composer_json "${tmpdir}"
   create_renovate_json "${tmpdir}"
-  echo "<?php // command" >"${tmpdir}/php-command"
+  mkdir -p "${tmpdir}/bin"
+  echo "<?php // command" >"${tmpdir}/bin/php-command"
   echo "<?php // script" >"${tmpdir}/php-script"
   echo "<?php // library" >"${tmpdir}/src/Example.php"
   echo "<?php // joke" >"${tmpdir}/src/Command/JokeCommand.php"
@@ -1037,7 +1038,7 @@ SETTINGS
   process_project
   popd >/dev/null || return 1
 
-  assert_file_not_exists "${tmpdir}/php-command"
+  assert_dir_not_exists "${tmpdir}/bin"
   assert_file_not_exists "${tmpdir}/php-script"
   assert_dir_not_exists "${tmpdir}/src/Command"
   assert_file_exists "${tmpdir}/src/Example.php"
@@ -1061,7 +1062,7 @@ create_release_workflow() {
           tag_name: ${{ env.RELEASE_VERSION }}
           files: |
             #;< PHP_PHAR
-            ./.build/php-command.phar
+            ./dist/php-command.phar
             #;> PHP_PHAR
             #;< PHP_SCRIPT
             php-script
@@ -1079,7 +1080,8 @@ create_release_project() {
   create_release_workflow "${tmpdir}"
   create_zizmor_yml "${tmpdir}"
   echo '{"main": "php-command"}' >"${tmpdir}/box.json"
-  echo "<?php // command" >"${tmpdir}/php-command"
+  mkdir -p "${tmpdir}/bin"
+  echo "<?php // command" >"${tmpdir}/bin/php-command"
   echo "<?php // script" >"${tmpdir}/php-script"
 
   namespace="AcmeApp"
@@ -1110,7 +1112,11 @@ create_release_project() {
   popd >/dev/null || return 1
 
   assert_file_not_exists "${tmpdir}/box.json"
-  assert_file_exists "${tmpdir}/acme-app"
+  assert_file_exists "${tmpdir}/bin/acme-app"
+  assert_file_not_exists "${tmpdir}/bin/php-command"
+  assert_file_contains "${tmpdir}/composer.json" '"bin/acme-app"'
+  assert_file_not_contains "${tmpdir}/composer.json" '"bin/acme-app",'
+  assert_file_not_contains "${tmpdir}/composer.json" 'php-script'
   assert_file_not_exists "${tmpdir}/.github/workflows/release-php.yml"
   assert_file_not_contains "${tmpdir}/zizmor.yml" "release-php.yml"
   assert_file_contains "${tmpdir}/zizmor.yml" "release-nodejs.yml"
@@ -1131,6 +1137,8 @@ create_release_project() {
   process_project
   popd >/dev/null || return 1
 
+  assert_dir_not_exists "${tmpdir}/bin"
+  assert_file_exists "${tmpdir}/acme-app"
   assert_file_exists "${tmpdir}/.github/workflows/release-php.yml"
   assert_file_contains "${tmpdir}/.github/workflows/release-php.yml" "files:"
   assert_file_contains "${tmpdir}/.github/workflows/release-php.yml" "acme-app"

@@ -2,7 +2,7 @@
  
    paths:
      - src
--    - force-crystal
+-    - bin/force-crystal
      - tests/phpunit
  
    excludePaths:

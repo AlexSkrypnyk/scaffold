@@ -2,8 +2,8 @@
  Multi-command CLI application structure:
  
  - **Location:** `src/Command/` directory
--- **Entry point:** `force-crystal`
-+- **Entry point:** `star-forge`
+-- **Entry point:** `bin/force-crystal`
++- **Entry point:** `bin/star-forge`
  - **Use for:** Complex applications with multiple commands, shared logic, OOP
    architecture
  
@@ -11,8 +11,8 @@
  
  1. Create class in `src/Command/YourCommand.php` extending
     `Symfony\Component\Console\Command\Command`
--2. Register in `force-crystal`: `$application->add(new YourCommand());`
-+2. Register in `star-forge`: `$application->add(new YourCommand());`
+-2. Register in `bin/force-crystal`: `$application->add(new YourCommand());`
++2. Register in `bin/star-forge`: `$application->add(new YourCommand());`
  3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
  
  
@@ -29,7 +29,7 @@
  ### Building
  
  
-@@ -191,15 +185,6 @@
+@@ -194,15 +188,6 @@
  - Data providers: `#[DataProvider('providerMethodName')]`
  
  
@@ -45,7 +45,7 @@
  ## CI/CD
  
  GitHub Actions workflows test across:
-@@ -212,9 +197,6 @@
+@@ -215,9 +200,6 @@
  - `.github/workflows/test-php.yml` - PHP testing
  - `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
    - Builds the PHAR to attach

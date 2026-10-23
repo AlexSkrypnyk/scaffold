@@ -95,9 +95,12 @@ import MyComponentSource from '!!raw-loader!../../../../box.json';
 
 In the provided Box configuration, several settings are specified:
 
-- **Output**: Defines where the compiled PHAR file will be stored. In this case,
-  it's set to `.build/php-command.phar`. Whenever Box compiles the
-  PHAR, this is where the file will be output.
+- **Main**: Unset, so Box uses the first `bin` entry in `composer.json`, which
+  is `bin/php-command`. The same launcher serves Composer installs and the PHAR.
+
+- **Output**: Defines where the compiled PHAR file is stored. In this case,
+  it's set to `dist/php-command.phar`. Git ignores `dist`, so the PHAR is
+  never committed and ships only as a release asset.
 
 - **Compression**: Specifies the compression algorithm to be used for the PHAR.
   The value `GZ` indicates Gzip compression. This reduces the PHAR file size,
@@ -105,8 +108,9 @@ In the provided Box configuration, several settings are specified:
 
 - **Finder**: A powerful feature that allows you to include or exclude specific
   files and directories in the PHAR. In your setup, the finder is set to include
-  all files in the current directory (`"./"`), excluding
-  the `tests` directories.
+  all files in the current directory (`"./"`), excluding `dist`, `docs`,
+  `tests` and the standalone script. Excluding `dist` keeps a previous build
+  out of the next PHAR.
 
 These settings can be tailored to fit the needs of your project. By
 understanding and properly configuring these parameters, you can control exactly

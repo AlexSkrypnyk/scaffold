@@ -10,7 +10,7 @@
 -Multi-command CLI application structure:
 -
 -- **Location:** `src/Command/` directory
--- **Entry point:** `force-crystal`
+-- **Entry point:** `bin/force-crystal`
 -- **Use for:** Complex applications with multiple commands, shared logic, OOP
 -  architecture
 -
@@ -20,7 +20,7 @@
 -
 -1. Create class in `src/Command/YourCommand.php` extending
 -   `Symfony\Component\Console\Command\Command`
--2. Register in `force-crystal`: `$application->add(new YourCommand());`
+-2. Register in `bin/force-crystal`: `$application->add(new YourCommand());`
 -3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
 -
 -
@@ -69,7 +69,7 @@
  ## NodeJS Application Architecture
  
  ### Standalone Single-File Script
-@@ -133,64 +69,6 @@
+@@ -133,67 +69,6 @@
  ```
  
  
@@ -77,9 +77,12 @@
 -
 -
 -```bash
--# Build PHAR executable (installs Box first)
+-# Build PHAR executable into dist/ (installs Box first)
 -composer build
 -```
+-
+-Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+-The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
 -
 -
 -```bash
@@ -134,7 +137,7 @@
  ### Shell Script Testing with BATS
  
  Shell script tests use BATS:
-@@ -198,20 +76,6 @@
+@@ -201,20 +76,6 @@
  - Tests in `tests/bats/` with `.bats` extension
  - Helper functions in `tests/bats/_helper.bash`
  - Coverage exclusions: `# LCOV_EXCL_START` / `# LCOV_EXCL_END`

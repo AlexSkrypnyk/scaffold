@@ -137,7 +137,7 @@ is modified at all.
 The template carries every PHP pattern at once and `init.sh` keeps the selected
 one:
 
-1. **`src/` + `php-command`** - Symfony Console app
+1. **`src/` + `bin/php-command`** - Symfony Console app
   - Multi-command structure
   - OOP architecture
   - Example commands: `JokeCommand`, `SayHelloCommand`

@@ -1,4 +1,4 @@
-@@ -11,214 +11,35 @@
+@@ -11,217 +11,35 @@
  testing, code quality tools, and CI/CD workflows.
  
  
@@ -12,7 +12,7 @@
 -Multi-command CLI application structure:
 -
 -- **Location:** `src/Command/` directory
--- **Entry point:** `force-crystal`
+-- **Entry point:** `bin/force-crystal`
 -- **Use for:** Complex applications with multiple commands, shared logic, OOP
 -  architecture
 -
@@ -22,7 +22,7 @@
 -
 -1. Create class in `src/Command/YourCommand.php` extending
 -   `Symfony\Component\Console\Command\Command`
--2. Register in `force-crystal`: `$application->add(new YourCommand());`
+-2. Register in `bin/force-crystal`: `$application->add(new YourCommand());`
 -3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
 -
 -
@@ -143,9 +143,12 @@
 -
 -
 -```bash
--# Build PHAR executable (installs Box first)
+-# Build PHAR executable into dist/ (installs Box first)
 -composer build
 -```
+-
+-Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+-The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
 -
 -
 -```bash

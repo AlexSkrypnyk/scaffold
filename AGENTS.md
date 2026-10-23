@@ -30,7 +30,7 @@ testing, code quality tools, and CI/CD workflows.
 Multi-command CLI application structure:
 
 - **Location:** `src/Command/` directory
-- **Entry point:** `php-command`
+- **Entry point:** `bin/php-command`
 - **Use for:** Complex applications with multiple commands, shared logic, OOP
   architecture
 
@@ -40,7 +40,7 @@ To add a Symfony Console command:
 
 1. Create class in `src/Command/YourCommand.php` extending
    `Symfony\Component\Console\Command\Command`
-2. Register in `php-command`: `$application->add(new YourCommand());`
+2. Register in `bin/php-command`: `$application->add(new YourCommand());`
 3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
 
 [//]: # (#;> PHP_COMMAND)
@@ -207,9 +207,12 @@ npm run test-coverage
 [//]: # (#;< PHP_PHAR)
 
 ```bash
-# Build PHAR executable (installs Box first)
+# Build PHAR executable into dist/ (installs Box first)
 composer build
 ```
+
+Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
 
 [//]: # (#;> PHP_PHAR)
 

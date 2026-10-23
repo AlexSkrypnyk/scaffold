@@ -11,7 +11,7 @@ parameters:
     - src
     #;> !PHP_SCRIPT
     #;< PHP_COMMAND
-    - php-command
+    - bin/php-command
     #;> PHP_COMMAND
     #;< PHP_SCRIPT
     - php-script

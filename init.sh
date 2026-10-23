@@ -432,7 +432,8 @@ remove_php() {
 }
 
 remove_php_command() {
-  rm -f php-command || true
+  rm -f bin/php-command || true
+  rmdir bin >/dev/null 2>&1 || true
   rm -Rf src/Command || true
   rm -f tests/phpunit/Functional/ApplicationFunctionalTestCase.php || true
   rm -f tests/phpunit/Functional/JokeCommandTest.php || true
@@ -441,8 +442,7 @@ remove_php_command() {
 
   remove_tokens_with_content "PHP_COMMAND"
 
-  remove_string_content_line '"php-command"'
-  remove_string_content_line '"php-command",'
+  remove_string_content_line '"bin\/php-command"'
 }
 
 remove_php_command_build() {
@@ -1389,8 +1389,8 @@ process_project() {
       fi
 
       replace_string_content "php-command" "${php_command_name}"
-      mv "php-command" "${php_command_name}" >/dev/null 2>&1 || true
-      remove_php_script "${php_command_name}"
+      mv "bin/php-command" "bin/${php_command_name}" >/dev/null 2>&1 || true
+      remove_php_script "bin/${php_command_name}"
       remove_php_library
     elif [ "${use_php_script:-n}" = "y" ]; then
       remove_php_command
