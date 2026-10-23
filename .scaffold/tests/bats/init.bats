@@ -192,6 +192,56 @@ ZIZMOR
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
 }
 
+@test "disable_renovate_require_updates inserts the rule as the first package rule" {
+  local tmpdir="${BATS_TEST_TMPDIR}/require_rule"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  disable_renovate_require_updates
+  popd >/dev/null || return 1
+
+  run sed -n '8,15p' "${tmpdir}/renovate.json"
+  assert_output '    "packageRules": [
+        {
+            "matchManagers": ["composer"],
+            "matchFileNames": ["composer.json"],
+            "matchDepTypes": ["require"],
+            "enabled": false
+        },
+        {'
+  assert_file_contains "${tmpdir}/renovate.json" '"matchDepNames": ["php"]'
+  assert_file_not_exists "${tmpdir}/renovate.json.tmp"
+}
+
+@test "disable_renovate_require_updates keeps the rule through remove_nodejs and remove_renovate_managers" {
+  local tmpdir="${BATS_TEST_TMPDIR}/require_rule_no_nodejs"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  disable_renovate_require_updates
+  remove_nodejs
+  remove_renovate_managers
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/renovate.json" '"matchDepTypes": ["require"]'
+  assert_file_contains "${tmpdir}/renovate.json" '"matchDepNames": ["php"]'
+  assert_file_not_contains "${tmpdir}/renovate.json" '"npm"'
+}
+
+@test "disable_renovate_require_updates is a no-op without a renovate.json" {
+  local tmpdir="${BATS_TEST_TMPDIR}/require_rule_absent"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  disable_renovate_require_updates
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/renovate.json"
+  assert_file_not_exists "${tmpdir}/renovate.json.tmp"
+}
+
 create_composer_json() {
   cat >"${1}/composer.json" <<'COMPOSER'
 {
@@ -963,6 +1013,7 @@ SETTINGS
   echo "README dist content" >"${tmpdir}/README.dist.md"
   echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
   create_composer_json "${tmpdir}"
+  create_renovate_json "${tmpdir}"
   echo "<?php // command" >"${tmpdir}/php-command"
   echo "<?php // script" >"${tmpdir}/php-script"
   echo "<?php // library" >"${tmpdir}/src/Example.php"
@@ -977,6 +1028,7 @@ SETTINGS
   use_php="y"
   use_php_command="n"
   use_php_script="n"
+  use_renovate="y"
 
   # Stub the placeholder-logo download so the flow never hits the network.
   curl() { return 0; }
@@ -991,6 +1043,7 @@ SETTINGS
   assert_file_exists "${tmpdir}/src/Example.php"
   assert_file_exists "${tmpdir}/tests/phpunit/Unit/ExampleUnitTest.php"
   assert_file_not_contains "${tmpdir}/composer.json" '"bin"'
+  assert_file_contains "${tmpdir}/renovate.json" '"matchDepTypes": ["require"]'
 }
 
 create_release_workflow() {

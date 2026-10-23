@@ -603,6 +603,32 @@ remove_renovate_managers() {
   fi
 }
 
+##
+# Stop Renovate from raising the floor of the 'require' constraints.
+#
+# A library's 'require' block is the support window its consumers inherit,
+# and with no committed lock file a bump changes nothing the project resolves.
+#
+disable_renovate_require_updates() {
+  [ -f renovate.json ] || return 0
+
+  local rule
+  # 'read -d' exits non-zero at the end of the heredoc.
+  IFS= read -r -d '' rule <<'RULE' || true
+        {
+            "matchManagers": ["composer"],
+            "matchFileNames": ["composer.json"],
+            "matchDepTypes": ["require"],
+            "enabled": false
+        },
+RULE
+
+  # BSD 'sed a\' strips leading whitespace from the appended text, and awk
+  # rejects a newline in a '-v' value, so the rule travels through ENVIRON.
+  RULE="${rule}" awk '{ print } /"packageRules": \[/ { printf "%s", ENVIRON["RULE"] }' renovate.json >renovate.json.tmp
+  mv renovate.json.tmp renovate.json
+}
+
 remove_ai() {
   rm -f CLAUDE.md || true
   rm -f AGENTS.md || true
@@ -662,6 +688,7 @@ process_php_library() {
   remove_php_script
   remove_php_entrypoint
   remove_php_release
+  disable_renovate_require_updates
 }
 
 ##
