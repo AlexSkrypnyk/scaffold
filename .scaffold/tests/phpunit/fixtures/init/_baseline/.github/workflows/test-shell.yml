@@ -66,7 +66,7 @@ jobs:
       - name: Install Kcov
         run: |
           KCOV_VERSION=v43 && \
-          sudo apt update && sudo apt install -y git cmake g++ libcurl4-openssl-dev zlib1g-dev libdw-dev libiberty-dev binutils-dev && \
+          sudo apt update && sudo apt install -y binutils-dev build-essential cmake git libcurl4-openssl-dev libdw-dev libiberty-dev libssl-dev python3 zlib1g-dev && \
           git clone https://github.com/SimonKagstrom/kcov.git && \
           cd kcov && git checkout ${KCOV_VERSION} && mkdir build && cd build && \
           cmake .. && make && sudo make install && \
