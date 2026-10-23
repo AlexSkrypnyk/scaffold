@@ -1,0 +1,12 @@
+@@ -16,10 +16,7 @@
+       "Bash(npm run lint)",
+       "Bash(npm run lint-fix)",
+       "Bash(npm run test)",
+-      "Bash(npm run test-coverage)",
+-      "Bash(npm start)",
+-      "Bash(npm run build)",
+-      "Bash(npm run spellcheck)"
++      "Bash(npm run test-coverage)"
+     ]
+   }
+ }
