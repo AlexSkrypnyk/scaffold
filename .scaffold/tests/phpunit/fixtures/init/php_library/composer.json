@@ -3,7 +3,7 @@
          ]
      },
 -    "bin": [
--        "force-crystal"
+-        "bin/force-crystal"
 -    ],
      "config": {
          "allow-plugins": {

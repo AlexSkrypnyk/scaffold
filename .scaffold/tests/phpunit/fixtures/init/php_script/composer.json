@@ -1,0 +1,9 @@
+@@ -49,7 +49,7 @@
+         ]
+     },
+     "bin": [
+-        "bin/force-crystal"
++        "force-crystal"
+     ],
+     "config": {
+         "allow-plugins": {

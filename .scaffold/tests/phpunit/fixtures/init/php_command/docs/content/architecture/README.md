@@ -2,23 +2,23 @@
  
  ### Console application
  
--The PHP stack is a Symfony Console application. The `force-crystal` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
-+The PHP stack is a Symfony Console application. The `star-forge` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
+-The PHP stack is a Symfony Console application. The `bin/force-crystal` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
++The PHP stack is a Symfony Console application. The `bin/star-forge` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
  
  Commands live in the `YodasHut\App\Command` namespace, autoloaded PSR-4 from `src/`. `JokeCommand` accepts a `--topic` option, fetches a random joke from a public API, and prints the setup and punchline; any fetch or decode error is reported and returned as a command failure. `SayHelloCommand` is a minimal second command showing the multi-command structure.
  
  ```mermaid
--%% Traced from: force-crystal, src/Command/JokeCommand.php.
-+%% Traced from: star-forge, src/Command/JokeCommand.php.
+-%% Traced from: bin/force-crystal, src/Command/JokeCommand.php.
++%% Traced from: bin/star-forge, src/Command/JokeCommand.php.
  sequenceDiagram
      participant User
--    participant Entry as force-crystal
-+    participant Entry as star-forge
+-    participant Entry as bin/force-crystal
++    participant Entry as bin/star-forge
      participant App as Symfony Console Application
      participant Joke as JokeCommand
      participant API as official-joke-api.appspot.com
--    User->>Entry: ./force-crystal joke --topic=general
-+    User->>Entry: ./star-forge joke --topic=general
+-    User->>Entry: ./bin/force-crystal joke --topic=general
++    User->>Entry: ./bin/star-forge joke --topic=general
      Entry->>App: run()
      App->>Joke: execute(input, output)
      Joke->>API: GET /jokes/{topic}/random

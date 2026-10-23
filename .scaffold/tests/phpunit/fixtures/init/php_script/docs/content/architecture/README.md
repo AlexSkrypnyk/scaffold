@@ -5,21 +5,21 @@
 -### Console application
 +### Single-file script
  
--The PHP stack is a Symfony Console application. The `force-crystal` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
+-The PHP stack is a Symfony Console application. The `bin/force-crystal` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
 +The PHP stack is a self-contained single-file CLI script, `force-crystal`, with no dependencies on external packages. All business logic lives in a `main()` function, output goes through a `verbose()` function that records every message into an internal buffer, and the script validates that exactly one argument is provided before running.
  
 -Commands live in the `YodasHut\App\Command` namespace, autoloaded PSR-4 from `src/`. `JokeCommand` accepts a `--topic` option, fetches a random joke from a public API, and prints the setup and punchline; any fetch or decode error is reported and returned as a command failure. `SayHelloCommand` is a minimal second command showing the multi-command structure.
 +Two environment variables make the script testable: `SCRIPT_QUIET=1` suppresses printed output while the buffer keeps recording, and `SCRIPT_RUN_SKIP=1` skips execution so tests can require the file and call `main()` directly, asserting on the buffer contents.
  
  ```mermaid
--%% Traced from: force-crystal, src/Command/JokeCommand.php.
+-%% Traced from: bin/force-crystal, src/Command/JokeCommand.php.
 -sequenceDiagram
 -    participant User
--    participant Entry as force-crystal
+-    participant Entry as bin/force-crystal
 -    participant App as Symfony Console Application
 -    participant Joke as JokeCommand
 -    participant API as official-joke-api.appspot.com
--    User->>Entry: ./force-crystal joke --topic=general
+-    User->>Entry: ./bin/force-crystal joke --topic=general
 -    Entry->>App: run()
 -    App->>Joke: execute(input, output)
 -    Joke->>API: GET /jokes/{topic}/random

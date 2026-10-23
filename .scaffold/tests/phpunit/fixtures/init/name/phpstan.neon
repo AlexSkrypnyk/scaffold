@@ -2,8 +2,8 @@
  
    paths:
      - src
--    - force-crystal
-+    - star-forge
+-    - bin/force-crystal
++    - bin/star-forge
      - tests/phpunit
  
    excludePaths:
