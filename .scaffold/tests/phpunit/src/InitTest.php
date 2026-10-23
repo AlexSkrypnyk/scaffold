@@ -625,6 +625,54 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
+   * Only the class library stops Renovate from bumping 'require' constraints.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to init.sh.
+   */
+  #[DataProvider('dataProviderInitRenovateRequireRule')]
+  public function testInitRenovateRequireRule(array $arguments, bool $expected): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
+
+    $this->assertProcessSuccessful();
+
+    $config = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'renovate.json'), TRUE, 512, JSON_THROW_ON_ERROR);
+    $this->assertIsArray($config);
+    $this->assertIsArray($config['packageRules']);
+
+    $rule = [
+      'matchManagers' => ['composer'],
+      'matchFileNames' => ['composer.json'],
+      'matchDepTypes' => ['require'],
+      'enabled' => FALSE,
+    ];
+    $this->assertSame($expected, in_array($rule, $config['packageRules'], TRUE));
+  }
+
+  public static function dataProviderInitRenovateRequireRule(): \Iterator {
+    yield 'php library' => [['--no-php-command', '--no-php-script'], TRUE];
+    yield 'php library without nodejs' => [['--no-php-command', '--no-php-script', '--no-nodejs'], TRUE];
+    yield 'php command' => [['--php-command', '--no-php-script'], FALSE];
+    yield 'php command without phar' => [['--php-command', '--no-phar'], FALSE];
+    yield 'php script' => [['--no-php-command', '--php-script'], FALSE];
+  }
+
+  /**
+   * The class library initialises cleanly when Renovate is deselected.
+   */
+  public function testInitPhpLibraryWithoutRenovate(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', ['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe', '--no-php-command', '--no-php-script', '--no-renovate']);
+
+    $this->assertProcessSuccessful();
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'renovate.json');
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'renovate.json.tmp');
+  }
+
+  /**
    * A project generated with Actions linting must pass the zizmor audit.
    *
    * Mirrors the audit the shipped "Test Actions" workflow runs, using the

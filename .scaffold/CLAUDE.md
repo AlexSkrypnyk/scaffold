@@ -152,6 +152,9 @@ one:
     --no-php-script`, or "n" to both prompts)
   - Ships the tooling with no entry point: `process_php_library()` drops the
     `bin` section from `composer.json`
+  - Disables Renovate updates to `require` in the root `composer.json`
+    (`disable_renovate_require_updates()`), since those constraints are the
+    package's public contract and there is no committed lock to refresh
   - Keeps one placeholder class and its unit test, because PHPCS and PHPStan
     both error out when pointed at a project holding no PHP file
   - The other two modes drop that pair in `remove_php_library()`

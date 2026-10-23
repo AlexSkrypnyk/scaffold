@@ -52,6 +52,28 @@ breaking changes from being introduced automatically.
 To update npm or Composer packages to a new major version, update the
 dependency constraint manually and run the appropriate install command.
 
+### Class library `require` constraints
+
+A class library's `require` block sets the oldest versions its consumers can
+install. The library doesn't commit `composer.lock`, so a `bump` there changes
+nothing the library itself installs. It only raises the minimum for every
+consumer.
+
+When `init.sh` generates a class library, it adds this rule to `renovate.json`:
+
+```json
+{
+    "matchManagers": ["composer"],
+    "matchFileNames": ["composer.json"],
+    "matchDepTypes": ["require"],
+    "enabled": false
+}
+```
+
+Renovate keeps updating `require-dev`, which consumers never install. The
+`matchFileNames` value limits the rule to the root `composer.json`, so a nested
+`composer.json`, such as a test fixture, keeps its updates.
+
 ## Template initialization
 
 During project initialization via `init.sh`, the Renovate configuration
@@ -63,6 +85,7 @@ adjusts based on selected features:
 | PHP only | `node`/`yarn` ignore rule and `"npm"` from major-blocking removed |
 | NodeJS only | `php` ignore rule and `"composer"` from major-blocking removed |
 | Neither PHP nor NodeJS | All language and major-blocking rules removed |
+| PHP class library | Composer `require` updates disabled in the root `composer.json` |
 
 If Renovate is deselected during initialization, the `renovate.json` file is
 removed entirely.
