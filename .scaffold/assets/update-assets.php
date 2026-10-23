@@ -66,7 +66,9 @@ define('RECORD_AUTHOR', 'Alex');
  *
  * Each answer is sent in 1 write after STEP_MARKER, so the session reaches the
  * terminal identically on every run. Expect writes out all output it has read
- * before the answer runs, so the marker lands where the session waited.
+ * before the answer runs, so the marker lands where the session waited. A
+ * prompt is matched up to its trailing ": ", so the marker never lands inside
+ * a prompt that arrived in 2 reads.
  *
  * @param string $workspace_dir
  *   Directory holding the disposable copy of init.sh.
@@ -94,35 +96,39 @@ proc answer {{text ""}} {
     send -- "\$text\\r"
 }
 
+proc reply {label {text ""}} {
+    expect "\$label*: " { answer \$text }
+}
+
 cd "{$workspace_dir}"
 
 set env(PS1) {\$ }
 spawn bash --norc --noprofile
 
 expect "\\$ " { answer "./init.sh" }
-expect "Namespace (PascalCase):" { answer "{$namespace}" }
-expect "Project:" { answer "{$project}" }
-expect "Author:" { answer "{$author}" }
-expect "Use PHP" { answer }
-expect "Use CLI command app" { answer }
-expect "CLI command name" { answer }
-expect "Build PHAR" { answer }
-expect "Use NodeJS" { answer }
-expect "Use Shell" { answer }
-expect "Shell command name" { answer }
-expect "Use Docker" { answer }
-expect "Use GitHub release drafter" { answer }
-expect "Use GitHub PR author auto-assign" { answer }
-expect "Use GitHub funding" { answer }
-expect "Use GitHub PR template" { answer }
-expect "Use Renovate" { answer }
-expect "Use docs" { answer }
-expect "Use GitHub Actions linting" { answer }
-expect "Use scheduled builds" { answer }
-expect "Use AI agents" { answer }
-expect "AI architecture docs" { answer }
-expect "Remove this script" { answer }
-expect "Proceed with project init" { answer }
+reply "Namespace (PascalCase)" "{$namespace}"
+reply "Project" "{$project}"
+reply "Author" "{$author}"
+reply "Use PHP"
+reply "Use CLI command app"
+reply "CLI command name"
+reply "Build PHAR"
+reply "Use NodeJS"
+reply "Use Shell"
+reply "Shell command name"
+reply "Use Docker"
+reply "Use GitHub release drafter"
+reply "Use GitHub PR author auto-assign"
+reply "Use GitHub funding"
+reply "Use GitHub PR template"
+reply "Use Renovate"
+reply "Use docs"
+reply "Use GitHub Actions linting"
+reply "Use scheduled builds"
+reply "Use AI agents"
+reply "AI architecture docs"
+reply "Remove this script"
+reply "Proceed with project init"
 expect "\\$ " { answer "exit" }
 expect eof
 

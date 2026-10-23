@@ -34,24 +34,41 @@ final class UpdateAssetsTest extends TestCase {
     $this->assertStringContainsString('cd "/work/ws"', $script);
     $this->assertStringContainsString('send_user "' . STEP_MARKER . '"', $script);
     $this->assertStringContainsString('send -- "$text\r"', $script);
-    $this->assertStringContainsString('expect "\$ " { answer "./init.sh" }', $script);
-    $this->assertStringContainsString('expect "Namespace (PascalCase):" { answer "MyNs" }', $script);
-    $this->assertStringContainsString('expect "Project:" { answer "myproj" }', $script);
-    $this->assertStringContainsString('expect "Author:" { answer "Jane" }', $script);
-    $this->assertStringContainsString('expect "Proceed with project init" { answer }', $script);
-    $this->assertStringContainsString('expect "\$ " { answer "exit" }', $script);
+    $this->assertStringContainsString('expect "$label*: " { answer $text }', $script);
+    $this->assertSame(1, substr_count($script, 'send_user'), 'Only the answer proc writes the step marker.');
     $this->assertStringNotContainsString('send -h', $script);
     $this->assertStringNotContainsString('send_human', $script);
     $this->assertStringNotContainsString('sleep', $script);
-  }
 
-  public function testBuildInitExpectScriptAnswersEveryPrompt(): void {
-    $script = buildInitExpectScript('/work/ws', 'MyNs', 'myproj', 'Jane');
-
-    $expects = preg_match_all('/^expect "[^"]+" \{ answer( "[^"]*")? \}$/m', $script);
-
-    $this->assertSame(substr_count($script, "\nexpect ") - 1, $expects, 'Every expect except eof answers through the answer proc.');
-    $this->assertSame(1, substr_count($script, 'send_user'), 'Only the answer proc writes the step marker.');
+    $session = implode("\n", [
+      'expect "\$ " { answer "./init.sh" }',
+      'reply "Namespace (PascalCase)" "MyNs"',
+      'reply "Project" "myproj"',
+      'reply "Author" "Jane"',
+      'reply "Use PHP"',
+      'reply "Use CLI command app"',
+      'reply "CLI command name"',
+      'reply "Build PHAR"',
+      'reply "Use NodeJS"',
+      'reply "Use Shell"',
+      'reply "Shell command name"',
+      'reply "Use Docker"',
+      'reply "Use GitHub release drafter"',
+      'reply "Use GitHub PR author auto-assign"',
+      'reply "Use GitHub funding"',
+      'reply "Use GitHub PR template"',
+      'reply "Use Renovate"',
+      'reply "Use docs"',
+      'reply "Use GitHub Actions linting"',
+      'reply "Use scheduled builds"',
+      'reply "Use AI agents"',
+      'reply "AI architecture docs"',
+      'reply "Remove this script"',
+      'reply "Proceed with project init"',
+      'expect "\$ " { answer "exit" }',
+      'expect eof',
+    ]);
+    $this->assertStringContainsString($session, $script, 'Every prompt is answered through the answer proc, in order.');
   }
 
   public function testSanitizeCastCleansHeaderAndPaths(): void {
