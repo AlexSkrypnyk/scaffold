@@ -455,11 +455,12 @@ remove_php_command_build() {
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
   # JSON carries no token markers, so the Box build and the bin plugin that
-  # installs Box are removed by key. Both ends of the "build" range are
-  # anchored so an unexpected layout removes nothing.
+  # installs Box are removed by key. The "build" range ends on the array's
+  # closing bracket with or without a comma, so it never runs to the end of
+  # the file.
   sed "${sed_opts[@]}" \
     -e '/^ *"bamarni\/composer-bin-plugin": /d' \
-    -e '/^ *"build": \[$/,/^ *\],$/d' \
+    -e '/^ *"build": \[$/,/^ *\],\{0,1\}$/d' \
     -e 's/^\( *"reset": "rm -Rf vendor\) vendor-bin /\1 /' \
     composer.json
 }

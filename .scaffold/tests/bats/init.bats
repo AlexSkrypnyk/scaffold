@@ -337,6 +337,32 @@ COMPOSER
   assert_file_contains "${tmpdir}/composer.json" '"test": "phpunit --no-coverage"'
 }
 
+@test "remove_php_command_build stops at the build array when it is the last script" {
+  local tmpdir="${BATS_TEST_TMPDIR}/command_build_last"
+  mkdir -p "${tmpdir}"
+  cat >"${tmpdir}/composer.json" <<'COMPOSER'
+{
+    "scripts": {
+        "build": [
+            "box compile"
+        ]
+    },
+    "extra": {
+        "kept": true
+    }
+}
+COMPOSER
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_php_command_build
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/composer.json" '"build"'
+  assert_file_contains "${tmpdir}/composer.json" '"scripts": {'
+  assert_file_contains "${tmpdir}/composer.json" '"extra": {'
+  assert_file_contains "${tmpdir}/composer.json" '"kept": true'
+}
+
 @test "remove_php_command_build removes box.json without a composer.json" {
   local tmpdir="${BATS_TEST_TMPDIR}/command_build_no_composer"
   mkdir -p "${tmpdir}"
