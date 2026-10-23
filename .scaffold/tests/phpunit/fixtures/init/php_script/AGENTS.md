@@ -49,7 +49,7 @@
  ### Namespace Structure
  
  - Source code: `YodasHut\App\`
-@@ -127,22 +140,10 @@
+@@ -127,25 +140,10 @@
  ```
  
  
@@ -63,16 +63,19 @@
  
  
  ```bash
--# Build PHAR executable (installs Box first)
+-# Build PHAR executable into dist/ (installs Box first)
 -composer build
 -```
+-
+-Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+-The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
 -
 -
 -```bash
  # Clean and reinstall dependencies
  composer reset # removes vendor/, vendor-bin/, composer.lock
  composer install
-@@ -191,15 +192,6 @@
+@@ -194,15 +192,6 @@
  - Data providers: `#[DataProvider('providerMethodName')]`
  
  
@@ -88,7 +91,7 @@
  ## CI/CD
  
  GitHub Actions workflows test across:
-@@ -211,10 +203,6 @@
+@@ -214,10 +203,6 @@
  
  - `.github/workflows/test-php.yml` - PHP testing
  - `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset

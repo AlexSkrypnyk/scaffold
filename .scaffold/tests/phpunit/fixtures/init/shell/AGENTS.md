@@ -69,7 +69,7 @@
  ## NodeJS Application Architecture
  
  ### Standalone Single-File Script
-@@ -133,64 +69,6 @@
+@@ -133,67 +69,6 @@
  ```
  
  
@@ -77,9 +77,12 @@
 -
 -
 -```bash
--# Build PHAR executable (installs Box first)
+-# Build PHAR executable into dist/ (installs Box first)
 -composer build
 -```
+-
+-Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+-The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
 -
 -
 -```bash
@@ -134,7 +137,7 @@
  ### Shell Script Testing with BATS
  
  Shell script tests use BATS:
-@@ -198,20 +76,6 @@
+@@ -201,20 +76,6 @@
  - Tests in `tests/bats/` with `.bats` extension
  - Helper functions in `tests/bats/_helper.bash`
  - Coverage exclusions: `# LCOV_EXCL_START` / `# LCOV_EXCL_END`

@@ -1,11 +1,11 @@
 @@ -1,5 +1,5 @@
  {
--    "output": ".build/force-crystal.phar",
-+    "output": ".build/star-forge.phar",
+-    "output": "dist/force-crystal.phar",
++    "output": "dist/star-forge.phar",
      "compression": "GZ",
      "finder": [
          {
-@@ -24,6 +24,6 @@
+@@ -25,6 +25,6 @@
          "renovate.json"
      ],
      "replacements": {

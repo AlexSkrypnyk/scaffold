@@ -34,20 +34,23 @@
  ### Namespace Structure
  
  - Source code: `YodasHut\App\`
-@@ -137,12 +133,6 @@
+@@ -137,15 +133,6 @@
  
  
  ```bash
--# Build PHAR executable (installs Box first)
+-# Build PHAR executable into dist/ (installs Box first)
 -composer build
 -```
+-
+-Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+-The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
 -
 -
 -```bash
  # Clean and reinstall dependencies
  composer reset # removes vendor/, vendor-bin/, composer.lock
  composer install
-@@ -210,8 +200,6 @@
+@@ -213,8 +200,6 @@
  Key workflows:
  
  - `.github/workflows/test-php.yml` - PHP testing

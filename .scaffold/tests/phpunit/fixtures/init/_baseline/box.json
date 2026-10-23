@@ -1,10 +1,11 @@
 {
-    "output": ".build/force-crystal.phar",
+    "output": "dist/force-crystal.phar",
     "compression": "GZ",
     "finder": [
         {
             "in": "./",
             "exclude": [
+                "dist",
                 "docs",
                 "tests"
             ]

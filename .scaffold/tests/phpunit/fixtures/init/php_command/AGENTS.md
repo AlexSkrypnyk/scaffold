@@ -29,7 +29,7 @@
  ### Building
  
  
-@@ -191,15 +185,6 @@
+@@ -194,15 +188,6 @@
  - Data providers: `#[DataProvider('providerMethodName')]`
  
  
@@ -45,7 +45,7 @@
  ## CI/CD
  
  GitHub Actions workflows test across:
-@@ -212,9 +197,6 @@
+@@ -215,9 +200,6 @@
  - `.github/workflows/test-php.yml` - PHP testing
  - `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
    - Builds the PHAR to attach

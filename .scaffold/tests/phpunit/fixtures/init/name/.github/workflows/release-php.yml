@@ -11,10 +11,10 @@
  
        - name: Test PHAR
          run: |
--          ./.build/force-crystal.phar --version
--          ./.build/force-crystal.phar || exit 1
-+          ./.build/star-forge.phar --version
-+          ./.build/star-forge.phar || exit 1
+-          ./dist/force-crystal.phar --version
+-          ./dist/force-crystal.phar || exit 1
++          ./dist/star-forge.phar --version
++          ./dist/star-forge.phar || exit 1
  
        - name: Create Release
          uses: softprops/action-gh-release@__HASH__ # __VERSION__
@@ -22,5 +22,5 @@
          with:
            tag_name: ${{ env.RELEASE_VERSION }}
            files: |
--            ./.build/force-crystal.phar
-+            ./.build/star-forge.phar
+-            ./dist/force-crystal.phar
++            ./dist/star-forge.phar

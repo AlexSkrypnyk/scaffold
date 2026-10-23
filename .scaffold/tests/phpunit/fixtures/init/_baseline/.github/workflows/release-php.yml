@@ -57,12 +57,12 @@ jobs:
 
       - name: Test PHAR
         run: |
-          ./.build/force-crystal.phar --version
-          ./.build/force-crystal.phar || exit 1
+          ./dist/force-crystal.phar --version
+          ./dist/force-crystal.phar || exit 1
 
       - name: Create Release
         uses: softprops/action-gh-release@__HASH__ # __VERSION__
         with:
           tag_name: ${{ env.RELEASE_VERSION }}
           files: |
-            ./.build/force-crystal.phar
+            ./dist/force-crystal.phar
