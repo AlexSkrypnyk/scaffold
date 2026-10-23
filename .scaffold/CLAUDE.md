@@ -389,6 +389,15 @@ touches the real tree. It needs `asciinema`, `expect`, `node`, and `npm`;
 svg-term is installed on demand into the git-ignored
 `.scaffold/assets/node_modules`.
 
+Regeneration is reproducible: recording an unchanged session produces the same
+bytes, so `git status` after a regeneration is the check - a clean tree means
+the rendering did not change. The expect script writes an invisible marker
+before each answer, and `canonicalizeCast()` cuts the recorded output into 1
+event per step at those markers, spaced `STEP_DELAY` apart. The recorded
+timing and the terminal's chunking never reach the committed files. Any output
+that varies between runs (a progress meter, a timestamp) breaks this, so keep
+`init.sh`'s interactive output deterministic.
+
 The pure cast helpers are unit-tested in
 `.scaffold/tests/phpunit/src/UpdateAssetsTest.php`, which also guards that the
 `AsciinemaPlayer` component stays byte-identical between `docs/` and
