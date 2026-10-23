@@ -742,7 +742,7 @@ process_readme() {
   replace_string_content 'text=Yourproject' "text=${project// /+}"
   replace_string_content 'alt="Yourproject logo"' "alt=\"${project} logo\""
 
-  curl "https://placehold.jp/000000/ffffff/200x200.png?text=${project// /+}&css=%7B%22border-radius%22%3A%22%20100px%22%7D" >logo.tmp.png || true
+  curl -s "https://placehold.jp/000000/ffffff/200x200.png?text=${project// /+}&css=%7B%22border-radius%22%3A%22%20100px%22%7D" >logo.tmp.png || true
   if [ -s "logo.tmp.png" ]; then
     mv logo.tmp.png "logo.png" >/dev/null 2>&1 || true
   fi
