@@ -207,9 +207,12 @@ npm run test-coverage
 [//]: # (#;< PHP_PHAR)
 
 ```bash
-# Build PHAR executable (installs Box first)
+# Build PHAR executable into dist/ (installs Box first)
 composer build
 ```
+
+Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
 
 [//]: # (#;> PHP_PHAR)
 
