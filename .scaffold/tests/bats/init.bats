@@ -1062,7 +1062,7 @@ create_release_workflow() {
           tag_name: ${{ env.RELEASE_VERSION }}
           files: |
             #;< PHP_PHAR
-            ./.build/php-command.phar
+            ./dist/php-command.phar
             #;> PHP_PHAR
             #;< PHP_SCRIPT
             php-script

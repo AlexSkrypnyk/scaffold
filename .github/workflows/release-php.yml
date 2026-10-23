@@ -58,8 +58,8 @@ jobs:
 
       - name: Test PHAR
         run: |
-          ./.build/php-command.phar --version
-          ./.build/php-command.phar || exit 1
+          ./dist/php-command.phar --version
+          ./dist/php-command.phar || exit 1
 
       # yamllint disable-line #;> PHP_PHAR
       - name: Create Release
@@ -68,7 +68,7 @@ jobs:
           tag_name: ${{ env.RELEASE_VERSION }}
           files: |
             #;< PHP_PHAR
-            ./.build/php-command.phar
+            ./dist/php-command.phar
             #;> PHP_PHAR
             #;< PHP_SCRIPT
             php-script

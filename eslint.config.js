@@ -10,7 +10,7 @@ module.exports = [
       'docs/**',
       'node_modules/**',
       'vendor/**',
-      '.build/**',
+      'dist/**',
       '.logs/**',
     ],
   },

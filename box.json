@@ -1,10 +1,11 @@
 {
-    "output": ".build/php-command.phar",
+    "output": "dist/php-command.phar",
     "compression": "GZ",
     "finder": [
         {
             "in": "./",
             "exclude": [
+                "dist",
                 "docs",
                 "php-script",
                 "tests"
