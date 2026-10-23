@@ -285,6 +285,71 @@ COMPOSER
   assert_file_not_exists "${tmpdir}/composer.json"
 }
 
+create_phar_composer_json() {
+  cat >"${1}/composer.json" <<'COMPOSER'
+{
+    "require-dev": {
+        "alexskrypnyk/phpunit-helpers": "^0.16.0",
+        "bamarni/composer-bin-plugin": "^1.9.1",
+        "composer": ">=2.10.2"
+    },
+    "config": {
+        "allow-plugins": {
+            "bamarni/composer-bin-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "build": [
+            "@composer bin box require --dev humbug/box",
+            "box validate",
+            "box compile"
+        ],
+        "lint": [
+            "phpcs"
+        ],
+        "reset": "rm -Rf vendor vendor-bin composer.lock",
+        "test": "phpunit --no-coverage"
+    }
+}
+COMPOSER
+}
+
+@test "remove_php_command_build strips the Box build and the bin plugin from composer.json" {
+  local tmpdir="${BATS_TEST_TMPDIR}/command_build"
+  mkdir -p "${tmpdir}"
+  create_phar_composer_json "${tmpdir}"
+  echo '{"main": "php-command"}' >"${tmpdir}/box.json"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_php_command_build
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/box.json"
+  assert_file_not_contains "${tmpdir}/composer.json" 'bamarni/composer-bin-plugin'
+  assert_file_not_contains "${tmpdir}/composer.json" '"build"'
+  assert_file_not_contains "${tmpdir}/composer.json" 'box'
+  assert_file_not_contains "${tmpdir}/composer.json" 'vendor-bin'
+  assert_file_contains "${tmpdir}/composer.json" '"reset": "rm -Rf vendor composer.lock",'
+  assert_file_contains "${tmpdir}/composer.json" '"alexskrypnyk/phpunit-helpers": "^0.16.0",'
+  assert_file_contains "${tmpdir}/composer.json" '"dealerdirect/phpcodesniffer-composer-installer": true'
+  assert_file_contains "${tmpdir}/composer.json" '"lint": ['
+  assert_file_contains "${tmpdir}/composer.json" '"test": "phpunit --no-coverage"'
+}
+
+@test "remove_php_command_build removes box.json without a composer.json" {
+  local tmpdir="${BATS_TEST_TMPDIR}/command_build_no_composer"
+  mkdir -p "${tmpdir}"
+  echo '{"main": "php-command"}' >"${tmpdir}/box.json"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_php_command_build
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/box.json"
+  assert_file_not_exists "${tmpdir}/composer.json"
+}
+
 @test "protect_skill_references and restore_skill_references round-trip" {
   local tmpdir="${BATS_TEST_TMPDIR}/skill_refs"
   mkdir -p "${tmpdir}"
