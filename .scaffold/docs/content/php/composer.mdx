@@ -46,39 +46,31 @@ which makes them easily accessible without cluttering the global scope.
 - **Configuration**:
 Composer is configured with the following settings:
 
-  - **Security Audit (Composer 2.9.0+)**:
-  Composer 2.9.0 introduced automatic security auditing during install and update operations. The template is configured with security-focused defaults:
+  - **Dependency Policy (Composer 2.10+)**:
+  The [`policy`](https://getcomposer.org/doc/06-config.md#policy) section sets how Composer treats packages with security advisories and abandoned packages. The template ships these values:
 
-    - **`block-insecure: true`** - Blocks installation of packages with known security vulnerabilities (CVE or GHSA advisories) unless explicitly ignored. This enforces security by default and prevents vulnerable dependencies from being installed.
+    | Setting | Value | Effect |
+    |---------|-------|--------|
+    | `advisories.block` | `false` | Composer installs packages that have known advisories. Set it to `true` to block them. |
+    | `advisories.audit` | `"fail"` | `composer audit` fails when an installed package has a known advisory. |
+    | `abandoned.audit` | `"report"` | `composer audit` lists abandoned packages and still passes. |
 
-    - **`abandoned: "report"`** - Reports warnings for abandoned/unmaintained packages without failing the build. This provides visibility into maintenance status while allowing flexibility for projects that need to continue using unmaintained packages.
+  Composer older than 2.10 ignores the `policy` section without a warning. To prevent that, `require-dev` declares `"composer": ">=2.10.2"`, so an older Composer refuses to install the project. The floor is 2.10.2 because earlier 2.10 releases have a known advisory. The constraint sits in `require-dev` because `config` applies only to the root project, so packages that depend on yours keep their own Composer version. `composer install --no-dev` skips the check, so it applies to `composer update` and to installs that include development dependencies.
 
-  **Choosing the right audit settings for your project:**
-
-  | Setting | Value | Use Case |
-  |---------|-------|----------|
-  | `block-insecure` | `true` | **Recommended for most projects.** Enforces security by blocking vulnerable packages. Best for production applications where security is critical. |
-  | `block-insecure` | `false` | Only for development/testing environments where you need to temporarily work with vulnerable dependencies. Not recommended for production. |
-  | `abandoned` | `"report"` | **Recommended default.** Shows warnings but doesn't fail builds. Good balance between awareness and flexibility. |
-  | `abandoned` | `"fail"` | Strict mode - fails builds with abandoned packages. Use when you want to enforce active maintenance across all dependencies. |
-  | `abandoned` | `"ignore"` | Suppresses all abandoned package warnings. Only use if you've consciously accepted the maintenance risk. |
-
-  **Temporarily allowing specific vulnerabilities:**
-
-  If you need to temporarily allow a specific vulnerability after security review (e.g., waiting for upstream fix, confirmed false positive, mitigated by other controls), you can add an `ignore` section:
+  To allow a specific advisory after you review it, add its ID and your reason to `ignore-id`:
 
   ```json
-  "audit": {
-    "abandoned": "report",
-    "block-insecure": true,
-    "ignore": {
-      "CVE-2024-1234": "Waiting for upstream fix, mitigated by input validation",
-      "GHSA-xxxx-yyyy-zzzz": "False positive - feature not used in our code"
+  "policy": {
+    "advisories": {
+      "ignore-id": {
+        "CVE-2024-1234": "Waiting for upstream fix, mitigated by input validation",
+        "GHSA-xxxx-yyyy-zzzz": "False positive - feature not used in our code"
+      }
     }
   }
   ```
 
-  Each ignored advisory should include a brief rationale explaining why it's acceptable for your project. Review and remove these exceptions regularly as fixes become available.
+  Remove each exception after a fix is available.
 
   - **Discard Changes**:
   Automatically discards any changes to the `composer.lock` file that are not committed. This ensures a clean state for the dependency versions defined in `composer.json`.
