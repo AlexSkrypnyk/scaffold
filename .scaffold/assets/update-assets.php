@@ -16,6 +16,10 @@
  * `init.sh` rewrites the tree in place and deletes itself, so the recording
  * always runs in a disposable workspace exported with `git archive HEAD`.
  *
+ * The recorded timing is discarded: the cast is rebuilt with 1 event per
+ * answered prompt at a fixed interval, so regenerating an unchanged session
+ * produces identical bytes.
+ *
  * Dependencies: asciinema, expect, node, npm.
  *
  * Environment variables:
@@ -34,11 +38,16 @@ declare(strict_types=1);
 define('TERMINAL_COLS', 80);
 define('TERMINAL_ROWS', 24);
 
-// Delay before answering each prompt in the expect script (seconds).
-define('PROMPT_DELAY', 1);
-
 // Maximum idle time preserved between recorded events (seconds).
 define('MAX_IDLE_TIME', 3);
+
+// Rendered gap between one step and the next (seconds).
+define('STEP_DELAY', 1);
+
+// Written by the expect script before each answer, so the cast can be cut
+// into steps where the session waited for input. An OSC sequence with no
+// meaning to a terminal, and stripped before the cast is committed.
+define('STEP_MARKER', "\033]scaffold-step\007");
 
 // Pause appended after the last event so the SVG animation rests on the final
 // frame before it loops (seconds).
@@ -55,6 +64,12 @@ define('RECORD_AUTHOR', 'Alex');
  * Types the three identity answers and accepts the default for every remaining
  * prompt, mirroring a "keep everything" run.
  *
+ * Each answer is sent in 1 write after STEP_MARKER, so the session reaches the
+ * terminal identically on every run. Expect writes out all output it has read
+ * before the answer runs, so the marker lands where the session waited. A
+ * prompt is matched up to its trailing ": ", so the marker never lands inside
+ * a prompt that arrived in 2 reads.
+ *
  * @param string $workspace_dir
  *   Directory holding the disposable copy of init.sh.
  * @param string $namespace
@@ -68,20 +83,21 @@ define('RECORD_AUTHOR', 'Alex');
  *   The expect script contents.
  */
 function buildInitExpectScript(string $workspace_dir, string $namespace, string $project, string $author): string {
+  $marker = STEP_MARKER;
+
   return <<<EXPECT
 #!/usr/bin/env expect
 
 set timeout 180
 log_user 1
 
-proc type_text {text} {
-    set send_human {.1 .3 1 .05 2 .1 .2 0 .4 0 .6 0 .8 0 1}
-    send -h -- \$text
+proc answer {{text ""}} {
+    send_user "{$marker}"
+    send -- "\$text\\r"
 }
 
-proc accept_default {} {
-    sleep 1
-    send -- "\\r"
+proc reply {label {text ""}} {
+    expect "\$label*: " { answer \$text }
 }
 
 cd "{$workspace_dir}"
@@ -89,63 +105,41 @@ cd "{$workspace_dir}"
 set env(PS1) {\$ }
 spawn bash --norc --noprofile
 
-expect "\\$ "
-sleep 1
-type_text "./init.sh"
-accept_default
-
-expect "Namespace (PascalCase):" {
-    sleep 1
-    type_text "{$namespace}"
-    accept_default
-}
-
-expect "Project:" {
-    sleep 1
-    type_text "{$project}"
-    accept_default
-}
-
-expect "Author:" {
-    sleep 1
-    type_text "{$author}"
-    accept_default
-}
-
-expect "Use PHP" { accept_default }
-expect "Use CLI command app" { accept_default }
-expect "CLI command name" { accept_default }
-expect "Build PHAR" { accept_default }
-expect "Use NodeJS" { accept_default }
-expect "Use Shell" { accept_default }
-expect "Shell command name" { accept_default }
-expect "Use Docker" { accept_default }
-expect "Use GitHub release drafter" { accept_default }
-expect "Use GitHub PR author auto-assign" { accept_default }
-expect "Use GitHub funding" { accept_default }
-expect "Use GitHub PR template" { accept_default }
-expect "Use Renovate" { accept_default }
-expect "Use docs" { accept_default }
-expect "Use GitHub Actions linting" { accept_default }
-expect "Use scheduled builds" { accept_default }
-expect "Use AI agents" { accept_default }
-expect "AI architecture docs" { accept_default }
-expect "Remove this script" { accept_default }
-expect "Proceed with project init" { accept_default }
-
-expect "\\$ "
-send -- "exit\\r"
+expect "\\$ " { answer "./init.sh" }
+reply "Namespace (PascalCase)" "{$namespace}"
+reply "Project" "{$project}"
+reply "Author" "{$author}"
+reply "Use PHP"
+reply "Use CLI command app"
+reply "CLI command name"
+reply "Build PHAR"
+reply "Use NodeJS"
+reply "Use Shell"
+reply "Shell command name"
+reply "Use Docker"
+reply "Use GitHub release drafter"
+reply "Use GitHub PR author auto-assign"
+reply "Use GitHub funding"
+reply "Use GitHub PR template"
+reply "Use Renovate"
+reply "Use docs"
+reply "Use GitHub Actions linting"
+reply "Use scheduled builds"
+reply "Use AI agents"
+reply "AI architecture docs"
+reply "Remove this script"
+reply "Proceed with project init"
+expect "\\$ " { answer "exit" }
 expect eof
 
 EXPECT;
 }
 
 /**
- * Remove recording noise and sanitise absolute paths in a cast.
+ * Neutralise the header and sanitise absolute paths in a cast.
  *
- * Drops the `spawn` line echoed by expect and rewrites the workspace and home
- * directories to stable placeholders so the committed cast never leaks a local
- * path.
+ * Rewrites the workspace and home directories to stable placeholders so the
+ * committed cast never leaks a local path.
  *
  * @param string $content
  *   Raw asciicast content (newline-delimited JSON).
@@ -173,25 +167,79 @@ function sanitizeCast(string $content, string $workspace_dir, string $home): str
     $lines[0] = (string) json_encode($header);
   }
 
-  $filtered = [$lines[0]];
-  $count = count($lines);
-  for ($i = 1; $i < $count; $i++) {
-    if ($lines[$i] === '') {
-      continue;
-    }
-    if (str_contains($lines[$i], 'spawn ')) {
-      continue;
-    }
-    $filtered[] = $lines[$i];
-  }
-
-  $result = implode("\n", $filtered);
+  $result = implode("\n", array_filter($lines, static fn(string $line): bool => $line !== ''));
   $result = str_replace($workspace_dir, '/home/user/project', $result);
   if ($home !== '') {
     $result = str_replace($home, '/home/user', $result);
   }
 
   return rtrim($result, "\n") . "\n";
+}
+
+/**
+ * Rewrite a v2 cast onto a canonical timeline.
+ *
+ * The recorded events follow how the terminal chunked its output and when
+ * the scheduler delivered it, so 2 runs of an unchanged session differ in
+ * both events and timestamps.
+ *
+ * The output is joined into 1 stream and cut at each STEP_MARKER, which the
+ * expect script writes where the session waited for input. Each step becomes
+ * 1 event, STEP_DELAY seconds after the previous one. Non-output events are
+ * dropped.
+ *
+ * @param string $content
+ *   Asciicast v2 content (newline-delimited JSON), the header first.
+ *
+ * @return string
+ *   The canonical cast content, terminated with a newline.
+ */
+function canonicalizeCast(string $content): string {
+  $lines = explode("\n", rtrim($content, "\n"));
+  $header = array_shift($lines);
+  $stream = '';
+
+  foreach ($lines as $line) {
+    $event = json_decode($line, TRUE);
+
+    if (!is_array($event) || ($event[1] ?? NULL) !== 'o' || !is_string($event[2] ?? NULL)) {
+      continue;
+    }
+
+    $stream .= $event[2];
+  }
+
+  $steps = array_values(array_filter(explode(STEP_MARKER, stripSpawnEcho($stream)), static fn(string $step): bool => $step !== ''));
+
+  $canonical = [$header];
+  foreach ($steps as $index => $step) {
+    $canonical[] = json_encode([$index * STEP_DELAY, 'o', $step], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+  }
+
+  return implode("\n", $canonical) . "\n";
+}
+
+/**
+ * Remove the expect spawn echo from the head of a session's output.
+ *
+ * Expect prints the command it spawns, so a recording starts with a line
+ * from the harness rather than the session. The echo ends at the first line
+ * break.
+ *
+ * @param string $stream
+ *   The session's output.
+ *
+ * @return string
+ *   The output past the echo.
+ */
+function stripSpawnEcho(string $stream): string {
+  if (!str_starts_with($stream, 'spawn ')) {
+    return $stream;
+  }
+
+  $break = strpos($stream, "\n");
+
+  return $break === FALSE ? $stream : substr($stream, $break + 1);
 }
 
 /**
@@ -265,7 +313,7 @@ function main(): void {
 
     $raw = (string) file_get_contents($cast_file);
     $home = (string) getenv('HOME');
-    $clean = sanitizeCast($raw, $workspace_dir, $home);
+    $clean = canonicalizeCast(sanitizeCast($raw, $workspace_dir, $home));
 
     $cast_dest = $project_dir . '/.scaffold/docs/static/img/init.cast';
     file_put_contents($cast_dest, $clean);
