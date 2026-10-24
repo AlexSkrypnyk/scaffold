@@ -8,7 +8,9 @@
 /.phpunit.cache
 /composer.lock
 /vendor
+#;< PHP_PHAR
 /vendor-bin
+#;> PHP_PHAR
 #;> PHP
 #;< NODEJS
 /node_modules

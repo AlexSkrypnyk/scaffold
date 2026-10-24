@@ -673,6 +673,48 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
+   * Only a project that builds a PHAR keeps the Box build scaffolding.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to init.sh.
+   */
+  #[DataProvider('dataProviderInitPharBuildScaffolding')]
+  public function testInitPharBuildScaffolding(array $arguments, bool $expected): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
+
+    $this->assertProcessSuccessful();
+
+    $composer = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'composer.json'), TRUE, 512, JSON_THROW_ON_ERROR);
+    $this->assertIsArray($composer);
+    $this->assertIsArray($composer['require-dev']);
+    $this->assertIsArray($composer['config']);
+    $this->assertIsArray($composer['config']['allow-plugins']);
+    $this->assertIsArray($composer['scripts']);
+
+    $this->assertSame($expected, array_key_exists('bamarni/composer-bin-plugin', $composer['require-dev']));
+    $this->assertSame($expected, array_key_exists('bamarni/composer-bin-plugin', $composer['config']['allow-plugins']));
+    $this->assertSame($expected, array_key_exists('build', $composer['scripts']));
+    $this->assertSame($expected ? 'rm -Rf vendor vendor-bin composer.lock' : 'rm -Rf vendor composer.lock', $composer['scripts']['reset']);
+
+    // Neighbouring keys survive the line-based removal.
+    $this->assertArrayHasKey('phpunit/phpunit', $composer['require-dev']);
+    $this->assertArrayHasKey('ergebnis/composer-normalize', $composer['config']['allow-plugins']);
+    $this->assertArrayHasKey('lint', $composer['scripts']);
+
+    $gitignore = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . '.gitignore');
+    $this->assertSame($expected, str_contains($gitignore, '/vendor-bin'));
+  }
+
+  public static function dataProviderInitPharBuildScaffolding(): \Iterator {
+    yield 'php command' => [['--php-command', '--no-php-script'], TRUE];
+    yield 'php command without phar' => [['--php-command', '--no-phar'], FALSE];
+    yield 'php script' => [['--no-php-command', '--php-script'], FALSE];
+    yield 'php library' => [['--no-php-command', '--no-php-script'], FALSE];
+  }
+
+  /**
    * A project generated with Actions linting must pass the zizmor audit.
    *
    * Mirrors the audit the shipped "Test Actions" workflow runs, using the

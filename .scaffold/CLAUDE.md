@@ -62,7 +62,10 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `PHP_LIBRARY` - Class-library features, selected by declining both PHP entry
   points; `!PHP_SCRIPT` marks what the command app and the library share (the
   `src` directory), `!PHP_LIBRARY` what the two entry points share
-- `PHP_PHAR` - PHAR packaging
+- `PHP_PHAR` - PHAR packaging. `composer.json` can't carry markers, so
+  `remove_php_command_build()` also deletes the Box `build` script, the
+  `bamarni/composer-bin-plugin` requirement and its `allow-plugins` entry, and
+  `vendor-bin` from the `reset` script
 - `PHP_RELEASE` - Documentation of `release-php.yml`, which exists only to attach
   an asset to a tag. `remove_php_release()` deletes the workflow, its `zizmor.yml`
   suppression entries and these blocks for the two modes that release no asset: a

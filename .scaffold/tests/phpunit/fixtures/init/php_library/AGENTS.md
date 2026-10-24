@@ -48,7 +48,7 @@
 -
 -```bash
  # Clean and reinstall dependencies
- composer reset # removes vendor/, vendor-bin/, composer.lock
+ composer reset # removes installed dependencies and composer.lock
  composer install
 @@ -213,8 +200,6 @@
  Key workflows:

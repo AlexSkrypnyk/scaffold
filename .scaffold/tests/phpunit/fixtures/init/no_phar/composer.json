@@ -1,0 +1,37 @@
+@@ -22,7 +22,6 @@
+     },
+     "require-dev": {
+         "alexskrypnyk/phpunit-helpers": "__VERSION__",
+-        "bamarni/composer-bin-plugin": "__VERSION__",
+         "composer": "__VERSION__",
+         "dealerdirect/phpcodesniffer-composer-installer": "__VERSION__",
+         "drevops/phpcs-standard": "__VERSION__",
+@@ -54,7 +53,6 @@
+     ],
+     "config": {
+         "allow-plugins": {
+-            "bamarni/composer-bin-plugin": true,
+             "dealerdirect/phpcodesniffer-composer-installer": true,
+             "ergebnis/composer-normalize": true
+         },
+@@ -71,11 +69,6 @@
+         "sort-packages": true
+     },
+     "scripts": {
+-        "build": [
+-            "@composer bin box require --dev humbug/box",
+-            "box validate",
+-            "box compile"
+-        ],
+         "lint": [
+             "phpcs",
+             "phpstan",
+@@ -85,7 +78,7 @@
+             "rector",
+             "phpcbf"
+         ],
+-        "reset": "rm -Rf vendor vendor-bin composer.lock",
++        "reset": "rm -Rf vendor composer.lock",
+         "test": "phpunit --no-coverage",
+         "test-coverage": "phpunit"
+     }
