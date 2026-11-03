@@ -1,66 +1,40 @@
 ---
-title: Shell CLI Command
+title: Shell CLI command
 sidebar_position: 2
 cspell: ignore yesno
 ---
 
-# CLI Command
+# CLI command
 
-[`shell-command.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/shell-command.sh)
-is a Bash script template for writing a single-file command-line interface (CLI)
-scripts. It's designed to be a single-file script without relying on any
-external packages, making it a self-contained program.
+[`shell-command.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/shell-command.sh) is a template for a single-file Bash command-line interface (CLI) script. It's self-contained: it needs Bash and standard tools such as `curl`, and no packages. Follow this page to learn what the template does and how to turn it into your own command.
 
-Below are some of its main features:
+By default, `init.sh` renames the script after your project, such as `acme-app.sh`. To pick another name, pass `--shell-command-name` or answer the **Shell command name** prompt. Use your script's name in place of `shell-command.sh` in the examples on this page.
 
-1. **Error Handling**: Implements `set -euo pipefail` to prevent the
-script from continuing execution in case of errors, uninitialized variables, or
-failed commands, enhancing reliability.
+The template includes the following features:
 
-**Debug Mode**: Controlled by the `SCRIPT_DEBUG` environment variable. When
-  set to `1`, the script runs in debug mode, providing verbose output to assist
-  with debugging.
+- **Strict mode**: `set -euo pipefail` stops the script at a failed command, an unset variable or a failed pipe.
+- **Debug mode**: set the `SCRIPT_DEBUG` environment variable to `1` to print each command as it runs.
+- **Prompts**: `ask` reads a value and offers a default. `ask_yesno` reads a `y` or `n` answer, with `Y` as its default, and returns it in lowercase.
+- **Confirmation**: the script asks `Proceed?` before it does its work, with `Y` as the default. Any answer other than `y` or `Y` exits the script. Set `SHOULD_PROCEED=y` to skip the question.
+- **`main` function**: the script's logic lives in `main`, which runs only when you run the script directly. Sourcing the script from another script loads its functions without running `main`.
 
-- **Utility Functions for User Interaction**:
-  - `ask`: Gathers input from the user with an option to specify a default
-    value.
-  - `ask_yesno`: Simplifies collecting `yes`/`no` responses from the user,
-    incorporating default responses and input normalization.
+The example logic takes a joke topic as its first argument, or asks for one with `general` as the default. It then fetches a random joke from the Official Joke API and prints it. The `JOKE_URL_ENDPOINT` environment variable overrides the API URL.
 
-- **Conditional Execution Based on User Confirmation**: Features a check to
-  confirm whether the user wishes to proceed with the operation, allowing for an
-  early exit if desired.
+## Get started
 
-- **Structured Script Design**: Encapsulates the main logic within a `main`
-  function, promoting code organization and readability. This structure also
-  ensures that the script's main functionality is executed only when the script
-  is not being sourced into another shell script.
+To turn the template into your own command:
 
-Overall, this template offers a robust starting point for developing your own
-Shell CLI scripts.
+1. Update the description and the `@usage` lines in the comment block at the top of the script.
+2. Replace the `topic="${1-}"` line with the arguments your command takes.
+3. Replace the example logic in `main` with your own, including the validation of your arguments.
+4. Run the script from your project root:
 
-## Getting Started
+   ```bash
+   ./shell-command.sh
+   ```
 
-Begin by updating the script name and file name in the script comments. This
-will clarify the script's functionality for anyone who reads the code.
+   The template version prints `Follow the prompts` and asks for a joke topic.
 
-Next, adjust the `main` function to validate and handle the CLI arguments
-specific to your script.
+## Write tests
 
-Your core logic will be housed in the `main` function.
-
-You can then run your script from the command line using `./shell-script`.
-
-## Authoring tests
-
-This template includes
-a [`tests/bats`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/bats)
-directory with a sample Unit and Functional tests written in [BATS](https://github.com/bats-core/bats-core).
-
-The tests also include a `test_helpers.bash` file that provides a set of
-
-[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats)
-is an example of Unit and Functional tests for running the script with different
-arguments.
-
-The CI supports running the tests with coverage reports uploaded to Codecov.
+[`tests/bats/shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) runs the script with different arguments and answers. Update its tests when you change the script. See [Testing](testing) for how the tests work and how to run them with coverage.

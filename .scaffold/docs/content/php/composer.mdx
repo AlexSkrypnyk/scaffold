@@ -1,91 +1,86 @@
 ---
 title: Composer
 sidebar_position: 1
+cspell: ignore autoloading bamarni dealerdirect ergebnis phpcbf phpcodesniffer
 ---
 
 # Composer
 
-[Composer](https://getcomposer.org/) is a dependency manager for PHP. It allows you to declare the libraries
-your project depends on and it will manage (install/update) them for you.
+[Composer](https://getcomposer.org/) is a dependency manager for PHP. You declare the libraries your project depends on, and Composer installs and updates them. The template's [`composer.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/composer.json) also defines the scripts that lint, test and build the code. This page lists what each part of that file sets, for developers adapting it to their project.
 
-This template uses Composer to manage dependencies and provide scripts for
-linting and testing code.
+## Sections
 
-The provided [`composer.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/composer.json) file contains the following sections:
+The following table lists the metadata, dependency and autoloading sections:
 
-- **Project Information**:
-Metadata like name, description, and license.
+| Section | Keys | What it sets |
+|---------|------|--------------|
+| Project information | `name`, `description`, `license`, `type`, `homepage` | The package metadata. |
+| Author and support | `authors`, `support` | The maintainer's details and the URLs for issues and source code. |
+| Dependencies | `require` | PHP `>=8.3` and `symfony/console`. Every PHP mode keeps both. |
+| Development dependencies | `require-dev` | The development tools, such as [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), [Rector](https://getrector.org/) and [PHPUnit](https://phpunit.de/). The `composer` entry requires Composer 2.10.2 or later. |
+| Autoloading | `autoload` | PSR-4 autoloading of the `YourNamespace\App\` namespace from `src`. |
+| Development autoloading | `autoload-dev` | PSR-4 autoloading of the `YourNamespace\App\Tests\` namespace from `tests/phpunit`, plus a classmap of that directory. |
+| Executables | `bin` | The entry point that Composer links into `vendor/bin` for projects that install the package. It's `bin/php-command` for a CLI command app or `php-script` for a CLI script. A library has no `bin` section. |
 
-- **Author and Support**:
-Includes maintainer details and URLs for issues and source code.
+`init.sh` replaces `YourNamespace` with your namespace and renames the entry point to the name you choose.
 
-- **Dependencies**:
-Requires PHP version `>= 8.3`. If using as base for CLI command,
-`symfony/console` is provided as a dependency as well.
+## Scripts
 
-- **Development Dependencies**:
-Tools like [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), and [PHPUnit](https://phpunit.de/) for development are listed.
+The following table lists the Composer scripts. Run a script by its name, for example `composer lint`.
 
-- **Auto-loading**:
-PSR-4 standard is used for auto-loading classes from the `src` directory.
+| Script | What it does |
+|--------|--------------|
+| `lint` | Checks the code with PHP_CodeSniffer, PHPStan and Rector. See [Linting](./linting.mdx). |
+| `lint-fix` | Fixes the code with Rector, then the PHP_CodeSniffer fixer, `phpcbf`. PHPStan has no fixer. |
+| `test` | Runs the PHPUnit tests without generating a coverage report. |
+| `test-coverage` | Runs the PHPUnit tests and generates the coverage reports. |
+| `build` | Builds a PHAR file with Box. Only a CLI command app has this script, and only when `init.sh` runs with `--phar`, its default. See [PHP packaging](../ci/php-packaging.mdx). |
+| `reset` | Deletes `vendor` and `composer.lock`, and `vendor-bin` when the project builds a PHAR. |
 
-- **Dev Auto-loading**:
-Auto-loads classes for development from `tests/phpunit` directory.
+## Configuration
 
-- **Custom Scripts**:
-Defines CLI scripts for tasks:
-  - `lint` and `lint-fix` - to lint and fix code using [PHP Code Sniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), and [Rector](https://getrector.org/).
-  - `test` - to run PHPUnit tests without generating coverage report.
-  - `test-coverage` - to run PHPUnit tests and generate coverage report.
-  - `build` - to build a PHAR file (if using as base for CLI command).
+The following table lists the settings in the `config` section, apart from `policy`:
 
-- **Executable Binaries**:
-Executable binaries are defined as executable scripts in `bin` directory,
-which makes them easily accessible without cluttering the global scope.
+| Setting | Value | Effect |
+|---------|-------|--------|
+| `allow-plugins` | 3 plugins | Lets `dealerdirect/phpcodesniffer-composer-installer`, `ergebnis/composer-normalize` and `bamarni/composer-bin-plugin` run. `init.sh` removes `bamarni/composer-bin-plugin` when the project doesn't build a PHAR. |
+| `discard-changes` | `true` | In a non-interactive update, Composer discards local changes to installed dependencies. |
+| `sort-packages` | `true` | `composer require` keeps the packages in `composer.json` sorted by name. |
 
-- **Configuration**:
-Composer is configured with the following settings:
+The `Test PHP` workflow runs `composer normalize --dry-run` and fails when `composer.json` isn't normalized. After you edit `composer.json` by hand, run `composer normalize` to sort the packages and normalize the file. The command comes from the `ergebnis/composer-normalize` plugin.
 
-  - **Dependency Policy (Composer 2.10+)**:
-  The [`policy`](https://getcomposer.org/doc/06-config.md#policy) section sets how Composer treats packages with security advisories and abandoned packages. The template ships these values:
+### Dependency policy (Composer 2.10+)
 
-    | Setting | Value | Effect |
-    |---------|-------|--------|
-    | `advisories.block` | `false` | Composer installs packages that have known advisories. Set it to `true` to block them. |
-    | `advisories.audit` | `"fail"` | `composer audit` fails when an installed package has a known advisory. |
-    | `abandoned.audit` | `"report"` | `composer audit` lists abandoned packages and still passes. |
+The [`policy`](https://getcomposer.org/doc/06-config.md#policy) setting sets how Composer treats packages with security advisories and abandoned packages. The template ships these values:
 
-  Composer older than 2.10 ignores the `policy` section without a warning. To prevent that, `require-dev` declares `"composer": ">=2.10.2"`, so an older Composer refuses to install the project. The floor is 2.10.2 because earlier 2.10 releases have a known advisory. The constraint sits in `require-dev` because `config` applies only to the root project, so packages that depend on yours keep their own Composer version. `composer install --no-dev` skips the check, so it applies to `composer update` and to installs that include development dependencies.
+| Setting | Value | Effect |
+|---------|-------|--------|
+| `advisories.block` | `false` | Composer installs packages that have known advisories. Set it to `true` to block them. |
+| `advisories.audit` | `"fail"` | `composer audit` fails when an installed package has a known advisory. |
+| `abandoned.audit` | `"report"` | `composer audit` lists abandoned packages and still passes. |
 
-  To allow a specific advisory after you review it, add its ID and your reason to `ignore-id`:
+Composer older than 2.10 ignores the `policy` section without a warning. To stop Composer older than 2.10.2 from installing the project, `require-dev` declares `"composer": ">=2.10.2"`. The floor is 2.10.2 because earlier 2.10 releases have a known advisory.
 
-  ```json
-  "policy": {
-    "advisories": {
-      "ignore-id": {
-        "CVE-2024-1234": "Waiting for upstream fix, mitigated by input validation",
-        "GHSA-xxxx-yyyy-zzzz": "False positive - feature not used in our code"
-      }
+`config` applies only to the root project, so the constraint sits in `require-dev`, which also applies only there. Packages that depend on yours keep their own Composer version. `composer install --no-dev` skips the check, so the floor applies to `composer update` and to installs that include development dependencies.
+
+To allow a specific advisory after you review it, add its ID and your reason to `ignore-id`:
+
+```json
+"policy": {
+  "advisories": {
+    "ignore-id": {
+      "CVE-2024-1234": "Waiting for upstream fix, mitigated by input validation",
+      "GHSA-xxxx-yyyy-zzzz": "False positive - feature not used in our code"
     }
   }
-  ```
+}
+```
 
-  Remove each exception after a fix is available.
+Remove each exception after you update to a version with the fix.
 
-  - **Discard Changes**:
-  Automatically discards any changes to the `composer.lock` file that are not committed. This ensures a clean state for the dependency versions defined in `composer.json`.
+## Stability
 
-  - **Sort Packages**:
-  Ensures that the packages in `composer.json` are sorted, which helps in maintaining a consistent and organized structure. Run `composer normalize` to sort the packages.
+2 top-level keys set how Composer chooses package versions:
 
-  - **Minimum Stability**:
-  Sets the minimum stability to `stable`, meaning that only stable versions of packages will be considered when resolving dependencies. You can change this to `dev` or `alpha` if you want to include unstable versions in your project.
-
-  - **Prefer Stable**:
-  Prefers stable versions of packages over unstable ones, providing more reliable and tested packages unless a specific unstable version is required.
-
-
-
-
-
-
+- `minimum-stability` is `stable`, so Composer considers only stable versions. To include unstable versions in your project, change it to `alpha` for alpha and later pre-releases or to `dev` for development versions too.
+- `prefer-stable` is `true`, so Composer picks stable versions over unstable ones unless a specific unstable version is required.

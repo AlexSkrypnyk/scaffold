@@ -6,38 +6,31 @@ cspell: ignore RELEASEDRAFTER
 
 # Release
 
-The `Release` workflow automates the release process for the repository. It is
-triggered on pushes to the `main` branch and when a new tag is created.
+A project created from Scaffold carries release workflows that draft release notes and publish the project's assets. This page is for maintainers of that project. It lists the release workflows `init.sh` can add and when each one runs.
 
-## Trigger Conditions
+## Trigger conditions
 
-- **Runs on Pushes to the `main` Branch**: The workflow is activated every time
-  new commits are pushed to the `main` branch. This ensures that any changes
-  merged into `main` — either directly or through pull requests — automatically
-  trigger the release process. This functionality ensures that the `main` branch
-  is always in a release-ready state.
+Every release workflow runs on a new Git tag, and some also run on other events. The tag can come from a `git push` or from a release you publish in the GitHub interface.
 
-- **Triggers on New Git Tags**: The workflow is also activated when a new Git
-  tag is created. Tags in Git are often used to mark specific points in your
-  repository history as being important, usually to indicate a new version
-  release. Whenever a new tag is pushed to the repository or created through
-  GitHub's interface, the workflow is triggered. This allows for
-  version-specific releases and assets to be automatically generated and
-  published.
+The following table lists the release workflows and the `init.sh` choices that add each one:
 
-## Permissions
+| Workflow | File | Runs on | Added when |
+|---|---|---|---|
+| Draft release notes | `draft-release-notes.yml` | A push to `main` or a tag | Release Drafter is selected; it's on by default |
+| Release PHP | `release-php.yml` | A tag or a manual run | The project is a PHP command app with a PHAR, or a single-file PHP script |
+| Release Node.js | `release-nodejs.yml` | A tag or a manual run | Node.js is selected |
+| Release Docker | `release-docker.yml` | A tag | Docker is selected; it's off by default |
+| Release docs | `release-docs.yml` | A tag or a manual run | The documentation site is selected |
 
-The workflow has write access to the repository content.
+To start a manual run of Release PHP, Release Node.js or Release docs, open the **Actions** tab and enter a `version`, which becomes the release tag. The Docker and documentation releases have their own pages: [Publishing](../docker/publishing.mdx) and [Documentation](../documentation.mdx).
 
 [//]: # (#;< RELEASEDRAFTER)
 
 ## Release Drafter job
 
 - Runs on `ubuntu-latest`.
-- Runs on code `push` to `main` branch or on `create` tag.
-- Uses the [`release-drafter/release-drafter`](https://github.com/release-drafter/release-drafter)
-  action to draft GitHub releases.
-- Requires write access to both contents and pull requests.
+- Uses the [`release-drafter/release-drafter`](https://github.com/release-drafter/release-drafter) action to draft GitHub releases.
+- Declares write access to both contents and pull requests.
 
 See the [Release Drafter](release-drafter) page for more information.
 
@@ -45,15 +38,15 @@ See the [Release Drafter](release-drafter) page for more information.
 
 [//]: # (#;< PHP)
 
-## PHP Release job
+## PHP release job
 
-- Activates if the workflow is triggered by a tag creation.
-- Runs on `ubuntu-latest`.
-- Checks out code, caches Composer dependencies, and installs them.
-- Builds and tests a PHP PHAR file
-  using [Box](https://github.com/box-project/box).
-- Retrieves the tag name.
-- Creates a new GitHub release and attaches the PHAR file as a release asset.
+- Runs on `ubuntu-latest` with PHP 8.4 and write access to the repository contents.
+- Checks out code, caches Composer dependencies and installs them.
+- Sets the release version from the `version` input of a manual run, or from the tag name.
+- For a command app, writes the version into `box.json`, builds the PHAR with [Box](https://github.com/box-project/box) and runs the PHAR to check that it starts.
+- Creates a GitHub release for the version and attaches the asset: the PHAR for a command app, or the script file for a single-file script.
+
+A class library and a command app built with `--no-phar` have no asset to attach, so `init.sh` leaves this workflow out of those projects.
 
 See the [PHP packaging](php-packaging) page for more information.
 
@@ -61,11 +54,11 @@ See the [PHP packaging](php-packaging) page for more information.
 
 [//]: # (#;< NODEJS)
 
-## Node.js Release job:
+## Node.js release job
 
-- Activates if the workflow is triggered by a tag creation.
-- Runs on `ubuntu-latest`.
-- Checks out code and sets up a Node.js environment.
-- Installs npm dependencies and builds the project.
+- Runs on `ubuntu-latest` with write access to the repository contents.
+- Checks out code.
+- Sets the release version from the `version` input of a manual run, or from the tag name.
+- Creates a GitHub release for the version and attaches `nodejs-script` as its asset.
 
 [//]: # (#;> NODEJS)

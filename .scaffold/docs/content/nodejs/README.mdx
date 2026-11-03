@@ -5,7 +5,12 @@ sidebar_position: 4
 
 # NodeJS
 
-This scaffold provides a template for NodeJS projects, which can be used as a
-base for single-file CLI scripts.
+The NodeJS part of Scaffold is a starting point for a single-file command-line interface (CLI) script, `nodejs-script`, with linting and tests already set up. This section is for developers who write that script in a project generated from Scaffold.
 
-It also provides a set of tools for linting and testing code, including examples.
+`init.sh` keeps the NodeJS files by default. To leave them out, pass `--no-nodejs` to `init.sh` or answer `n` to its `Use NodeJS` prompt.
+
+Pick the page for your task:
+
+- [NodeJS CLI Script](./nodejs-script.mdx) shows how to adapt the script and write tests for it.
+- [Linting](./linting.mdx) covers checking the code with ESLint and Prettier.
+- [Testing](./testing.mdx) covers running the tests and collecting coverage.

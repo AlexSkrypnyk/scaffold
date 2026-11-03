@@ -5,17 +5,16 @@ sidebar_position: 3
 
 # Linting
 
-The Dockerfile is linted using [Hadolint](https://github.com/hadolint/hadolint),
-a Dockerfile linter that helps enforce best practices and catch common mistakes
-before an image is built.
+[Hadolint](https://github.com/hadolint/hadolint) checks a `Dockerfile` for common mistakes and departures from Dockerfile best practices. Follow this page to lint your `Dockerfile` before you build an image.
 
 ## Usage
 
-Lint the Dockerfile locally:
+To lint the `Dockerfile`, install Hadolint and run the following command in your project root:
 
 ```bash
 hadolint Dockerfile
 ```
 
-Linting also runs automatically in CI as part of the [testing](testing)
-workflow, so pull requests are checked before they are merged.
+The `Dockerfile` starts with a `# hadolint global ignore=DL3018` comment, so Hadolint skips rule `DL3018`. That rule requires pinned package versions in `apk add`.
+
+The `test-docker.yml` workflow also runs Hadolint in CI, before it builds the image. See [Testing](testing).
