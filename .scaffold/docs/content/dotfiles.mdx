@@ -5,40 +5,36 @@ sidebar_position: 6
 
 # Dotfiles
 
+Scaffold adds 3 dotfiles to every generated project. They set editor formatting, the files Git tracks and the contents of release archives. This page is for developers who want to know what each file sets before they change it.
+
 ## `.editorconfig`
 
-The `.editorconfig` file serves as a configuration file for your text editor,
-enforcing consistent coding styles across multiple file types in the project.
-It ensures that different editors follow the same indentation and formatting
-rules, leading to more readable and maintainable code.
+`.editorconfig` sets the indentation and formatting rules for each file type. Editors that support the [EditorConfig](https://editorconfig.org/) standard apply those rules, so every supporting editor writes files the same way.
 
-This template provides a [`.editorconfig`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.editorconfig)
-file with some sensible defaults.
+The template's [`.editorconfig`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.editorconfig) sets the following defaults for every file:
 
-Read more about the EditorConfig standard at [EditorConfig](https://editorconfig.org/).
+- LF line endings and UTF-8
+- Indentation with 2 spaces
+- Trailing whitespace trimmed and a final newline added
+
+A section for `.json`, `.lock` and `.xml` files sets 4-space indentation instead.
 
 ## `.gitignore`
 
-The `.gitignore` file specifies files and folders that should be ignored by Git,
-ensuring that they are not tracked or committed to the repository. This helps in
-keeping the repository clean from files that are not source code,
-like dependencies and build artifacts.
+`.gitignore` lists the files and directories that Git doesn't track, such as dependencies and build artifacts.
 
-This template provides a [`.gitignore`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitignore)
-file with some sensible defaults to ignore files and folders that are commonly
-ignored in PHP and Node.js projects.
+The template's [`.gitignore`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitignore) covers what PHP and Node.js projects commonly produce. `init.sh` removes the entries for languages you don't select.
 
-To ignore OS temporary files use [global `.gitignore`](https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer).
-
-Read more about the `.gitignore` files in the [Git documentation](https://git-scm.com/docs/gitignore).
+To ignore temporary files your operating system creates, use a [global `.gitignore`](https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer). For the pattern syntax, see the [`gitignore` documentation](https://git-scm.com/docs/gitignore).
 
 ## `.gitattributes`
 
-The `.gitattributes` file sets attributes on a path-by-path basis for the
-repository, affecting how Git handles certain files. In this case, it specifies
-files and folders to be excluded when creating distribution archives of
-the repository.
+`.gitattributes` sets Git attributes path by path. In a generated project, it marks files and directories `export-ignore`, so `git archive` leaves them out of distribution archives. GitHub builds the source archive of a release with `git archive`.
 
-This template provides a [`.gitattributes`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitattributes)
-file with some sensible defaults to ignore files and folders when creating an
-archive for distribution. For example, when creating a release on GitHub.
+The template's [`.gitattributes`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitattributes) holds its `export-ignore` lines commented out, and `init.sh` uncomments them. In the generated project, `git archive` leaves out the following paths:
+
+- `.editorconfig`, `.gitattributes`, `.gitignore`, `.github` and `logo.png`
+- `docs`, when the project has a `docs` directory
+- On a PHP project, `tests`, `phpcs.xml`, `phpstan.neon`, `phpunit.xml` and `rector.php`
+- On a Node.js project, `.npmignore`
+- When you select Renovate, `renovate.json`

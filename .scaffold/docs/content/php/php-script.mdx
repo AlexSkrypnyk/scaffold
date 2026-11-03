@@ -1,88 +1,83 @@
 ---
-title: PHP CLI Script
+title: PHP CLI script
 sidebar_position: 3
+cspell: ignore alexskrypnyk
 ---
 
-# CLI Script
+# CLI script
 
-[`php-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-script)
-is a PHP template for writing a single-file command-line interface (CLI)
-scripts. It's designed to be a single-file script without relying on any
-external packages, making it a self-contained program.
+[`php-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/php-script) is a template for a single-file command-line interface (CLI) script. The script is self-contained: it runs on PHP alone and loads no Composer packages. Use it for a tool that does 1 task. For a tool with several commands, see [CLI command](./php-command.mdx).
 
-Below are some of its main features:
+This page is for developers writing a script from Scaffold. It covers what the template handles for you, how to adapt it and how to test it.
 
-1. **Environment-agnostic**: It starts with `#!/usr/bin/env php`, which helps
-   the script find the PHP executable irrespective of its location.
+To select this mode, pass `--php-script` to `init.sh`. Interactively, answer "n" to `Use CLI command app` and "y" to `Use simple script`. `init.sh` replaces `php-script` with your project name, or with the value of `--php-script-name`, in filenames and file contents. This page uses the template name.
 
-2. **Usage Information**: It includes a `print_help()` function that prints out
-   how to use the script. Users can trigger this function by providing `help()`,
-   `--help`, `-h`, or `-?` as arguments.
+## What the script handles
 
-3. **Error Handling**: The template is equipped to handle errors gracefully. It
-   uses PHP's `set_error_handler()` function to throw exceptions on errors, making
-   debugging easier.
+The template ships the parts every script needs:
 
-4. **Argument Checking**: The `main()` function looks at the number of arguments
-   passed and throws an exception if it doesn't meet the expected count.
+- **Shebang:** with the first line, `#!/usr/bin/env php`, your system finds PHP on your `PATH`, so `./php-script` runs directly.
+- **Help:** when any argument is `help`, `--help`, `-h` or `-?`, `main()` calls `print_help()` and skips the argument check.
+- **Argument check:** `main()` throws an exception unless the script gets exactly 1 argument.
+- **Error handling:** `set_error_handler()` turns PHP errors into exceptions. The entry point, the code at the end of the file that calls `main()`, catches any exception from `main()`, prints the message and exits with an error code.
+- **Output buffer:** `verbose()` prints each message and records it in an internal buffer. It returns the whole buffer, so tests can assert on the output.
+- **CLI only:** the script stops with an error outside the command line, such as under a web server.
 
-5. **Verbose Output**: The `verbose()` function takes care of outputting messages
-   to the console. An environment variable `SCRIPT_QUIET` can suppress these
-   messages if set to '1'.
+The script reads 2 environment variables:
 
-6. **Environment Variables for Control**: `SCRIPT_QUIET` for silencing verbose
-   output, and `SCRIPT_RUN_SKIP` for skipping the actual running of the script.
-   These can be useful for testing or other conditional executions.
+| Variable | Effect when set to `1` |
+|---|---|
+| `SCRIPT_QUIET` | `verbose()` records messages in its buffer without printing them. |
+| `SCRIPT_RUN_SKIP` | The entry point doesn't run, so you can `require` the file and call `main()` yourself. |
 
-7. **Security**: The script checks to ensure that it is being run from the
-   command line and not from a web server, preventing unintended external
-   access.
+Run the script with 1 argument from the project root:
 
-8. **Entrypoint**: The script identifies its entry point and goes through an
-   error-handling mechanism before running the `main()` function.
+```bash
+./php-script value/of/argument
+```
 
-9. **Testability**: The template is designed to be test-friendly. It allows you
-   to skip the script's run for unit testing by setting an environment variable.
-   Example unit tests are provided in the `tests/phpunit` directory.
+The script prints the following:
 
-Overall, this template offers a robust starting point for developing your own
-PHP CLI scripts.
+```text
+Would execute script business logic with argument value/of/argument.
+```
 
-## Getting Started
+## Adapt the script
 
-Begin by updating the script name and file name in the script comments. This
-will clarify the script's functionality for anyone who reads the code.
+To turn the template into your script:
 
-Next, adjust the `main` function to validate and handle the CLI arguments
-specific to your script. You should also revise the `print_help` function to
-include relevant usage instructions.
+1. In the header comment, replace `PHP CLI script template` with your script's name.
+2. In `main()`, change the `if ($argc < 2 || $argc > 2)` check to accept the arguments your script takes. `$argc` also counts the script name, so 1 argument makes `$argc` equal `2`.
+3. Replace the `// Add your logic here.` comment and the `verbose()` call after it with your code.
+4. Rewrite the help text in `print_help()`: its title, arguments, options and examples.
+5. Delete the "To adopt script template" block from the header comment.
+6. In both example tests, update the cases in `dataProviderMain()` to match your script's arguments and output.
+7. Run the tests:
 
-Your core logic will be housed in the `main` function. Simply replace the
-placeholder comment "Add your logic here" with the code that accomplishes your
-task. If you're interested in testing the script before running it, you can use
-environment variables like `SCRIPT_QUIET` and `SCRIPT_RUN_SKIP` to modify its
-behavior.
+   ```bash
+   composer test
+   ```
 
-You can then run your script from the command line using `./php-script`.
+   Confirm that every test passes.
 
-## Authoring tests
+## Test the script
 
-This template includes a [`tests/phpunit`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/phpunit)
-directory with a sample Unit and Functional tests.
+The template ships tests for the script at 2 levels, each with a base class. Both base classes include `AssertArrayTrait` from [`alexskrypnyk/phpunit-helpers`](https://github.com/AlexSkrypnyk/phpunit-helpers), which adds `assertArrayContainsString()` for checking output lines.
 
-[`ScriptUnitTestCase.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Unit/ScriptUnitTestCase.php)
-is a base class for all Unit tests. It provides all required functionality for
-testing the script without actually running it. It also includes several traits.
+### Unit tests
 
-[`ExampleScriptUnitTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Unit/ExampleScriptUnitTest.php)
-is an example of a Unit test for running the script with different arguments and
-options.
+Unit tests call `main()` inside the test process. [`ScriptUnitTestCase`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Unit/ScriptUnitTestCase.php) sets `SCRIPT_RUN_SKIP=1` and `SCRIPT_QUIET=1`, then loads the script. Its `runMain()` method calls `main()` with your arguments and returns the `verbose()` buffer.
 
-[`ScriptFunctionalTestCase.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/ScriptFunctionalTestCase.php)
-is a base class for all Functional tests. It provides all required functionality
-for testing the script by running it as your script users would do. It also
-includes several traits.
+[`ExampleScriptUnitTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Unit/ExampleScriptUnitTest.php) runs `main()` with different arguments and checks the output or the exception.
 
-[`ExampleScriptFunctionalTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/ExampleScriptFunctionalTest.php)
-is an example of a Functional test for running the script with different
-arguments and options.
+### Functional tests
+
+Functional tests run the script in a separate process. [`ScriptFunctionalTestCase`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/ScriptFunctionalTestCase.php) extends the unit base class and sets both variables back to `0`. Its `runScript()` method runs `php php-script` with your arguments and returns the exit code and the output lines.
+
+[`ExampleScriptFunctionalTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/ExampleScriptFunctionalTest.php) runs the same cases and checks each exit code against `EXIT_SUCCESS` or `EXIT_ERROR`.
+
+For the PHPUnit configuration and coverage reports, see [Testing](./testing.mdx).
+
+## Distribution
+
+`composer.json` lists the script under `bin`, so Composer links it into `vendor/bin` in any project that requires your package. When you push a tag, the `Release PHP` GitHub Actions workflow creates a release for the tag and attaches the script file to it.

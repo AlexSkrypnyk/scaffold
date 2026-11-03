@@ -5,39 +5,32 @@ sidebar_position: 5
 
 # Publishing
 
-The scaffold publishes multi-architecture (`linux/amd64`, `linux/arm64`) images
-to a container registry in two ways: a rolling `canary` image on every merge to
-`main`, and an immutable image on every tagged release.
+Your project's GitHub Actions workflows publish its image to Docker Hub for `linux/amd64` and `linux/arm64`. This page covers when each image gets published and the credentials the workflows need. The workflows publish the following images:
+
+- A `canary` image from `test-docker.yml`, after each push to `main` passes the tests
+- A release image from `release-docker.yml`, for every Git tag
 
 ## Canary images
 
-On a merge to `main`, the [testing](testing) workflow builds and pushes an image
-tagged `canary` once the tests pass. This provides a bleeding-edge build in
-between tagged releases. The canary push runs only on `main`, so pull requests
-and forks never publish an image.
+On a push to `main`, the [testing](testing) workflow builds the image and pushes it with the `canary` tag after its tests pass. The `canary` tag points to the latest passing build of `main`, so you can try changes between tagged releases. Pull requests, including those from forks, never publish an image.
 
 ## Tagged releases
 
-The [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml)
-workflow runs on tag pushes. It:
+The [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) workflow runs when you push a Git tag whose name has no `/`. It runs the following steps:
 
-1. Sets up QEMU and Docker Buildx for multi-architecture builds
-2. Authenticates with Docker Hub
-3. Builds and pushes multi-arch images tagged from the release metadata
+1. Sets up QEMU and Docker Buildx to build for both platforms.
+2. Authenticates with Docker Hub.
+3. Builds the image and pushes it with tags generated from the Git tag by `docker/metadata-action`.
 
 ## Registry credentials
 
-Both publishing paths require the following repository secrets:
+Both workflows authenticate with Docker Hub using the following repository secrets:
 
-- `DOCKER_USER` - Docker Hub username
-- `DOCKER_PASS` - Docker Hub access token
+- `DOCKER_USER`: your Docker Hub username
+- `DOCKER_PASS`: a Docker Hub access token
 
-Set these in your repository's **Settings > Secrets and variables > Actions**.
+Add them under your repository's **Settings > Secrets and variables > Actions**.
 
-## Overriding the image name
+## Override the image name
 
-By default the image is published under the name chosen during initialization.
-To publish elsewhere without editing the workflows (for example, to push to a
-throwaway repository while testing the pipeline end to end), set a `DOCKER_IMAGE`
-repository or organization **variable** to the target image name. When it is
-unset, the default name is used.
+Both workflows publish to the image name you chose when you ran `init.sh`. To publish to another image without editing the workflows, set the `DOCKER_IMAGE` repository or organization variable to that image name. For example, point it at a throwaway repository to test the pipeline end to end. Create `DOCKER_IMAGE` on the **Variables** tab, because the workflows ignore a secret with that name.

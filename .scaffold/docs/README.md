@@ -1,25 +1,35 @@
 # Scaffold documentation
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+`.scaffold/docs` holds the source of getscaffold.dev, the site that documents the Scaffold template. The site is built with [Docusaurus](https://docusaurus.io/). Follow this page to run the site locally and build it. Run every command from the `.scaffold/docs` directory of the repository.
 
-### Installation
+## Install the dependencies
 
-```
+To install the dependencies, run the following command:
+
+```bash
 $ npm install
 ```
 
-### Local Development
+## Start a local server
 
-```
+To start a local development server and open the site in a browser, run the following command:
+
+```bash
 $ npm start
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Most changes appear in the browser without a server restart.
 
-### Build
+## Build the site
 
-```
+To generate the static site into the `build` directory, run the following command:
+
+```bash
 $ npm run build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+Any static hosting service can serve the `build` directory.
+
+`npm start` and `npm run build` first copy `init.sh` from the repository root to `static/init.sh`, a git-ignored copy. The built site includes that copy, so the one-line `curl` installer fetches it from getscaffold.dev/init.sh.
+
+Before you commit, run `npm test`. It runs the Jest tests and the CSpell spell check. CI runs the same command after it builds the site.

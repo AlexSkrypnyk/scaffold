@@ -5,79 +5,55 @@ sidebar_position: 2
 
 # CLI Script
 
-[`nodejs-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/nodejs-script)
-is a NodeJS template for writing single-file command-line interface (CLI)
-scripts. It's designed to be a single-file script without relying on any
-external packages, making it a self-contained program.
+[`nodejs-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/nodejs-script) is a NodeJS template for a single-file command-line interface (CLI) script. It uses only the Node.js standard library, so you can distribute and run it as 1 file. This page shows how to turn the template into your own script and test it.
 
-Below are some of its main features:
+The template provides the following:
 
-1. **Environment-agnostic**: It starts with `#!/usr/bin/env node`, which helps
-   the script find the Node.js executable irrespective of its location.
+- **Portable shebang**: With the first line, `#!/usr/bin/env node`, your system runs the script with the `node` executable found on your `PATH`.
+- **Help**: `printHelp()` prints the usage information. Before it checks the argument count, `main()` calls `printHelp()` and stops when any argument is `help`, `--help`, `-h` or `-?`.
+- **Argument check**: `main()` throws an error unless it gets exactly 1 argument.
+- **Error handling**: The entry point is the code at the end of the file that calls `main()`. It catches an error thrown by `main()`, prints `ERROR:` followed by the message and exits with code `1`.
+- **Buffered output**: `verbose()` records each message in an internal buffer and prints it to standard output. It returns the buffer, so a test can assert on the output.
+- **Quiet mode**: Set `SCRIPT_QUIET` to any non-empty value except `0` to stop `verbose()` printing. It still records the messages.
+- **Exports for tests**: The file exports `main()`, `printHelp()` and `verbose()`. The entry point runs only when Node.js runs the file directly. Set `SCRIPT_RUN_SKIP` to `1` to skip it even then.
 
-2. **Usage Information**: It includes a `printHelp()` function that prints out
-   how to use the script. Users can trigger this function by providing `help`,
-   `--help`, `-h`, or `-?` as arguments.
+## Adapt the script
 
-3. **Error Handling**: The template is equipped to handle errors gracefully. It
-   throws errors that are caught at the entry point and reported with a non-zero
-   exit code, making debugging easier.
+The header comment at the top of `nodejs-script` lists the changes that turn the template into your script. `main()` gets `argv`, which holds the script path followed by the arguments, and `argc`, the length of `argv`.
 
-4. **Argument Checking**: The `main()` function looks at the number of arguments
-   passed and throws an error if it doesn't meet the expected count.
+To adapt the script:
 
-5. **Verbose Output**: The `verbose()` function takes care of outputting
-   messages to the console. An environment variable `SCRIPT_QUIET` can suppress
-   these messages if set to '1'.
+1. In the header comment, replace `NodeJS CLI script template` with your script's name.
+2. Optional: To rename the file, rename it and replace `nodejs-script` with the new filename in the header comment and in these files:
+   - `package.json`
+   - `eslint.config.js`
+   - `.c8rc.json`
+   - `tests/nodejs/_helper.js`
+   - `.github/workflows/release-nodejs.yml`
+3. In `main()`, change the `if (argc < 2 || argc > 2) {` line to check for your argument count plus 1, because `argc` counts the script path. For a script that takes 2 arguments, change both `2` values to `3`.
+4. Update the text in `printHelp()` with your script's usage.
+5. In `main()`, replace the `// Add the script logic here.` comment and the `verbose()` line after it with your script's logic.
+6. Remove the `To adopt script template:` block from the header comment.
+7. Run the script with the arguments it takes, for example:
 
-6. **Environment Variables for Control**: `SCRIPT_QUIET` for silencing verbose
-   output, and `SCRIPT_RUN_SKIP` for skipping the actual running of the script.
-   These can be useful for testing or other conditional executions.
+   ```bash
+   ./nodejs-script value/of/argument
+   ```
 
-7. **Testability**: The template is designed to be test-friendly. It allows you
-   to skip the script's run for unit testing by setting an environment variable
-   and requiring the file. Example tests are provided in the `tests/nodejs`
-   directory.
+   Confirm that the script prints the output of your logic. The unchanged template prints `Would execute script business logic with argument value/of/argument.`
 
-8. **Zero dependencies**: The script relies only on the Node.js standard
-   library, so it can be distributed and run as a single file.
+## Test the script
 
-Overall, this template offers a robust starting point for developing your own
-NodeJS CLI scripts.
+The [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs) directory holds example unit and functional tests for the script. [Testing](./testing.mdx) shows how to run them.
 
-## Getting Started
+[`_helper.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/_helper.js) provides 2 helpers:
 
-Begin by updating the script name and file name in the script comments. This
-will clarify the script's functionality for anyone who reads the code.
+- `runMain()` requires the script and calls `main()` in the test process. It returns the buffered output, so a test asserts on it without spawning a process.
+- `runScript()` runs the script as a separate process. It returns the exit code and the output.
 
-Next, adjust the `main` function to validate and handle the CLI arguments
-specific to your script. You should also revise the `printHelp` function to
-include relevant usage instructions.
+Each example test uses 1 of the helpers:
 
-Your core logic will be housed in the `main` function. Simply replace the
-placeholder comment "Add your logic here" with the code that accomplishes your
-task. If you're interested in testing the script before running it, you can use
-environment variables like `SCRIPT_QUIET` and `SCRIPT_RUN_SKIP` to modify its
-behavior.
+- [`script.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.test.js) is a unit test. It calls `main()` through `runMain()` with different arguments and options.
+- [`script.functional.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.functional.test.js) is a functional test. It runs the script through `runScript()` the way your script's users run it.
 
-You can then run your script from the command line using `./nodejs-script`.
-
-## Authoring tests
-
-This template includes a [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs)
-directory with sample Unit and Functional tests built on the
-[Node.js built-in test runner](https://nodejs.org/api/test.html).
-
-[`_helper.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/_helper.js)
-provides shared helpers: `runMain()` requires the script and calls `main()`
-in-process so its buffered output can be asserted without spawning a process,
-while `runScript()` runs the script as a separate process to assert its exit
-code and output.
-
-[`script.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.test.js)
-is an example of a Unit test for running the script with different arguments and
-options.
-
-[`script.functional.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.functional.test.js)
-is an example of a Functional test for running the script as your script users
-would do.
+The test runner runs every entry in each file's `cases` array as a test. After you adapt the script, update the entries to match its arguments and output. To add a test, copy an entry and change its values.

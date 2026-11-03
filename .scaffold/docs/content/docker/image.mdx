@@ -1,18 +1,16 @@
 ---
 title: Image
 sidebar_position: 2
+cspell: ignore opencontainers yournamespace yourproject
 ---
 
 # Image
 
-The Docker support centers on a small, self-contained image built from a minimal
-base image and a dedicated entrypoint script.
+Containers from your project's image run Bash on Alpine Linux and start through an entrypoint script. This page covers what the image contains and how to build and run it locally.
 
 ## Dockerfile
 
-The included [`Dockerfile`](https://github.com/AlexSkrypnyk/scaffold/blob/main/Dockerfile)
-uses a minimal Alpine Linux base image with Bash installed. It follows OCI image
-labeling conventions and uses a dedicated entrypoint script.
+The [`Dockerfile`](https://github.com/AlexSkrypnyk/scaffold/blob/main/Dockerfile) installs Bash on the `alpine:3` base image and sets `entrypoint.sh` as the entrypoint. The following block shows its instructions without the digest pin and the labels:
 
 ```dockerfile
 FROM alpine:3
@@ -24,13 +22,15 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 ```
 
+The full file pins `alpine:3` to a digest. It also adds the `org.opencontainers.image.authors` and `org.opencontainers.image.source` labels from the Open Container Initiative (OCI) conventions.
+
 ## Entrypoint
 
-The [`entrypoint.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/entrypoint.sh)
-script enforces strict shell options (`set -euo pipefail`) and forwards
-arguments to the container command.
+The [`entrypoint.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/entrypoint.sh) script sets strict shell options with `set -euo pipefail` and prints a line with your project name, such as `acme-app is running`. The script then runs the container's arguments as a command, with `exec`.
 
-## Building and running
+## Build and run the image
+
+To build the image and run a container from it, run the following commands in your project root:
 
 ```bash
 # Build the image
@@ -39,3 +39,5 @@ docker build -t yournamespace/yourproject .
 # Run the container
 docker run --rm yournamespace/yourproject
 ```
+
+Use your image name in place of `yournamespace/yourproject`. With no arguments, the container prints the entrypoint's `is running` line, then exits.

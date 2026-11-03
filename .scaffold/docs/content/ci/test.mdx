@@ -1,43 +1,45 @@
 ---
 title: Test
 sidebar_position: 1
+cspell: ignore kcov reqs
 ---
 
 # Test
 
-The `Test` workflow configure GitHub Actions for your repository to
-automatically run tests on pull requests and pushes to specific branches.
-The workflow includes steps for linting, testing, and code coverage.
+Scaffold ships a test workflow for each stack a project uses. The PHP, Node.js and Shell workflows lint the code, run the tests and measure coverage. This page is for maintainers who want to know what each job runs and which repository variables change it. The Docker and documentation workflows have their own pages: [Docker testing](../docker/testing.mdx) and [Documentation](../documentation.mdx).
 
 ## Trigger conditions
 
-- **Pull Requests**: The workflow activates whenever a new pull request is
-  created or an existing one is updated. It triggers for pull requests targeting
-  the `main` branch, any branch that begins with `feature/`, or even between
-  feature branches themselves. For example, a pull request
-  from `feature/new-button` to `feature/new-layout` would also activate the
-  workflow. This ensures automated testing for changes aimed at both the
-  stable `main` branch and ongoing work in feature-specific branches.
+Every test workflow in your project runs on the following events, including `Test Actions` and the Docker and documentation workflows:
 
-- **Pushes**: The workflow also activates whenever new commits are pushed
-  directly to the `main` branch. This could be a direct commit or a merge from a
-  pull request. This action ensures that the `main` branch is continually in a
-  deployable and stable state according to the defined tests and checks.
+- A pull request that targets `main` or any branch that begins with `feature/`. A pull request from `feature/new-button` to `feature/new-layout` runs the workflows too.
+- A push to `main`, including a merged pull request.
+- A daily scheduled run at 04:23 UTC, which shows whether the project still builds when nobody has pushed. To leave it out, run `init.sh` with `--no-schedule` or answer no to "Use scheduled builds". In an existing project, delete the `schedule` block from each `.github/workflows/test-*.yml` file.
+
+You can also start the PHP, Node.js, Shell and Docker workflows by hand from the **Actions** tab. To open a terminal session on the runner, select **Enable terminal session** in the run form; see [CI](README.mdx).
 
 [//]: # (#;< PHP)
 
 ## PHP job
 
-- Runs on `ubuntu-latest`.
-- Uses a matrix strategy to test against multiple PHP versions.
+The `Test PHP` workflow runs on `ubuntu-latest`. It tests PHP 8.3, 8.4 and 8.5, each with the latest dependency versions and with the lowest versions `composer.json` allows. On PHP 8.5, Composer installs with `--ignore-platform-reqs`.
+
+Every combination runs these steps:
+
 - Checks out code and caches Composer dependencies.
-- Installs dependencies via Composer.
-- Runs code linting. Add `CI_LINT_IGNORE_FAILURE` with a value of `1` to
-  your repository's variables to ignore linting failures.
-- Runs tests with coverage. Add `CI_TEST_IGNORE_FAILURE` with a value of `1` to
-  your repository's variables to ignore test failures.
-- Publishes coverage report with a 90% threshold to the associated pull
-  request.
+- Installs dependencies through Composer.
+- Validates `composer.json` with `composer validate` and `composer normalize --dry-run`.
+- Runs tests with coverage through `composer test-coverage`.
+- Uploads the `.logs` directory as an artifact.
+
+The PHP 8.4 job with the latest dependency versions also runs these steps:
+
+- Runs code linting with `composer lint`.
+- Fails the job when line coverage is lower than `CI_CODE_COVERAGE_THRESHOLD` (see [Repository variables](#repository-variables)).
+- On a pull request, posts the summary from `.logs/coverage.txt` as a new comment and hides the previous one.
+- Uploads the test results and the coverage report to Codecov.
+
+In a command app with a PHAR, a separate `Build PHAR` job runs a single time, on PHP 8.4. It builds the PHAR with `composer build` and runs it to confirm it starts.
 
 [//]: # (#;> PHP)
 
@@ -45,14 +47,18 @@ The workflow includes steps for linting, testing, and code coverage.
 
 ## Node.js job
 
-- Runs on `ubuntu-latest`.
-- Uses a matrix strategy to test against multiple NodeJs versions.
-- Checks out code.
-- Sets up Node.js environment.
-- Runs code linting. Add `CI_LINT_IGNORE_FAILURE` with a value of `1` to
-  your repository's variables to ignore linting failures
-- Runs tests with coverage. Add `CI_TEST_IGNORE_FAILURE` with a value of `1` to
-  your repository's variables to ignore test failures.
+The `Test Node.js` workflow runs on `ubuntu-latest` against Node.js 18, 20 and 22. Every version runs these steps:
+
+- Checks out code and sets up Node.js.
+- Installs dependencies with `npm install`.
+- Runs tests with coverage through `npm run test-coverage`.
+- Uploads the `.logs` directory as an artifact.
+
+The Node.js 22 job also runs these steps:
+
+- Runs code linting with `npm run lint`.
+- Fails the job when line coverage is lower than `CI_CODE_COVERAGE_THRESHOLD`.
+- Uploads the coverage report to Codecov.
 
 [//]: # (#;> NODEJS)
 
@@ -60,51 +66,43 @@ The workflow includes steps for linting, testing, and code coverage.
 
 ## Shell job
 
-- Runs on a matrix of several OSes.
-- Checks out code.
-- Sets up Node.js environment.
-- Installs BATS testing framework.
-- Runs code linting. Add `CI_LINT_IGNORE_FAILURE` with a value of `1` to
-  your repository's variables to ignore linting failures
-- Runs tests with coverage. Add `CI_TEST_IGNORE_FAILURE` with a value of `1` to
-  your repository's variables to ignore test failures.
+The `Test shell` workflow runs on `ubuntu-latest`, `ubuntu-22.04`, `ubuntu-24.04`, `macos-14` and `macos-15`. On macOS, it first installs the current Bash with Homebrew. Every runner runs these steps:
+
+- Checks out code and sets up Node.js.
+- Installs the BATS testing framework with `npm ci` in `tests/bats`.
+- Runs the BATS tests. On `ubuntu-latest`, kcov wraps this run to measure coverage.
+
+On `ubuntu-latest`, the job also lints the shell scripts with ShellCheck and shfmt. It then uploads the coverage report as an artifact and to Codecov.
 
 [//]: # (#;> SHELL)
 
 ## Actions job
 
-Validates and audits the GitHub Actions workflow files in the repository. This
-job is optional and disabled by default - enable it during initialization by
-answering "Use GitHub Actions linting" (or passing `--test-actions`).
+The `Test Actions` workflow validates and audits the workflow files in `.github/workflows`. It's off by default: to add it, answer yes to "Use GitHub Actions linting" in `init.sh` or pass `--test-actions`.
 
 - Checks out code.
-- Runs code linting with [`yamllint`](https://github.com/adrienverge/yamllint) using [configuration](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/.yamllint-for-gha.yml) file.
-- Runs code linting with [`actionlint`](https://github.com/rhysd/actionlint).
-- Runs security analysis with [`zizmor`](https://docs.zizmor.sh/), uploading the results to the repository's Security tab. Accepted findings are documented per-rule in the repository-root `zizmor.yml`.
+- Lints the workflow YAML with [`yamllint`](https://github.com/adrienverge/yamllint), using the [`.github/.yamllint-for-gha.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/.yamllint-for-gha.yml) configuration file.
+- Lints the workflows with [`actionlint`](https://github.com/rhysd/actionlint).
+- Runs security analysis with [`zizmor`](https://docs.zizmor.sh/) and uploads the results to the repository's **Security** tab. The `zizmor` step reads its suppressions from `zizmor.yml` in the repository root, where a comment explains each accepted finding.
 
-Add `CI_ACTIONLINT_IGNORE_FAILURE` with a value of `1` to your repository's variables
-to ignore the `yamllint`/`actionlint` failures, or `CI_ZIZMOR_IGNORE_FAILURE`
-to ignore zizmor failures.
+## Repository variables
+
+The following table lists the repository variables the test workflows read. Set them on the **Variables** tab of your repository's **Settings > Secrets and variables > Actions**.
+
+| Variable | Value | Effect |
+|---|---|---|
+| `CI_LINT_IGNORE_FAILURE` | `1` | Lets the PHP, Node.js, Shell and Docker jobs pass when linting fails |
+| `CI_TEST_IGNORE_FAILURE` | `1` | Lets the PHP, Node.js and Shell test steps pass when tests fail. The coverage threshold check still runs |
+| `CI_CODE_COVERAGE_THRESHOLD` | A whole-number percentage, `80` by default | Sets the minimum line coverage for the PHP and Node.js coverage checks |
+| `CI_ACTIONLINT_IGNORE_FAILURE` | `1` | Lets the Actions job pass when `yamllint` or `actionlint` fails |
+| `CI_ZIZMOR_IGNORE_FAILURE` | `1` | Lets the Actions job pass when `zizmor` fails |
 
 ## Code coverage
 
-The workflow publishes code coverage reports for PHP and Node.js projects to
-the relevant pull request. This helps you keep track of code coverage and make
-sure that new code is sufficiently tested.
+The PHP, Node.js and Shell jobs send coverage reports to [Codecov](https://about.codecov.io/) with the [`codecov/codecov-action`](https://github.com/codecov/codecov-action) action. Each upload runs only when the repository has a `CODECOV_TOKEN` secret, so without the secret the workflows skip the upload.
 
-[Codecov](https://about.codecov.io/) is used to track code coverage using
-reports generated by test tooling.
+To set up Codecov for your repository, follow the steps in the [official Codecov documentation](https://docs.codecov.com/docs/quick-start#section-add-repository). Then add the token as the `CODECOV_TOKEN` repository secret.
 
-The [`codecov/codecov-action`](https://github.com/codecov/codecov-action)
-action is used to send coverage reports to Codecov.
-
-To setup Codecov for your repository, follow the steps in the [official Codecov
-documentation](https://docs.codecov.com/docs/quick-start#section-add-repository).
-Note that Codecov is free for open source projects and does not require a
-secret token to be set up.
-
-An example of a coverage comment in a [pull request](https://github.com/AlexSkrypnyk/scaffold/pull/39):
+The following screenshot shows the PHP job's coverage comment on an example [pull request](https://github.com/AlexSkrypnyk/scaffold/pull/39):
 
 ![Code Coverage in PR Comment](/img/coverage.png)
-
-Read more about code coverage reporting in the [`codecov/codecov-action`](https://github.com/codecov/codecov-action).

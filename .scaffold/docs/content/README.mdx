@@ -8,31 +8,24 @@ import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
 
 # Introduction
 
-Welcome to the documentation for Scaffold, your go-to repository for
-kick-starting your projects!
-
-If you're tired of setting up your project environment from scratch each time
-you begin a new venture, you're in the right place.
-
-Scaffold is designed to give you a consistent and tested foundation for your
-projects, so you can focus on the important stuff.
+Scaffold is a project template for Shell, PHP, NodeJS and Docker projects. Each new project starts with working example code, tests, linters and CI workflows. This page is for developers starting a project from Scaffold.
 
 ## Quick start
 
-The quickest way to start is a single command in a new **empty directory** - it downloads Scaffold and then prompts you for the project details:
+The `init.sh` script sets up your project. It replaces `yournamespace`, `yourproject`, `Your Name` and other strings with your own values, and keeps the features you choose.
 
-```bash
-curl -fsSL https://getscaffold.dev/init.sh | bash
-```
+To create a project with the one-line installer:
 
-To run unattended - for automation and AI agents - pass the details as options instead of answering prompts:
+1. Open a terminal in a new **empty directory**.
+2. Run the following command and answer the prompts:
 
-```bash
-curl -fsSL https://getscaffold.dev/init.sh | \
-  bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
-```
+   ```bash
+   curl -fsSL https://getscaffold.dev/init.sh | bash
+   ```
 
-The latest release is used by default; to pin a specific tag, branch, or commit, pass `--ref` to the script after `bash -s --` (for example `bash -s -- --ref=1.2.3`). Then commit and push the result to your repository.
+   The script downloads Scaffold into the directory and then prompts you for the project details. Confirm that it ends with `Initialization complete.`
+
+3. Commit the result to a new git repository and push it.
 
 <AsciinemaPlayer
   src="/img/init.cast"
@@ -42,12 +35,22 @@ The latest release is used by default; to pin a specific tag, branch, or commit,
   terminalLineHeight={1.1}
 />
 
-### Alternative: start from a checkout
+For automation and AI agents, replace the command in step 2 with this non-interactive one:
 
-Prefer to work from a local copy first?
+```bash
+curl -fsSL https://getscaffold.dev/init.sh | \
+  bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+```
+
+The non-interactive command needs `--namespace`, `--name` and `--author`. The script uses the default for every other choice. With either command, the script downloads the latest release. To pin a tag, branch or commit, add `--ref` to the non-interactive command, for example `--ref=1.2.3`. Leave `--ref` out of the interactive command, because any option turns off the prompts.
+
+### Alternative: start from a downloaded release
+
+To start from a local copy instead:
 
 1. Download the latest release from [GitHub](https://github.com/AlexSkrypnyk/scaffold/releases/latest).
-2. Run `./init.sh` to replace `yournamespace`, `yourproject`, `Your Name` and other strings with your own and choose the features.
-3. Commit and push the changes to your repository.
+2. Extract the archive and open a terminal in its directory.
+3. Run `./init.sh` and answer the prompts.
+4. Commit the result to a new git repository and push it.
 
 Run `./init.sh --help` for all options.

@@ -22,96 +22,96 @@
 
 </div>
 
+Scaffold is a project template for Shell, PHP, NodeJS and Docker projects. The template ships working example code with tests, linters and GitHub Actions workflows. You run `init.sh` to name your project and keep only the stacks and features you pick.
+
 ## Features
 
+The template holds every feature, and `init.sh` removes the ones you don't select:
+
 - **Shell**
-  - [Simple single-file script scaffold](shell-command.sh)
-    with [BATS tests](tests/bats) (with coverage)
-  - CI config to [Lint and test](.github/workflows/test-shell.yml) (with
-    coverage)
+  - [Single-file script](shell-command.sh) with [BATS tests](tests/bats) and coverage
+  - CI workflow to [lint and test](.github/workflows/test-shell.yml) with coverage
 - **PHP**
   - [`composer.json`](composer.json)
-  - [Symfony CLI command app scaffold](bin/php-command)
-    with [unit tests](tests/phpunit/Unit/Command) (with coverage)
-    and [traits](tests/phpunit/Traits)
-  - [Simple single-file script scaffold](php-script)
-    with [unit tests](tests/phpunit/Functional) (with coverage)
-  - Class library scaffold - the tooling with no entry point, for packages that
-    ship only classes
-  - Code quality tools with
-    configurations: [PHP Code Sniffer](phpcs.xml),
-    [PHPStan](phpstan.neon), [Rector](rector.php)
-  - CI config to [Lint, test](.github/workflows/test-php.yml)
-    and [publish](.github/workflows/release-php.yml) PHP, packaging the command
-    app as a [PHAR](box.json)
+  - [Symfony Console command app](bin/php-command) with [functional tests](tests/phpunit/Functional) and coverage
+  - [Single-file script](php-script) with [unit](tests/phpunit/Unit) and [functional](tests/phpunit/Functional) tests and coverage
+  - Class library with the PHP tooling and no entry point, for packages that ship only classes
+  - Code quality configuration for [PHP_CodeSniffer](phpcs.xml), [PHPStan](phpstan.neon) and [Rector](rector.php)
+  - CI workflows to [lint and test](.github/workflows/test-php.yml) and to [publish](.github/workflows/release-php.yml) a release, packaging the command app as a [PHAR](box.json)
 - **NodeJS**
   - [`package.json`](package.json)
-  - CI config to [build and test](.github/workflows/test-nodejs.yml) for NodeJS
-- **Docker**
-  - [`Dockerfile`](Dockerfile) with minimal Alpine-based image and [`entrypoint.sh`](entrypoint.sh)
-  - CI config to [lint and test](.github/workflows/test-docker.yml) Docker
-    image (Hadolint + Buildx build)
-  - CI config to [publish](.github/workflows/release-docker.yml) multi-arch
-    images (`linux/amd64`, `linux/arm64`) to Docker Hub
+  - [Single-file script](nodejs-script) with [tests](tests/nodejs) and coverage
+  - CI workflow to [lint and test](.github/workflows/test-nodejs.yml)
+- **Docker**, off by default
+  - [`Dockerfile`](Dockerfile) for a minimal Alpine-based image, with an [`entrypoint.sh`](entrypoint.sh)
+  - CI workflow to [lint and test](.github/workflows/test-docker.yml) the image with Hadolint and a Buildx build
+  - CI workflow to [publish](.github/workflows/release-docker.yml) multi-arch images (`linux/amd64`, `linux/arm64`) to Docker Hub
 - **CI**
   - [Release drafter](.github/workflows/draft-release-notes.yml)
   - Release asset packaging and upload
   - [PR auto-assign](.github/workflows/assign-author.yml)
+  - [GitHub Actions linting](.github/workflows/test-actions.yml) with yamllint, actionlint and zizmor, off by default
 - **Documentation**
-  - [Readme with badges](README.dist.md) and [contributing guide](CONTRIBUTING.dist.md), plus a [generated logo](logo.png)
-  - [Scaffold](docs) for the documentation site using [Docusaurus](https://docusaurus.io/)
+  - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md) and a [generated logo](logo.png)
+  - A [documentation site](docs) built with [Docusaurus](https://docusaurus.io/)
   - Spell check with [CSpell](https://cspell.org/)
-  - [Terminal recorder](.scaffold/assets/update-assets.php) rendering an animated SVG plus an [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component
+  - An [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component, and the [terminal recorder](.scaffold/assets/update-assets.php) that renders Scaffold's `init.sh` walkthrough as an animated SVG
 - **Utility files**
   - [`.editorconfig`](.editorconfig), [`.gitignore`](.gitignore), [`.gitattributes`](.gitattributes)
   - [Renovate bot configuration](renovate.json)
   - [Pull request template](.github/PULL_REQUEST_TEMPLATE.md)
   - [Funding](.github/FUNDING.yml)
-  - Init shell script to chose features
+  - [`init.sh`](init.sh), which applies the features you choose
 - **AI agents**
   - [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) guidance for AI coding agents
-  - Optional AI-maintained [architecture documentation](docs/content/architecture/README.md) with Mermaid or PlantUML diagrams, generated and kept current by the bundled [`update-architecture-docs`](.claude/skills/update-architecture-docs/SKILL.md) skill
-  - Bundled [`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md)
-    skill that updates a generated project to the latest scaffold release
+  - Optional [architecture documentation](docs/content/architecture/README.md) with Mermaid or PlantUML diagrams, which an AI agent generates and updates with the [`update-architecture-docs`](.claude/skills/update-architecture-docs/SKILL.md) skill
+  - An [`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md) skill that updates a generated project to the latest Scaffold release
 
-## How to use this scaffold repository
+## Create a project
 
-1. Click on **Use this template** > **Create a new repository**
-2. Checkout locally
-3. Run [`./init.sh`](init.sh) to replace `yournamespace`, `yourproject`,
-   `Your Name` strings with your own and choose the features.<br/>
-   ![init](.scaffold/assets/init.svg)
+`init.sh` replaces the `yournamespace`, `yourproject` and `Your Name` strings with your own values. It then keeps the features you choose and removes the rest.
+
+To create a project from a GitHub repository:
+
+1. On GitHub, click **Use this template > Create a new repository**.
+2. Clone your new repository.
+3. In the repository root, run [`./init.sh`](init.sh) and answer the prompts. Confirm that the script ends with `Initialization complete.`<br/>
+   ![An interactive init.sh run, from the first prompt to the summary](.scaffold/assets/init.svg)
 
 ### Non-interactive setup
 
-Pass options instead of answering prompts to initialise without any interaction - useful for automation and AI agents. Any option enables non-interactive mode; `--namespace`, `--name` and `--author` are required, and every other choice falls back to its default.
+Pass options to `init.sh` to skip the prompts, for example in automation or from an AI agent. Any option switches the script to non-interactive mode. The `--namespace`, `--name` and `--author` options are required, and every other choice uses its default:
 
 ```bash
 ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-The same works as a one-liner straight from getscaffold.dev, with no prior checkout - run it in an **empty directory** and the script downloads the Scaffold into the current directory, then prompts you for the details:
+Run `./init.sh --help` for the full list of options.
+
+### Start without a checkout
+
+You can also download and run the script straight from getscaffold.dev. Run it in an **empty directory**. The script downloads Scaffold into that directory and then prompts you for the details:
 
 ```bash
 curl -fsSL https://getscaffold.dev/init.sh | bash
 ```
 
-To stay fully unattended, pass the details as options instead:
+To run it non-interactively, pass the details as options instead:
 
 ```bash
 curl -fsSL https://getscaffold.dev/init.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-The latest release is used by default; to pin a specific tag, branch, or commit, pass `--ref` to the script after `bash -s --` (for example `bash -s -- --ref=1.2.3`). Run `./init.sh --help` for the full list of options.
+The script downloads the latest release. To pin a tag, branch or commit, add `--ref` after `bash -s --` in the non-interactive command, for example `--ref=1.2.3`. Any option turns off the prompts, so `--ref` needs the 3 required options with it.
 
-## Updating a generated project
+## Update a generated project
 
-Projects generated from this scaffold can pull later template improvements
-without losing their own code. If you use Claude Code, the bundled
-[`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md)
-skill automates it: in your generated project, ask Claude to "update scaffold"
-and it fetches the skill, downloads the latest scaffold release, re-runs
-`init.sh` with your original answers, restores your project-specific files from
-git, and reconciles the differences. The generated project's
-[`AGENTS.md`](AGENTS.md) carries the same instructions for any AI agent.
+You can pull later template changes into a project generated from Scaffold and keep its own code. In Claude Code, ask Claude to "update scaffold" in your generated project. Claude fetches the [`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md) skill and follows its steps:
+
+1. Download the latest Scaffold release.
+2. Run `init.sh` again with your project's original answers.
+3. Restore your project-specific files from git.
+4. Reconcile the differences.
+
+In a project generated with the AI agent files, [`AGENTS.md`](AGENTS.md) carries the same instructions for any AI agent. `--no-ai` leaves `AGENTS.md` out.
