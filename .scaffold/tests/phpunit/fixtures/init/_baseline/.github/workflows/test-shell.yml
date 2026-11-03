@@ -31,6 +31,7 @@ jobs:
           - ubuntu-22.04
           - ubuntu-24.04
           - macos-15
+          - macos-26
     runs-on: ${{ matrix.os }}
 
     permissions:
