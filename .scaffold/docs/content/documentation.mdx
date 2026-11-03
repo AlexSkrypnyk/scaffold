@@ -43,7 +43,7 @@ npm run spellcheck
 
 ## Netlify previews on pull requests
 
-The [Test Docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docs.yml) GitHub Action builds and tests the site on every push to `main`. It also runs on every pull request whose base branch is `main` or matches `feature/**`. When the repository has 2 Netlify secrets, the action deploys each build to Netlify and comments the preview link on each pull request.
+The [Test Docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docs.yml) GitHub Action builds and tests the site on every push to `main`. It also runs on every pull request whose base branch is `main` or matches `feature/**`. When the repository has 2 Netlify secrets, the action deploys each build to Netlify and comments the preview link on the pull request. GitHub doesn't pass these secrets to pull requests from forks, so those get no preview.
 
 To set up the Netlify deploy:
 
