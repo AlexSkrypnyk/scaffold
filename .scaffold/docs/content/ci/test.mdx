@@ -91,8 +91,8 @@ The following table lists the repository variables the test workflows read. Set 
 
 | Variable | Value | Effect |
 |---|---|---|
-| `CI_LINT_IGNORE_FAILURE` | `1` | Lets the PHP, Node.js and Shell jobs pass when linting fails |
-| `CI_TEST_IGNORE_FAILURE` | `1` | Lets the PHP, Node.js and Shell jobs pass when tests fail |
+| `CI_LINT_IGNORE_FAILURE` | `1` | Lets the PHP, Node.js, Shell and Docker jobs pass when linting fails |
+| `CI_TEST_IGNORE_FAILURE` | `1` | Lets the PHP, Node.js and Shell test steps pass when tests fail. The coverage threshold check still runs |
 | `CI_CODE_COVERAGE_THRESHOLD` | A whole-number percentage, `80` by default | Sets the minimum line coverage for the PHP and Node.js coverage checks |
 | `CI_ACTIONLINT_IGNORE_FAILURE` | `1` | Lets the Actions job pass when `yamllint` or `actionlint` fails |
 | `CI_ZIZMOR_IGNORE_FAILURE` | `1` | Lets the Actions job pass when `zizmor` fails |

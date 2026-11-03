@@ -114,4 +114,4 @@ You can pull later template changes into a project generated from Scaffold and k
 3. Restore your project-specific files from git.
 4. Reconcile the differences.
 
-The generated project's [`AGENTS.md`](AGENTS.md) carries the same instructions for any AI agent.
+In a project generated with the AI agent files, [`AGENTS.md`](AGENTS.md) carries the same instructions for any AI agent. `--no-ai` leaves `AGENTS.md` out.

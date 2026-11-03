@@ -28,7 +28,7 @@ The `build` script in `composer.json` runs [Box](https://github.com/box-project/
 
 On every `Test PHP` run, the `Build PHAR` job builds the PHAR, then runs it with `--version` and with no arguments. A PHAR that fails to build or run fails the workflow.
 
-The `Release PHP` workflow publishes the PHAR. It runs when you push any tag, or when you start it by hand from the **Actions** tab with a version. It builds and runs the PHAR with the same checks as the `Build PHAR` job. Then the `softprops/action-gh-release` action attaches the PHAR to the GitHub release for that version, and creates the release if it doesn't exist.
+The `Release PHP` workflow publishes the PHAR. It runs when you push a tag whose name has no `/`, or when you start it by hand from the **Actions** tab with a version. It builds and runs the PHAR with the same checks as the `Build PHAR` job. Then the `softprops/action-gh-release` action attaches the PHAR to the GitHub release for that version, and creates the release if it doesn't exist.
 
 For an example, the [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page of the Scaffold repository shows a released PHAR under **Assets**.
 

@@ -11,6 +11,6 @@ The [`test-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gith
 2. Builds the image with Docker Buildx.
 3. Runs a container from the image, which runs `entrypoint.sh`. The step fails when the container exits with an error.
 
-A pull request that breaks the `Dockerfile` or `entrypoint.sh` fails this workflow before it's merged.
+A pull request that breaks the `Dockerfile` or `entrypoint.sh` fails this workflow before it's merged. When the `CI_LINT_IGNORE_FAILURE` repository variable is `1`, a Hadolint failure lets the workflow pass.
 
 On a push to `main`, after the test job passes, the same workflow publishes a `canary` image. See [Publishing](publishing).

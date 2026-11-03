@@ -16,7 +16,7 @@ On a push to `main`, the [testing](testing) workflow builds the image and pushes
 
 ## Tagged releases
 
-The [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) workflow runs when you push any Git tag. It runs the following steps:
+The [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) workflow runs when you push a Git tag whose name has no `/`. It runs the following steps:
 
 1. Sets up QEMU and Docker Buildx to build for both platforms.
 2. Authenticates with Docker Hub.

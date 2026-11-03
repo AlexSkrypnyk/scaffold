@@ -14,7 +14,7 @@ The template provides the following:
 - **Argument check**: `main()` throws an error unless it gets exactly 1 argument.
 - **Error handling**: The entry point is the code at the end of the file that calls `main()`. It catches an error thrown by `main()`, prints `ERROR:` followed by the message and exits with code `1`.
 - **Buffered output**: `verbose()` records each message in an internal buffer and prints it to standard output. It returns the buffer, so a test can assert on the output.
-- **Quiet mode**: Set `SCRIPT_QUIET` to any value except `0` to stop `verbose()` printing. It still records the messages.
+- **Quiet mode**: Set `SCRIPT_QUIET` to any non-empty value except `0` to stop `verbose()` printing. It still records the messages.
 - **Exports for tests**: The file exports `main()`, `printHelp()` and `verbose()`. The entry point runs only when Node.js runs the file directly. Set `SCRIPT_RUN_SKIP` to `1` to skip it even then.
 
 ## Adapt the script
