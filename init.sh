@@ -600,6 +600,7 @@ remove_pr_template() {
 
 remove_renovate() {
   rm -f renovate.json || true
+  rm -f .github/workflows/update-dependencies.yml || true
   remove_tokens_with_content "RENOVATE"
 }
 

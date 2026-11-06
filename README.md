@@ -50,6 +50,7 @@ The template holds every feature, and `init.sh` removes the ones you don't selec
   - [Release drafter](.github/workflows/draft-release-notes.yml)
   - Release asset packaging and upload
   - [PR auto-assign](.github/workflows/assign-author.yml)
+  - [On-demand Renovate run](.github/workflows/update-dependencies.yml) that you start from the **Actions** tab
   - [GitHub Actions linting](.github/workflows/test-actions.yml) with yamllint, actionlint and zizmor, off by default
 - **Documentation**
   - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md) and a [generated logo](logo.png)
