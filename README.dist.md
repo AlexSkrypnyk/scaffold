@@ -39,7 +39,7 @@
 ## Installation
 
 [//]: # (#;< PHP)
-Install the package with Composer:
+Install the PHP package with Composer:
 
 ```bash
 composer require yournamespace/yourproject
@@ -47,7 +47,7 @@ composer require yournamespace/yourproject
 
 [//]: # (#;> PHP)
 [//]: # (#;< NODEJS)
-Download `nodejs-script` from the [latest release](https://github.com/yournamespace/yourproject/releases/latest) and make it executable:
+Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yournamespace/yourproject/releases/latest) and make it executable:
 
 ```bash
 chmod +x nodejs-script
@@ -55,7 +55,7 @@ chmod +x nodejs-script
 
 [//]: # (#;> NODEJS)
 [//]: # (#;< SHELL)
-Copy `shell-command.sh` from this repository and make it executable:
+Copy the shell script, `shell-command.sh`, from this repository and make it executable:
 
 ```bash
 chmod +x shell-command.sh
@@ -63,7 +63,7 @@ chmod +x shell-command.sh
 
 [//]: # (#;> SHELL)
 [//]: # (#;< DOCKER)
-Pull the image from Docker Hub:
+Pull the Docker image from Docker Hub:
 
 ```bash
 docker pull yournamespace/yourproject
@@ -74,7 +74,7 @@ docker pull yournamespace/yourproject
 
 [//]: # (#;< PHP)
 [//]: # (#;< !PHP_LIBRARY)
-Run the command that Composer installs:
+Run the PHP command that Composer installs:
 
 ```bash
 vendor/bin/yourproject
@@ -90,7 +90,7 @@ The command takes the following arguments and options:
 
 [//]: # (#;> !PHP_LIBRARY)
 [//]: # (#;< PHP_LIBRARY)
-Call the library's classes from your code:
+Call the PHP library's classes from your code:
 
 ```php
 use YourNamespace\App\Example;
@@ -101,7 +101,7 @@ echo (new Example())->greet('World');
 [//]: # (#;> PHP_LIBRARY)
 [//]: # (#;> PHP)
 [//]: # (#;< NODEJS)
-Run the script with 1 argument:
+Run the Node.js script with 1 argument:
 
 ```bash
 ./nodejs-script value/of/argument
@@ -109,7 +109,7 @@ Run the script with 1 argument:
 
 [//]: # (#;> NODEJS)
 [//]: # (#;< SHELL)
-Run the script and answer its prompts:
+Run the shell script and answer its prompts:
 
 ```bash
 ./shell-command.sh
@@ -117,7 +117,7 @@ Run the script and answer its prompts:
 
 [//]: # (#;> SHELL)
 [//]: # (#;< DOCKER)
-Run a container from the image:
+Run a container from the Docker image:
 
 ```bash
 docker run --rm yournamespace/yourproject

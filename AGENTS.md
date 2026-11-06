@@ -282,7 +282,7 @@ Shell script tests use BATS:
 
 GitHub Actions workflows test across:
 
-- PHP versions: 8.3, 8.4
+- PHP versions: 8.3, 8.4, 8.5
 - Separate jobs: lint, test, coverage upload (Codecov)
 
 Key workflows:
