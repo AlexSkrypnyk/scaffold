@@ -5,11 +5,13 @@ sidebar_position: 4
 
 # NodeJS
 
-NodeJS support adds a single-file command-line interface (CLI) script, `nodejs-script`, to your project, with linting and tests already set up. It's on by default. To leave it out, answer `n` to the **Use NodeJS** prompt in `init.sh`, or pass `--no-nodejs`.
+NodeJS support adds `nodejs-script`, a single-file command-line interface (CLI) script, to your project. The pages in this section are for developers who work on that script in a project generated from Scaffold.
+
+NodeJS support is on by default. To leave it out, run `init.sh` with `--no-nodejs` or answer `n` to its **Use NodeJS** prompt.
 
 Pick the page for your task:
 
-- [NodeJS CLI script](./nodejs-script.mdx): adapt the script and write tests for it
+- [NodeJS CLI script](./nodejs-script.mdx): adapt the script
 - [Linting](./linting.mdx): check the code with ESLint and Prettier
-- [Testing](./testing.mdx): run the tests and collect coverage
-- [Release](../ci/release.mdx): attach `nodejs-script` to a GitHub release
+- [Testing](./testing.mdx): run and write tests, and measure coverage
+- [Release](../ci/release.mdx): see how the release workflow attaches `nodejs-script` to a GitHub release

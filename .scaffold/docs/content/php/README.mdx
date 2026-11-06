@@ -5,20 +5,20 @@ sidebar_position: 3
 
 # PHP
 
-The PHP part of Scaffold is a Composer project with linting and tests already configured. These pages are for developers who write PHP code in a project generated from Scaffold.
+PHP is on by default in `init.sh`, which sets up your project as a Composer package with PHP linting and tests. Start here to pick a PHP mode and find its tooling.
 
-Scaffold ships 3 PHP modes. `init.sh` keeps the mode you select with its options or prompts and deletes the other 2. Pick the mode that matches what you build:
+`init.sh` keeps 1 of 3 PHP modes and deletes the files of the other 2. Pick the mode that matches what you build:
 
 | Mode | What you build | `init.sh` options |
 |------|----------------|-------------------|
-| [PHP CLI command](./php-command.mdx) | A Symfony Console app with several commands | None, because it's the default mode. `--php-command` also selects it. |
-| [PHP CLI script](./php-script.mdx) | A self-contained single-file script | `--php-script` |
+| [PHP CLI command](./php-command.mdx) | A Symfony Console app with several commands | Selected by default. `--php-command` also selects it. |
+| [PHP CLI script](./php-script.mdx) | A self-contained single-file script | `--php-script`, which also turns off the command app |
 | [PHP library](./php-library.mdx) | Classes that other projects install with Composer, with no executable | `--no-php-command --no-php-script` |
 
-Every mode shares the same tooling:
+Every mode uses the same tooling:
 
-- [Composer](./composer.mdx) covers the dependencies and scripts in `composer.json`.
-- [Linting](./linting.mdx) covers PHP_CodeSniffer, PHPStan and Rector.
-- [Testing](./testing.mdx) covers PHPUnit and code coverage.
+- [Composer](./composer.mdx): the dependencies and scripts in `composer.json`
+- [Linting](./linting.mdx): PHP_CodeSniffer, PHPStan and Rector
+- [Testing](./testing.mdx): PHPUnit and code coverage
 
 To leave PHP out, pass `--no-php` to `init.sh`.

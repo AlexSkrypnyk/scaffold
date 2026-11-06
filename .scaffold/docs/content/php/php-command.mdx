@@ -6,13 +6,11 @@ cspell: ignore alexskrypnyk
 
 # CLI command
 
-In CLI command mode, your project is a console app built on the [Symfony Console component](https://symfony.com/doc/current/components/console.html). Use it for a tool with several commands or shared logic. For a tool that does 1 task with no dependencies, see [CLI script](./php-script.mdx).
+In CLI command mode, your project is a console app built on the [Symfony Console component](https://symfony.com/doc/current/components/console.html). Use it for a tool with several commands or shared logic. This page is for developers building that tool from Scaffold. Follow it to add a command, test it and ship the app. For a tool that does 1 task with no dependencies, see [CLI script](./php-script.mdx).
 
-This page is for developers building a command-line tool from Scaffold. It covers how the app is laid out, how to add and test a command and how to ship the tool.
+`init.sh` selects this mode by default. It replaces `php-command` with your project name, or with the value of `--php-command-name`, in filenames and file contents. This page uses the placeholder name, `php-command`.
 
-`init.sh` selects this mode by default. It replaces `php-command` with your project name, or with the value of `--php-command-name`, in filenames and file contents. This page uses the template name.
-
-## Application structure
+## App structure
 
 The app has 2 parts:
 
@@ -21,16 +19,16 @@ The app has 2 parts:
 
 Symfony Console parses arguments and options, prints help and styles the output.
 
-The launcher makes `JokeCommand` the default with `setDefaultCommand()`, so `./bin/php-command` with no command name runs `joke`.
-
 ## Example commands
 
 The following table lists the 2 example commands:
 
 | Class | Command name | What it does |
 |---|---|---|
-| `SayHelloCommand` | `say-hello` | Prints `Hello, Symfony console!` and returns `Command::SUCCESS`. Sets a description and a help text. |
+| `SayHelloCommand` | `say-hello` | Prints a greeting and returns `Command::SUCCESS`. Sets a description and a help text. |
 | `JokeCommand` | `joke` | Fetches a random joke from `https://official-joke-api.appspot.com/jokes/TOPIC/random` and prints its setup and punchline. The optional `--topic` option sets `TOPIC` and defaults to `general`. If the request fails or the joke lacks a setup or a punchline, prints `Unable to retrieve a joke.` and returns `Command::FAILURE`. |
+
+The launcher makes `JokeCommand` the default with `setDefaultCommand()`, so `./bin/php-command` with no command name runs `joke`.
 
 After `composer install`, run the `say-hello` command from the project root:
 
@@ -42,16 +40,16 @@ The command prints `Hello, Symfony console!`.
 
 ## Add a command
 
-Start from `SayHelloCommand` for a command with no input, or from `JokeCommand` for one with options.
+Each command is a class in `src/Command/` that you register in `bin/php-command`. To add a command of your own:
 
-To add a command of your own:
-
-1. Copy `SayHelloCommand.php` or `JokeCommand.php` in `src/Command/` to a new file named after your new class.
-2. In the new file, rename the class to the filename without `.php`.
+1. In `src/Command/`, copy an example class to a new file named after your class:
+   - For a command with no input, copy `SayHelloCommand.php`.
+   - For a command with options, copy `JokeCommand.php`.
+2. In the new file, rename the class to match the new filename.
 3. In `configure()`, set the name, description and help text of the command and add its arguments and options.
 4. In `execute()`, replace the example code with your logic. Return `Command::SUCCESS` or `Command::FAILURE`.
 5. In `bin/php-command`, add a `use` line and an `$application->add()` call for your class, the same way the launcher registers `SayHelloCommand`.
-6. Add a test for the command in `tests/phpunit/Functional/`. See [Test a command](#test-a-command).
+6. Add a test for the command in `tests/phpunit/Functional/`, with the `#[Group('command')]` attribute. See [Test a command](#test-a-command).
 7. Run the command:
 
    ```bash
@@ -62,14 +60,14 @@ To add a command of your own:
 
 ## Test a command
 
-The command tests live in [`tests/phpunit/Functional/`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/phpunit/Functional). They use `ApplicationTrait` from [`alexskrypnyk/phpunit-helpers`](https://github.com/AlexSkrypnyk/phpunit-helpers), which wraps Symfony's `ApplicationTester`. The trait's main methods are:
+The command tests live in [`tests/phpunit/Functional/`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/phpunit/Functional). They use `ApplicationTrait` from [`alexskrypnyk/phpunit-helpers`](https://github.com/AlexSkrypnyk/phpunit-helpers), which wraps Symfony's `ApplicationTester`. The tests call 2 methods of `ApplicationTrait`:
 
-- `applicationInitFromCommand()`, which builds an app around 1 command
-- `applicationRun()`, which runs the app and returns its output
+- `applicationInitFromCommand()` builds an app around 1 command.
+- `applicationRun()` runs the app and returns its output.
 
-[`SayHelloCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/SayHelloCommandTest.php) checks the greeting. [`JokeCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/JokeCommandTest.php) mocks `getContent()`, so `JokeCommand` gets fixture responses in place of calls to the API.
+[`SayHelloCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/SayHelloCommandTest.php) checks the greeting. [`JokeCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/JokeCommandTest.php) mocks `getContent()` to return fixture responses in place of the joke API.
 
-Both tests belong to the `command` group. To run only that group:
+Both tests carry the `#[Group('command')]` attribute. To run only that group, run the following command:
 
 ```bash
 composer test -- --group=command
@@ -77,34 +75,9 @@ composer test -- --group=command
 
 For the PHPUnit configuration and coverage reports, see [Testing](./testing.mdx).
 
-## Distribution
+## Ship the app
 
-A CLI app ships as a PHAR file, as a Composer package or as both. The template supports all 3 from 1 layout:
+Ship the app as a PHAR, as a Composer package or both. Box compiles `bin/php-command` into the PHAR, and Composer links the same file into `vendor/bin`:
 
-- The app code lives in `src/`.
-- A thin launcher, `bin/php-command`, loads the Composer autoloader and runs the app.
-- `composer.json` lists the launcher under `bin`.
-
-Composer, Box, PHP-Scoper and Rector ship their own executables with the same `bin/<name>` launcher layout.
-
-### As a PHAR
-
-A PHAR is a single executable file that bundles the app and its dependencies. Users need only PHP to run it.
-
-`composer build` compiles the PHAR into `dist/php-command.phar`. Git ignores `dist`, so the PHAR stays out of your commits. When you push a tag, the `Release PHP` GitHub Actions workflow builds the PHAR, creates a release for the tag and attaches the PHAR to it. For the Box configuration, see [PHP packaging](/ci/php-packaging).
-
-The PHAR build is on by default. With `--no-phar`, or "n" to the `Build PHAR` prompt, `init.sh` removes the Box configuration, the `build` script, the `Build PHAR` job of the `Test PHP` workflow and the `Release PHP` workflow.
-
-### As a Composer package
-
-Publish the project to Packagist.org, the Composer package registry. Composer links every `bin` entry into the `vendor/bin` directory of the project that requires the package. That project runs `vendor/bin/php-command`.
-
-The launcher looks for the requiring project's autoloader before its own, so it runs both as a dependency and from its own checkout.
-
-### As both
-
-Use the single launcher for both. Composer links `bin/php-command`, and Box compiles the same file into the PHAR. A change to the launcher reaches Composer installs and the next PHAR build.
-
-### PHAR through Composer
-
-Some tools, such as PHPStan, commit the built PHAR to their Composer package and point a small `bin/` launcher at it. Composer users of those tools get the compiled build. The template ships the source through Composer. Composer downloads the package from your Git repository, where `dist` is ignored, so the PHAR stays out of the package.
+- **As a PHAR:** A PHAR is 1 executable file that holds the app and its dependencies, so users need only PHP. `composer build` compiles it into `dist/php-command.phar`. When you push a tag, the `Release PHP` workflow builds the PHAR and attaches it to the GitHub release for the tag. `init.sh` sets up the PHAR build and release unless you pass `--no-phar`. For the build steps, the PHAR version and what `--no-phar` removes, see [PHP packaging](../ci/php-packaging.mdx).
+- **As a Composer package:** Publish the project to Packagist.org, the Composer package registry. In a project that requires your package, developers run `vendor/bin/php-command`. The launcher looks for that project's autoloader first and falls back to its own, so it runs both as a dependency and from its own checkout. Git ignores `dist`, so the package holds no PHAR.

@@ -6,8 +6,10 @@ cspell: ignore autoassign
 
 # Auto assign PR
 
-The `Auto Author Assign` workflow in `.github/workflows/assign-author.yml` assigns a pull request to its author. It runs the [`toshimaru/auto-author-assign`](https://github.com/toshimaru/auto-author-assign) action when a pull request is opened or reopened. The action skips pull requests that already have an assignee or that a bot opened.
+The `Auto Author Assign` workflow assigns each pull request to its author. For maintainers of a Scaffold project, this page covers when it runs and how to remove it.
 
-The `pull_request_target` event triggers the workflow, so GitHub runs your repository's copy of the workflow with write permission on pull requests. That holds for pull requests from forks too.
+The workflow, `.github/workflows/assign-author.yml`, runs the [`toshimaru/auto-author-assign`](https://github.com/toshimaru/auto-author-assign) action when a pull request is opened or reopened. The action leaves a pull request unchanged when it already has an assignee or a bot opened it.
 
-`init.sh` keeps the workflow by default. To leave it out of a new project, answer no to the `init.sh` prompt **Use GitHub PR author auto-assign**, or pass `--no-pr-autoassign` to `init.sh`. To remove it from an existing project, delete `.github/workflows/assign-author.yml`.
+The `pull_request_target` event starts the workflow, so GitHub runs the workflow file from the base branch. Its token can write to pull requests, even on a pull request from a fork. The workflow checks out no pull request code, so a fork's code never runs with that access.
+
+`init.sh` keeps the workflow by default. To leave it out, answer no to the `init.sh` prompt **Use GitHub PR author auto-assign** or pass `--no-pr-autoassign`. In an existing project, delete `.github/workflows/assign-author.yml`.

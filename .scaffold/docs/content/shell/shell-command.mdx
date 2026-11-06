@@ -6,26 +6,28 @@ cspell: ignore yesno
 
 # CLI command
 
-[`shell-command.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/shell-command.sh) is a template for a single-file Bash command-line interface (CLI) script. It's self-contained and needs only Bash and standard tools such as `curl`. Follow this page to learn what the template does and how to turn it into your own command.
+[`shell-command.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/shell-command.sh) is a template for a single-file Bash command-line interface (CLI) script. It needs only Bash and standard tools such as `curl`. This page is for developers who build their own command from the template in a project generated from Scaffold. Follow it to turn the template into your command.
 
-By default, `init.sh` renames the script after your project, such as `acme-app.sh`. To pick another name, pass `--shell-command-name` or answer the **Shell command name** prompt. Use your script's name in place of `shell-command.sh` in the examples on this page.
+By default, `init.sh` renames the script after your project, such as `acme-app.sh`. To pick another name, answer the **Shell command name** prompt, or pass `--shell-command-name`. On this page, use your script's name in place of `shell-command.sh`.
 
-The template includes the following features:
+## Template features
+
+The template provides the following:
 
 - **Strict mode**: `set -euo pipefail` stops the script at a failed command, an unset variable or a failed pipe.
-- **Debug mode**: set the `SCRIPT_DEBUG` environment variable to `1` to print each command as it runs.
+- **Debug mode**: Set the `SCRIPT_DEBUG` environment variable to `1` to print each command as it runs.
 - **Prompts**: `ask` reads a value, with an optional default. `ask_yesno` reads a `y` or `n` answer, with `Y` as its default, and returns it in lowercase.
-- **Confirmation**: the script asks `Proceed?` before it does its work, with `Y` as the default. Any answer other than `y` or `Y` exits the script. Set `SHOULD_PROCEED=y` to skip the question.
-- **`main` function**: the script's logic lives in `main`, which runs only when you run the script directly. Sourcing the script from another script loads its functions without running `main`.
+- **Confirmation**: The script asks `Proceed?` before it does its work. To continue, press <kbd>Enter</kbd> or answer `y` or `Y`. Any other answer, `yes` included, exits the script. To skip the question, set the `SHOULD_PROCEED` environment variable to `y`.
+- **`main` function**: The script's logic lives in `main`, which runs only when you run the script directly. Sourcing the script from another script loads its functions without running `main`.
 
-The example logic takes a joke topic as its first argument, or asks for one with `general` as the default. It then fetches a random joke from the Official Joke API and prints it. The `JOKE_URL_ENDPOINT` environment variable overrides the API URL, where `__TOPIC__` stands for the topic.
+The example logic takes a joke topic as its first argument, or asks for one with `general` as the default. It then fetches a random joke from the Official Joke API and prints it. To call another URL, set the `JOKE_URL_ENDPOINT` environment variable, with `__TOPIC__` where the topic goes.
 
-## Get started
+## Adapt the script
 
 To turn the template into your own command:
 
 1. Update the description and the `@usage` lines in the comment block at the top of the script.
-2. Replace the `topic="${1-}"` line with the arguments your command takes.
+2. Replace the `topic="${1-}"` line with code that reads the arguments your command takes.
 3. Replace the example logic in `main` with your own, including the validation of your arguments.
 4. Run the script from your project root:
 
@@ -33,8 +35,8 @@ To turn the template into your own command:
    ./shell-command.sh
    ```
 
-   Confirm that the script runs your logic. The unchanged template prints `Follow the prompts` and asks for a joke topic.
+   Confirm that the script runs your logic. For comparison, the unchanged template prints `Follow the prompts` and asks for a joke topic.
 
-## Write tests
+## Test the script
 
-[`tests/bats/shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) runs the script with different answers and settings. Update its tests when you change the script. See [Testing](testing) for how the tests work, how to run them and how CI measures their coverage.
+[`tests/bats/shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) holds example tests for the template. After you adapt the script, update those tests to match its arguments and output. See [Write tests](./testing.mdx#write-tests).

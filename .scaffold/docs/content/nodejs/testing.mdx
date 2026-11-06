@@ -5,33 +5,47 @@ sidebar_position: 4
 
 # Testing
 
-You test the `nodejs-script` file with the test runner built into Node.js and measure coverage with c8. This page shows how to run the tests, where new test files go and where c8 writes the coverage reports.
+You test `nodejs-script` with the test runner built into Node.js and measure coverage with c8. This page is for developers who change `nodejs-script` or its tests in a project generated from Scaffold. Follow it to run the tests, write your own and read the coverage reports.
 
-## Node.js test runner
+## Run the tests
 
-[`node --test`](https://nodejs.org/api/test.html) ships with Node.js, so it needs no extra package. Tests assert with the `node:assert` module. The runner isolates each test file in its own process.
+The test runner, [`node --test`](https://nodejs.org/api/test.html), ships with Node.js. It runs each test file in its own process.
 
-To run all the tests, run the following command:
+To run all the tests, run the following command in your project root:
 
 ```bash
 npm run test
 ```
 
-When every test passes, the summary at the end of the output reports `fail 0` and the runner exits with code `0`.
+Confirm that the summary at the end of the output reports `fail 0` and that the command exits with code `0`.
 
-`npm run test` passes `tests/nodejs/*.test.js` to the runner, so it runs only the test files at the top level of [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs). Put new test files there, with names that end in `.test.js`.
+## Write tests
+
+`npm run test` passes `tests/nodejs/*.test.js` to the runner, so it runs only the test files at the top level of [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs). Put new test files there, with names that end in `.test.js`. The example tests assert with the `node:assert` module.
+
+[`_helper.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/_helper.js) provides 2 helpers that run the script:
+
+- `runMain()` loads the script with `require()` and calls `main()` in the test process. It returns the buffered output, so a test asserts on it without spawning a process.
+- `runScript()` runs the script as a separate process. It returns the exit code and the output.
+
+Each example test file uses 1 of the helpers:
+
+- [`script.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.test.js) is a unit test. It calls `main()` through `runMain()` with different arguments and options.
+- [`script.functional.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.functional.test.js) is a functional test. It runs the script through `runScript()` the way your script's users run it.
+
+Each example test file registers 1 test for every entry in its `cases` array. To add a test, copy an entry and change its values.
 
 ## Coverage
 
 [`c8`](https://github.com/bcoe/c8) collects the coverage data that V8, the JavaScript engine in Node.js, records natively.
 
-To run the tests and generate the coverage reports, run the following command:
+To run the tests and generate the coverage reports, run the following command after `npm install`:
 
 ```bash
 npm run test-coverage
 ```
 
-With the settings in [`.c8rc.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.c8rc.json), c8 measures coverage of `nodejs-script` and writes these reports:
+With the settings in [`.c8rc.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.c8rc.json), c8 measures coverage of `nodejs-script` and writes the following reports:
 
 | Format | Output |
 |--------|--------|

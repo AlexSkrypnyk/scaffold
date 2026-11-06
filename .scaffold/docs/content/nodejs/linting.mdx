@@ -5,24 +5,40 @@ sidebar_position: 3
 
 # Linting
 
-You check NodeJS code with 2 tools. [ESLint](https://eslint.org/) reports problem patterns and coding-standard violations. [Prettier](https://prettier.io/), an opinionated code formatter, reprints the code in its own style. This page shows how to run both and where each one is configured.
+[ESLint](https://eslint.org/) reports problem patterns and coding-standard violations in NodeJS code. [Prettier](https://prettier.io/), an opinionated code formatter, reprints the code in its own style. This page is for developers who change `nodejs-script` or its tests in a project generated from Scaffold. Follow it to run both tools, fix what they report and change their settings.
 
-## Usage
+## Check the code
 
-Both tools check `nodejs-script`, `eslint.config.js` and the `.js` files in `tests/nodejs` and its subdirectories.
+Both tools check `nodejs-script`, `eslint.config.js` and the `.js` files in `tests/nodejs` and its subdirectories. To check these files:
 
-To check the code, run `npm run lint`. It runs ESLint, then runs Prettier to report files that need formatting.
+1. In your project root, install ESLint and Prettier with the project's other development dependencies:
 
-To fix what the tools can fix automatically, run `npm run lint-fix`. It runs ESLint with `--fix`, then Prettier with `--write` to reformat the files.
+   ```bash
+   npm install
+   ```
 
-To lint another file:
+2. Run the following command:
 
-1. Add its path to the ESLint and Prettier commands in the `lint` and `lint-fix` scripts in `package.json`.
-2. Add the path to the `files` array in `eslint.config.js`.
+   ```bash
+   npm run lint
+   ```
 
-In CI, the `Test Node.js` workflow runs `npm run lint` in its Node.js 22 job only. See [Test](../ci/test).
+   ESLint lists each problem it finds. Prettier runs only when ESLint finds no problems, and lists the files that need formatting.
 
-## ESLint
+The `Test Node.js` workflow runs `npm run lint` in CI, in its Node.js 22 job only. See [Test](../ci/test).
+
+## Fix the code
+
+To fix what the tools can fix automatically, run `npm run lint-fix`. It runs ESLint with `--fix`. When no ESLint problems remain after those fixes, it runs Prettier with `--write`, which reformats the files in place.
+
+## Lint another file
+
+To add a file to both tools:
+
+1. In `package.json`, add the file's path to the ESLint command and the Prettier command of both the `lint` and `lint-fix` scripts.
+2. In `eslint.config.js`, add the path to the `files` array, which lists the files the ESLint rules apply to.
+
+## ESLint settings
 
 The [`eslint.config.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/eslint.config.js) file is a starting ruleset to customize. It sets the following:
 
@@ -30,9 +46,9 @@ The [`eslint.config.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/esli
 - ECMAScript 2022 syntax in CommonJS modules, with the Node.js globals defined
 - `eslint-config-prettier`, which turns off the ESLint rules that conflict with Prettier
 
-## Prettier
+## Prettier settings
 
 Prettier reads its settings from the `prettier` key in [`package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/package.json). The template sets the following:
 
 - `singleQuote` is `true`, so Prettier prefers single quotes for strings.
-- An override makes Prettier parse `nodejs-script`, which has no `.js` extension, with the `babel` parser.
+- An override sets the `babel` parser for `nodejs-script`, which has no `.js` extension for Prettier to pick a parser from.

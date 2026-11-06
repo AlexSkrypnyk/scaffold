@@ -6,14 +6,13 @@ cspell: ignore acmeapp
 
 # Docker
 
-Docker support adds the files that define a container image, with GitHub Actions workflows that lint, build, test and publish it. It's off by default. To turn it on, answer `y` to the **Use Docker** prompt in `init.sh`, or pass `--docker`.
+Docker support adds a `Dockerfile` and an entrypoint script to your project, with GitHub Actions workflows that lint the `Dockerfile`, then test and publish the image. The pages in this section are for developers who build or publish that image in a project generated from Scaffold.
 
-The image name defaults to your namespace in lowercase and your project name, such as `acmeapp/acme-app`. To use another name, answer the **Docker image name** prompt, or pass `--docker-image-name`. That option also turns Docker support on.
+Docker support is off by default. To turn it on, run `init.sh` with `--docker` or answer `y` to its **Use Docker** prompt. The image name defaults to your namespace in lowercase and your project name, such as `acmeapp/acme-app`. To pick another name, pass `--docker-image-name` or answer the **Docker image name** prompt. `--docker-image-name` also turns Docker support on.
 
-The following table lists the files Docker support adds:
+Pick the page for your task:
 
-| File | What it does |
-|---|---|
-| `Dockerfile` and `entrypoint.sh` | Define the image. See [Image](./image.mdx). |
-| `.github/workflows/test-docker.yml` | Lints the `Dockerfile` and tests the image. After the tests pass on a push to `main`, pushes a `canary` image. See [Testing](./testing.mdx) and [Linting](./linting.mdx). |
-| `.github/workflows/release-docker.yml` | Publishes the image for every Git tag. See [Publishing](./publishing.mdx). |
+- [Image](./image.mdx): see what `Dockerfile` and `entrypoint.sh` contain, then build and run the image
+- [Linting](./linting.mdx): check the `Dockerfile` with Hadolint
+- [Testing](./testing.mdx): see what `.github/workflows/test-docker.yml` checks
+- [Publishing](./publishing.mdx): publish the image to Docker Hub

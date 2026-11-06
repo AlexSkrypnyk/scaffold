@@ -6,7 +6,7 @@ cspell: ignore opencontainers yournamespace yourproject
 
 # Image
 
-Containers from your project's image run Bash on Alpine Linux and start through an entrypoint script. This page covers what the image contains and how to build and run it locally.
+This page is for developers who change or run the Docker image in a project generated from Scaffold. It covers what the image contains and how to build it and run a container on your machine.
 
 ## Dockerfile
 
@@ -22,22 +22,28 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 ```
 
-The full file pins `alpine:3` to a digest. It also adds the `org.opencontainers.image.authors` and `org.opencontainers.image.source` labels from the Open Container Initiative (OCI) conventions.
+The full file pins `alpine:3` to a digest. It also sets the `org.opencontainers.image.authors` and `org.opencontainers.image.source` labels from the Open Container Initiative (OCI) conventions.
 
 ## Entrypoint
 
-The [`entrypoint.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/entrypoint.sh) script sets strict shell options with `set -euo pipefail` and prints a line with your project name, such as `acme-app is running`. The script then runs the container's arguments as a command, with `exec`.
+The [`entrypoint.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/entrypoint.sh) script sets strict shell options with `set -euo pipefail` and prints a line with your project name, such as `acme-app is running`. It then runs the container's arguments as a command with `exec`. With no arguments, the script ends after that line, so the container exits.
 
 ## Build and run the image
 
-To build the image and run a container from it, run the following commands in your project root:
+To build and run the image, run these commands in your project root, with your image name in place of `yournamespace/yourproject`:
 
-```bash
-# Build the image
-docker build -t yournamespace/yourproject .
+1. Build the image:
 
-# Run the container
-docker run --rm yournamespace/yourproject
-```
+   ```bash
+   # Build the image
+   docker build -t yournamespace/yourproject .
+   ```
 
-Use your image name in place of `yournamespace/yourproject`. With no arguments, the container prints the entrypoint's `is running` line, then exits.
+2. Run a container from the image, with no arguments:
+
+   ```bash
+   # Run the container
+   docker run --rm yournamespace/yourproject
+   ```
+
+   Confirm that the container prints `acme-app is running`, with your project name in place of `acme-app`, then exits.

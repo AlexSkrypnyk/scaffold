@@ -1,19 +1,20 @@
 ---
 title: AI integration
 sidebar_position: 7
+cspell: ignore PHPCBF
 ---
 
 # AI integration
 
-Scaffold ships configuration that lets AI coding agents work in a generated project from the first commit. This page is for developers who use those agents. It covers each file, the commands an agent runs without asking and how to keep the architecture documentation current.
+Scaffold ships configuration for AI coding agents, so an agent can work in a generated project from the first commit. This page is for developers who use those agents. It describes each file, lists the commands an agent runs without asking and shows how to keep the architecture documentation current.
 
-`init.sh` asks **Use AI agents** and keeps all of this configuration unless you answer no. Non-interactively, pass `--ai` or `--no-ai` to `init.sh`. With `--no-ai`, `init.sh` removes `CLAUDE.md`, `AGENTS.md` and the `.claude/` directory from the generated project.
+`init.sh` keeps this configuration by default. To remove it, answer `n` to the **Use AI agents** prompt, or pass `--no-ai` in place of `--ai`. `init.sh` then deletes `CLAUDE.md`, `AGENTS.md`, the `.claude/` directory and the [architecture documentation](#architecture-documentation).
 
 ## `AGENTS.md`
 
-`AGENTS.md` gives an AI coding agent the project's architecture and coding conventions. It also lists the commands that lint, test and build the project. The file follows the [AGENTS.md](https://agents.md/) convention, which many AI coding tools read.
+`AGENTS.md` holds the project's architecture and coding conventions for AI coding agents. It also lists the commands that lint, test and build the project. The file follows the [AGENTS.md](https://agents.md/) convention. `init.sh` trims the template's [`AGENTS.md`](https://github.com/AlexSkrypnyk/scaffold/blob/main/AGENTS.md) to the features you select.
 
-`init.sh` trims the template's [`AGENTS.md`](https://github.com/AlexSkrypnyk/scaffold/blob/main/AGENTS.md) to the features you select. The generated file's "Updating from the template" section covers pulling the template's latest infrastructure into the project. When you ask your agent to "update scaffold", the agent fetches the `update-consumer-scaffold` skill into the git-ignored `.claude/skills/update-consumer-scaffold/` directory and runs the skill.
+The generated file's "Updating from the template" section holds the steps for pulling the template's latest infrastructure into the project. When you ask your agent to "update scaffold", the agent fetches the `update-consumer-scaffold` skill into `.claude/skills/update-consumer-scaffold/` and runs it. The project's `.gitignore` lists that directory, so the skill stays out of commits.
 
 ## `CLAUDE.md`
 
@@ -21,44 +22,45 @@ Scaffold ships configuration that lets AI coding agents work in a generated proj
 
 ## `.claude/settings.json`
 
-`.claude/settings.json` lists the project commands Claude Code runs without asking for confirmation, such as lint, test and build. The file is committed, so the whole team shares 1 list.
+`.claude/settings.json` lists the commands Claude Code runs without asking you first. The list matches the commands in `AGENTS.md`. `init.sh` removes the entries for the features you didn't select, so a project without Docker has no Docker entries. The file is committed, so the whole team shares 1 list.
 
-The list matches the commands documented in `AGENTS.md`. `init.sh` removes the entries for the features you didn't select, so a project without Docker pre-approves no Docker command.
+Each entry is a rule in 1 of 2 forms:
 
-Commands that run a repository-defined script, install packages or build and run the project's Docker image are pre-approved only in their exact documented form. `Bash(composer test)` and `Bash(npm run lint)` are 2 such rules. Claude Code asks before any other form, such as `composer run test` or `npm exec`. Rules for single-purpose tools, such as `./vendor/bin/phpunit` and the Hadolint container, end in `:*` and match any arguments. So `./vendor/bin/phpunit --filter testName` runs without a prompt.
+- Rules for `composer`, `npm` and the project image's `docker build` and `docker run` each match 1 exact command line, such as `Bash(composer test)`. Claude Code asks before any other spelling, such as `composer run test`.
+- Rules for PHPCS, PHPCBF, PHPStan, Rector, PHPUnit, BATS, Hadolint and PlantUML end in `:*` and match any arguments. So `./vendor/bin/phpunit --filter testName` runs without a prompt.
 
-To pre-approve another command for yourself, add it to `.claude/settings.local.json`.
-
-## `.claude/settings.local.json`
-
-`.claude/settings.local.json` holds your personal permission overrides, such as machine-specific or experimental permissions. The project's `.gitignore` lists the file, so it stays out of your commits.
+`.claude/settings.local.json` holds your personal overrides, such as machine-specific or experimental permissions. To pre-approve a command for yourself only, add it to that file. The project's `.gitignore` lists the file, so it stays out of your commits.
 
 ## `.artifacts`
 
-`.artifacts` is the directory where agents and developers write temporary output, such as generated plans, notes and reports. Every generated project's `.gitignore` lists it, so files written there stay out of commits.
+`.artifacts` holds temporary output from agents and developers, such as plans, notes and reports. Every generated project's `.gitignore` lists the directory, so its files stay out of commits.
 
 ## Architecture documentation
 
-Scaffold can also ship architecture documentation: a walkthrough of how the project works, with diagrams an AI agent traces from the source code. It lives in `docs/content/architecture/`, so the documentation site serves it with the project's other pages.
+The architecture documentation is a walkthrough of how your project works, with diagrams an AI agent draws from the source code. It lives in `docs/content/architecture/README.md`, so the documentation site serves it with your other pages. When you leave out the [documentation site](./documentation.mdx), `init.sh` moves `docs/content/architecture/` to `docs/architecture/` and rewrites every path that points to it.
 
-When AI agents are enabled, `init.sh` asks for the **AI architecture docs** diagram format. Pick the format that matches your toolchain:
+The feature adds the following:
 
-| Format | Flag | Diagrams |
+- `docs/content/architecture/README.md`: an initial walkthrough of the template's example code, trimmed to the stacks you select
+- `.claude/skills/update-architecture-docs/SKILL.md`: the Claude Code skill an agent follows to update the walkthrough
+- An "Architecture Documentation" section in `AGENTS.md`, with the instruction to update the walkthrough after any structural change
+
+### Pick a diagram format
+
+When you keep the AI configuration, `init.sh` asks for the **AI architecture docs** format. Pick the format that matches your toolchain:
+
+| Format | Option | Diagrams |
 |---|---|---|
-| `mermaid` (default) | `--ai-arch-docs` or `--ai-arch-docs=mermaid` | Fenced Mermaid blocks in the Markdown. GitHub renders them natively in its light and dark themes. The documentation site renders them through its bundled `@docusaurus/theme-mermaid` theme. They need no toolchain. |
-| `plantuml` | `--ai-arch-docs=plantuml` | Committed `.puml` sources, rendered to committed light `.svg` files with `plantuml -tsvg docs/content/architecture/*.puml`. |
-| `none` | `--ai-arch-docs=none` or `--no-ai-arch-docs` | None. `init.sh` removes the feature. |
+| `mermaid` (default) | `--ai-arch-docs` or `--ai-arch-docs=mermaid` | Mermaid code blocks in `README.md` |
+| `plantuml` | `--ai-arch-docs=plantuml` | Committed `.puml` sources, rendered to committed light-theme `.svg` files |
+| `none` | `--ai-arch-docs=none` or `--no-ai-arch-docs` | None: `init.sh` removes the feature |
 
-`--no-ai` removes the architecture documentation too.
+The `mermaid` format needs no extra tools. GitHub renders Mermaid blocks in its light and dark themes. The documentation site renders them through its bundled `@docusaurus/theme-mermaid` theme.
 
-The feature ships the following files:
+The `plantuml` format needs PlantUML installed. `.claude/settings.json` keeps its `Bash(plantuml:*)` rule only for this format.
 
-- `.claude/skills/update-architecture-docs/SKILL.md`: a committed Claude Code skill with the instructions an agent follows to generate and maintain `docs/content/architecture/README.md`
-- `docs/content/architecture/README.md`: a starting walkthrough of the template's example code, trimmed to the stacks you selected
-- An "Architecture Documentation" section in `AGENTS.md`, which instructs agents to update the documentation after any structural change
+### Update the walkthrough
 
-To regenerate the walkthrough, ask your agent to "update architecture docs". The agent runs the skill, traces the codebase from its entry points and rewrites `docs/content/architecture/README.md`. The result has 1 component diagram for the overall structure and 1 sequence or flow diagram for each primary flow. When the documentation and the code disagree, the code wins.
+To update the walkthrough, ask your agent to "update architecture docs". The agent traces the codebase from its entry points and rewrites `docs/content/architecture/README.md`. The result has 1 component diagram for the overall structure and 1 sequence or flow diagram for each primary flow. When the walkthrough and the code disagree, the code wins.
 
-The `plantuml` format needs PlantUML installed. Before rendering, the agent runs `plantuml -version`. When PlantUML is missing, the agent skips rendering and reports that the `.svg` files weren't regenerated. The report includes the install commands: `brew install plantuml` on macOS and `apt-get install plantuml` on Debian or Ubuntu. `init.sh` keeps the `Bash(plantuml:*)` permission in `.claude/settings.json` only for the `plantuml` format.
-
-With `--no-docs`, `init.sh` removes the Docusaurus site and moves the architecture documentation to `docs/architecture/`. It then rewrites every path reference in the generated project to match.
+With the `plantuml` format, the agent checks for PlantUML with `plantuml -version`, then renders the diagrams with `plantuml -tsvg docs/content/architecture/*.puml`. When PlantUML is missing, the agent edits the prose and `.puml` sources but skips rendering. It reports that the `.svg` files weren't regenerated. The report includes the install commands: `brew install plantuml` on macOS and `apt-get install plantuml` on Debian or Ubuntu.

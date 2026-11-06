@@ -6,41 +6,36 @@ cspell: ignore bamarni yourproject
 
 # PHP packaging
 
-This page is for maintainers of a Scaffold console app who ship it as a PHP Archive (PHAR). It covers how to build, version and release the PHAR and which settings control its contents.
+A PHP Archive (PHAR) bundles a PHP app and its dependencies into 1 executable file, the way a JAR file bundles a Java app. A user needs only the file and PHP to run it, so the format suits command-line tools, cron jobs and daemons. This page is for maintainers of a Scaffold CLI command app who ship it as a PHAR. It covers how the PHAR is built, versioned and released. It also lists the `box.json` settings. In your project, `init.sh` has replaced `php-command` and `yourproject` with your command and project names.
 
-A PHAR bundles a PHP app and its dependencies into 1 executable file, the way a JAR file bundles a Java app. Users download that file and run it, and they need PHP installed, as a JAR needs Java. The format suits command-line tools, cron jobs and daemons that run outside a web server.
+## Build
 
-For a CLI command app, `init.sh` keeps this setup by default. Answering no to its **Build PHAR** prompt, or passing `--no-phar`, removes the PHAR setup:
+The `build` script in `composer.json` runs [Box](https://github.com/box-project/box), a PHAR build tool that reads its settings from `box.json`. `composer build` runs these commands in order:
 
-- `box.json`
-- The `build` script, the `bamarni/composer-bin-plugin` entries and `vendor-bin` in the `reset` script, all in `composer.json`
-- The `/dist` and `/vendor-bin` entries in `.gitignore`
-- The `Build PHAR` job of the `Test PHP` workflow
-- The `Release PHP` workflow
+| Command | Effect |
+|---|---|
+| `@composer bin box require --dev humbug/box` | Installs Box into `vendor-bin/box` through the `bamarni/composer-bin-plugin` Composer plugin |
+| `box validate` | Checks `box.json` |
+| `box compile` | Writes the PHAR to `dist/php-command.phar` |
 
-## Workflow
+The following table lists the workflows that build the PHAR:
 
-The `build` script in `composer.json` runs [Box](https://github.com/box-project/box), a PHAR build tool that reads its settings from `box.json`. `composer build` runs 3 commands in order:
+| Workflow and job | When it runs | What it does |
+|---|---|---|
+| `Test PHP`, `Build PHAR` job | Every `Test PHP` run, including on pull requests | Builds the PHAR, then runs it with `--version` and with no arguments. A PHAR that fails to build or run fails the job. |
+| `Release PHP` | A tag push, or a manual run with a version | Builds and runs the PHAR with the same checks, then attaches it to the GitHub release for the version. The `softprops/action-gh-release` action creates the release if it doesn't exist. |
 
-1. `@composer bin box require --dev humbug/box` installs Box into `vendor-bin/box` through the `bamarni/composer-bin-plugin` Composer plugin.
-2. `box validate` checks `box.json`.
-3. `box compile` writes the PHAR to `dist/php-command.phar`.
-
-On every `Test PHP` run, the `Build PHAR` job builds the PHAR, then runs it with `--version` and with no arguments. A PHAR that fails to build or run fails the workflow.
-
-The `Release PHP` workflow publishes the PHAR. It runs when you push a tag whose name has no `/`, or when you start it by hand from the **Actions** tab with a version. It builds and runs the PHAR with the same checks as the `Build PHAR` job. Then the `softprops/action-gh-release` action attaches the PHAR to the GitHub release for that version, and creates the release if it doesn't exist.
-
-For an example, the [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page of the Scaffold repository shows a released PHAR under **Assets**.
+For the tags that trigger `Release PHP`, see [Release](release.mdx#trigger-conditions). The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows a released PHAR under **Assets**.
 
 ## PHAR version
 
 The PHAR prints its version with the `--version` flag. Box writes the version into the copy of `bin/php-command` inside the PHAR:
 
 1. `bin/php-command`, the launcher, passes the `@yourproject-version@` placeholder to the Symfony Console `Application` class as its version.
-2. Box replaces `@yourproject-version@` with the value of the `yourproject-version` key under `replacements` in `box.json`, which is `development`.
-3. Before it builds, `Release PHP` replaces `development` with the release version in its own checkout of `box.json`. The change never reaches your repository.
+2. `box.json` sets the `yourproject-version` value under `replacements` to `development`. Before it builds, `Release PHP` replaces `development` with the release version in its own checkout of `box.json`. The change never reaches your repository.
+3. Box replaces `@yourproject-version@` with the `yourproject-version` value.
 
-The version depends on how the build starts:
+The following table lists the version each build gets:
 
 | Build | Version |
 |---|---|
@@ -54,7 +49,7 @@ To print the version of your build, run the following command in the `dist` dire
 ./php-command.phar --version
 ```
 
-## Box
+## Box configuration
 
 `box.json` sets which files go into the PHAR, where Box writes it and how Box compresses it. Scaffold ships this [`box.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/box.json):
 
@@ -67,11 +62,21 @@ The following table describes each setting:
 
 | Setting | Value | Effect |
 |---|---|---|
-| `main` | Unset | Box uses the first `bin` entry in `composer.json`, `bin/php-command`. The same launcher serves Composer installs and the PHAR. |
-| `output` | `dist/php-command.phar` | Sets where Box writes the PHAR. Git ignores `dist`, so Git doesn't track the PHAR. |
-| `compression` | `GZ` | Box compresses the PHAR with gzip, which makes the file smaller. |
+| `main` | Unset | Box uses the first `bin` entry in `composer.json`, `bin/php-command`, so the PHAR and a Composer install use the same launcher. |
+| `output` | `dist/php-command.phar` | Sets where Box writes the PHAR. Git ignores `dist`, so the PHAR stays out of your commits. |
+| `compression` | `GZ` | Compresses the PHAR with gzip, so the file is smaller. |
 | `finder` | Every file in `./`, excluding `dist`, `docs`, `php-script` and `tests` | Selects the files to bundle. Excluding `dist` keeps a previous build out of the next PHAR. |
-| `blacklist` | 11 paths, such as `.github`, `phpcs.xml` and `box.json` | Box leaves these paths out of the PHAR. |
-| `replacements` | `yourproject-version` set to `development` | Box puts this value in place of the version placeholder in the launcher. See [PHAR version](#phar-version). |
+| `blacklist` | 11 paths, such as `.github`, `phpcs.xml` and `box.json` | Leaves these paths out of the PHAR. |
+| `replacements` | `yourproject-version` set to `development` | Replaces the version placeholder in the launcher. See [PHAR version](#phar-version). |
 
-To change what the PHAR contains, edit these settings in `box.json`. The [Box documentation](https://box-project.github.io/box/) lists every setting.
+The [Box documentation](https://box-project.github.io/box/) lists every setting.
+
+## Remove the PHAR build
+
+`init.sh` keeps the PHAR build in a CLI command app by default. Answering no to **Build PHAR**, or passing `--no-phar`, removes the following:
+
+- `box.json`
+- The `build` script and the `bamarni/composer-bin-plugin` entries in `composer.json`, and `vendor-bin` in its `reset` script
+- The `/dist` and `/vendor-bin` entries in `.gitignore`
+- The `Build PHAR` job of the `Test PHP` workflow
+- The `Release PHP` workflow

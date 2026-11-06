@@ -5,23 +5,18 @@ sidebar_position: 6
 
 # Testing
 
-The template ships a [PHPUnit](https://phpunit.de/) 11 configuration and keeps the example tests for the PHP mode you pick: [CLI command](./php-command.mdx), [CLI script](./php-script.mdx) or [library](./php-library.mdx). This page is for developers running and writing tests in a project made from Scaffold. It covers the test layout, the PHPUnit settings and the coverage reports.
+A Scaffold project tests PHP code with [PHPUnit](https://phpunit.de/) 11, and `init.sh` keeps the example tests for the PHP mode you pick: [CLI command](./php-command.mdx), [CLI script](./php-script.mdx) or [library](./php-library.mdx). This page is for developers running and writing tests in a Scaffold project. Use it to run the tests, find the coverage reports and look up the PHPUnit settings.
 
-## PHPUnit
+## Test layout
 
-The tests live in `tests/phpunit/`, in 2 directories:
+PHPUnit runs every test in `tests/phpunit/`. Put each test in 1 of 2 directories there:
 
 - `Unit/` for tests that call your code directly
 - `Functional/` for tests that run a whole command or script
 
-With the settings in [phpunit.xml](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpunit.xml), PHPUnit does the following:
+The `autoload-dev` section of `composer.json` maps the `YourNamespace\App\Tests\` namespace to `tests/phpunit`. `init.sh` replaces `YourNamespace` with your namespace, in the tests and in `composer.json`.
 
-- Runs the tests that failed last time first, while keeping each test after the tests it depends on.
-- Marks a test as risky when it prints output.
-- Fails the run on risky tests and on warnings.
-- Shows details for tests that trigger warnings, errors, notices, deprecations or PHPUnit deprecations.
-- Reports notices and warnings only from your source: `src`, or the script file in CLI script mode.
-- Ignores indirect deprecations.
+## Commands
 
 To run all the tests without coverage, run the following command:
 
@@ -29,19 +24,15 @@ To run all the tests without coverage, run the following command:
 composer test
 ```
 
-To run only the tests in 1 group, tag a test class or method with a group attribute such as `#[Group('wip')]`, then run the following command:
+To run only the tests in 1 group, tag a test class or method with a group attribute such as `#[Group('wip')]`. Then run the following command:
 
 ```bash
 composer test -- --group=wip
 ```
 
-## Namespaces
-
-Composer loads the tests through the `autoload-dev` section of `composer.json`, which maps the `YourNamespace\App\Tests\` namespace to `tests/phpunit`. `init.sh` replaces `YourNamespace` with the namespace you give it, in the tests and in `composer.json`.
-
 ## Coverage
 
-`composer test-coverage` runs the tests and measures coverage of `src`. In CLI script mode, it measures the script file. PHPUnit needs a coverage driver such as PCOV or Xdebug. The following commands set `XDEBUG_MODE=coverage`, which Xdebug needs and PCOV ignores.
+`composer test-coverage` runs the tests and measures coverage of `src`, or of the script file in CLI script mode. PHPUnit needs a coverage driver, such as PCOV or Xdebug. The following commands start with `XDEBUG_MODE=coverage`, which Xdebug needs and PCOV ignores.
 
 To run the tests with coverage, run the following command:
 
@@ -55,7 +46,7 @@ To get coverage for the tests in 1 group, run the following command:
 XDEBUG_MODE=coverage composer test-coverage -- --group=wip
 ```
 
-PHPUnit writes the coverage reports to `.logs/` in the project root. Git ignores `.logs`. The following table lists the reports:
+PHPUnit writes the coverage reports to the `.logs/` directory that Git ignores. The following table lists the reports:
 
 | Format | File | Use |
 |---|---|---|
@@ -63,15 +54,22 @@ PHPUnit writes the coverage reports to `.logs/` in the project root. Git ignores
 | Cobertura | `.logs/cobertura.xml` | Feed coverage to other tools. |
 | Text | `.logs/coverage.txt` | Read the coverage summary. |
 
-With both `composer test` and `composer test-coverage`, PHPUnit writes test results to `.logs/junit.xml` in JUnit format.
-
-With the coverage settings in `phpunit.xml`, PHPUnit does the following:
-
-- Requires coverage metadata, such as `#[CoversClass]`, on every test.
-- Accepts a test that runs more code than its metadata lists.
-- Includes uncovered files in the report.
-- Leaves path coverage off.
-- Ignores deprecated code units.
-- Honors `@codeCoverageIgnore` annotations.
+Both `composer test` and `composer test-coverage` write the test results to `.logs/junit.xml` in JUnit format.
 
 The `Test PHP` GitHub Actions workflow runs `composer test-coverage`. It checks the Cobertura report against a coverage threshold and posts the text report to the pull request as a comment. See [Code coverage](../ci/test#code-coverage).
+
+## PHPUnit settings
+
+With the settings in [`phpunit.xml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpunit.xml), PHPUnit does the following:
+
+- Runs the tests that failed last time first. A test that depends on other tests still runs after them.
+- Marks a test as risky when it prints output.
+- Marks a test as risky when it has no coverage metadata, such as `#[CoversClass]`.
+- Fails the whole run when any test is risky or triggers a warning.
+- Shows details for tests that trigger warnings, errors, notices, deprecations or PHPUnit deprecations.
+- Reports notices and warnings only from your source: `src`, or the script file in CLI script mode.
+- Ignores indirect deprecations.
+- Accepts a test that runs more code than its metadata lists.
+- Leaves path coverage off.
+- Ignores deprecated code units in coverage.
+- Honors `@codeCoverageIgnore` annotations.

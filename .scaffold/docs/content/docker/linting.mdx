@@ -5,16 +5,23 @@ sidebar_position: 3
 
 # Linting
 
-[Hadolint](https://github.com/hadolint/hadolint) checks a `Dockerfile` for common mistakes and departures from Dockerfile best practices. Follow this page to lint your `Dockerfile` before you build an image.
+Hadolint checks a `Dockerfile` for common mistakes and departures from Dockerfile best practices. This page is for developers who change the `Dockerfile` in a project generated from Scaffold. Follow it to lint the `Dockerfile` before you build an image.
 
-## Usage
+## Check the Dockerfile
 
-To lint the `Dockerfile`, install Hadolint and run the following command in your project root:
+To check the `Dockerfile`:
 
-```bash
-hadolint Dockerfile
-```
+1. Install [Hadolint](https://github.com/hadolint/hadolint).
+2. In your project root, run the following command:
 
-The `Dockerfile` starts with a `# hadolint global ignore=DL3018` comment, so Hadolint skips rule `DL3018`. That rule requires pinned package versions in `apk add`.
+   ```bash
+   hadolint Dockerfile
+   ```
 
-The `test-docker.yml` workflow also runs Hadolint in CI, before it builds the image. See [Testing](testing).
+   Hadolint lists each problem with its line number and rule code.
+
+The `test-docker.yml` workflow runs Hadolint on the `Dockerfile` in CI too. To let CI pass when Hadolint fails, see [Testing](testing).
+
+## Hadolint settings
+
+The `Dockerfile` starts with a `# hadolint global ignore=DL3018` comment, so Hadolint skips rule `DL3018` in the whole file. That rule requires pinned package versions in `apk add`.

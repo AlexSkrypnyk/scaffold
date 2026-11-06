@@ -8,24 +8,13 @@ import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
 
 # Introduction
 
-Scaffold is a project template for Shell, PHP, NodeJS and Docker projects. Each new project starts with working example code, tests, linters and CI workflows. This page is for developers starting a project from Scaffold.
+Scaffold is a project template for Shell, PHP, NodeJS and Docker projects. Each project you create from it starts with working example code, tests, linters and CI workflows. This page is for developers starting a project from Scaffold. Follow it to create your project and push it to GitHub.
 
 ## Quick start
 
-The `init.sh` script sets up your project. It replaces `yournamespace`, `yourproject`, `Your Name` and other strings with your own values, and keeps the features you choose.
+The `init.sh` script turns the template into your project. It replaces `yournamespace`, `yourproject`, `Your Name` and other placeholders with your answers to its prompts. It removes the features you turn down.
 
-To create a project with the one-line installer:
-
-1. Open a terminal in a new **empty directory**.
-2. Run the following command and answer the prompts:
-
-   ```bash
-   curl -fsSL https://getscaffold.dev/init.sh | bash
-   ```
-
-   The script downloads Scaffold into the directory and then prompts you for the project details. Confirm that it ends with `Initialization complete.`
-
-3. Commit the result to a new git repository and push it.
+The following recording shows a run of `init.sh`:
 
 <AsciinemaPlayer
   src="/img/init.cast"
@@ -35,22 +24,47 @@ To create a project with the one-line installer:
   terminalLineHeight={1.1}
 />
 
-For automation and AI agents, replace the command in step 2 with this non-interactive one:
+To create a project:
+
+1. Open a terminal in a new empty directory. The script exits with an error if the directory holds anything, even a `.git` directory.
+2. Run the following command:
+
+   ```bash
+   curl -fsSL https://getscaffold.dev/init.sh | bash
+   ```
+
+   The script downloads the latest Scaffold release into the directory.
+
+3. Answer each prompt. Confirm that the script ends with `Initialization complete.`
+4. Commit the files to a new git repository.
+5. Push the repository to GitHub.
+
+## Run without prompts
+
+Any command-line option turns off the prompts. You must then pass `--namespace`, `--name` and `--author`. The script uses the default for every other choice. For automation and AI agents, run the following command in place of the step 2 command:
 
 ```bash
 curl -fsSL https://getscaffold.dev/init.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-The non-interactive command needs `--namespace`, `--name` and `--author`. The script uses the default for every other choice. With either command, the script downloads the latest release. To pin a tag, branch or commit, add `--ref` to the non-interactive command, for example `--ref=1.2.3`. Leave `--ref` out of the interactive command, because any option turns off the prompts.
+Replace the 3 values with a PascalCase namespace, a lowercase hyphenated project name and your name.
 
-### Alternative: start from a downloaded release
+To start from a tag, branch or commit in place of the latest release, add `--ref` to the no-prompt command, such as `--ref=1.2.3`. To list every option and its default, run `curl -fsSL https://getscaffold.dev/init.sh | bash -s -- --help`.
 
-To start from a local copy instead:
+## Start from a downloaded release
+
+To run `init.sh` from a local copy:
 
 1. Download the latest release from [GitHub](https://github.com/AlexSkrypnyk/scaffold/releases/latest).
-2. Extract the archive and open a terminal in its directory.
-3. Run `./init.sh` and answer the prompts.
-4. Commit the result to a new git repository and push it.
+2. Extract the archive.
+3. In the extracted directory, run `./init.sh`.
+4. Follow steps 3-5 of the quick start.
 
-Run `./init.sh --help` for all options.
+## What's next
+
+- [PHP](./php/README.mdx)
+- [NodeJS](./nodejs/README.mdx)
+- [Shell](./shell/README.mdx)
+- [Docker](./docker/README.mdx)
+- [CI](./ci/README.mdx)
