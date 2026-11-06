@@ -33,7 +33,7 @@
 - Your second feature as a list item
 - Your third feature as a list item
 [//]: # (#;< AI_ARCH_DOCS)
-- Architecture documentation in `docs/content/architecture/`, which an AI agent keeps up to date with the `update-architecture-docs` skill
+- Architecture documentation in `docs/content/architecture/`, which an AI agent regenerates with the `update-architecture-docs` skill when you ask it to "update architecture docs"
 [//]: # (#;> AI_ARCH_DOCS)
 
 ## Installation
@@ -86,7 +86,7 @@ The command takes the following arguments and options:
 |-------------|---------------|------------------------------------|
 | `arg1`      | None          | Description of the first argument. |
 | `--option1` | `default1`    | Option with a default value.       |
-| `--option2` | None          | Option without a value.            |
+| `--option2` | None          | Flag that takes no value.          |
 
 [//]: # (#;> !PHP_LIBRARY)
 [//]: # (#;< PHP_LIBRARY)
@@ -131,7 +131,7 @@ docker run --rm yournamespace/yourproject
 [//]: # (#;< AI)
 ## Update from the template
 
-To pull the latest infrastructure from the Scaffold template into this project, ask Claude Code to "update scaffold". [`AGENTS.md`](AGENTS.md) holds the instructions that it follows.
+To pull the latest infrastructure from the Scaffold template into this project, ask Claude Code to "update scaffold". Claude Code follows the instructions in [`AGENTS.md`](AGENTS.md).
 
 [//]: # (#;> AI)
 ---

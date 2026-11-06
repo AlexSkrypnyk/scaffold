@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for considering a contribution to this project. Follow this guide to install the dependencies and run the same linters and tests that CI runs on your pull request. Run every command from the repository root.
+Thank you for considering a contribution to this project. Follow this guide to install the dependencies and run the same linters and tests that CI runs on your pull request. Run the section for each stack your change touches, from the repository root.
 
 [//]: # (#;< PHP)
 ## PHP
@@ -13,7 +13,7 @@ composer lint
 composer test
 ```
 
-To fix the coding standard and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, run `composer test-coverage`.
+To fix the PHP_CodeSniffer and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, run `composer test-coverage`.
 
 [//]: # (#;> PHP)
 [//]: # (#;< NODEJS)
@@ -42,11 +42,13 @@ shfmt -i 2 -ci -s -d shell-command.sh tests/bats/*.bash tests/bats/*.bats
 ./tests/bats/node_modules/.bin/bats tests/bats
 ```
 
+To apply the formatting that shfmt reports, run the shfmt command with `-w` in place of `-d`.
+
 [//]: # (#;> SHELL)
 [//]: # (#;< DOCKER)
 ## Docker
 
-Lint the `Dockerfile` with Hadolint, then build the image and run a container from it:
+Lint the `Dockerfile`, build the image and run a container from it:
 
 ```bash
 docker run --rm -i hadolint/hadolint < Dockerfile
