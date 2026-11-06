@@ -12,21 +12,21 @@
  
  ## Installation
  
--Install the package with Composer:
-+Pull the image from Docker Hub:
+-Install the PHP package with Composer:
++Pull the Docker image from Docker Hub:
  
  ```bash
 -composer require yodashut/force-crystal
 +docker pull yodashut/force-crystal
  ```
  
--Download `nodejs-script` from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
+-Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
 -
 -```bash
 -chmod +x nodejs-script
 -```
 -
--Copy `force-crystal.sh` from this repository and make it executable:
+-Copy the shell script, `force-crystal.sh`, from this repository and make it executable:
 -
 -```bash
 -chmod +x force-crystal.sh
@@ -34,8 +34,8 @@
 -
  ## Usage
  
--Run the command that Composer installs:
-+Run a container from the image:
+-Run the PHP command that Composer installs:
++Run a container from the Docker image:
  
  ```bash
 -vendor/bin/force-crystal
@@ -49,13 +49,13 @@
 -| `--option1` | `default1`    | Option with a default value.       |
 -| `--option2` | None          | Option without a value.            |
 -
--Run the script with 1 argument:
+-Run the Node.js script with 1 argument:
 -
 -```bash
 -./nodejs-script value/of/argument
 -```
 -
--Run the script and answer its prompts:
+-Run the shell script and answer its prompts:
 -
 -```bash
 -./force-crystal.sh

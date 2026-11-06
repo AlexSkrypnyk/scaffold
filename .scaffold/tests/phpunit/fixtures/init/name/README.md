@@ -30,22 +30,22 @@
  
  </div>
 @@ -33,19 +33,19 @@
- Install the package with Composer:
+ Install the PHP package with Composer:
  
  ```bash
 -composer require yodashut/force-crystal
 +composer require jeditemple/star-forge
  ```
  
--Download `nodejs-script` from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
-+Download `nodejs-script` from the [latest release](https://github.com/jeditemple/star-forge/releases/latest) and make it executable:
+-Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
++Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/jeditemple/star-forge/releases/latest) and make it executable:
  
  ```bash
  chmod +x nodejs-script
  ```
  
--Copy `force-crystal.sh` from this repository and make it executable:
-+Copy `star-forge.sh` from this repository and make it executable:
+-Copy the shell script, `force-crystal.sh`, from this repository and make it executable:
++Copy the shell script, `star-forge.sh`, from this repository and make it executable:
  
  ```bash
 -chmod +x force-crystal.sh
@@ -54,7 +54,7 @@
  
  ## Usage
 @@ -53,7 +53,7 @@
- Run the command that Composer installs:
+ Run the PHP command that Composer installs:
  
  ```bash
 -vendor/bin/force-crystal
@@ -63,7 +63,7 @@
  
  The command takes the following arguments and options:
 @@ -73,7 +73,7 @@
- Run the script and answer its prompts:
+ Run the shell script and answer its prompts:
  
  ```bash
 -./force-crystal.sh

@@ -10,13 +10,13 @@
  
  ## Installation
  
--Install the package with Composer:
+-Install the PHP package with Composer:
 -
 -```bash
 -composer require yodashut/force-crystal
 -```
 -
- Download `nodejs-script` from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
+ Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
  
  ```bash
 @@ -49,20 +42,6 @@
@@ -24,7 +24,7 @@
  
  ## Usage
 -
--Run the command that Composer installs:
+-Run the PHP command that Composer installs:
 -
 -```bash
 -vendor/bin/force-crystal
@@ -38,5 +38,5 @@
 -| `--option1` | `default1`    | Option with a default value.       |
 -| `--option2` | None          | Option without a value.            |
  
- Run the script with 1 argument:
+ Run the Node.js script with 1 argument:
  

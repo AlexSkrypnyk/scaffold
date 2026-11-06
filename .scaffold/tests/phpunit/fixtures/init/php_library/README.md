@@ -2,8 +2,8 @@
  
  ## Usage
  
--Run the command that Composer installs:
-+Call the library's classes from your code:
+-Run the PHP command that Composer installs:
++Call the PHP library's classes from your code:
  
 -```bash
 -vendor/bin/force-crystal
@@ -21,5 +21,5 @@
 -| `--option1` | `default1`    | Option with a default value.       |
 -| `--option2` | None          | Option without a value.            |
  
- Run the script with 1 argument:
+ Run the Node.js script with 1 argument:
  
