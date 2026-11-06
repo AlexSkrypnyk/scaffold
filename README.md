@@ -48,7 +48,7 @@ The template holds every feature, and `init.sh` removes the ones you don't selec
   - CI workflow to [publish](.github/workflows/release-docker.yml) multi-arch images (`linux/amd64`, `linux/arm64`) to Docker Hub
 - **CI**
   - [Release drafter](.github/workflows/draft-release-notes.yml)
-  - Release asset packaging and upload
+  - Release workflows that attach the [PHAR or PHP script](.github/workflows/release-php.yml) and the [Node.js script](.github/workflows/release-nodejs.yml) to each GitHub release
   - [PR auto-assign](.github/workflows/assign-author.yml)
   - [On-demand Renovate run](.github/workflows/update-dependencies.yml) that you start from the **Actions** tab
   - [GitHub Actions linting](.github/workflows/test-actions.yml) with yamllint, actionlint and zizmor, off by default
@@ -115,4 +115,4 @@ You can pull later template changes into a project generated from Scaffold and k
 3. Restore your project-specific files from git.
 4. Reconcile the differences.
 
-In a project generated with the AI agent files, [`AGENTS.md`](AGENTS.md) carries the same instructions for any AI agent. `--no-ai` leaves `AGENTS.md` out.
+The generated project's [`AGENTS.md`](AGENTS.md) holds these instructions, so any AI agent can follow them. A project generated with `--no-ai` has no `AGENTS.md`, so it can't update this way.

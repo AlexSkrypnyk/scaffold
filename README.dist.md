@@ -33,80 +33,106 @@
 - Your second feature as a list item
 - Your third feature as a list item
 [//]: # (#;< AI_ARCH_DOCS)
-- AI-maintained architecture documentation in `docs/content/architecture/` via the `update-architecture-docs` skill
+- Architecture documentation in `docs/content/architecture/`, which an AI agent keeps up to date with the `update-architecture-docs` skill
 [//]: # (#;> AI_ARCH_DOCS)
 
 ## Installation
 
 [//]: # (#;< PHP)
+Install the package with Composer:
 
-    composer require yournamespace/yourproject
+```bash
+composer require yournamespace/yourproject
+```
 
 [//]: # (#;> PHP)
-
 [//]: # (#;< NODEJS)
+Download `nodejs-script` from the [latest release](https://github.com/yournamespace/yourproject/releases/latest) and make it executable:
 
-Download the latest release from GitHub releases page.
+```bash
+chmod +x nodejs-script
+```
 
 [//]: # (#;> NODEJS)
-
 [//]: # (#;< SHELL)
+Copy `shell-command.sh` from this repository and make it executable:
 
-Download the latest release from GitHub releases page.
+```bash
+chmod +x shell-command.sh
+```
 
 [//]: # (#;> SHELL)
+[//]: # (#;< DOCKER)
+Pull the image from Docker Hub:
 
+```bash
+docker pull yournamespace/yourproject
+```
+
+[//]: # (#;> DOCKER)
 ## Usage
 
 [//]: # (#;< PHP)
 [//]: # (#;< !PHP_LIBRARY)
+Run the command that Composer installs:
 
-    vendor/bin/yourproject
+```bash
+vendor/bin/yourproject
+```
 
-[//]: # (#;> !PHP_LIBRARY)
-[//]: # (#;< PHP_LIBRARY)
-
-    use YourNamespace\App\Example;
-    echo (new Example())->greet('World');
-
-[//]: # (#;> PHP_LIBRARY)
-[//]: # (#;> PHP)
-
-[//]: # (#;< NODEJS)
-
-    ./nodejs-script value/of/argument
-
-[//]: # (#;> NODEJS)
-
-[//]: # (#;< SHELL)
-
-    ./shell-command.sh
-
-[//]: # (#;> SHELL)
-
-[//]: # (#;< PHP)
-[//]: # (#;< !PHP_LIBRARY)
-
-### CLI options
+The command takes the following arguments and options:
 
 | Name        | Default value | Description                        |
 |-------------|---------------|------------------------------------|
-| `arg1`      |               | Description of the first argument. |
+| `arg1`      | None          | Description of the first argument. |
 | `--option1` | `default1`    | Option with a default value.       |
 | `--option2` | None          | Option without a value.            |
 
 [//]: # (#;> !PHP_LIBRARY)
+[//]: # (#;< PHP_LIBRARY)
+Call the library's classes from your code:
+
+```php
+use YourNamespace\App\Example;
+
+echo (new Example())->greet('World');
+```
+
+[//]: # (#;> PHP_LIBRARY)
 [//]: # (#;> PHP)
+[//]: # (#;< NODEJS)
+Run the script with 1 argument:
 
-## Contributing
+```bash
+./nodejs-script value/of/argument
+```
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the
-linting and testing commands.
+[//]: # (#;> NODEJS)
+[//]: # (#;< SHELL)
+Run the script and answer its prompts:
 
-## Updating
+```bash
+./shell-command.sh
+```
 
-To pull the latest infrastructure from the template into this project, ask
-Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
+[//]: # (#;> SHELL)
+[//]: # (#;< DOCKER)
+Run a container from the image:
 
+```bash
+docker run --rm yournamespace/yourproject
+```
+
+[//]: # (#;> DOCKER)
+## Contribute
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) lists the commands that install the dependencies and run the linters and tests.
+
+[//]: # (#;< AI)
+## Update from the template
+
+To pull the latest infrastructure from the Scaffold template into this project, ask Claude Code to "update scaffold". [`AGENTS.md`](AGENTS.md) holds the instructions that it follows.
+
+[//]: # (#;> AI)
 ---
 _This repository was created using the [Scaffold](https://getscaffold.dev/) project template_
