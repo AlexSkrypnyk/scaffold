@@ -29,30 +29,45 @@
  ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
  
  </div>
-@@ -31,7 +31,7 @@
- ## Installation
+@@ -33,19 +33,19 @@
+ Install the package with Composer:
  
+ ```bash
+-composer require yodashut/force-crystal
++composer require jeditemple/star-forge
+ ```
  
--    composer require yodashut/force-crystal
-+    composer require jeditemple/star-forge
+-Download `nodejs-script` from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
++Download `nodejs-script` from the [latest release](https://github.com/jeditemple/star-forge/releases/latest) and make it executable:
  
+ ```bash
+ chmod +x nodejs-script
+ ```
  
+-Copy `force-crystal.sh` from this repository and make it executable:
++Copy `star-forge.sh` from this repository and make it executable:
  
-@@ -45,7 +45,7 @@
+ ```bash
+-chmod +x force-crystal.sh
++chmod +x star-forge.sh
+ ```
+ 
  ## Usage
- 
- 
--    vendor/bin/force-crystal
-+    vendor/bin/star-forge
- 
- 
- 
 @@ -53,7 +53,7 @@
+ Run the command that Composer installs:
  
+ ```bash
+-vendor/bin/force-crystal
++vendor/bin/star-forge
+ ```
  
+ The command takes the following arguments and options:
+@@ -73,7 +73,7 @@
+ Run the script and answer its prompts:
  
--    ./force-crystal.sh
-+    ./star-forge.sh
+ ```bash
+-./force-crystal.sh
++./star-forge.sh
+ ```
  
- 
- 
+ ## Contribute

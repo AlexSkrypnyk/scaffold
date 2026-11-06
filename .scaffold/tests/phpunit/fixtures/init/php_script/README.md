@@ -6,23 +6,29 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -39,9 +38,6 @@
+@@ -42,12 +41,6 @@
+ chmod +x nodejs-script
+ ```
  
- 
- 
--Download the latest release from GitHub releases page.
+-Copy `force-crystal.sh` from this repository and make it executable:
 -
+-```bash
+-chmod +x force-crystal.sh
+-```
 -
  ## Usage
  
+ Run the command that Composer installs:
+@@ -68,12 +61,6 @@
  
-@@ -51,9 +47,6 @@
- 
-     ./nodejs-script value/of/argument
- 
+ ```bash
+ ./nodejs-script value/of/argument
+-```
 -
+-Run the script and answer its prompts:
 -
--    ./force-crystal.sh
+-```bash
+-./force-crystal.sh
+ ```
  
- 
- 
+ ## Contribute
