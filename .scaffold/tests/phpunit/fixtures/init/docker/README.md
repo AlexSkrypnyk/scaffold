@@ -47,7 +47,7 @@
 -|-------------|---------------|------------------------------------|
 -| `arg1`      | None          | Description of the first argument. |
 -| `--option1` | `default1`    | Option with a default value.       |
--| `--option2` | None          | Option without a value.            |
+-| `--option2` | None          | Flag that takes no value.          |
 -
 -Run the Node.js script with 1 argument:
 -

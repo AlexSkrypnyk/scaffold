@@ -1,4 +1,4 @@
-@@ -26,14 +26,3 @@
+@@ -26,16 +26,3 @@
  
  To fix the ESLint and Prettier issues that the linters report, run `npm run lint-fix`. To write a coverage report to `.logs/`, run `npm run test-coverage`.
  
@@ -12,4 +12,6 @@
 -shfmt -i 2 -ci -s -d force-crystal.sh tests/bats/*.bash tests/bats/*.bats
 -./tests/bats/node_modules/.bin/bats tests/bats
 -```
+-
+-To apply the formatting that shfmt reports, run the shfmt command with `-w` in place of `-d`.
 -

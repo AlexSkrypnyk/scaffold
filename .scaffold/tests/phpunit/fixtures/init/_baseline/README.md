@@ -26,7 +26,7 @@
 - Your first feature as a list item
 - Your second feature as a list item
 - Your third feature as a list item
-- Architecture documentation in `docs/content/architecture/`, which an AI agent keeps up to date with the `update-architecture-docs` skill
+- Architecture documentation in `docs/content/architecture/`, which an AI agent regenerates with the `update-architecture-docs` skill when you ask it to "update architecture docs"
 
 ## Installation
 
@@ -62,7 +62,7 @@ The command takes the following arguments and options:
 |-------------|---------------|------------------------------------|
 | `arg1`      | None          | Description of the first argument. |
 | `--option1` | `default1`    | Option with a default value.       |
-| `--option2` | None          | Option without a value.            |
+| `--option2` | None          | Flag that takes no value.          |
 
 Run the Node.js script with 1 argument:
 
@@ -82,7 +82,7 @@ Run the shell script and answer its prompts:
 
 ## Update from the template
 
-To pull the latest infrastructure from the Scaffold template into this project, ask Claude Code to "update scaffold". [`AGENTS.md`](AGENTS.md) holds the instructions that it follows.
+To pull the latest infrastructure from the Scaffold template into this project, ask Claude Code to "update scaffold". Claude Code follows the instructions in [`AGENTS.md`](AGENTS.md).
 
 ---
 _This repository was created using the [Scaffold](https://getscaffold.dev/) project template_
