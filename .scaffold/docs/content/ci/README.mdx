@@ -15,7 +15,7 @@ Continuous integration (CI) is the practice of merging changes into a shared rep
 
 ## GitHub Actions
 
-GitHub Actions is GitHub's CI/CD service, so your builds need no external CI tool. A workflow is a YAML file in your repository's `.github/workflows` directory. Events such as pushes, pull requests, a schedule or a manual start trigger it. Each workflow runs 1 or more jobs, and each job runs its steps in order on a runner, a machine GitHub provides.
+GitHub Actions is the CI/CD service built into GitHub. A workflow is a YAML file in your repository's `.github/workflows` directory. Events such as pushes, pull requests, a schedule or a manual start trigger it. Each workflow runs 1 or more jobs, and each job runs its steps in order on a runner, a machine GitHub provides.
 
 The pages in this section cover what Scaffold ships:
 
@@ -28,7 +28,7 @@ The pages in this section cover what Scaffold ships:
 
 ### SSH into a GitHub Actions runner
 
-The `Test PHP`, `Test Node.js`, `Test shell` and `Test Docker` workflows end each test job with a **Setup tmate session** step. That step runs the [mxschmitt/action-tmate](https://github.com/mxschmitt/action-tmate) action, which shares the runner's terminal over SSH through tmate. GitHub runs the step only when you start the workflow by hand with **Enable terminal session.** selected. The step comes after the job's other steps and runs even when one of them fails.
+The `Test PHP`, `Test Node.js`, `Test shell` and `Test Docker` workflows end each test job with a **Setup tmate session** step. That step runs the [mxschmitt/action-tmate](https://github.com/mxschmitt/action-tmate) action, which shares the runner's terminal over SSH through tmate. GitHub runs the step only on a run you start by hand. The step comes after the job's other steps and runs even when one of them fails.
 
 The action connects to the public tmate server. If that server is unavailable, follow the [action-tmate README](https://github.com/mxschmitt/action-tmate#readme) to use a tmate server of your own.
 

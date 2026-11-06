@@ -15,7 +15,7 @@ The `Draft release notes` workflow in `.github/workflows/draft-release-notes.yml
 
 To release, publish the draft as it is or edit it first. The [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page of the Scaffold repository shows releases drafted this way.
 
-## Versioning scheme configuration
+## Version schemes
 
 Each draft gets its version from 1 of 2 versioning schemes:
 
@@ -36,7 +36,7 @@ SemVer needs no setup. To switch to CalVer:
 6. In **Value**, enter `calver`.
 7. Click **Add variable**.
 
-Confirm that the workflow's **Set version** step logs `Using CalVer:` followed by the version on its next run.
+After the next push to `main`, confirm that the **Set version** step of the `Draft release notes` workflow logs `Using CalVer:` and the version.
 
 ## Release notes
 
@@ -75,7 +75,7 @@ The following sections describe each setting.
 
 ### `version-resolver.default: minor`
 
-- **What it does**: Sets the version part to bump when no label rule matches. A label rule maps pull request labels to a version part, and Scaffold's configuration defines none. Every draft bumps the minor version.
+- **What it does**: Sets the version part to bump when no label rule matches. A label rule maps pull request labels to a version part. Scaffold's configuration defines no label rules, so every draft bumps the minor version.
 - **Override**: Under CalVer, the workflow passes its own version to Release Drafter. That version replaces the resolved version.
 
 ### `template: |`

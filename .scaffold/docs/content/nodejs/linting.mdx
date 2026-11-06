@@ -5,7 +5,7 @@ sidebar_position: 3
 
 # Linting
 
-You check NodeJS code with 2 tools. ESLint reports problem patterns and coding-standard violations, and Prettier enforces a single formatting style. This page shows how to run both and where each one is configured.
+You check NodeJS code with 2 tools. [ESLint](https://eslint.org/) reports problem patterns and coding-standard violations. [Prettier](https://prettier.io/), an opinionated code formatter, reprints the code in its own style. This page shows how to run both and where each one is configured.
 
 ## Usage
 
@@ -15,13 +15,14 @@ To check the code, run `npm run lint`. It runs ESLint, then runs Prettier to rep
 
 To fix what the tools can fix automatically, run `npm run lint-fix`. It runs ESLint with `--fix`, then Prettier with `--write` to reformat the files.
 
-To lint another file, add its path to both tool commands in the `lint` and `lint-fix` scripts in `package.json`. Then add it to the `files` array in `eslint.config.js`.
+To lint another file:
 
-The `Test Node.js` workflow runs `npm run lint` in 1 job of its matrix, the Node.js 22 job. See [Test](../ci/test).
+1. Add its path to the ESLint and Prettier commands in the `lint` and `lint-fix` scripts in `package.json`.
+2. Add the path to the `files` array in `eslint.config.js`.
+
+In CI, the `Test Node.js` workflow runs `npm run lint` in its Node.js 22 job only. See [Test](../ci/test).
 
 ## ESLint
-
-[ESLint](https://eslint.org/) analyzes JavaScript files and detects problematic patterns and violations of a coding standard.
 
 The [`eslint.config.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/eslint.config.js) file is a starting ruleset to customize. It sets the following:
 
@@ -30,8 +31,6 @@ The [`eslint.config.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/esli
 - `eslint-config-prettier`, which turns off the ESLint rules that conflict with Prettier
 
 ## Prettier
-
-[Prettier](https://prettier.io/) is an opinionated code formatter. It parses the code and reprints it according to its own rules.
 
 Prettier reads its settings from the `prettier` key in [`package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/package.json). The template sets the following:
 

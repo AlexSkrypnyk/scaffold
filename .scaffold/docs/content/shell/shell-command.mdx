@@ -6,7 +6,7 @@ cspell: ignore yesno
 
 # CLI command
 
-[`shell-command.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/shell-command.sh) is a template for a single-file Bash command-line interface (CLI) script. It's self-contained: it needs Bash and standard tools such as `curl`, and no packages. Follow this page to learn what the template does and how to turn it into your own command.
+[`shell-command.sh`](https://github.com/AlexSkrypnyk/scaffold/blob/main/shell-command.sh) is a template for a single-file Bash command-line interface (CLI) script. It's self-contained and needs only Bash and standard tools such as `curl`. Follow this page to learn what the template does and how to turn it into your own command.
 
 By default, `init.sh` renames the script after your project, such as `acme-app.sh`. To pick another name, pass `--shell-command-name` or answer the **Shell command name** prompt. Use your script's name in place of `shell-command.sh` in the examples on this page.
 
@@ -14,11 +14,11 @@ The template includes the following features:
 
 - **Strict mode**: `set -euo pipefail` stops the script at a failed command, an unset variable or a failed pipe.
 - **Debug mode**: set the `SCRIPT_DEBUG` environment variable to `1` to print each command as it runs.
-- **Prompts**: `ask` reads a value and offers a default. `ask_yesno` reads a `y` or `n` answer, with `Y` as its default, and returns it in lowercase.
+- **Prompts**: `ask` reads a value, with an optional default. `ask_yesno` reads a `y` or `n` answer, with `Y` as its default, and returns it in lowercase.
 - **Confirmation**: the script asks `Proceed?` before it does its work, with `Y` as the default. Any answer other than `y` or `Y` exits the script. Set `SHOULD_PROCEED=y` to skip the question.
 - **`main` function**: the script's logic lives in `main`, which runs only when you run the script directly. Sourcing the script from another script loads its functions without running `main`.
 
-The example logic takes a joke topic as its first argument, or asks for one with `general` as the default. It then fetches a random joke from the Official Joke API and prints it. The `JOKE_URL_ENDPOINT` environment variable overrides the API URL.
+The example logic takes a joke topic as its first argument, or asks for one with `general` as the default. It then fetches a random joke from the Official Joke API and prints it. The `JOKE_URL_ENDPOINT` environment variable overrides the API URL, where `__TOPIC__` stands for the topic.
 
 ## Get started
 
@@ -33,8 +33,8 @@ To turn the template into your own command:
    ./shell-command.sh
    ```
 
-   The template version prints `Follow the prompts` and asks for a joke topic.
+   Confirm that the script runs your logic. The unchanged template prints `Follow the prompts` and asks for a joke topic.
 
 ## Write tests
 
-[`tests/bats/shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) runs the script with different arguments and answers. Update its tests when you change the script. See [Testing](testing) for how the tests work and how to run them with coverage.
+[`tests/bats/shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) runs the script with different answers and settings. Update its tests when you change the script. See [Testing](testing) for how the tests work, how to run them and how CI measures their coverage.

@@ -16,7 +16,7 @@ Every test workflow in your project runs on the following events, including `Tes
 - A push to `main`, including a merged pull request.
 - A daily scheduled run at 04:23 UTC, which shows whether the project still builds when nobody has pushed. To leave it out, run `init.sh` with `--no-schedule` or answer no to "Use scheduled builds". In an existing project, delete the `schedule` block from each `.github/workflows/test-*.yml` file.
 
-You can also start the PHP, Node.js, Shell and Docker workflows by hand from the **Actions** tab. To open a terminal session on the runner, select **Enable terminal session** in the run form; see [CI](README.mdx).
+You can also start the PHP, Node.js, Shell and Docker workflows by hand from the **Actions** tab. To open a terminal session on the runner, see [SSH into a GitHub Actions runner](README.mdx#ssh-into-a-github-actions-runner).
 
 [//]: # (#;< PHP)
 
@@ -78,11 +78,13 @@ On `ubuntu-latest`, the job also lints the shell scripts with ShellCheck and shf
 
 ## Actions job
 
-The `Test Actions` workflow validates and audits the workflow files in `.github/workflows`. It's off by default: to add it, answer yes to "Use GitHub Actions linting" in `init.sh` or pass `--test-actions`.
+The `Test Actions` workflow validates and audits the workflow files in `.github/workflows`. `init.sh` leaves it out by default. To add it, answer yes to "Use GitHub Actions linting" in `init.sh` or pass `--test-actions`.
+
+The workflow runs these steps:
 
 - Checks out code.
 - Lints the workflow YAML with [`yamllint`](https://github.com/adrienverge/yamllint), using the [`.github/.yamllint-for-gha.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/.yamllint-for-gha.yml) configuration file.
-- Lints the workflows with [`actionlint`](https://github.com/rhysd/actionlint). The `.github/actionlint.yaml` file declares runner labels that `actionlint` doesn't recognize yet.
+- Lints the workflows with [`actionlint`](https://github.com/rhysd/actionlint). The `.github/actionlint.yaml` file declares runner labels missing from the built-in list of `actionlint`, such as `ubuntu-26.04`.
 - Runs security analysis with [`zizmor`](https://docs.zizmor.sh/) and uploads the results to the repository's **Security** tab. The `zizmor` step reads its suppressions from `zizmor.yml` in the repository root, where a comment explains each accepted finding.
 
 ## Repository variables
@@ -99,7 +101,7 @@ The following table lists the repository variables the test workflows read. Set 
 
 ## Code coverage
 
-The PHP, Node.js and Shell jobs send coverage reports to [Codecov](https://about.codecov.io/) with the [`codecov/codecov-action`](https://github.com/codecov/codecov-action) action. Each upload runs only when the repository has a `CODECOV_TOKEN` secret, so without the secret the workflows skip the upload.
+The PHP, Node.js and Shell jobs send coverage reports to [Codecov](https://about.codecov.io/) with the [`codecov/codecov-action`](https://github.com/codecov/codecov-action) action. Each upload runs only when the repository has a `CODECOV_TOKEN` secret.
 
 To set up Codecov for your repository, follow the steps in the [official Codecov documentation](https://docs.codecov.com/docs/quick-start#section-add-repository). Then add the token as the `CODECOV_TOKEN` repository secret.
 

@@ -6,7 +6,7 @@ cspell: ignore docblocks drev drevops phpcbf
 
 # Linting
 
-You check PHP code with 3 tools: PHP_CodeSniffer for coding standards, PHPStan for static analysis and Rector for automated refactoring. This page shows how to run them and what each configuration file sets.
+You check PHP code with 3 tools: PHP_CodeSniffer for coding standards, PHPStan for static analysis and Rector for automated refactoring. This page is for developers working in a project generated from Scaffold. It covers how to run the tools and what each configuration file sets.
 
 ## Usage
 
@@ -43,11 +43,11 @@ For every option a ruleset accepts, see [the Annotated Ruleset page](https://git
 
 ## PHPStan
 
-[PHPStan](https://phpstan.org/), the PHP Static Analysis Tool, finds errors in your code without running it. Like a compiler, it checks the code before you run it. It catches whole classes of bugs even before you write tests.
+[PHPStan](https://phpstan.org/), the PHP Static Analysis Tool, finds errors in your code without running it.
 
-The [`phpstan.neon`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpstan.neon) file sets `level` to `9`. PHPStan's strictest level is `10`. The template's code and tests pass at level `9`. Adjust the level in `phpstan.neon` to suit your project.
+The [`phpstan.neon`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpstan.neon) file sets `level` to `9`, and the template's code and tests pass at that level. PHPStan's strictest level is `10`. Adjust the level in `phpstan.neon` to suit your project.
 
-Test methods and data providers don't need parameter docblocks, so PHPStan ignores the `no value type specified in iterable type array` error in `tests/phpunit`.
+PHPStan ignores the `no value type specified in iterable type array` error in `tests/phpunit`, so test methods and data providers can skip parameter docblocks.
 
 For the full configuration reference, see the [PHPStan website](https://phpstan.org/config-reference).
 
@@ -55,13 +55,15 @@ For the full configuration reference, see the [PHPStan website](https://phpstan.
 
 [Rector](https://getrector.com/) upgrades and refactors PHP code automatically.
 
-The [`rector.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/rector.php) file is a starting configuration to customize. It turns on the following rules:
+The [`rector.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/rector.php) file is a starting configuration to customize. It turns on the following sets and rules:
 
 - The PHP 8.3 upgrade set
 - The `deadCode`, `codeQuality`, `codingStyle`, `typeDeclarations`, `naming`, `instanceOf`, `earlyReturn` and `phpunitCodeQuality` prepared sets
 - The PHPUnit sets for the PHPUnit version installed by Composer
 - `DeclareStrictTypesRector`, which adds `declare(strict_types=1);` to each file
 
-It also turns off 12 rules from those sets. Rector processes every `.php` and `.inc` file in the project, skipping `vendor` and `node_modules`, so it picks up `.php` files in a new directory without a change.
+It also turns off 12 rules from those sets. Rector replaces fully qualified class names in code with `use` imports. It leaves docblocks and global classes, such as `\Exception`, as they are.
+
+Rector processes every `.php` and `.inc` file in the project, skipping `vendor` and `node_modules`, so it picks up `.php` files in a new directory without a change.
 
 For the full configuration reference, see the [Rector website](https://getrector.com/documentation/).

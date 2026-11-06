@@ -10,11 +10,11 @@ Follow this page to run and write tests for your shell script with [BATS](https:
 
 ## BATS
 
-[BATS](https://github.com/bats-core/bats-core) is a TAP-compliant testing framework for Bash. It verifies that the UNIX programs you write behave as expected.
+[BATS](https://github.com/bats-core/bats-core) (Bash Automated Testing System) is a TAP-compliant testing framework for Bash. The example tests also use [BATS Helpers](https://bats-helpers.drevops.com/), a library that adds assertions, data providers, helpers, mocking and step runners to BATS. Its source lives on [GitHub](https://github.com/drevops/bats-helpers).
 
 To run the tests from your project root:
 
-1. Install BATS and the BATS Helpers library from [`tests/bats/package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/package.json):
+1. Install BATS and BATS Helpers with npm from [`tests/bats/package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/package.json):
 
    ```bash
    npm ci --prefix tests/bats
@@ -30,12 +30,12 @@ To run the tests from your project root:
 
 ## Write tests
 
-[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) holds 4 example tests. Each test runs the script in 1 of the following ways:
+[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) holds 4 example tests. Each test runs the script with the `tui_run` function from BATS Helpers, which types answers at the script's prompts. The tests cover the following cases:
 
-- With answers typed at its prompts, calling the live joke API
-- With a topic argument, calling the live joke API
-- With an `n` answer to its `Proceed?` question
-- With a mocked `curl` call
+- Answers at the topic prompt and the `Proceed?` question, calling the live joke API
+- A topic answer and `SHOULD_PROCEED=y`, so the script skips the `Proceed?` question and calls the live joke API
+- A topic answer and `SHOULD_PROCEED=n`, so the script stops
+- A topic answer and a mock of the `curl` call, set up with the `steps_run` function from BATS Helpers
 
 The 2 tests that call the live joke API need network access.
 
@@ -50,7 +50,3 @@ The 2 tests that call the live joke API need network access.
 ## Coverage
 
 In CI, the [Test shell workflow](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml) measures coverage with kcov on the `ubuntu-latest` runner. It writes HTML and Cobertura (`cobertura.xml`) reports to `.logs/.coverage-html` and uploads the `.logs/.coverage-html` directory as a build artifact. When the `CODECOV_TOKEN` secret is set, it also uploads the reports to [Codecov](https://codecov.io/).
-
-## BATS Helpers
-
-[BATS Helpers](https://bats-helpers.drevops.com/) adds assertions, data providers, helpers, mocking and step runners to BATS. Its source lives on [GitHub](https://github.com/drevops/bats-helpers). The example tests use its `tui_run` function to run the script with prompt answers and its `steps_run` function to mock `curl`.

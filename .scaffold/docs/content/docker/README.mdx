@@ -8,12 +8,12 @@ cspell: ignore acmeapp
 
 Docker support adds the files that define a container image, with GitHub Actions workflows that lint, build, test and publish it. It's off by default. To turn it on, answer `y` to the **Use Docker** prompt in `init.sh`, or pass `--docker`.
 
-The image name defaults to your namespace in lowercase and your project name, such as `acmeapp/acme-app`. To use another name, pass `--docker-image-name` or answer the **Docker image name** prompt.
+The image name defaults to your namespace in lowercase and your project name, such as `acmeapp/acme-app`. To use another name, answer the **Docker image name** prompt, or pass `--docker-image-name`. That option also turns Docker support on.
 
 The following table lists the files Docker support adds:
 
 | File | What it does |
 |---|---|
 | `Dockerfile` and `entrypoint.sh` | Define the image. See [Image](./image.mdx). |
-| `.github/workflows/test-docker.yml` | Lints and tests the image. After the tests pass on a push to `main`, pushes a `canary` image. See [Testing](./testing.mdx) and [Linting](./linting.mdx). |
+| `.github/workflows/test-docker.yml` | Lints the `Dockerfile` and tests the image. After the tests pass on a push to `main`, pushes a `canary` image. See [Testing](./testing.mdx) and [Linting](./linting.mdx). |
 | `.github/workflows/release-docker.yml` | Publishes the image for every Git tag. See [Publishing](./publishing.mdx). |

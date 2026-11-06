@@ -5,12 +5,12 @@ sidebar_position: 4
 
 # Testing
 
-The [`test-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docker.yml) workflow lints the `Dockerfile` and checks that the image builds and starts. It runs on every push to `main` and on every pull request to `main` or a `feature/**` branch. Its test job runs the following steps:
+The [`test-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docker.yml) workflow lints the `Dockerfile` and checks that the image builds and starts. It runs on every push to `main` and on every pull request to `main` or a `feature/**` branch. For the daily and manual runs, see [Trigger conditions](../ci/test.mdx#trigger-conditions). Its test job runs the following steps:
 
 1. Lints the `Dockerfile` with Hadolint. See [Linting](linting).
 2. Builds the image with Docker Buildx.
 3. Runs a container from the image, which runs `entrypoint.sh`. The step fails when the container exits with an error.
 
-A pull request that breaks the `Dockerfile` or `entrypoint.sh` fails this workflow before it's merged. When the `CI_LINT_IGNORE_FAILURE` repository variable is `1`, a Hadolint failure lets the workflow pass.
+A pull request that breaks the `Dockerfile` or `entrypoint.sh` fails this workflow before it's merged. To let the workflow pass when Hadolint fails, set the `CI_LINT_IGNORE_FAILURE` repository variable to `1`.
 
 On a push to `main`, after the test job passes, the same workflow publishes a `canary` image. See [Publishing](publishing).

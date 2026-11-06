@@ -1,9 +1,9 @@
 ---
-title: NodeJS CLI Script
+title: NodeJS CLI script
 sidebar_position: 2
 ---
 
-# CLI Script
+# CLI script
 
 [`nodejs-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/nodejs-script) is a NodeJS template for a single-file command-line interface (CLI) script. It uses only the Node.js standard library, so you can distribute and run it as 1 file. This page shows how to turn the template into your own script and test it.
 
@@ -19,7 +19,7 @@ The template provides the following:
 
 ## Adapt the script
 
-The header comment at the top of `nodejs-script` lists the changes that turn the template into your script. `main()` gets `argv`, which holds the script path followed by the arguments, and `argc`, the length of `argv`.
+The header comment at the top of `nodejs-script` lists the changes that turn the template into your script. `main()` takes 2 parameters: `argv` holds the script path followed by the arguments, and `argc` is the length of `argv`.
 
 To adapt the script:
 
@@ -51,9 +51,9 @@ The [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/no
 - `runMain()` requires the script and calls `main()` in the test process. It returns the buffered output, so a test asserts on it without spawning a process.
 - `runScript()` runs the script as a separate process. It returns the exit code and the output.
 
-Each example test uses 1 of the helpers:
+Each example test file uses 1 of the helpers:
 
 - [`script.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.test.js) is a unit test. It calls `main()` through `runMain()` with different arguments and options.
 - [`script.functional.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.functional.test.js) is a functional test. It runs the script through `runScript()` the way your script's users run it.
 
-The test runner runs every entry in each file's `cases` array as a test. After you adapt the script, update the entries to match its arguments and output. To add a test, copy an entry and change its values.
+Each test file registers 1 test for every entry in its `cases` array. After you adapt the script, update the entries to match its arguments and output. To add a test, copy an entry and change its values.

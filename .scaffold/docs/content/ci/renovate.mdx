@@ -3,11 +3,11 @@ title: Renovate
 sidebar_position: 4
 ---
 
-# Renovate - Automated dependency updates
+# Renovate
 
 Scaffold configures [Renovate](https://renovatebot.com) to keep a project's dependencies up to date. Renovate scans the project files for dependencies, checks for newer versions and opens pull requests with the changes. This page is for maintainers who want to know which updates Renovate merges on its own, which ones stay manual and how to run Renovate on demand.
 
-The configuration lives in [`renovate.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/renovate.json).
+After you install the [Renovate GitHub app](https://github.com/apps/renovate) on your repository, Renovate reads its configuration from [`renovate.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/renovate.json).
 
 ## Configuration overview
 
@@ -24,7 +24,7 @@ The following table lists the top-level settings in `renovate.json`:
 
 ## Update rules
 
-A catch-all rule in `packageRules` sets every package's group to `all dependencies`. Renovate batches the pending updates in that group into a shared pull request.
+A catch-all rule in `packageRules` sets every package's group to `all dependencies`. Renovate batches the pending updates in that group into 1 pull request on the `deps/all` branch. Major updates go into a second pull request, on `deps/major-all`.
 
 ### Language version constraints
 
@@ -81,19 +81,19 @@ When you answer no to "Use Renovate" or pass `--no-renovate`, `init.sh` deletes 
 
 ## Run Renovate on demand
 
-The Renovate GitHub app updates dependencies on its own schedule. To get updates between its runs, start the **Update dependencies** workflow, [`update-dependencies.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/update-dependencies.yml), by hand. The workflow runs Renovate once with your `renovate.json`, and lifts the schedule and pull request limits for that run.
+The Renovate GitHub app updates dependencies on its own schedule. To get updates between its runs, start the **Update dependencies** workflow, [`update-dependencies.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/update-dependencies.yml), by hand. The workflow runs Renovate a single time with your `renovate.json` and lifts the schedule and pull request limits for that run.
 
-The workflow pushes branches and opens pull requests with a token from the `RENOVATE_TOKEN` repository secret. Use a personal access token with the permissions in Renovate's [GitHub platform guide](https://docs.renovatebot.com/modules/platform/github/). The built-in `GITHUB_TOKEN` can't update workflow files, and its pull requests start no CI runs.
+The workflow pushes branches and opens pull requests with a token from the `RENOVATE_TOKEN` repository secret, and fails at its first step without it. Use a personal access token with the permissions in Renovate's [GitHub platform guide](https://docs.renovatebot.com/modules/platform/github/). The built-in `GITHUB_TOKEN` can't update workflow files, and its pull requests start no CI runs.
 
 To run Renovate on demand:
 
-1. Add the `RENOVATE_TOKEN` secret under **Settings > Secrets and variables > Actions**. You do this once per repository.
+1. If your repository has no `RENOVATE_TOKEN` secret, add it under **Settings > Secrets and variables > Actions**.
 2. In your repository on GitHub, click **Actions**.
 3. Select the **Update dependencies** workflow.
 4. Click **Run workflow** to open the run options.
 5. Optional: To list the updates in the job log without pushing anything, select **Dry run: report updates without pushing branches or opening pull requests.**
 6. Optional: To troubleshoot a run, select **Enable debug logging.**
-7. Click the green **Run workflow** button. After the run finishes, confirm that the dependency pull requests appear on the **Pull requests** tab.
+7. Click the green **Run workflow** button. After the run finishes, confirm that the **Pull requests** tab lists the dependency pull requests. On a dry run, the job log lists the updates.
 
 The workflow commits as `renovate[bot]`, the Renovate app's account, so the app and the workflow update the same branches and pull requests. To commit as another author, set the `RENOVATE_GIT_AUTHOR` repository variable to `Name <email@example.com>`. The workflow leaves the Dependency Dashboard to the app.
 

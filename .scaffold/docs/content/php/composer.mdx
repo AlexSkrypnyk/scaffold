@@ -17,7 +17,7 @@ The following table lists the metadata, dependency and autoloading sections:
 | Project information | `name`, `description`, `license`, `type`, `homepage` | The package metadata. |
 | Author and support | `authors`, `support` | The maintainer's details and the URLs for issues and source code. |
 | Dependencies | `require` | PHP `>=8.3` and `symfony/console`. Every PHP mode keeps both. |
-| Development dependencies | `require-dev` | The development tools, such as [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), [Rector](https://getrector.org/) and [PHPUnit](https://phpunit.de/). The `composer` entry requires Composer 2.10.2 or later. |
+| Development dependencies | `require-dev` | The development tools, such as [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), [Rector](https://getrector.org/) and [PHPUnit](https://phpunit.de/). The `composer` entry sets the minimum Composer version. See [Dependency policy](#dependency-policy-composer-210). |
 | Autoloading | `autoload` | PSR-4 autoloading of the `YourNamespace\App\` namespace from `src`. |
 | Development autoloading | `autoload-dev` | PSR-4 autoloading of the `YourNamespace\App\Tests\` namespace from `tests/phpunit`, plus a classmap of that directory. |
 | Executables | `bin` | The entry point that Composer links into `vendor/bin` for projects that install the package. It's `bin/php-command` for a CLI command app or `php-script` for a CLI script. A library has no `bin` section. |
@@ -47,7 +47,7 @@ The following table lists the settings in the `config` section, apart from `poli
 | `discard-changes` | `true` | In a non-interactive update, Composer discards local changes to installed dependencies. |
 | `sort-packages` | `true` | `composer require` keeps the packages in `composer.json` sorted by name. |
 
-The `Test PHP` workflow runs `composer normalize --dry-run` and fails when `composer.json` isn't normalized. After you edit `composer.json` by hand, run `composer normalize` to sort the packages and normalize the file. The command comes from the `ergebnis/composer-normalize` plugin.
+The `ergebnis/composer-normalize` plugin adds the `composer normalize` command, which sorts and formats `composer.json`. The `Test PHP` workflow runs `composer normalize --dry-run` and fails when the file isn't normalized. After you edit `composer.json` by hand, run `composer normalize`.
 
 ### Dependency policy (Composer 2.10+)
 
@@ -61,7 +61,7 @@ The [`policy`](https://getcomposer.org/doc/06-config.md#policy) setting sets how
 
 Composer older than 2.10 ignores the `policy` section without a warning. To stop Composer older than 2.10.2 from installing the project, `require-dev` declares `"composer": ">=2.10.2"`. The floor is 2.10.2 because earlier 2.10 releases have a known advisory.
 
-`config` applies only to the root project, so the constraint sits in `require-dev`, which also applies only there. Packages that depend on yours keep their own Composer version. `composer install --no-dev` skips the check, so the floor applies to `composer update` and to installs that include development dependencies.
+Composer reads `config` and `require-dev` only in the root project, so the floor sits in `require-dev`. Packages that depend on yours keep their own Composer version. `composer install --no-dev` skips the check, so the floor applies to `composer update` and to installs that include development dependencies.
 
 To allow a specific advisory after you review it, add its ID and your reason to `ignore-id`:
 
@@ -82,5 +82,5 @@ Remove each exception after you update to a version with the fix.
 
 2 top-level keys set how Composer chooses package versions:
 
-- `minimum-stability` is `stable`, so Composer considers only stable versions. To include unstable versions in your project, change it to `alpha` for alpha and later pre-releases or to `dev` for development versions too.
+- `minimum-stability` is `stable`, so Composer considers only stable versions. To allow pre-releases, lower it to `RC`, `beta`, `alpha` or `dev`. Each value also allows every more stable version.
 - `prefer-stable` is `true`, so Composer picks stable versions over unstable ones unless a specific unstable version is required.

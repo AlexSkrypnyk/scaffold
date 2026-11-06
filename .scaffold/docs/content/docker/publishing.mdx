@@ -5,22 +5,19 @@ sidebar_position: 5
 
 # Publishing
 
-Your project's GitHub Actions workflows publish its image to Docker Hub for `linux/amd64` and `linux/arm64`. This page covers when each image gets published and the credentials the workflows need. The workflows publish the following images:
-
-- A `canary` image from `test-docker.yml`, after each push to `main` passes the tests
-- A release image from `release-docker.yml`, for every Git tag
+Your project's GitHub Actions workflows publish its image to Docker Hub, built for `linux/amd64` and `linux/arm64`. A `canary` image follows `main`, and a release image follows each Git tag. Follow this page to learn when each image gets published and to set up the credentials the workflows need.
 
 ## Canary images
 
-On a push to `main`, the [testing](testing) workflow builds the image and pushes it with the `canary` tag after its tests pass. The `canary` tag points to the latest passing build of `main`, so you can try changes between tagged releases. Pull requests, including those from forks, never publish an image.
+On a push to `main`, the [`test-docker.yml`](testing) workflow builds the image and pushes it with the `canary` tag after its tests pass. The `canary` tag points to the latest passing build of `main`, so you can try changes between tagged releases. Pull requests, including those from forks, never publish an image.
 
 ## Tagged releases
 
-The [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) workflow runs when you push a Git tag whose name has no `/`. It runs the following steps:
+The [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) workflow runs for every Git tag whose name has no `/`. It runs the following steps:
 
 1. Sets up QEMU and Docker Buildx to build for both platforms.
 2. Authenticates with Docker Hub.
-3. Builds the image and pushes it with tags generated from the Git tag by `docker/metadata-action`.
+3. Builds the image and pushes it with 2 tags from `docker/metadata-action`: the Git tag's name and `latest`.
 
 ## Registry credentials
 
@@ -33,4 +30,4 @@ Add them under your repository's **Settings > Secrets and variables > Actions**.
 
 ## Override the image name
 
-Both workflows publish to the image name you chose when you ran `init.sh`. To publish to another image without editing the workflows, set the `DOCKER_IMAGE` repository or organization variable to that image name. For example, point it at a throwaway repository to test the pipeline end to end. Create `DOCKER_IMAGE` on the **Variables** tab, because the workflows ignore a secret with that name.
+Both workflows publish to the image name you chose when you ran `init.sh`. To publish to another image without editing the workflows, set the `DOCKER_IMAGE` repository or organization variable to that image name. For example, point it at a throwaway Docker Hub repository to test the pipeline end to end. Create `DOCKER_IMAGE` on the **Variables** tab, because the workflows ignore a secret with that name.

@@ -14,12 +14,12 @@ To select this mode, pass `--php-script` to `init.sh`. Interactively, answer "n"
 
 ## What the script handles
 
-The template ships the parts every script needs:
+The template handles these parts of a script for you:
 
-- **Shebang:** with the first line, `#!/usr/bin/env php`, your system finds PHP on your `PATH`, so `./php-script` runs directly.
+- **Shebang:** the first line is `#!/usr/bin/env php`, so `./php-script` runs with the `php` on your `PATH`.
 - **Help:** when any argument is `help`, `--help`, `-h` or `-?`, `main()` calls `print_help()` and skips the argument check.
 - **Argument check:** `main()` throws an exception unless the script gets exactly 1 argument.
-- **Error handling:** `set_error_handler()` turns PHP errors into exceptions. The entry point, the code at the end of the file that calls `main()`, catches any exception from `main()`, prints the message and exits with an error code.
+- **Error handling:** `set_error_handler()` turns PHP errors into exceptions. The entry point, the code at the end of the file that calls `main()`, catches an exception from `main()`, prints its message and exits with an error code. A deprecation or a user notice stops `main()` with no message and exit code `0`.
 - **Output buffer:** `verbose()` prints each message and records it in an internal buffer. It returns the whole buffer, so tests can assert on the output.
 - **CLI only:** the script stops with an error outside the command line, such as under a web server.
 

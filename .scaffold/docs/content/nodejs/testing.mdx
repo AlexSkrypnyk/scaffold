@@ -9,7 +9,7 @@ You test the `nodejs-script` file with the test runner built into Node.js and me
 
 ## Node.js test runner
 
-[`node --test`](https://nodejs.org/api/test.html) is the test runner built into Node.js, so it needs no extra package. Tests assert with the `node:assert` module, and the runner isolates each test file in its own process.
+[`node --test`](https://nodejs.org/api/test.html) ships with Node.js, so it needs no extra package. Tests assert with the `node:assert` module. The runner isolates each test file in its own process.
 
 To run all the tests, run the following command:
 
@@ -17,13 +17,13 @@ To run all the tests, run the following command:
 npm run test
 ```
 
-When every test passes, the runner prints `# fail 0` in its summary and exits with code `0`.
+When every test passes, the summary at the end of the output reports `fail 0` and the runner exits with code `0`.
 
-`npm run test` passes `tests/nodejs/*.test.js` to the runner, so it runs only the test files at the top level of [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs). Put new test files there.
+`npm run test` passes `tests/nodejs/*.test.js` to the runner, so it runs only the test files at the top level of [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs). Put new test files there, with names that end in `.test.js`.
 
 ## Coverage
 
-[`c8`](https://github.com/bcoe/c8) collects the coverage data that V8, the JavaScript engine in Node.js, records natively. c8 renders the data in several formats.
+[`c8`](https://github.com/bcoe/c8) collects the coverage data that V8, the JavaScript engine in Node.js, records natively.
 
 To run the tests and generate the coverage reports, run the following command:
 
@@ -39,4 +39,4 @@ With the settings in [`.c8rc.json`](https://github.com/AlexSkrypnyk/scaffold/blo
 | LCOV | `.logs/lcov.info` and an HTML report in `.logs/lcov-report` |
 | Cobertura | `.logs/cobertura-coverage.xml` |
 
-The Cobertura report is machine-readable, for other tools to consume. In the [Test](../ci/test) workflow, a step reads the Cobertura report and fails the run when line coverage is less than 80%. Another step uploads the report to Codecov. To change the threshold, set the `CI_CODE_COVERAGE_THRESHOLD` repository variable.
+In the [Test](../ci/test) workflow, the Node.js 22 job reads the Cobertura report and fails when line coverage is less than 80%. To change the threshold, set the `CI_CODE_COVERAGE_THRESHOLD` repository variable. When the `CODECOV_TOKEN` secret is set, the job also uploads the report to Codecov.

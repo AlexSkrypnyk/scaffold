@@ -162,17 +162,9 @@ one:
     both error out when pointed at a project holding no PHP file
   - The other two modes drop that pair in `remove_php_library()`
 
-**Key Challenge:** PHP_CodeSniffer cannot scan files without `.php` extension.
-
-**Solution:** Temporary rename workaround in `composer.json`:
-
-```json
-"lint": [
-"cp php-script php-script.php && phpcs; rm php-script.php"
-]
-```
-
-Same pattern used in `phpcs.xml` (`<file>php-script.php</file>`).
+`php-script` has no `.php` extension, so `phpcs.xml` and `phpstan.neon` list it
+by name (`<file>php-script</file>`, `- php-script`) inside `PHP_SCRIPT` token
+blocks. PHP_CodeSniffer scans a file named explicitly whatever its extension.
 
 ## Testing the Template
 

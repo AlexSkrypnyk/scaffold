@@ -10,7 +10,7 @@ This page is for maintainers of a Scaffold console app who ship it as a PHP Arch
 
 A PHAR bundles a PHP app and its dependencies into 1 executable file, the way a JAR file bundles a Java app. Users download that file and run it, and they need PHP installed, as a JAR needs Java. The format suits command-line tools, cron jobs and daemons that run outside a web server.
 
-`init.sh` keeps this setup by default. Answering no to its **Build PHAR** prompt, or passing `--no-phar`, removes the PHAR setup:
+For a CLI command app, `init.sh` keeps this setup by default. Answering no to its **Build PHAR** prompt, or passing `--no-phar`, removes the PHAR setup:
 
 - `box.json`
 - The `build` script, the `bamarni/composer-bin-plugin` entries and `vendor-bin` in the `reset` script, all in `composer.json`
@@ -56,7 +56,7 @@ To print the version of your build, run the following command in the `dist` dire
 
 ## Box
 
-Box reads from `box.json` which files go into the PHAR, where to write it and how to compress it. Scaffold's [`box.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/box.json):
+`box.json` sets which files go into the PHAR, where Box writes it and how Box compresses it. Scaffold ships this [`box.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/box.json):
 
 import CodeBlock from '@theme/CodeBlock';
 import MyComponentSource from '!!raw-loader!../../../../box.json';

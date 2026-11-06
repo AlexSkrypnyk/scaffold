@@ -19,7 +19,7 @@ To change the site's title, URL, navigation or theme, edit the [configuration fi
 
 ## Diagrams
 
-The shipped configuration file sets `markdown.mermaid`, so the site renders [Mermaid](https://mermaid.js.org/) diagrams. To add a diagram, write its Mermaid source in a code block tagged `mermaid`. This page holds such a block, and the site renders it as the following diagram:
+The shipped configuration file sets `markdown.mermaid` and loads the `@docusaurus/theme-mermaid` theme, so the site renders [Mermaid](https://mermaid.js.org/) diagrams. To add a diagram, write its Mermaid source in a code block tagged `mermaid`. This page holds such a block, and the site renders it as the following diagram:
 
 ```mermaid
 graph TD;
@@ -31,9 +31,9 @@ graph TD;
 
 For the full syntax, see the [Mermaid syntax documentation](https://mermaid.js.org/intro/syntax-reference.html).
 
-## Spell checking
+## Spell check
 
-[CSpell](https://cspell.org/) checks every `.mdx` page in `docs/content/` against a [custom configuration file](https://github.com/AlexSkrypnyk/scaffold/blob/main/docs/cspell.json).
+[CSpell](https://cspell.org/) checks every `.mdx` page in `docs/content/` against a [custom configuration file](https://github.com/AlexSkrypnyk/scaffold/blob/main/docs/cspell.json). The Test Docs workflow runs the same check, so a misspelled word fails the workflow. To accept a word CSpell doesn't know, add it to the `words` list in `docs/cspell.json`.
 
 To check the spelling of the documentation, run the following command in `docs/`:
 
@@ -43,7 +43,7 @@ npm run spellcheck
 
 ## Netlify previews on pull requests
 
-The [Test Docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docs.yml) GitHub Action builds and tests the site on every push to `main`. It also runs on every pull request whose base branch is `main` or matches `feature/**`. When the repository has 2 Netlify secrets, the action deploys each build to Netlify and comments the preview link on the pull request. GitHub doesn't pass these secrets to pull requests from forks, so those get no preview.
+The [Test Docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docs.yml) workflow builds and tests the site on every push to `main`. It also runs on every pull request whose base branch is `main` or matches `feature/**`. When the repository has the `NETLIFY_SITE_ID` and `NETLIFY_AUTH_TOKEN` secrets, the workflow deploys each build to Netlify and comments the preview link on the pull request. GitHub doesn't pass these secrets to pull requests from forks, so those get no preview.
 
 To set up the Netlify deploy:
 
@@ -53,15 +53,15 @@ To set up the Netlify deploy:
    - `NETLIFY_SITE_ID`: the ID from **Site > Site configuration > General > Site details > Site information > Site ID** on Netlify
    - `NETLIFY_AUTH_TOKEN`: a token from **User settings > Applications > Personal access tokens > New access token** on Netlify
 
-3. Open a pull request. Confirm that the action comments a link to the deployed preview.
+3. Open a pull request. Confirm that the workflow comments a link to the deployed preview.
 
 ## GitHub Pages on release
 
-The [Release docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docs.yml) GitHub Action builds the site on every tag push. You can also run it manually and enter a version. The site footer shows the tag name, or the version you entered on a manual run.
+The [Release docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docs.yml) workflow builds the site on every tag push. You can also run it manually and enter a version. The site footer shows the tag name, or the version you entered on a manual run.
 
-In the shipped action, the steps that upload and deploy the site are commented out. To publish the site to GitHub Pages on each release, uncomment the `Upload documentation site` and `Deploy documentation site` steps at the end of `.github/workflows/release-docs.yml`.
+In the shipped workflow, the steps that upload and deploy the site are commented out. To publish the site to GitHub Pages on each release, uncomment the `Upload documentation site` and `Deploy documentation site` steps at the end of `.github/workflows/release-docs.yml`.
 
-The action runs in the `pages` concurrency group. Starting a new run cancels any run in progress, so only the most recent run deploys. The job deploys to the `github-pages` environment. That environment takes its URL from the `Setup GitHub pages` step.
+The workflow runs in the `pages` concurrency group. Starting a new run cancels any run in progress, so only the most recent run deploys. The job deploys to the `github-pages` environment. That environment takes its URL from the `Setup GitHub pages` step.
 
 ## Terminal recordings
 
@@ -83,7 +83,9 @@ To add a recording to a page:
    <AsciinemaPlayer src="/img/demo.cast" autoPlay loop controls />
    ```
 
-The component loads the player's script and styles only in the browser, so the server-side build can render pages that use it. It passes the following props to the player:
+3. Run `npm start` in `docs/`, then open the page. Confirm that the player shows the recording.
+
+The component loads the asciinema player's script and styles from the jsDelivr CDN. It loads them only in the browser, so the server-side build can render pages that use it. The component passes the following props to the player:
 
 | Prop | Default |
 |---|---|

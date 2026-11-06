@@ -5,7 +5,9 @@ sidebar_position: 4
 
 # Library
 
-In library mode, `init.sh` sets up a Composer package that ships classes and no executable, such as a Behat context, a PHPUnit extension, a framework plugin or a PSR implementation. It keeps the PHP tooling and drops both entry points: the [CLI command](./php-command.mdx) app and the [CLI script](./php-script.mdx).
+In library mode, `init.sh` sets up a Composer package that ships classes and no executable. Use it for a Behat context, a PHPUnit extension, a framework plugin or a PSR implementation. `init.sh` keeps the PHP tooling and drops both entry points: the [CLI command](./php-command.mdx) app and the [CLI script](./php-script.mdx).
+
+This page is for developers building a library from Scaffold. It covers how to select the mode, what it generates and how to replace the placeholder class.
 
 To select library mode, decline both entry points:
 
@@ -33,6 +35,17 @@ With Renovate enabled (`--renovate`, the default), `init.sh` excludes `require` 
 
 ## Add your classes
 
-Replace `Example` with your library's classes under `src/`. Declare them in the `AcmeApp\App\` namespace, where `AcmeApp` is your `--namespace` value. Cover each class with a test in `tests/phpunit/Unit/`.
+The `Example` class and its test are placeholders for your library's own code. Add your first class before you delete them, because PHP_CodeSniffer and PHPStan both report an error when the project holds no PHP file.
 
-Add a class of your own before you remove the placeholder pair. PHP_CodeSniffer and PHPStan both report an error when the project holds no PHP file.
+To replace the placeholder pair with your classes:
+
+1. Add your classes under `src/`, in the `AcmeApp\App\` namespace. `AcmeApp` is your `--namespace` value.
+2. Cover each class with a test in `tests/phpunit/Unit/`. Give each test class a `#[CoversClass]` attribute, because the run fails when a test has no coverage metadata.
+3. Delete `src/Example.php` and `tests/phpunit/Unit/ExampleUnitTest.php`.
+4. Run the tests:
+
+   ```bash
+   composer test
+   ```
+
+   Confirm that every test passes.
