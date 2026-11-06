@@ -5,7 +5,7 @@ sidebar_position: 4
 
 # Renovate - Automated dependency updates
 
-Scaffold configures [Renovate](https://renovatebot.com) to keep a project's dependencies up to date. Renovate scans the project files for dependencies, checks for newer versions and opens pull requests with the changes. This page is for maintainers who want to know which updates Renovate merges on its own and which ones stay manual.
+Scaffold configures [Renovate](https://renovatebot.com) to keep a project's dependencies up to date. Renovate scans the project files for dependencies, checks for newer versions and opens pull requests with the changes. This page is for maintainers who want to know which updates Renovate merges on its own, which ones stay manual and how to run Renovate on demand.
 
 The configuration lives in [`renovate.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/renovate.json).
 
@@ -77,7 +77,25 @@ Renovate keeps updating `require-dev`, which consumers never install. The `match
 | Neither PHP nor NodeJS | Removes the language rules and the rule that blocks major updates |
 | PHP class library | Adds the rule that disables `require` updates in the root `composer.json` |
 
-When you answer no to "Use Renovate" or pass `--no-renovate`, `init.sh` deletes `renovate.json`.
+When you answer no to "Use Renovate" or pass `--no-renovate`, `init.sh` deletes `renovate.json` and the `update-dependencies.yml` workflow.
+
+## Run Renovate on demand
+
+The Renovate GitHub app updates dependencies on its own schedule. To get updates between its runs, start the **Update dependencies** workflow, [`update-dependencies.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/update-dependencies.yml), by hand. The workflow runs Renovate once with your `renovate.json`, and lifts the schedule and pull request limits for that run.
+
+The workflow pushes branches and opens pull requests with a token from the `RENOVATE_TOKEN` repository secret. Use a personal access token with the permissions in Renovate's [GitHub platform guide](https://docs.renovatebot.com/modules/platform/github/). The built-in `GITHUB_TOKEN` can't update workflow files, and its pull requests start no CI runs.
+
+To run Renovate on demand:
+
+1. Add the `RENOVATE_TOKEN` secret under **Settings > Secrets and variables > Actions**. You do this once per repository.
+2. In your repository on GitHub, click **Actions**.
+3. Select the **Update dependencies** workflow.
+4. Click **Run workflow** to open the run options.
+5. Optional: To list the updates in the job log without pushing anything, select **Dry run: report updates without pushing branches or opening pull requests.**
+6. Optional: To troubleshoot a run, select **Enable debug logging.**
+7. Click the green **Run workflow** button. After the run finishes, confirm that the dependency pull requests appear on the **Pull requests** tab.
+
+The workflow commits as `renovate[bot]`, the Renovate app's account, so the app and the workflow update the same branches and pull requests. To commit as another author, set the `RENOVATE_GIT_AUTHOR` repository variable to `Name <email@example.com>`. The workflow leaves the Dependency Dashboard to the app.
 
 ## Dependency dashboard
 

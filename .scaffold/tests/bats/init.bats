@@ -420,6 +420,22 @@ AGENTS
   assert_file_not_exists "${tmpdir}/zizmor.yml"
 }
 
+@test "remove_renovate removes the config and the update workflow" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_renovate"
+  mkdir -p "${tmpdir}/.github/workflows"
+  create_renovate_json "${tmpdir}"
+  touch "${tmpdir}/.github/workflows/update-dependencies.yml"
+  touch "${tmpdir}/.github/workflows/test-php.yml"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_renovate
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/renovate.json"
+  assert_file_not_exists "${tmpdir}/.github/workflows/update-dependencies.yml"
+  assert_file_exists "${tmpdir}/.github/workflows/test-php.yml"
+}
+
 @test "remove_schedule removes the schedule trigger block" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_schedule"
   mkdir -p "${tmpdir}/.github/workflows"

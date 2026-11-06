@@ -307,6 +307,13 @@ Key workflows:
 - `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
 
 [//]: # (#;> NODEJS)
+[//]: # (#;< RENOVATE)
+
+- `.github/workflows/update-dependencies.yml` - Manually started Renovate run
+  that opens dependency update pull requests out of schedule; needs the
+  `RENOVATE_TOKEN` repository secret
+
+[//]: # (#;> RENOVATE)
 [//]: # (#;< DOCKER)
 
 ## Docker
