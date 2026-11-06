@@ -82,7 +82,7 @@ The `Test Actions` workflow validates and audits the workflow files in `.github/
 
 - Checks out code.
 - Lints the workflow YAML with [`yamllint`](https://github.com/adrienverge/yamllint), using the [`.github/.yamllint-for-gha.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/.yamllint-for-gha.yml) configuration file.
-- Lints the workflows with [`actionlint`](https://github.com/rhysd/actionlint).
+- Lints the workflows with [`actionlint`](https://github.com/rhysd/actionlint). The `.github/actionlint.yaml` file declares runner labels that `actionlint` doesn't recognize yet.
 - Runs security analysis with [`zizmor`](https://docs.zizmor.sh/) and uploads the results to the repository's **Security** tab. The `zizmor` step reads its suppressions from `zizmor.yml` in the repository root, where a comment explains each accepted finding.
 
 ## Repository variables
