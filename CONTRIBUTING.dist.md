@@ -62,13 +62,14 @@ The container prints `yourproject is running`.
 [//]: # (#;< DOCS)
 ## Documentation site
 
-Install the documentation site's dependencies, then run its Jest tests and spell check:
+Install the documentation site's dependencies, build the site, then run its Jest tests and spell check:
 
 ```bash
 npm --prefix docs install
+npm --prefix docs run build
 npm --prefix docs test
 ```
 
-[`docs/README.md`](docs/README.md) shows how to preview and build the site.
+[`docs/README.md`](docs/README.md) shows how to preview the site locally.
 
 [//]: # (#;> DOCS)
