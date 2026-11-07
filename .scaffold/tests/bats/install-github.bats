@@ -1438,7 +1438,7 @@ checks_setup() {
 
   github_compute_checks >"${BATS_TEST_TMPDIR}/out"
 
-  assert_file_contains "${BATS_TEST_TMPDIR}/out" "  Required checks: Lint, Test PHP"
+  assert_file_contains "${BATS_TEST_TMPDIR}/out" "  Required checks: Lint; Test PHP"
   assert_equal "${github_checks_rule}" "$(github_checks_rule_json $'Lint\nTest PHP')"
 
   # Each check suite and each workflow file is read once.
@@ -1523,7 +1523,7 @@ $(ruleset_body "{\"type\":\"pull_request\"}, ${rule}")"
 
   run github_apply_existing_ruleset
   assert_success
-  assert_output "  Required checks: Lint, Test PHP
+  assert_output "  Required checks: Lint; Test PHP
   Ruleset: created default-branch with required checks"
 }
 
@@ -1584,7 +1584,7 @@ $(ruleset_body "{\"type\":\"pull_request\"}, ${rule}")"
   assert_success
   assert_output "  Waiting for the CI runs of the pushed commit
   CI: 4 runs finished
-  Warning: these runs failed, so pull requests stay blocked until CI passes: Test PHP, Shell"
+  Warning: these runs failed, so pull requests stay blocked until CI passes: Test PHP; Shell"
 }
 
 @test "github_wait_for_runs gives up when no run starts" {
@@ -1646,7 +1646,6 @@ creation_setup() {
   run github_create_repo
   assert_success
   assert_output "  Creating public repository acme/app
-https://github.com/acme/app
   Pushed main to https://github.com/acme/app.git"
 
   run cat "${GH_WRITES}"
@@ -1806,7 +1805,7 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
   assert_output_contains "  Labels: 12 created, 0 updated, 0 unchanged"
   assert_output_contains "  Ruleset: created default-branch"
   assert_output_contains "  CI: 1 runs finished"
-  assert_output_contains "  Required checks: Lint, Test PHP"
+  assert_output_contains "  Required checks: Lint; Test PHP"
   assert_output_contains "  Ruleset: updated default-branch with required checks"
   assert_output_contains "GitHub repository settings complete."
 

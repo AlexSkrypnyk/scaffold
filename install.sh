@@ -1298,8 +1298,9 @@ github_call() {
 
   local output
 
+  # Only the dry-run listing is shown; each section reports its own outcome.
   if output="$(gh_write "$@" 2>&1)"; then
-    [ -z "${output}" ] || echo "${output}"
+    [ "${dry_run}" != "1" ] || [ -z "${output}" ] || echo "${output}"
     return 0
   fi
 
@@ -1675,7 +1676,7 @@ github_compute_checks() {
   fi
 
   github_checks_rule="$(github_checks_rule_json "${check_names}")"
-  echo "  Required checks: ${check_names//$'\n'/, }"
+  echo "  Required checks: ${check_names//$'\n'/; }"
 }
 
 ##
@@ -1741,7 +1742,7 @@ github_wait_for_runs() {
   echo "  CI: ${total} runs finished"
 
   if [ -n "${failed}" ]; then
-    echo "  Warning: these runs failed, so pull requests stay blocked until CI passes: ${failed//$'\n'/, }"
+    echo "  Warning: these runs failed, so pull requests stay blocked until CI passes: ${failed//$'\n'/; }"
   fi
 
   return 0
