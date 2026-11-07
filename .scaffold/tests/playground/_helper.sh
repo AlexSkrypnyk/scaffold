@@ -11,6 +11,9 @@ set -euo pipefail
 PLAYGROUND_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 PLAYGROUND_GITHUB_OWNER="${PLAYGROUND_GITHUB_OWNER:-AlexSkrypnyk}"
 
+# 1 timestamp per run, shared by the work directory and any repository name.
+PLAYGROUND_TIMESTAMP="$(date +%Y%m%d%H%M%S)"
+
 ##
 # Exit 1 unless 'gh' and SCAFFOLD_GITHUB_TOKEN are both available.
 #
@@ -40,7 +43,7 @@ playground_check_prerequisites() {
 #
 playground_workdir() {
   local dir
-  dir="${PLAYGROUND_ROOT}/.artifacts/playground/${1}-$(date +%Y%m%d%H%M%S)"
+  dir="${PLAYGROUND_ROOT}/.artifacts/playground/${1}-${PLAYGROUND_TIMESTAMP}"
 
   mkdir -p "${dir}"
 
