@@ -376,7 +376,8 @@ function recordInstall(string $name, bool $create_repo, string $project_dir, str
     'SCAFFOLD_RECORD_LOGIN' => RECORD_LOGIN,
     'SCAFFOLD_RECORD_REPO' => RECORD_PROJECT,
     'SCAFFOLD_RECORD_STATE' => $state_dir,
-    'SCAFFOLD_RECORD_GIT' => trim((string) shell_exec('command -v git')),
+    // The recorded shell runs in the workspace, so a relative path would break.
+    'SCAFFOLD_RECORD_GIT' => (string) realpath(trim((string) shell_exec('command -v git'))),
     'GIT_CONFIG_GLOBAL' => $gitconfig,
     'GIT_CONFIG_NOSYSTEM' => '1',
   ];

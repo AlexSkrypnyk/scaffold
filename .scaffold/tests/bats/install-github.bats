@@ -201,11 +201,11 @@ assert_no_writes() {
   local cases=(
     "y" "y" "0" ""
     "n" "y" "1" "Skipping GitHub repository settings: 'gh' is not installed.
-Install GitHub CLI (https://cli.github.com), then run './install.sh github'."
+Install GitHub CLI (https://cli.github.com), then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github'."
     "y" "n" "1" "Skipping GitHub repository settings: SCAFFOLD_GITHUB_TOKEN is not set.
-Set SCAFFOLD_GITHUB_TOKEN, then run './install.sh github'."
+Set SCAFFOLD_GITHUB_TOKEN, then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github'."
     "n" "n" "1" "Skipping GitHub repository settings: 'gh' is not installed; SCAFFOLD_GITHUB_TOKEN is not set.
-Install GitHub CLI (https://cli.github.com) and set SCAFFOLD_GITHUB_TOKEN, then run './install.sh github'."
+Install GitHub CLI (https://cli.github.com) and set SCAFFOLD_GITHUB_TOKEN, then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github'."
   )
   local i
 
@@ -234,7 +234,7 @@ Install GitHub CLI (https://cli.github.com) and set SCAFFOLD_GITHUB_TOKEN, then 
     run github_main
     assert_failure
     assert_output_contains "Skipping GitHub repository settings:"
-    assert_output_contains "then run './install.sh github'."
+    assert_output_contains "then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github'."
 
     run cat "${GH_READS}" "${GH_WRITES}"
     assert_output ""
@@ -1405,6 +1405,17 @@ default_answers() {
     $'on: push # pull_request later\njobs: {}' "1"
     $'on:\n  # pull_request:\n  push:\njobs: {}' "1"
     $'jobs: {}' "1"
+    $'\'on\':\n  pull_request:\njobs: {}' "0"
+    $'"on": [push, pull_request]\njobs: {}' "0"
+    $'on:\n  push:\n    branches:\n      - pull_request\njobs: {}' "1"
+    $'on:\n  pull_request:\n    branches:\n      - main\n      - \'feature/**\'\njobs: {}' "0"
+    $'on:\n  pull_request:\n    branches: [\'release/*\', "main"]\njobs: {}' "0"
+    $'on:\n  pull_request:\n    branches:\n      - \'**\'\njobs: {}' "0"
+    $'on:\n  pull_request:\n    branches:\n      - develop\njobs: {}' "1"
+    $'on:\n  pull_request:\n    paths:\n      - src/**\njobs: {}' "1"
+    $'on:\n  pull_request:\n    paths-ignore:\n      - docs/**\njobs: {}' "1"
+    $'on:\n  pull_request:\n    branches-ignore:\n      - main\njobs: {}' "1"
+    $'on:\n  pull_request:\n    types: [opened]\n  push:\n    paths:\n      - src/**\njobs: {}' "0"
   )
   local i
 
@@ -1569,7 +1580,7 @@ $(ruleset_body "{\"type\":\"pull_request\"}, ${rule}")"
   assert_success
   assert_output "  Waiting for the CI runs of the pushed commit
   CI: 2 runs finished"
-  assert_file_contains "${GH_READS}" "gh run list --repo acme/app --commit abc --json status,conclusion,name"
+  assert_file_contains "${GH_READS}" "gh run list --repo acme/app --commit abc --limit 100 --json status,conclusion,name"
 
   run cat "${GH_RUN_LIST_COUNT}"
   assert_output "3"
@@ -2009,4 +2020,107 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
   run main --namespace=AcmeApp --name=acme-app --author="Jane Doe"
   assert_success
   assert_file_not_exists "${dir}/install.sh"
+}
+
+#-------------------------------------------------------------------------------
+# Edge cases
+#-------------------------------------------------------------------------------
+
+@test "github_workflow_has_pull_request matches the branch it is given" {
+  local workflow=$'on:\n  pull_request:\n    branches: [develop]\njobs: {}'
+
+  run github_workflow_has_pull_request "develop" <<<"${workflow}"
+  assert_success
+
+  run github_workflow_has_pull_request "main" <<<"${workflow}"
+  assert_failure
+}
+
+@test "github_compute_checks encodes the default branch in the check-runs path" {
+  github_setup
+  GH_STATE="${GH_STATE/default_branch=main/default_branch=release#1?}"
+  github_load_repo
+
+  github_compute_checks >/dev/null
+
+  assert_file_contains "${GH_READS}" "gh api repos/acme/app/commits/release%231%3F/check-runs"
+}
+
+@test "parse_args removes spaces from merge methods and reads the timeout as decimal" {
+  parse_args --github-merge="squash, rebase" --github-wait-timeout=08
+
+  assert_equal "${github_merge}" "squash,rebase"
+  assert_equal "${github_wait_timeout}" "8"
+}
+
+@test "github_desired_settings keeps a multi-line description on 1 line" {
+  github_setup
+  github_description=$'First line\nprivate=false'
+
+  run github_desired_settings
+  assert_output_contains "description=First line private=false"
+  assert_output_not_contains $'\nprivate=false'
+}
+
+@test "github_wait_for_runs reports a run list that fails" {
+  github_setup
+  github_pushed_sha="abc"
+  GH_FAIL_MATCH="run list *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+
+  run github_wait_for_runs
+  assert_failure
+  assert_output_contains "  CI: could not list the runs (gh: Resource not accessible by personal access token (HTTP 403))"
+}
+
+@test "github_collect_interactive rejects a repository other than origin" {
+  github_setup
+  enter_repo "interactive_mismatch" "git@github.com:acme/app.git"
+
+  # Owner, repository.
+  run github_collect_interactive <<<"$(printf 'acme\nother\n')"
+  assert_failure
+  assert_output_contains "Error: GitHub repository acme/other does not match the 'origin' remote acme/app."
+
+  run cat "${GH_READS}"
+  assert_output ""
+}
+
+@test "gh_run, github_token_set and github_git_push keep the token out of a trace" {
+  github_setup
+  SCAFFOLD_GITHUB_TOKEN="secret-token-value"
+  dry_run=1
+
+  {
+    set -x
+    gh_run api user --jq .login
+    github_token_set
+    github_git_push "https://github.com/acme/app.git" "main"
+    set +x
+  } >"${BATS_TEST_TMPDIR}/out" 2>"${BATS_TEST_TMPDIR}/trace"
+
+  assert_file_not_contains "${BATS_TEST_TMPDIR}/trace" "secret-token-value"
+  assert_file_not_contains "${BATS_TEST_TMPDIR}/out" "secret-token-value"
+}
+
+@test "print_summary shows the creation and push choices separately" {
+  github_setup
+  default_answers
+  use_github="y"
+  github_create="y"
+  github_push="n"
+
+  run print_summary
+  assert_output_contains "  Create repository              : y"
+  assert_output_contains "    Push                         : n"
+}
+
+@test "github_create_repo prints how to finish after a failed push" {
+  creation_setup
+  enter_project "create_push_hint"
+  GIT_PUSH_STATUS=1
+
+  run github_create_repo
+  assert_failure
+  assert_output_contains "Push with 'git push -u origin main', then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github' to apply the settings."
 }

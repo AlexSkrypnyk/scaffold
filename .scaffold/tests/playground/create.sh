@@ -45,7 +45,9 @@ status=0
   --github-description='Test repo for Scaffold installer' \
   "$@" || status=$?
 
-playground_summary "https://github.com/${PLAYGROUND_GITHUB_OWNER}/${repo}" "${dir}"
-echo "Cleanup        : gh repo delete ${PLAYGROUND_GITHUB_OWNER}/${repo} --yes"
+slug="$(playground_option --github-owner "${PLAYGROUND_GITHUB_OWNER}" "$@")/$(playground_option --github-repo "${repo}" "$@")"
+
+playground_summary "https://github.com/${slug}" "${dir}"
+echo "Cleanup        : gh repo delete ${slug} --yes"
 
 exit "${status}"

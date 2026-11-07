@@ -127,6 +127,9 @@ github_pushed_sha=""
 # The required status checks rule computed from CI, as a JSON object.
 github_checks_rule=""
 
+# CI runs of the pushed commit as "status<TAB>conclusion<TAB>name" lines.
+github_runs=""
+
 # App that owns the check runs of GitHub Actions workflows.
 GITHUB_ACTIONS_APP_ID=15368
 
@@ -1023,13 +1026,55 @@ process_internal() {
 #-------------------------------------------------------------------------------
 
 ##
+# Turn off command tracing until xtrace_restore().
+#
+# SCRIPT_DEBUG traces every expanded command, which would print the token.
+#
+xtrace_suspend() {
+  xtrace_was_on=0
+
+  case $- in
+    *x*)
+      xtrace_was_on=1
+      set +x
+      ;;
+  esac
+}
+
+##
+# Turn command tracing back on when xtrace_suspend() turned it off.
+#
+xtrace_restore() {
+  [ "${xtrace_was_on:-0}" != "1" ] || set -x
+}
+
+##
+# Check whether SCAFFOLD_GITHUB_TOKEN is set, without tracing its value.
+#
+github_token_set() {
+  local status=0
+
+  xtrace_suspend
+  [ -n "${SCAFFOLD_GITHUB_TOKEN:-}" ] || status=1
+  xtrace_restore
+
+  return "${status}"
+}
+
+##
 # Run 'gh' authenticated with SCAFFOLD_GITHUB_TOKEN only.
 #
 # GH_TOKEN overrides the account 'gh' is logged in with, and GITHUB_TOKEN is
 # blanked so a token already exported in the shell is never used.
 #
 gh_run() {
-  GH_TOKEN="${SCAFFOLD_GITHUB_TOKEN:-}" GITHUB_TOKEN="" gh "$@"
+  local status=0
+
+  xtrace_suspend
+  GH_TOKEN="${SCAFFOLD_GITHUB_TOKEN:-}" GITHUB_TOKEN="" gh "$@" || status=$?
+  xtrace_restore
+
+  return "${status}"
 }
 
 ##
@@ -1066,7 +1111,7 @@ github_prerequisites() {
     actions="Install GitHub CLI (https://cli.github.com)"
   fi
 
-  if [ -z "${SCAFFOLD_GITHUB_TOKEN:-}" ]; then
+  if ! github_token_set; then
     reasons="${reasons:+${reasons}; }SCAFFOLD_GITHUB_TOKEN is not set"
 
     if [ -n "${actions}" ]; then
@@ -1078,8 +1123,9 @@ github_prerequisites() {
 
   [ -n "${reasons}" ] || return 0
 
+  # The install removes this script at the end, so the hint downloads it.
   echo "Skipping GitHub repository settings: ${reasons}."
-  echo "${actions}, then run './install.sh github'."
+  echo "${actions}, then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github'."
 
   return 1
 }
@@ -1109,6 +1155,28 @@ github_origin() {
 }
 
 ##
+# Check that the GitHub owner and repository match the 'origin' remote.
+#
+# An empty owner or repository takes the remote's value. The remote is never
+# rewritten, so another repository would receive this checkout's history.
+#
+# @return int 1 when they name another repository than 'origin'.
+#
+github_check_origin() {
+  local origin
+  origin="$(github_origin)"
+
+  [ -n "${origin}" ] || return 0
+
+  local wanted="${github_owner:-${origin%%/*}}/${github_repo:-${origin#*/}}"
+
+  [ "$(to_lowercase "${wanted}")" != "$(to_lowercase "${origin}")" ] || return 0
+
+  echo "Error: GitHub repository ${wanted} does not match the 'origin' remote ${origin}. Change the options or the remote." >&2
+  return 1
+}
+
+##
 # Resolve the GitHub owner and repository from options and 'origin', then
 # derive the namespace and project defaults from them.
 #
@@ -1119,17 +1187,12 @@ resolve_github_identity() {
   [ -z "${github_owner}" ] || github_owner_source="--github-owner"
   [ -z "${github_repo}" ] || github_repo_source="--github-repo"
 
+  github_check_origin || exit 1
+
   local origin
   origin="$(github_origin)"
 
   if [ -n "${origin}" ]; then
-    local wanted="${github_owner:-${origin%%/*}}/${github_repo:-${origin#*/}}"
-
-    if [ "$(to_lowercase "${wanted}")" != "$(to_lowercase "${origin}")" ]; then
-      echo "Error: GitHub repository ${wanted} does not match the 'origin' remote ${origin}. Change the options or the remote." >&2
-      exit 1
-    fi
-
     if [ -z "${github_owner}" ]; then
       github_owner="${origin%%/*}"
       github_owner_source="the 'origin' remote"
@@ -1362,7 +1425,8 @@ github_desired_settings() {
   echo "has_discussions=false"
 
   # An empty description is never sent, so an existing one is never blanked.
-  [ -z "${github_description}" ] || echo "description=${github_description}"
+  # Each line is 1 setting, so a newline in the description would add others.
+  [ -z "${github_description}" ] || echo "description=${github_description//[$'\r\n']/ }"
 }
 
 ##
@@ -1567,24 +1631,89 @@ github_apply_ruleset() {
 }
 
 ##
-# Check whether a workflow file read from stdin has a 'pull_request' trigger.
+# Check whether a workflow file read from stdin runs on pull requests to a
+# branch.
 #
-# Reads the top-level 'on' key in its string, list and map forms. Comments
+# Reads the top-level 'on' key, quoted or not, in its string, list and map
+# forms, and only the events directly under it. A 'pull_request' trigger
+# counts only when no 'paths', 'paths-ignore' or 'branches-ignore' filter can
+# skip it, and when its 'branches' list, if any, matches the branch. Comments
 # are ignored, and 'pull_request_target' does not count.
 #
+# @param $1 string Branch the pull requests target (default: main)
+#
 github_workflow_has_pull_request() {
-  awk '
-    /^on:/ {
-      in_on = 1
-      rest = $0
-      sub(/^on:/, "", rest)
-      sub(/#.*/, "", rest)
-      if (rest ~ /(^|[^a-z_])pull_request([^a-z_]|$)/) found = 1
+  awk -v branch="${1:-main}" -v sq="'" '
+    function unquote(value) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+      gsub("^[\"" sq "]|[\"" sq "]$", "", value)
+      return value
+    }
+    function glob_match(pattern, text, re) {
+      re = pattern
+      gsub(/\./, "\\.", re)
+      gsub(/\*+/, ".*", re)
+      gsub(/\?/, ".", re)
+      return text ~ ("^" re "$")
+    }
+    function add_branches(list, count, parts, i, pattern) {
+      gsub(/[][]/, "", list)
+      count = split(list, parts, ",")
+      for (i = 1; i <= count; i++) {
+        pattern = unquote(parts[i])
+        if (pattern == "") continue
+        has_branches = 1
+        if (glob_match(pattern, branch)) branch_matches = 1
+      }
+    }
+    {
+      line = $0
+      sub(/[[:space:]]+#.*$/, "", line)
+      if (line ~ /^[[:space:]]*(#.*)?$/) next
+      match(line, /^[[:space:]]*/)
+      indent = RLENGTH
+      key = substr(line, indent + 1)
+    }
+    indent == 0 {
+      in_on = (key ~ ("^[\"" sq "]?on[\"" sq "]?:"))
+      in_pr = 0
+      base = 0
+      if (in_on) {
+        rest = key
+        sub(/^[^:]*:/, "", rest)
+        if (rest ~ /(^|[^a-z_])pull_request([^a-z_]|$)/) found = 1
+      }
       next
     }
-    in_on && /^[^[:space:]#]/ { in_on = 0 }
-    in_on && /^[[:space:]]+(-[[:space:]]+)?pull_request[[:space:]]*(:|$)/ { found = 1 }
-    END { exit found ? 0 : 1 }
+    !in_on { next }
+    base == 0 { base = indent }
+    indent <= base {
+      in_pr = 0
+      in_branches = 0
+      if (indent == base && key ~ ("^(-[[:space:]]+)?[\"" sq "]?pull_request[\"" sq "]?[[:space:]]*(:.*)?$")) {
+        found = 1
+        in_pr = 1
+        pr_indent = 0
+      }
+      next
+    }
+    in_pr {
+      if (pr_indent == 0) pr_indent = indent
+      if (indent == pr_indent) {
+        in_branches = 0
+        if (key ~ /^(paths|paths-ignore|branches-ignore):/) filtered = 1
+        if (key ~ /^branches:/) {
+          in_branches = 1
+          rest = key
+          sub(/^branches:/, "", rest)
+          if (rest ~ /[^[:space:]]/) add_branches(rest)
+        }
+      } else if (in_branches && key ~ /^-/) {
+        sub(/^-[[:space:]]*/, "", key)
+        add_branches(key)
+      }
+    }
+    END { exit (found && !filtered && (!has_branches || branch_matches)) ? 0 : 1 }
   '
 }
 
@@ -1628,9 +1757,14 @@ github_compute_checks() {
   branch="${branch:-main}"
   github_checks_rule=""
 
+  # Branch names may hold URL metacharacters, which must not end the path.
+  local ref="${branch//%/%25}"
+  ref="${ref//#/%23}"
+  ref="${ref//\?/%3F}"
+
   local output
 
-  if ! output="$(gh_run api "repos/${slug}/commits/${branch}/check-runs" --paginate --jq ".check_runs[] | select(.app.id == ${GITHUB_ACTIONS_APP_ID} and .conclusion != \"skipped\" and .conclusion != \"cancelled\" and .conclusion != \"neutral\") | [(.check_suite.id | tostring), .head_sha, .name] | join(\"\\t\")" 2>&1)"; then
+  if ! output="$(gh_run api "repos/${slug}/commits/${ref}/check-runs" --paginate --jq ".check_runs[] | select(.app.id == ${GITHUB_ACTIONS_APP_ID} and .conclusion != \"skipped\" and .conclusion != \"cancelled\" and .conclusion != \"neutral\") | [(.check_suite.id | tostring), .head_sha, .name] | join(\"\\t\")" 2>&1)"; then
     github_section_error "Required checks" "Checks: read" "${output}"
     return $?
   fi
@@ -1658,7 +1792,7 @@ github_compute_checks() {
         return $?
       fi
 
-      if [ -n "${path}" ] && gh_run api -H "Accept: application/vnd.github.raw" "repos/${slug}/contents/${path}?ref=${sha}" 2>/dev/null | github_workflow_has_pull_request; then
+      if [ -n "${path}" ] && gh_run api -H "Accept: application/vnd.github.raw" "repos/${slug}/contents/${path}?ref=${sha}" 2>/dev/null | github_workflow_has_pull_request "${branch}"; then
         decision="y"
       fi
 
@@ -1688,27 +1822,48 @@ github_rerun_hint() {
 }
 
 ##
+# List the CI runs of the pushed commit as "status<TAB>conclusion<TAB>name".
+#
+# Sets github_runs. A commit can start more runs than the default page of 20,
+# so the limit is raised.
+#
+# @return int 1 when the runs cannot be listed.
+#
+github_list_runs() {
+  local output
+
+  if ! output="$(gh_run run list --repo "${github_owner}/${github_repo}" --commit "${github_pushed_sha}" --limit 100 --json status,conclusion,name --jq '.[] | [.status, (.conclusion // ""), .name] | join("\t")' 2>&1)"; then
+    echo "  CI: could not list the runs (${output//$'\n'/ })" >&2
+    return 1
+  fi
+
+  github_runs="${output}"
+}
+
+##
 # Wait for the CI runs of the pushed commit to finish.
 #
 # Polls instead of using 'timeout', which macOS does not ship. An interrupt
 # stops the wait and prints the command to finish the job later.
 #
-# @return int 0 when every run finished, 1 when none appeared or the deadline
-#   passed.
+# @return int 0 when every run finished, 1 when none appeared, the runs could
+#   not be listed or the deadline passed.
 #
 github_wait_for_runs() {
-  local slug="${github_owner}/${github_repo}"
-  local jq_runs='.[] | [.status, (.conclusion // ""), .name] | join("\t")'
-  local runs=""
   local deadline=$((SECONDS + github_runs_timeout))
+  github_runs=""
 
   trap 'github_wait_interrupted' INT
 
   echo "  Waiting for the CI runs of the pushed commit"
 
   while :; do
-    runs="$(gh_run run list --repo "${slug}" --commit "${github_pushed_sha}" --json status,conclusion,name --jq "${jq_runs}" 2>/dev/null || true)"
-    [ -z "${runs}" ] || break
+    if ! github_list_runs; then
+      trap - INT
+      return 1
+    fi
+
+    [ -z "${github_runs}" ] || break
 
     if [ "${SECONDS}" -ge "${deadline}" ]; then
       trap - INT
@@ -1721,7 +1876,7 @@ github_wait_for_runs() {
 
   deadline=$((SECONDS + github_wait_timeout))
 
-  while grep -qv $'^completed\t' <<<"${runs}"; do
+  while grep -qv $'^completed\t' <<<"${github_runs}"; do
     if [ "${SECONDS}" -ge "${deadline}" ]; then
       trap - INT
       echo "  CI: runs still in progress after ${github_wait_timeout}s"
@@ -1729,15 +1884,19 @@ github_wait_for_runs() {
     fi
 
     sleep "${github_poll_interval}"
-    runs="$(gh_run run list --repo "${slug}" --commit "${github_pushed_sha}" --json status,conclusion,name --jq "${jq_runs}" 2>/dev/null || true)"
+
+    if ! github_list_runs; then
+      trap - INT
+      return 1
+    fi
   done
 
   trap - INT
 
   local total
   local failed
-  total="$(grep -c . <<<"${runs}")"
-  failed="$(awk -F '\t' '$2 != "success" && $2 != "skipped" && $2 != "neutral" { print $3 }' <<<"${runs}")"
+  total="$(grep -c . <<<"${github_runs}")"
+  failed="$(awk -F '\t' '$2 != "success" && $2 != "skipped" && $2 != "neutral" { print $3 }' <<<"${github_runs}")"
 
   echo "  CI: ${total} runs finished"
 
@@ -1845,8 +2004,14 @@ github_self_exclude() {
 # @param $2 string Branch to push
 #
 github_git_push() {
+  local status=0
+
+  xtrace_suspend
   # shellcheck disable=SC2016
-  SCAFFOLD_GITHUB_TOKEN="${SCAFFOLD_GITHUB_TOKEN:-}" GIT_TERMINAL_PROMPT=0 git_write -c credential.helper= -c 'credential.helper=!f() { echo username=x-access-token; echo "password=${SCAFFOLD_GITHUB_TOKEN}"; }; f' push -q "${1}" "HEAD:refs/heads/${2}"
+  SCAFFOLD_GITHUB_TOKEN="${SCAFFOLD_GITHUB_TOKEN:-}" GIT_TERMINAL_PROMPT=0 git_write -c credential.helper= -c 'credential.helper=!f() { echo username=x-access-token; echo "password=${SCAFFOLD_GITHUB_TOKEN}"; }; f' push -q "${1}" "HEAD:refs/heads/${2}" || status=$?
+  xtrace_restore
+
+  return "${status}"
 }
 
 ##
@@ -1898,8 +2063,10 @@ github_create_repo() {
     local branch="main"
     [ "${fresh}" = "1" ] || branch="$(git symbolic-ref --short HEAD 2>/dev/null || echo main)"
 
+    # A re-run finds the repository and skips creation, so the push has to be
+    # finished by hand.
     if ! github_git_push "${url}" "${branch}"; then
-      echo "  Push: failed" >&2
+      echo "  Push: failed. The repository exists but is empty. Push with 'git push -u origin ${branch}', then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github' to apply the settings." >&2
       return 1
     fi
 
@@ -2029,6 +2196,8 @@ configure_github() {
 github_collect_interactive() {
   github_owner="$(ask "  GitHub owner" "${github_owner}")"
   github_repo="$(ask "  GitHub repository" "${github_repo}")"
+
+  github_check_origin || return 1
 
   local rc=0
   github_load_repo || rc=$?
@@ -2347,6 +2516,7 @@ parse_args() {
       --github-description=*) github_description="${1#*=}" ;;
       --github-merge=*)
         github_merge="${1#*=}"
+        github_merge="${github_merge//[[:space:]]/}"
         if ! validate_github_merge "${github_merge}"; then
           echo "Run with --help for usage." >&2
           exit 1
@@ -2387,6 +2557,8 @@ parse_args() {
           echo "Run with --help for usage." >&2
           exit 1
         fi
+        # A leading zero would otherwise make the arithmetic read it as octal.
+        github_wait_timeout=$((10#${github_wait_timeout}))
         ;;
       --dry-run) dry_run=1 ;;
 
@@ -2543,8 +2715,9 @@ print_summary() {
   if [ "${use_github}" = "y" ]; then
     echo "  Repository                     : ${github_owner}/${github_repo}"
     if [ "${github_create}" = "y" ]; then
-      echo "  Create and push                : y"
+      echo "  Create repository              : y"
       echo "    Visibility                   : ${github_visibility}"
+      echo "    Push                         : ${github_push}"
     fi
     echo "  General settings               : ${github_settings}"
     echo "  Labels                         : ${github_labels}"

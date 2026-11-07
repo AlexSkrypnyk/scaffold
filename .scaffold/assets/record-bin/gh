@@ -4,7 +4,8 @@
 #
 # Answers the calls install.sh makes while it creates and configures a new
 # repository, so a recording shows the GitHub steps without reaching GitHub.
-# Every write succeeds with no output.
+# Every write succeeds with no output. An unknown call fails, so a new call in
+# install.sh shows up in the recording instead of passing silently.
 
 set -euo pipefail
 
@@ -26,6 +27,8 @@ case "$*" in
     touch "${state}/created"
     echo "https://github.com/${slug}"
     ;;
+  "api --method PATCH repos/${slug} "*) ;;
+  "label create "*" --repo ${slug} "*) ;;
   "api repos/${slug}/labels "*)
     printf 'bug\td73a4a\tSomething is not working\n'
     ;;
@@ -53,5 +56,9 @@ case "$*" in
     ;;
   "api -H Accept: application/vnd.github.raw "*)
     printf 'on:\n  pull_request:\n'
+    ;;
+  *)
+    echo "gh stand-in: unknown call: gh $*" >&2
+    exit 1
     ;;
 esac
