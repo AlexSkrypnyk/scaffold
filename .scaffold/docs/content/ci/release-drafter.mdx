@@ -22,9 +22,9 @@ The workflow reads the `RELEASE_VERSION_SCHEME` repository variable to pick the 
 | `RELEASE_VERSION_SCHEME` | Scheme | Next version |
 |---|---|---|
 | Unset, or any value other than `calver` | [Semantic Versioning (SemVer)](https://semver.org/) | The last release's version with the minor part bumped, so `2.4.3` becomes `2.5.0` |
-| `calver` | [Calendar Versioning (CalVer)](https://calver.org/) | `YY.M.0` from the run date, such as `25.1.0` for January 2025 or `25.12.0` for December 2025 |
+| `calver` | [Calendar Versioning (CalVer)](https://calver.org/) | `YY.M.N` from the run date, such as `25.12.0` for the first release of December 2025 and `25.12.1` for the second |
 
-Under CalVer, the patch number is always `0`. After you publish a release, the next draft in the same month gets the same version and tag as that release.
+Under CalVer, the workflow reads the patch number `N` from the repository's tags. It takes the highest `YY.M.N` tag of the current month and adds 1, or uses `0` when the month has no tag yet. A tag with a suffix, such as `25.12.0-rc1`, doesn't count.
 
 Set the variable on the **Variables** tab of your repository's **Settings > Secrets and variables > Actions**. After you set it to `calver`, the **Set version** step of the next `Draft release notes` run logs `Using CalVer:` and the version.
 
