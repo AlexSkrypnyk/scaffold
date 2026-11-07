@@ -2082,7 +2082,7 @@ collect_github_interactive() {
 
   github_prerequisites || return 0
 
-  if [ ! -e .git ] && github_creation_prerequisites >/dev/null; then
+  if [ ! -e .git ] && github_creation_prerequisites; then
     use_github="$(ask_yesno "Create a GitHub repository" "N")"
     [ "${use_github}" = "y" ] || return 0
     github_create="y"

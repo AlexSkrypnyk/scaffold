@@ -1888,6 +1888,7 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
 
   run collect_github_interactive <<<"$(printf 'n\n')"
   assert_success
+  assert_output_contains "Skipping repository creation: git user.email is not set."
   assert_equal "${github_create}" ""
 }
 
