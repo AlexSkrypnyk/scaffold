@@ -76,7 +76,7 @@ final class UpdateAssetsTest extends TestCase {
   public function testBuildInitExpectScriptCreatesRepository(): void {
     $script = buildInitExpectScript('/work/ws', 'MyNs', 'myproj', 'Jane', ['SCAFFOLD_GITHUB_TOKEN' => 'recording-token', 'PATH' => '/stub:/usr/bin'], TRUE);
 
-    $this->assertStringContainsString("set env(SCAFFOLD_GITHUB_TOKEN) {recording-token}\nset env(PATH) {/stub:/usr/bin}\nspawn bash --norc --noprofile", $script, 'The environment is set before the shell is spawned.');
+    $this->assertStringContainsString("set env(SCAFFOLD_GITHUB_TOKEN) {recording-token}\nset env(PATH) {/stub:/usr/bin}\nspawn bash --norc --noprofile", (string) $script, 'The environment is set before the shell is spawned.');
 
     $session = implode("\n", [
       'reply "Remove this script"',
@@ -92,7 +92,7 @@ final class UpdateAssetsTest extends TestCase {
       'reply "Wait for the first CI run and require its checks"',
       'reply "Proceed with project init"',
     ]);
-    $this->assertStringContainsString($session, $script, 'The creation prompts are answered in order.');
+    $this->assertStringContainsString($session, (string) $script, 'The creation prompts are answered in order.');
   }
 
   public function testSanitizeCastCleansHeaderAndPaths(): void {
