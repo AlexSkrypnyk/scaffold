@@ -49,12 +49,12 @@ jobs:
           context: .
           push: false
           load: true
-          tags: yournamespace/yourproject:test
+          tags: yournamespace/yourdockerimage:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Test Docker image
-        run: docker run --rm yournamespace/yourproject:test
+        run: docker run --rm yournamespace/yourdockerimage:test
 
       - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
@@ -91,13 +91,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
-          images: ${{ vars.DOCKER_IMAGE || 'yournamespace/yourproject' }}
+          images: ${{ vars.DOCKER_IMAGE || 'yournamespace/yourdockerimage' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7
         with:
           context: .
           push: true
-          tags: ${{ vars.DOCKER_IMAGE || 'yournamespace/yourproject' }}:canary
+          tags: ${{ vars.DOCKER_IMAGE || 'yournamespace/yourdockerimage' }}:canary
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64

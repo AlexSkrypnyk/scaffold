@@ -34,7 +34,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6
         with:
-          images: ${{ vars.DOCKER_IMAGE || 'yournamespace/yourproject' }}
+          images: ${{ vars.DOCKER_IMAGE || 'yournamespace/yourdockerimage' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7

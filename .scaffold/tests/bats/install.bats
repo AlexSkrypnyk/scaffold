@@ -941,8 +941,8 @@ create_claude_settings() {
       "Bash(npm start)",
       "Bash(npm run build)",
       "Bash(npm run spellcheck)",
-      "Bash(docker build -t yournamespace/yourproject .)",
-      "Bash(docker run --rm yournamespace/yourproject)",
+      "Bash(docker build -t yournamespace/yourdockerimage .)",
+      "Bash(docker run --rm yournamespace/yourdockerimage)",
       "Bash(docker run --rm -i hadolint/hadolint:*)"
     ]
   }
