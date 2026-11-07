@@ -39,6 +39,7 @@ final class UpdateAssetsTest extends TestCase {
     $this->assertStringNotContainsString('send -h', (string) $script);
     $this->assertStringNotContainsString('send_human', (string) $script);
     $this->assertStringNotContainsString('sleep', (string) $script);
+    $this->assertStringNotContainsString('set env(SCAFFOLD_GITHUB_TOKEN)', (string) $script);
 
     $session = implode("\n", [
       'expect "\$ " { answer "./install.sh" }',
@@ -64,11 +65,34 @@ final class UpdateAssetsTest extends TestCase {
       'reply "Use AI agents"',
       'reply "AI architecture docs"',
       'reply "Remove this script"',
+      'reply "Create a GitHub repository"',
       'reply "Proceed with project init"',
       'expect "\$ " { answer "exit" }',
       'expect eof',
     ]);
     $this->assertStringContainsString($session, (string) $script, 'Every prompt is answered through the answer proc, in order.');
+  }
+
+  public function testBuildInitExpectScriptCreatesRepository(): void {
+    $script = buildInitExpectScript('/work/ws', 'MyNs', 'myproj', 'Jane', ['SCAFFOLD_GITHUB_TOKEN' => 'recording-token', 'PATH' => '/stub:/usr/bin'], TRUE);
+
+    $this->assertStringContainsString("set env(SCAFFOLD_GITHUB_TOKEN) {recording-token}\nset env(PATH) {/stub:/usr/bin}\nspawn bash --norc --noprofile", (string) $script, 'The environment is set before the shell is spawned.');
+
+    $session = implode("\n", [
+      'reply "Remove this script"',
+      'reply "Create a GitHub repository" "y"',
+      'reply "GitHub owner"',
+      'reply "GitHub repository"',
+      'reply "Visibility"',
+      'reply "Apply general settings"',
+      'reply "Description"',
+      'reply "Apply labels"',
+      'reply "Delete labels not in the list"',
+      'reply "Protect the default branch with a ruleset"',
+      'reply "Wait for the first CI run and require its checks"',
+      'reply "Proceed with project init"',
+    ]);
+    $this->assertStringContainsString($session, (string) $script, 'The creation prompts are answered in order.');
   }
 
   public function testSanitizeCastCleansHeaderAndPaths(): void {

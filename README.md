@@ -106,6 +106,14 @@ curl -fsSL https://getscaffold.dev/install.sh | \
 
 The script downloads the latest release. To pin a tag, branch or commit, add `--ref` after `bash -s --` in the non-interactive command, for example `--ref=1.2.3`. Any option turns off the prompts, so `--ref` needs the 3 required options with it.
 
+### Set up the GitHub repository
+
+With [GitHub CLI](https://cli.github.com) installed and a token in `SCAFFOLD_GITHUB_TOKEN`, the last prompt sets up the project's GitHub repository. In an empty directory it offers to create the repository, push the project and protect its default branch with the checks of the first CI run:
+
+![An interactive install.sh run that creates the GitHub repository](.scaffold/assets/install-github.svg)
+
+In a clone, the same prompt applies the settings, labels and ruleset to the existing repository. To set up the repository of an existing project later, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github`. The [GitHub repository setup](https://getscaffold.dev/github) page lists the token permissions and every option.
+
 ## Update a generated project
 
 You can pull later template changes into a project generated from Scaffold and keep its own code. In Claude Code, ask Claude to "update scaffold" in your generated project. Claude fetches the [`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md) skill and follows its steps:

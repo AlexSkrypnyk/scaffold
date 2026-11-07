@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+##
+# Stand-in for 'git' in the install.sh recordings.
+#
+# Runs the real git for every command except 'push', which succeeds without
+# reaching a remote.
+
+set -euo pipefail
+
+for arg in "$@"; do
+  [ "${arg}" != "push" ] || exit 0
+done
+
+exec "${SCAFFOLD_RECORD_GIT}" "$@"

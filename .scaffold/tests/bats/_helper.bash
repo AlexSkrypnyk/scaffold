@@ -12,6 +12,10 @@ setup() {
   bats_load_library bats-helpers
   mock_setup
 
+  # A token in the developer's shell must never reach the GitHub code paths;
+  # the GitHub tests set their own dummy value.
+  unset SCAFFOLD_GITHUB_TOKEN
+
   # LCOV_EXCL_START
   if [ "${BATS_VERBOSE_RUN-}" = "1" ]; then
     echo "BUILD_DIR: ${BUILD_DIR}" >&3

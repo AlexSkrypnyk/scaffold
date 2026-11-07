@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+##
+# Stand-in for 'gh' in the install.sh recordings.
+#
+# Answers the calls install.sh makes while it creates and configures a new
+# repository, so a recording shows the GitHub steps without reaching GitHub.
+# Every write succeeds with no output. An unknown call fails, so a new call in
+# install.sh shows up in the recording instead of passing silently.
+
+set -euo pipefail
+
+slug="${SCAFFOLD_RECORD_LOGIN}/${SCAFFOLD_RECORD_REPO}"
+state="${SCAFFOLD_RECORD_STATE}"
+
+case "$*" in
+  "api user --jq .login")
+    echo "${SCAFFOLD_RECORD_LOGIN}"
+    ;;
+  "api repos/${slug} --jq "*)
+    if [ ! -f "${state}/created" ]; then
+      echo "gh: Not Found (HTTP 404)" >&2
+      exit 1
+    fi
+    printf '%s\n' "default_branch=main" "description=" "allow_merge_commit=true" "allow_squash_merge=true" "allow_rebase_merge=true" "squash_merge_commit_title=COMMIT_OR_PR_TITLE" "squash_merge_commit_message=COMMIT_MESSAGES" "allow_auto_merge=false" "allow_update_branch=false" "delete_branch_on_merge=false" "has_issues=true" "has_wiki=true" "has_projects=true" "has_discussions=false"
+    ;;
+  "repo create ${slug} "*)
+    touch "${state}/created"
+    echo "https://github.com/${slug}"
+    ;;
+  "api --method PATCH repos/${slug} "*) ;;
+  "label create "*" --repo ${slug} "*) ;;
+  "api repos/${slug}/labels "*)
+    printf 'bug\td73a4a\tSomething is not working\n'
+    ;;
+  "api repos/${slug}/rulesets --paginate "*)
+    [ ! -f "${state}/ruleset" ] || echo "1"
+    ;;
+  "api --method POST repos/${slug}/rulesets "*)
+    cat >/dev/null
+    touch "${state}/ruleset"
+    ;;
+  "api --method PUT "*)
+    cat >/dev/null
+    ;;
+  "api repos/${slug}/rulesets/1 --jq "*)
+    printf '\n\n'
+    ;;
+  "run list "*)
+    printf 'completed\tsuccess\tTest PHP\ncompleted\tsuccess\tTest Shell\n'
+    ;;
+  "api repos/${slug}/commits/main/check-runs "*)
+    printf '1\tabc\tPHP 8.4, Deps normal\n1\tabc\tPHP 8.5, Deps normal\n2\tabc\tShell (ubuntu-latest)\n'
+    ;;
+  "api repos/${slug}/actions/runs?check_suite_id="*)
+    echo ".github/workflows/test.yml"
+    ;;
+  "api -H Accept: application/vnd.github.raw "*)
+    printf 'on:\n  pull_request:\n'
+    ;;
+  *)
+    echo "gh stand-in: unknown call: gh $*" >&2
+    exit 1
+    ;;
+esac

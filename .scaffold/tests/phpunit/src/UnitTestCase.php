@@ -24,6 +24,11 @@ abstract class UnitTestCase extends UpstreamUnitTestCase {
   protected function setUp(): void {
     parent::setUp();
 
+    // A token in the developer's shell would show the GitHub prompts and
+    // reach the GitHub API, so the install runs never see it.
+    putenv('SCAFFOLD_GITHUB_TOKEN');
+    unset($_ENV['SCAFFOLD_GITHUB_TOKEN'], $_SERVER['SCAFFOLD_GITHUB_TOKEN']);
+
     static::locationsCopy('../../../', static::$sut, [], [
       '*.png',
       '.idea',
