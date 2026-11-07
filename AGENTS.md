@@ -391,3 +391,17 @@ invoke it:
 
 The skill directory is fetched on demand and is git-ignored - it is not
 committed to the project.
+
+## Configure the GitHub repository
+
+When you are asked to configure the project's GitHub repository (settings,
+labels or branch protection), run the following command in the project root:
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github
+```
+
+It needs GitHub CLI (`gh`) and a token in `SCAFFOLD_GITHUB_TOKEN`; it never
+uses the logged-in `gh` account. It leaves the project files untouched. Add
+`--dry-run` to print the changes without making them, and run with `--help`
+for the section options.
