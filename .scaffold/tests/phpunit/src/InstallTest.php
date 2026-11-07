@@ -142,6 +142,19 @@ final class InstallTest extends UnitTestCase {
           'docker_image_name' => self::TUI_DEFAULT,
         ],
     ];
+    yield 'docker custom image name' => [
+        [
+          'use_php' => self::$tuiNo,
+          'use_php_command' => self::TUI_SKIP,
+          'php_command_name' => self::TUI_SKIP,
+          'use_php_command_build' => self::TUI_SKIP,
+          'use_php_script' => self::TUI_SKIP,
+          'use_nodejs' => self::$tuiNo,
+          'use_shell' => self::$tuiNo,
+          'use_docker' => self::$tuiYes,
+          'docker_image_name' => 'acme/api-image',
+        ],
+    ];
     yield 'no release drafter' => [
         [
           'use_release_drafter' => self::$tuiNo,
@@ -836,7 +849,7 @@ final class InstallTest extends UnitTestCase {
     yield 'with docker' => [
       ['--docker'],
       $docker,
-      [...$wildcards, 'Bash(docker build -t yournamespace/yourproject .)'],
+      [...$wildcards, 'Bash(docker build -t yournamespace/yourdockerimage .)'],
     ];
     yield 'ai arch docs plantuml' => [
       ['--ai-arch-docs=plantuml'],
@@ -1066,6 +1079,95 @@ final class InstallTest extends UnitTestCase {
     $readme = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'README.md');
     $this->assertStringNotContainsString('yourproject', $readme);
     $this->assertStringNotContainsString('#;', $readme);
+  }
+
+  /**
+   * A custom Docker image name reaches only the Docker references.
+   *
+   * The default image name equals the Composer package name, so the default
+   * fixtures cannot tell a scoped replacement from a project-wide one.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to install.sh.
+   * @param array<string, list<string>> $present
+   *   Strings that must be present, keyed by file path.
+   * @param array<string, list<string>> $absent
+   *   Strings that must be absent, keyed by file path.
+   */
+  #[DataProvider('dataProviderInstallDockerImageName')]
+  public function testInstallDockerImageName(array $arguments, array $present, array $absent): void {
+    self::$fixtures = NULL;
+
+    $arguments = array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    foreach ($present as $path => $needles) {
+      $content = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . $path);
+      foreach ($needles as $needle) {
+        $this->assertStringContainsString($needle, $content, sprintf('Missing "%s" in "%s".', $needle, $path));
+      }
+    }
+
+    foreach ($absent as $path => $needles) {
+      $content = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . $path);
+      foreach ($needles as $needle) {
+        $this->assertStringNotContainsString($needle, $content, sprintf('Unexpected "%s" in "%s".', $needle, $path));
+      }
+    }
+
+    $finder = (new Finder())->files()->in(self::$sut)->ignoreDotFiles(FALSE)->exclude(['.git', '.artifacts', 'vendor', 'node_modules']);
+    foreach ($finder as $file) {
+      $this->assertStringNotContainsString('yourdockerimage', $file->getContents(), sprintf('Unprocessed image placeholder in "%s".', $file->getRelativePathname()));
+    }
+  }
+
+  public static function dataProviderInstallDockerImageName(): \Iterator {
+    $package = [
+      'composer.json' => ['"name": "acmeapp/acme-app"', '"homepage": "https://github.com/acmeapp/acme-app"'],
+      'package.json' => ['"name": "@acmeapp/acme-app"', '"repository": "github:acmeapp/acme-app"'],
+      'README.md' => ['https://github.com/acmeapp/acme-app/issues', 'https://img.shields.io/github/v/release/acmeapp/acme-app'],
+    ];
+
+    yield 'custom image name' => [
+      ['--docker-image-name=acme/api-image'],
+      [
+        ...$package,
+        'README.md' => [...$package['README.md'], 'docker pull acme/api-image', 'docker run --rm acme/api-image'],
+        'Dockerfile' => ['org.opencontainers.image.source="https://github.com/acmeapp/acme-app"'],
+        'CONTRIBUTING.md' => ['docker build -t acme/api-image .', 'docker run --rm acme/api-image'],
+        'AGENTS.md' => ['docker build -t acme/api-image .', 'docker run --rm acme/api-image', 'it defaults to `acme/api-image`'],
+        '.claude/settings.json' => ['Bash(docker build -t acme/api-image .)', 'Bash(docker run --rm acme/api-image)'],
+        '.github/workflows/test-docker.yml' => ['tags: acme/api-image:test', 'docker run --rm acme/api-image:test', "vars.DOCKER_IMAGE || 'acme/api-image'"],
+        '.github/workflows/release-docker.yml' => ["vars.DOCKER_IMAGE || 'acme/api-image'"],
+      ],
+      [
+        'composer.json' => ['acme/api-image'],
+        'package.json' => ['acme/api-image'],
+        'README.md' => ['github.com/acme/api-image', 'composer require acme/api-image'],
+        'Dockerfile' => ['acme/api-image'],
+        'docs/docusaurus.config.js' => ['acme/api-image'],
+      ],
+    ];
+    yield 'default image name' => [
+      ['--docker'],
+      [
+        ...$package,
+        'README.md' => [...$package['README.md'], 'docker pull acmeapp/acme-app'],
+        '.github/workflows/test-docker.yml' => ['tags: acmeapp/acme-app:test'],
+      ],
+      [],
+    ];
+    yield 'no docker' => [
+      ['--no-docker'],
+      $package,
+      [
+        'README.md' => ['docker pull'],
+        'AGENTS.md' => ['docker build'],
+      ],
+    ];
   }
 
   protected static function defaultAnswers(): array {

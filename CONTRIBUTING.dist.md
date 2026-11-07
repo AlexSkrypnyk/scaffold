@@ -52,8 +52,8 @@ Lint the `Dockerfile`, build the image and run a container from it:
 
 ```bash
 docker run --rm -i hadolint/hadolint < Dockerfile
-docker build -t yournamespace/yourproject .
-docker run --rm yournamespace/yourproject
+docker build -t yournamespace/yourdockerimage .
+docker run --rm yournamespace/yourdockerimage
 ```
 
 The container prints `yourproject is running`.

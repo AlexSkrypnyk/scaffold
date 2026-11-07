@@ -1455,7 +1455,7 @@ process_project() {
   fi
 
   if [ "${use_docker}" = "y" ]; then
-    replace_string_content "yournamespace/yourproject" "${docker_image_name}"
+    replace_string_content "yournamespace/yourdockerimage" "${docker_image_name}"
   else
     remove_docker
   fi

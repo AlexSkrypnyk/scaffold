@@ -66,7 +66,7 @@ chmod +x shell-command.sh
 Pull the Docker image from Docker Hub:
 
 ```bash
-docker pull yournamespace/yourproject
+docker pull yournamespace/yourdockerimage
 ```
 
 [//]: # (#;> DOCKER)
@@ -128,7 +128,7 @@ Run the shell script:
 Run a container from the Docker image:
 
 ```bash
-docker run --rm yournamespace/yourproject
+docker run --rm yournamespace/yourdockerimage
 ```
 
 [//]: # (#;> DOCKER)

@@ -315,10 +315,10 @@ Key workflows:
 
 ```bash
 # Build the Docker image
-docker build -t yournamespace/yourproject .
+docker build -t yournamespace/yourdockerimage .
 
 # Run the container
-docker run --rm yournamespace/yourproject
+docker run --rm yournamespace/yourdockerimage
 ```
 
 ### Linting
@@ -337,7 +337,7 @@ Docker Hub credentials are stored as repository secrets:
 - `DOCKER_USER` - Docker Hub username
 - `DOCKER_PASS` - Docker Hub access token
 
-Override the published image name (release and canary) by setting the `DOCKER_IMAGE` repository or organization variable; it defaults to `yournamespace/yourproject`.
+Override the published image name (release and canary) by setting the `DOCKER_IMAGE` repository or organization variable; it defaults to `yournamespace/yourdockerimage`.
 
 [//]: # (#;> DOCKER)
 

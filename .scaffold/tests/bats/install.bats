@@ -941,8 +941,8 @@ create_claude_settings() {
       "Bash(npm start)",
       "Bash(npm run build)",
       "Bash(npm run spellcheck)",
-      "Bash(docker build -t yournamespace/yourproject .)",
-      "Bash(docker run --rm yournamespace/yourproject)",
+      "Bash(docker build -t yournamespace/yourdockerimage .)",
+      "Bash(docker run --rm yournamespace/yourdockerimage)",
       "Bash(docker run --rm -i hadolint/hadolint:*)"
     ]
   }
@@ -1150,6 +1150,37 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/README.dist.md"
   assert_file_exists "${tmpdir}/CONTRIBUTING.md"
   assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
+}
+
+@test "process_project applies a custom Docker image name only to Docker references" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_docker"
+  mkdir -p "${tmpdir}/.github/workflows"
+  printf '# /.editorconfig   export-ignore\n# /docs            export-ignore\n' >"${tmpdir}/.gitattributes"
+  printf 'docker pull yournamespace/yourdockerimage\ncomposer require yournamespace/yourproject\n' >"${tmpdir}/README.dist.md"
+  echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
+  echo '{"name": "yournamespace/yourproject"}' >"${tmpdir}/package-meta.json"
+  echo "tags: yournamespace/yourdockerimage:test" >"${tmpdir}/.github/workflows/test-docker.yml"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_docker="y"
+  docker_image_name="acme/api-image"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/.github/workflows/test-docker.yml" "tags: acme/api-image:test"
+  assert_file_contains "${tmpdir}/README.md" "docker pull acme/api-image"
+  assert_file_contains "${tmpdir}/README.md" "composer require acmeapp/acme-app"
+  assert_file_contains "${tmpdir}/package-meta.json" '"name": "acmeapp/acme-app"'
+  assert_file_not_contains "${tmpdir}/package-meta.json" "acme/api-image"
 }
 
 @test "process_project scaffolds a class library when both entry points are declined" {

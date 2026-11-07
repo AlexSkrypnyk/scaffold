@@ -24,6 +24,10 @@ The initialization script performs three main operations:
   - `yournamespace` → User's namespace
   - `yourproject` → User's project name
   - `Your Name` → User's author name
+  - `yournamespace/yourdockerimage` → Docker image name, used only in Docker
+    references (Docker workflows, `DOCKER` blocks, Claude `docker` rules).
+    It is a separate placeholder because the default image name equals the
+    Composer package name, and both appear in the same files
 
 2. **Feature Selection** - Enables/disables template features using token system
 
@@ -294,6 +298,8 @@ Each test scenario in `InstallTest.php` validates a specific configuration:
 - `php_command`, `php_script`, `php_library`, `nodejs`, `shell` - Individual
   language selections
 - `no_languages` - No languages selected
+- `docker`, `docker_custom_image_name` - Docker enabled, with the default and
+  a custom image name
 - Feature toggles: `no_release_drafter`, `no_pr_autoassign`, `no_funding`,
   `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`, `no_phar`
 - AI options: `no_ai`, `ai_arch_docs_plantuml`, `no_ai_arch_docs`, `no_docs_no_ai_arch_docs`
