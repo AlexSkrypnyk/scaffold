@@ -477,21 +477,22 @@ validate_php_mode() {
 validate_github_merge() {
   local methods="${1}"
   local method
-
-  [ -n "${methods}" ] || {
-    echo "Error: --github-merge needs at least 1 of: merge, squash, rebase." >&2
-    return 1
-  }
+  local count=0
 
   for method in ${methods//,/ }; do
     case "${method}" in
-      merge | squash | rebase) ;;
+      merge | squash | rebase) count=$((count + 1)) ;;
       *)
         echo "Error: Invalid merge method for --github-merge: ${method}. Allowed values: merge, squash, rebase." >&2
         return 1
         ;;
     esac
   done
+
+  [ "${count}" -gt 0 ] || {
+    echo "Error: --github-merge needs at least 1 of: merge, squash, rebase." >&2
+    return 1
+  }
 }
 
 ##
@@ -1447,12 +1448,16 @@ github_apply_labels() {
 # The admin repository role (actor 5) bypasses the ruleset, so the owner can
 # still push directly.
 #
-# @param $1 string Extra rule as a JSON object (optional)
+# @param $1 string Extra rules as comma-separated JSON objects (optional)
+# @param $2 string Extra bypass actors as comma-separated JSON objects
+#                  (optional)
 #
 github_ruleset_body() {
   local rules='{"type": "deletion"}, {"type": "non_fast_forward"}'
+  local actors='{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}'
 
   [ -z "${1:-}" ] || rules="${rules}, ${1}"
+  [ -z "${2:-}" ] || actors="${actors}, ${2}"
 
   cat <<JSON
 {
@@ -1461,7 +1466,7 @@ github_ruleset_body() {
   "enforcement": "active",
   "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
   "rules": [${rules}],
-  "bypass_actors": [{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}]
+  "bypass_actors": [${actors}]
 }
 JSON
 }
@@ -1469,8 +1474,8 @@ JSON
 ##
 # Create the default branch ruleset, or update it when it exists.
 #
-# An update keeps the ruleset's required status checks, so a re-run never
-# removes them.
+# The update body replaces the rules and bypass actors, so the ones this script
+# does not manage, such as required status checks, are read and sent back.
 #
 github_apply_ruleset() {
   local slug="${github_owner}/${github_repo}"
@@ -1489,14 +1494,19 @@ github_apply_ruleset() {
     return 0
   fi
 
-  local checks
+  # Prints the unmanaged rules on line 1 and the unmanaged actors on line 2.
+  local jq_kept='([.rules[]? | select(.type != "deletion" and .type != "non_fast_forward") | tojson] | join(", ")), ([.bypass_actors[]? | select((.actor_type == "RepositoryRole" and .actor_id == 5) | not) | tojson] | join(", "))'
 
-  if ! checks="$(gh_run api "repos/${slug}/rulesets/${id}" --jq '.rules[] | select(.type == "required_status_checks") | tojson' 2>&1)"; then
-    github_section_error "Ruleset" "Administration: read" "${checks}"
+  if ! output="$(gh_run api "repos/${slug}/rulesets/${id}" --jq "${jq_kept}" 2>&1)"; then
+    github_section_error "Ruleset" "Administration: read" "${output}"
     return $?
   fi
 
-  github_call "Ruleset" "Administration: write" api --method PUT "repos/${slug}/rulesets/${id}" --silent --input - <<<"$(github_ruleset_body "${checks}")" || return $?
+  local kept_rules="${output%%$'\n'*}"
+  local kept_actors=""
+  [[ ${output} != *$'\n'* ]] || kept_actors="${output#*$'\n'}"
+
+  github_call "Ruleset" "Administration: write" api --method PUT "repos/${slug}/rulesets/${id}" --silent --input - <<<"$(github_ruleset_body "${kept_rules}" "${kept_actors}")" || return $?
   github_report "Ruleset" "would update" "updated" "${GITHUB_RULESET_NAME}"
 }
 

@@ -37,7 +37,7 @@ gh() {
     "api repos/acme/app --jq "*) echo "${GH_STATE}" ;;
     "api repos/acme/app/labels "*) printf '%s' "${GH_LABELS}" ;;
     "api repos/acme/app/rulesets --paginate "*) echo "${GH_RULESET_ID}" ;;
-    "api repos/acme/app/rulesets/"*" --jq "*) echo "${GH_RULESET_CHECKS}" ;;
+    "api repos/acme/app/rulesets/"*" --jq "*) echo "${GH_RULESET_KEPT}" ;;
   esac
 }
 
@@ -104,7 +104,7 @@ github_setup() {
   GH_STATE="$(state_applied)"
   GH_LABELS="$(labels_applied)"
   GH_RULESET_ID=""
-  GH_RULESET_CHECKS=""
+  GH_RULESET_KEPT=""
   GH_FAIL_MATCH=""
   GH_FAIL_OUTPUT=""
 
@@ -690,6 +690,7 @@ gh label delete good first issue --repo acme/app --yes"
 # Ruleset
 #-------------------------------------------------------------------------------
 
+# Expected ruleset body, with extra rules ($1) and extra bypass actors ($2).
 ruleset_body() {
   cat <<JSON
 {
@@ -698,7 +699,7 @@ ruleset_body() {
   "enforcement": "active",
   "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
   "rules": [{"type": "deletion"}, {"type": "non_fast_forward"}${1:+, ${1}}],
-  "bypass_actors": [{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}]
+  "bypass_actors": [{"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}${2:+, ${2}}]
 }
 JSON
 }
@@ -718,10 +719,12 @@ $(ruleset_body)"
   assert_output 'gh api repos/acme/app/rulesets --paginate --jq .[] | select(.name == "default-branch" and .source_type == "Repository") | .id'
 }
 
-@test "github_apply_ruleset updates the ruleset and keeps its required checks" {
+@test "github_apply_ruleset updates the ruleset and keeps the rules and actors it does not manage" {
   github_setup
   GH_RULESET_ID="42"
-  GH_RULESET_CHECKS='{"type":"required_status_checks","parameters":{"required_status_checks":[{"context":"test"}],"strict_required_status_checks_policy":false}}'
+  local rules='{"type":"required_status_checks","parameters":{"required_status_checks":[{"context":"test"}]}}, {"type":"pull_request"}'
+  local actors='{"actor_id":1,"actor_type":"Integration","bypass_mode":"always"}'
+  GH_RULESET_KEPT="${rules}"$'\n'"${actors}"
 
   run github_apply_ruleset
   assert_success
@@ -729,19 +732,30 @@ $(ruleset_body)"
 
   run cat "${GH_WRITES}"
   assert_output "gh api --method PUT repos/acme/app/rulesets/42 --silent --input -
-$(ruleset_body "${GH_RULESET_CHECKS}")"
+$(ruleset_body "${rules}" "${actors}")"
 }
 
-@test "github_apply_ruleset updates a ruleset without required checks" {
-  github_setup
-  GH_RULESET_ID="42"
+@test "github_apply_ruleset keeps the unmanaged rules or actors when only 1 kind exists" {
+  # Lines printed by the read, expected extra rules, expected extra actors.
+  local cases=(
+    '{"type":"pull_request"}' '{"type":"pull_request"}' ''
+    $'\n{"actor_id":1,"actor_type":"Integration","bypass_mode":"always"}' '' '{"actor_id":1,"actor_type":"Integration","bypass_mode":"always"}'
+    $'\n' '' ''
+  )
+  local i
 
-  run github_apply_ruleset
-  assert_success
+  for ((i = 0; i < ${#cases[@]}; i += 3)); do
+    github_setup
+    GH_RULESET_ID="42"
+    GH_RULESET_KEPT="${cases[i]}"
 
-  run cat "${GH_WRITES}"
-  assert_output "gh api --method PUT repos/acme/app/rulesets/42 --silent --input -
-$(ruleset_body)"
+    run github_apply_ruleset
+    assert_success
+
+    run cat "${GH_WRITES}"
+    assert_output "gh api --method PUT repos/acme/app/rulesets/42 --silent --input -
+$(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
+  done
 }
 
 @test "github_apply_ruleset prints the call and the body under --dry-run" {
@@ -1091,9 +1105,13 @@ $(ruleset_body)"
   assert_output_contains "Error: Invalid merge method for --github-merge: fast-forward. Allowed values: merge, squash, rebase."
   assert_output_contains "Run with --help for usage."
 
-  run parse_args --github-merge=
-  assert_failure
-  assert_output_contains "Error: --github-merge needs at least 1 of: merge, squash, rebase."
+  local value
+
+  for value in "" "," ",,"; do
+    run parse_args --github-merge="${value}"
+    assert_failure
+    assert_output_contains "Error: --github-merge needs at least 1 of: merge, squash, rebase."
+  done
 }
 
 @test "usage documents the github command, its options and the token" {

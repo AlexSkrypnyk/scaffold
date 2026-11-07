@@ -127,7 +127,7 @@ The `default-branch` ruleset protects the repository's default branch:
 - It blocks deleting the branch and force-pushing to it.
 - The admin repository role bypasses it, so the owner can still push directly.
 
-`install.sh` finds the ruleset by name. It updates an existing `default-branch` ruleset and creates one when none exists. An update keeps the ruleset's required status checks. A ruleset of another name stays as it is, so rename an existing ruleset to `default-branch` to have `install.sh` manage it.
+`install.sh` finds the ruleset by name. It updates an existing `default-branch` ruleset and creates one when none exists. An update keeps every other rule and bypass actor on the ruleset, such as required status checks. A ruleset of another name stays as it is, so rename an existing ruleset to `default-branch` to have `install.sh` manage it.
 
 Rulesets on a private repository of a personal account need GitHub Pro. On a free plan, `install.sh` skips the ruleset and applies the other sections.
 
