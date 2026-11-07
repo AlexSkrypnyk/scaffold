@@ -1,4 +1,4 @@
-@@ -163,8 +163,8 @@
+@@ -165,8 +165,8 @@
  
        - name: Test PHAR
          run: |
@@ -7,5 +7,5 @@
 +          ./dist/star-forge.phar --version
 +          ./dist/star-forge.phar || exit 1
  
-       - name: Setup tmate session
+       - name: Setup upterm session
          if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
