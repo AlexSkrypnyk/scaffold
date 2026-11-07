@@ -1,0 +1,234 @@
+@@ -11,217 +11,35 @@
+ testing, code quality tools, and CI/CD workflows.
+ 
+ 
+-## PHP Application Architecture
++## Docker
+ 
++### Building
+ 
+-### Symfony Console Application
+-
+-Multi-command CLI application structure:
+-
+-- **Location:** `src/Command/` directory
+-- **Entry point:** `bin/force-crystal`
+-- **Use for:** Complex applications with multiple commands, shared logic, OOP
+-  architecture
+-
+-### Adding New Commands
+-
+-To add a Symfony Console command:
+-
+-1. Create class in `src/Command/YourCommand.php` extending
+-   `Symfony\Component\Console\Command\Command`
+-2. Register in `bin/force-crystal`: `$application->add(new YourCommand());`
+-3. Add functional test in `tests/phpunit/Functional/YourCommandTest.php`
+-
+-
+-### Namespace Structure
+-
+-- Source code: `YodasHut\App\`
+-- Tests: `YodasHut\App\Tests\`
+-- Autoloading: PSR-4 via Composer
+-
+-## Commands
+-
+-### Code Quality
+-
+ ```bash
+-# Run all linters (PHPCS, PHPStan, Rector)
+-composer lint
++# Build the Docker image
++docker build -t acme/api-image .
+ 
+-# Auto-fix code style issues
+-composer lint-fix
+-
+-# Individual tools
+-./vendor/bin/phpcs # Check coding standards
+-./vendor/bin/phpcbf # Fix coding standards
+-./vendor/bin/phpstan # Static analysis (level 9)
+-./vendor/bin/rector --dry-run # Check Rector suggestions
++# Run the container
++docker run --rm acme/api-image
+ ```
+ 
+-### Testing
++### Linting
+ 
+ ```bash
+-# Run all PHPUnit tests (fast, no coverage)
+-composer test
+-
+-# Run with coverage reports
+-composer test-coverage
+-# Coverage reports: .logs/.coverage-html/index.html, .logs/cobertura.xml
+-
+-# Run specific test file
+-./vendor/bin/phpunit tests/phpunit/Functional/JokeCommandTest.php
+-
+-# Run specific test method
+-./vendor/bin/phpunit --filter testMethodName
++# Lint Dockerfile with hadolint
++docker run --rm -i hadolint/hadolint < Dockerfile
+ ```
+ 
++### CI/CD
+ 
+-## NodeJS Application Architecture
++- `.github/workflows/test-docker.yml` - Build and lint the Docker image, and push a `canary`-tagged image on merge to `main`
++- `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag
+ 
+-### Standalone Single-File Script
++Docker Hub credentials are stored as repository secrets:
++- `DOCKER_USER` - Docker Hub username
++- `DOCKER_PASS` - Docker Hub access token
+ 
+-Single-file CLI script structure:
+-
+-- **Location:** `nodejs-script` file (or custom name)
+-- **Dependencies:** None - self-contained
+-- **Use for:** Simple utilities, deployment scripts, one-off tasks
+-
+-### Environment Variables
+-
+-- `SCRIPT_QUIET=1` - Suppress output (useful in tests)
+-- `SCRIPT_RUN_SKIP=1` - Skip execution (useful when requiring file)
+-
+-### Testing Standalone Scripts
+-
+-The script uses a testable pattern:
+-
+-- Business logic in `main()` function
+-- Output via `verbose()` with internal buffer
+-- Set `SCRIPT_QUIET=1` in tests, then assert on `verbose()` return value
+-
+-Example test:
+-
+-```js
+-const assert = require('node:assert');
+-
+-process.env.SCRIPT_QUIET = '1';
+-process.env.SCRIPT_RUN_SKIP = '1';
+-const { main, verbose } = require('./nodejs-script');
+-main(['nodejs-script', 'arg1'], 2);
+-assert.ok(verbose('').some((line) => line.includes('expected')));
+-```
+-
+-### Commands
+-
+-```bash
+-# Run all linters (ESLint, Prettier)
+-npm run lint
+-
+-# Auto-fix code style issues
+-npm run lint-fix
+-
+-# Run all tests
+-npm run test
+-
+-# Run tests with coverage (reports in .logs/)
+-npm run test-coverage
+-```
+-
+-
+-```bash
+-# Shell script tests
+-./tests/bats/node_modules/bats/bin/bats tests/bats/
+-```
+-
+-
+-### Building
+-
+-
+-```bash
+-# Build PHAR executable into dist/ (installs Box first)
+-composer build
+-```
+-
+-Box compiles the same `bin/` launcher that Composer links into `vendor/bin`.
+-The `dist/` directory is git-ignored; the PHAR ships only as a release asset.
+-
+-
+-```bash
+-# Clean and reinstall dependencies
+-composer reset # removes installed dependencies and composer.lock
+-composer install
+-```
+-
+-## Code Quality Standards
+-
+-### Three-Layer Quality Stack
+-
+-1. **PHP_CodeSniffer** - Drupal coding standards + strict types requirement
+-  - Config: `phpcs.xml`
+-  - Rules: Drupal standard, Generic.PHP.RequireStrictTypes
+-  - Relaxed rules in test files (long arrays, missing function docs)
+-
+-2. **PHPStan** - Level 9 static analysis
+-  - Config: `phpstan.neon`
+-  - Ignores: Untyped iterables in tests/data providers
+-
+-3. **Rector** - PHP 8.3 modernization + code quality
+-  - Config: `rector.php`
+-  - Sets: PHP_83, CODE_QUALITY, CODING_STYLE, DEAD_CODE,
+-    TYPE_DECLARATION
+-
+-### Coding Conventions
+-
+-- All PHP files must declare `strict_types=1`
+-- Use single quotes for strings (double quotes if containing single quote)
+-- All files must end with a newline character
+-- Local variables/method arguments: `snake_case`
+-- Method names/class properties: `camelCase`
+-
+-## Testing Patterns
+-
+-### PHPUnit Structure
+-
+-- `tests/phpunit/Unit/` - Unit tests with mocks, no I/O
+-- `tests/phpunit/Functional/` - Integration tests, real file system
+-- `tests/phpunit/Traits/` - Shared test utilities
+-
+-### Writing Tests
+-
+-Tests should use PHPUnit 11 features:
+-
+-- Coverage attributes: `#[CoversClass(ClassName::class)]`
+-- Test attributes: `#[Test]` (optional, using `test` prefix is also fine)
+-- Data providers: `#[DataProvider('providerMethodName')]`
+-
+-
+-### Shell Script Testing with BATS
+-
+-Shell script tests use BATS:
+-
+-- Tests in `tests/bats/` with `.bats` extension
+-- Helper functions in `tests/bats/_helper.bash`
+-- Coverage exclusions: `# LCOV_EXCL_START` / `# LCOV_EXCL_END`
+-
+-
+-## CI/CD
+-
+-GitHub Actions workflows test across:
+-
+-- PHP versions: 8.3, 8.4, 8.5
+-- Separate jobs: lint, test, coverage upload (Codecov)
+-
+-Key workflows:
+-
+-- `.github/workflows/test-php.yml` - PHP testing
+-- `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
+-  - Builds the PHAR to attach
+-
+-
+-- `.github/workflows/test-shell.yml` - Shell script testing
+-
+-
+-- `.github/workflows/test-nodejs.yml` - NodeJS testing
+-- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
++Override the published image name (release and canary) by setting the `DOCKER_IMAGE` repository or organization variable; it defaults to `acme/api-image`.
+ 
+ 
+ ## Documentation

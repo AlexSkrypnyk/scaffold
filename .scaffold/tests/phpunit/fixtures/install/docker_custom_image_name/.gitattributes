@@ -1,0 +1,11 @@
+@@ -6,10 +6,4 @@
+ /.gitignore      export-ignore
+ /docs            export-ignore
+ /logo.png        export-ignore
+-/tests           export-ignore
+-/phpcs.xml       export-ignore
+-/phpstan.neon    export-ignore
+-/phpunit.xml     export-ignore
+-/rector.php      export-ignore
+-/.npmignore      export-ignore
+ /renovate.json   export-ignore
