@@ -372,14 +372,27 @@ npm run build # Build static site
 
 ## Terminal recordings
 
-The `install.sh` walkthrough shown in `README.md` and on the getscaffold.dev site
-is a single asciinema recording rendered two ways by
+The `install.sh` walkthroughs shown in `README.md` and on the getscaffold.dev site
+are 2 asciinema recordings, each rendered two ways by
 `.scaffold/assets/update-assets.php`:
 
-- `.scaffold/assets/install.svg` - an animated SVG embedded in `README.md`
+- `install` declines the **Create a GitHub repository** prompt.
+- `install-github` accepts it and walks through repository creation, the
+  settings and the CI wait.
+
+Each recording produces:
+
+- `.scaffold/assets/<name>.svg` - an animated SVG embedded in `README.md`
   (GitHub renders animated SVG but cannot run JavaScript).
-- `.scaffold/docs/static/img/install.cast` - an asciicast played by the
-  `AsciinemaPlayer` component in `.scaffold/docs/content/README.mdx`.
+- `.scaffold/docs/static/img/<name>.cast` - an asciicast played by the
+  `AsciinemaPlayer` component in `.scaffold/docs/content/README.mdx` and
+  `.scaffold/docs/content/github.mdx`.
+
+The recorded shell puts `.scaffold/assets/record-bin/` first on `PATH`. Its
+`gh` stand-in answers every call the GitHub step makes, and its `git` wrapper
+turns `push` into a no-op, so neither recording reaches GitHub. A new `gh` call
+in `install.sh` needs a matching case in the stand-in, or the recording shows
+the call failing.
 
 Regenerate both after changing `install.sh` or its prompts:
 

@@ -3,11 +3,13 @@ title: GitHub repository setup
 sidebar_position: 9
 ---
 
+import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
+
 # GitHub repository setup
 
-`install.sh` can apply a fixed set of general settings, labels and a default branch ruleset to your project's GitHub repository. This page is for developers who publish a Scaffold project on GitHub. Follow it to configure the repository during an install or later, on a project that already exists.
+`install.sh` can create your project's GitHub repository and apply a fixed set of general settings, labels and a default branch ruleset to it. This page is for developers who publish a Scaffold project on GitHub. Follow it to set up the repository during an install, or later on a project that already exists.
 
-The GitHub step changes only the repository on GitHub. It works on a repository that exists, so create and push the repository first.
+The GitHub step changes only git and the repository on GitHub. It runs after `Initialization complete.`, so the project files are ready even when a request fails.
 
 ## Before you begin
 
@@ -20,23 +22,32 @@ The GitHub step changes only the repository on GitHub. It works on a repository 
 
   Replace `github_pat_xxx` with your token. `install.sh` sends only this token. It ignores the account `gh` is logged in with and any `GITHUB_TOKEN` in your shell.
 
+- To create a repository, install git and set your git email with `git config --global user.email`.
+
 A fine-grained token needs these repository permissions:
 
 | Permission | Needed for |
 |---|---|
 | Metadata: read | Reading the repository (always granted) |
-| Administration: write | General settings and the ruleset |
+| Administration: write | General settings, the ruleset and creating the repository |
 | Issues: write | Labels |
+| Checks: read | Reading the checks of a CI run |
+| Actions: read | Waiting for CI and matching each check to its workflow file |
+| Contents: read | Reading workflow triggers |
+| Contents: write and Workflows: write | Pushing a new repository |
 
-You can limit a fine-grained token to the repositories it manages. A classic token needs the `repo` scope.
+For settings only, you can limit a fine-grained token to the repositories it manages. Creating a repository needs **All repositories** access, because a token limited to selected repositories can't include one that doesn't exist yet. A classic token needs the `repo` and `workflow` scopes.
 
 When `gh` or the token is missing, `install.sh` prints what's missing and the command to run later. An install carries on without the GitHub step and exits 0. The `github` command stops with exit code 1.
 
 ## Configure the repository during an install
 
-To configure the repository as part of an interactive install, answer `y` to the **Configure GitHub repository settings** prompt. The prompt appears only when `gh` and the token are both available. It defaults to `n`.
+The last prompt of an interactive install depends on the directory:
 
-The install then asks for the owner, the repository and each section. It reads the repository from GitHub before the section prompts, so the **Description** prompt shows the current description. Press <kbd>Enter</kbd> to keep it.
+- In a directory with a `.git` directory, such as a clone of a repository made with **Use this template**, the prompt is **Configure GitHub repository settings**.
+- In a directory without one, such as a run piped from `curl`, the prompt is **Create a GitHub repository**. When git or your git email is missing, the install prints why and asks **Configure GitHub repository settings** instead.
+
+Both prompts appear only when `gh` and the token are available, and both default to `n`. After a `y`, the install asks for the owner, the repository and each section. It reads the repository from GitHub before the section prompts, so the **Description** prompt shows the current description. Press <kbd>Enter</kbd> to keep it.
 
 Without prompts, pass `--github`:
 
@@ -45,7 +56,39 @@ curl -fsSL https://getscaffold.dev/install.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe" --github
 ```
 
-The settings go to GitHub after `Initialization complete.`, so the project files are ready even when a request fails.
+## Create the repository
+
+When the repository doesn't exist on GitHub, `install.sh` can create it and push the project. The following recording shows an install that creates the repository:
+
+<AsciinemaPlayer
+  src="/img/install-github.cast"
+  autoPlay={false}
+  loop={false}
+  controls={true}
+  terminalLineHeight={1.1}
+/>
+
+In an interactive run, answer `y` to **Create a GitHub repository**, or to the **does not exist. Create it** prompt that follows a repository GitHub doesn't know. Then pick the visibility. Without prompts, pass `--github-create`, which also turns on `--github`:
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | \
+  bash -s -- --github-owner=acme-org --github-repo=acme-app --author="Jane Doe" --github-create
+```
+
+`install.sh` creates the repository in this order:
+
+1. Without a `.git` directory, it runs `git init` on a `main` branch.
+2. Without commits, it commits every file in 1 initial commit. Unless you pass `--keep`, `install.sh` itself stays out of that commit.
+3. It creates the repository with `gh repo create`, as `public` unless you pass `--github-visibility=private`.
+4. It adds an `origin` remote when there is none. An existing `origin` stays as it is.
+5. It pushes the current branch with the token, so your local git credentials don't matter.
+6. It applies the general settings, the labels and the ruleset.
+7. It waits for the first CI run and adds that run's checks to the ruleset. For details, see [Required status checks](#required-status-checks).
+8. It removes `install.sh`, unless you passed `--keep`.
+
+A repository with commits keeps them, and `install.sh` warns about uncommitted changes because it pushes only what's committed. To create the repository without pushing, pass `--no-github-push`.
+
+`install.sh` removes itself only as the very last step. A run that fails or is interrupted keeps the script, so you can run `./install.sh github` again.
 
 ## Configure an existing project
 
@@ -125,21 +168,41 @@ Names match without regard to case, as they do on GitHub. Other labels stay in p
 The `default-branch` ruleset protects the repository's default branch:
 
 - It blocks deleting the branch and force-pushing to it.
+- It requires the checks of the latest CI run, as the next section describes.
 - The admin repository role bypasses it, so the owner can still push directly.
 
-`install.sh` finds the ruleset by name. It updates an existing `default-branch` ruleset and creates one when none exists. An update keeps every other rule and bypass actor on the ruleset, such as required status checks. A ruleset of another name stays as it is, so rename an existing ruleset to `default-branch` to have `install.sh` manage it.
+`install.sh` finds the ruleset by name. It updates an existing `default-branch` ruleset and creates one when none exists. An update keeps every other rule and bypass actor on the ruleset. A ruleset of another name stays as it is, so rename an existing ruleset to `default-branch` to have `install.sh` manage it.
 
 Rulesets on a private repository of a personal account need GitHub Pro. On a free plan, `install.sh` skips the ruleset and applies the other sections.
 
+### Required status checks
+
+`install.sh` reads the checks from the latest commit on the default branch. It keeps a check only when all 3 of these hold:
+
+- GitHub Actions reported it.
+- Its workflow file has a `pull_request` trigger. A check from a workflow that runs only on push never reports on a pull request, so requiring it would block every pull request.
+- Its conclusion isn't `skipped`, `cancelled` or `neutral`.
+
+`install.sh` reads each workflow file through the GitHub API, so the check works from a `curl` run with no checkout. The checks it finds replace the ruleset's required checks. When it finds none, the ruleset keeps the checks it already had, and `install.sh` prints the command to run again after CI. On an existing repository, `--no-github-required-checks` leaves the required checks as they are.
+
+A repository that `install.sh` created in the same run has no CI run yet. The ruleset goes on without checks, and `install.sh` then waits for the first CI run of the pushed commit:
+
+- When no run starts within about 60 seconds, it stops waiting and prints the command to run again later.
+- It waits up to 1800 seconds for every run to finish. To change the limit, pass `--github-wait-timeout`.
+- When every run has finished, it adds the checks to the ruleset. A failed run still adds its checks, with a warning that pull requests stay blocked until CI passes.
+- When the wait times out or you press <kbd>Ctrl-C</kbd>, the ruleset stays without checks and `install.sh` prints the command to run again.
+
+To skip the wait, pass `--no-github-wait-checks`.
+
 ## Preview the changes
 
-To print the requests `install.sh` would send without sending them, add `--dry-run`:
+To print the requests and git commands `install.sh` would run without running them, add `--dry-run`:
 
 ```bash
 curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --dry-run
 ```
 
-A dry run still reads the repository to work out what would change, so it needs `gh` and the token too.
+A dry run still reads the repository to work out what would change, so it needs `gh` and the token too. A dry run for a new repository creates nothing and doesn't wait for CI.
 
 ## When a request fails
 
@@ -149,7 +212,7 @@ A 403 skips only its section and names the missing permission:
   Ruleset: skipped (token lacks Administration: write)
 ```
 
-The other sections still run, and a skipped section doesn't change the exit code. Any other failure also lets the other sections run, then makes `install.sh` exit with code 1.
+The other sections still run, and a skipped section doesn't change the exit code. Any other failure also lets the other sections run, then makes `install.sh` exit with code 1. A failure to create or push the repository stops the GitHub step, because the sections need the repository.
 
 ## Options
 
@@ -160,12 +223,18 @@ These options control the GitHub step. Each one also works with the `github` com
 | `--github`, `--no-github` | Off | Configures the repository after an install. |
 | `--github-owner=VALUE` | See [How the owner and repository are found](#how-the-owner-and-repository-are-found) | Sets the GitHub user or organization. |
 | `--github-repo=VALUE` | See [How the owner and repository are found](#how-the-owner-and-repository-are-found) | Sets the repository name. |
+| `--github-create`, `--no-github-create` | Off | Creates the repository when it doesn't exist, and turns on `--github`. |
+| `--github-visibility=VALUE` | `public` | Sets the visibility of a created repository: `public` or `private`. |
+| `--github-push`, `--no-github-push` | On | Pushes a created repository. |
 | `--github-settings`, `--no-github-settings` | On | Applies the general settings. |
 | `--github-description=VALUE` | Unchanged | Sets the repository description. |
 | `--github-merge=VALUE` | `squash,rebase` | Sets the allowed merge methods: `merge`, `squash` and `rebase`. |
 | `--github-labels`, `--no-github-labels` | On | Applies the labels. |
 | `--github-labels-prune`, `--no-github-labels-prune` | Off | Deletes labels that aren't in the list. |
 | `--github-ruleset`, `--no-github-ruleset` | On | Applies the default branch ruleset. |
-| `--dry-run` | Off | Prints the requests without sending them. |
+| `--github-required-checks`, `--no-github-required-checks` | On | Requires the checks of the latest CI run on an existing repository. |
+| `--github-wait-checks`, `--no-github-wait-checks` | On | Waits for the first CI run of a created repository and requires its checks. |
+| `--github-wait-timeout=SECONDS` | `1800` | Sets how long to wait for CI. |
+| `--dry-run` | Off | Prints the requests and git commands without running them. |
 
 Every interactive install also prints the non-interactive command that repeats your answers, before the **Proceed with project init** prompt. The command leaves out the token.
