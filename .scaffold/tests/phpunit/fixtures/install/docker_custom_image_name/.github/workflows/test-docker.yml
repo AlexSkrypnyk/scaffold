@@ -54,10 +54,12 @@ jobs:
       - name: Test Docker image
         run: docker run --rm acme/api-image:test
 
-      - name: Setup tmate session
+      - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
+        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
         timeout-minutes: 30
+        with:
+          limit-access-to-actor: true
 
   push-canary-to-registry:
     name: Docker canary
