@@ -3,18 +3,21 @@
 
 /**
  * @file
- * Generate the animated SVG and asciicast recording of install.sh.
+ * Generate the animated SVG and asciicast recordings of install.sh.
  *
- * Records an interactive `./install.sh` session against a throwaway copy of the
- * current git tree, then produces two artefacts from that single recording:
+ * Records 2 interactive `./install.sh` sessions against throwaway copies of
+ * the current git tree: `install` declines to create a GitHub repository, and
+ * `install-github` creates one. Each recording produces 2 artefacts:
  *
- * - `.scaffold/assets/install.svg` - an animated SVG embedded in the README
+ * - `.scaffold/assets/<name>.svg` - an animated SVG embedded in the README
  *   (GitHub renders animated SVG but cannot run JavaScript).
- * - `.scaffold/docs/static/img/install.cast` - an asciicast played by the
+ * - `.scaffold/docs/static/img/<name>.cast` - an asciicast played by the
  *   Docusaurus `AsciinemaPlayer` component (interactive playback).
  *
- * `install.sh` rewrites the tree in place and deletes itself, so the recording
- * always runs in a disposable workspace exported with `git archive HEAD`.
+ * `install.sh` rewrites the tree in place and deletes itself, so each
+ * recording runs in a disposable workspace exported with `git archive HEAD`.
+ * The stand-ins in `record-bin/` replace `gh` and `git push`, so the GitHub
+ * steps never reach GitHub.
  *
  * The recorded timing is discarded: the cast is rebuilt with 1 event per
  * answered prompt at a fixed interval, so regenerating an unchanged session
@@ -58,11 +61,23 @@ define('RECORD_NAMESPACE', 'MyNamespace');
 define('RECORD_PROJECT', 'myproject');
 define('RECORD_AUTHOR', 'Alex');
 
+// GitHub login the stand-in 'gh' reports, shown as the default owner.
+define('RECORD_LOGIN', 'my-org');
+
+// Recordings to generate: file name => whether the session creates a GitHub
+// repository.
+define('RECORDINGS', [
+  'install' => FALSE,
+  'install-github' => TRUE,
+]);
+
 /**
  * Build the expect script that drives install.sh's interactive prompts.
  *
  * Types the three identity answers and accepts the default for every remaining
- * prompt, mirroring a "keep everything" run.
+ * prompt, mirroring a "keep everything" run. With $create_repo, the session
+ * also answers "y" to creating a GitHub repository; without it, the session
+ * declines.
  *
  * Each answer is sent in 1 write after STEP_MARKER, so the session reaches the
  * terminal identically on every run. Expect writes out all output it has read
@@ -78,12 +93,34 @@ define('RECORD_AUTHOR', 'Alex');
  *   Value typed at the "Project" prompt.
  * @param string $author
  *   Value typed at the "Author" prompt.
+ * @param array<string, string> $env
+ *   Environment variables set in the recorded shell.
+ * @param bool $create_repo
+ *   Whether to accept the "Create a GitHub repository" prompt.
  *
  * @return string
  *   The expect script contents.
  */
-function buildInitExpectScript(string $workspace_dir, string $namespace, string $project, string $author): string {
+function buildInitExpectScript(string $workspace_dir, string $namespace, string $project, string $author, array $env = [], bool $create_repo = FALSE): string {
   $marker = STEP_MARKER;
+
+  $env_lines = '';
+  foreach ($env as $name => $value) {
+    $env_lines .= sprintf("set env(%s) {%s}\n", $name, $value);
+  }
+
+  $github = $create_repo ? implode("\n", [
+    'reply "Create a GitHub repository" "y"',
+    'reply "GitHub owner"',
+    'reply "GitHub repository"',
+    'reply "Visibility"',
+    'reply "Apply general settings"',
+    'reply "Description"',
+    'reply "Apply labels"',
+    'reply "Delete labels not in the list"',
+    'reply "Protect the default branch with a ruleset"',
+    'reply "Wait for the first CI run and require its checks"',
+  ]) : 'reply "Create a GitHub repository"';
 
   return <<<EXPECT
 #!/usr/bin/env expect
@@ -103,9 +140,7 @@ proc reply {label {text ""}} {
 cd "{$workspace_dir}"
 
 set env(PS1) {\$ }
-# A token in the maintainer's shell would add the GitHub prompts.
-if {[info exists env(SCAFFOLD_GITHUB_TOKEN)]} { unset env(SCAFFOLD_GITHUB_TOKEN) }
-spawn bash --norc --noprofile
+{$env_lines}spawn bash --norc --noprofile
 
 expect "\\$ " { answer "./install.sh" }
 reply "Namespace (PascalCase)" "{$namespace}"
@@ -130,6 +165,7 @@ reply "Use scheduled builds"
 reply "Use AI agents"
 reply "AI architecture docs"
 reply "Remove this script"
+{$github}
 reply "Proceed with project init"
 expect "\\$ " { answer "exit" }
 expect eof
@@ -299,43 +335,85 @@ function main(): void {
     mkdir($tmp_dir, 0755, TRUE);
   }
 
+  foreach (RECORDINGS as $name => $create_repo) {
+    recordInstall($name, $create_repo, $project_dir, $assets_dir, $tmp_dir);
+  }
+
+  verbose('Done.');
+}
+
+/**
+ * Record 1 install.sh session and write its cast and SVG.
+ *
+ * @param string $name
+ *   File name of the cast and the SVG, without the extension.
+ * @param bool $create_repo
+ *   Whether the session creates a GitHub repository.
+ * @param string $project_dir
+ *   Path to the repository root.
+ * @param string $assets_dir
+ *   Directory that receives the SVG and holds the stand-ins.
+ * @param string $tmp_dir
+ *   Path to the temporary directory.
+ */
+function recordInstall(string $name, bool $create_repo, string $project_dir, string $assets_dir, string $tmp_dir): void {
   $workspace_dir = createWorkspace($project_dir, $tmp_dir);
   verbose('Workspace: ' . $workspace_dir);
 
-  $expect_script = $tmp_dir . '/install.exp';
-  $cast_file = $tmp_dir . '/install-raw.cast';
-  $svg_input = $tmp_dir . '/install-svg.cast';
+  $state_dir = $workspace_dir . '-state';
+  mkdir($state_dir, 0755, TRUE);
+
+  // A fixed git identity keeps the recorded session independent of the
+  // maintainer's git config.
+  $gitconfig = $state_dir . '/gitconfig';
+  file_put_contents($gitconfig, "[user]\n\tname = " . RECORD_AUTHOR . "\n\temail = author@example.com\n");
+
+  // A token in the maintainer's shell is replaced, and every 'gh' call goes to
+  // the stand-in.
+  $env = [
+    'PATH' => $assets_dir . '/record-bin:' . getenv('PATH'),
+    'SCAFFOLD_GITHUB_TOKEN' => 'recording-token',
+    'SCAFFOLD_RECORD_LOGIN' => RECORD_LOGIN,
+    'SCAFFOLD_RECORD_REPO' => RECORD_PROJECT,
+    'SCAFFOLD_RECORD_STATE' => $state_dir,
+    'SCAFFOLD_RECORD_GIT' => trim((string) shell_exec('command -v git')),
+    'GIT_CONFIG_GLOBAL' => $gitconfig,
+    'GIT_CONFIG_NOSYSTEM' => '1',
+  ];
+
+  $expect_script = $tmp_dir . '/' . $name . '.exp';
+  $cast_file = $tmp_dir . '/' . $name . '-raw.cast';
+  $svg_input = $tmp_dir . '/' . $name . '-svg.cast';
 
   try {
-    file_put_contents($expect_script, buildInitExpectScript($workspace_dir, RECORD_NAMESPACE, RECORD_PROJECT, RECORD_AUTHOR));
+    file_put_contents($expect_script, buildInitExpectScript($workspace_dir, RECORD_NAMESPACE, RECORD_PROJECT, RECORD_AUTHOR, $env, $create_repo));
     chmod($expect_script, 0755);
 
-    verbose('Recording install.sh...');
+    verbose('Recording ' . $name . '...');
     recordSession($cast_file, $expect_script);
 
     $raw = (string) file_get_contents($cast_file);
     $home = (string) getenv('HOME');
     $clean = canonicalizeCast(sanitizeCast($raw, $workspace_dir, $home));
 
-    $cast_dest = $project_dir . '/.scaffold/docs/static/img/install.cast';
+    $cast_dest = $project_dir . '/.scaffold/docs/static/img/' . $name . '.cast';
     file_put_contents($cast_dest, $clean);
     verbose('Cast written: ' . $cast_dest);
 
     file_put_contents($svg_input, appendEndPause($clean, END_PAUSE));
 
-    $svg_file = $assets_dir . '/install.svg';
+    $svg_file = $assets_dir . '/' . $name . '.svg';
     verbose('Rendering SVG...');
     renderSvg($svg_input, $svg_file, $assets_dir);
     verbose('SVG written: ' . $svg_file);
   }
   finally {
     removeDir($workspace_dir);
+    removeDir($state_dir);
     removeFile($expect_script);
     removeFile($cast_file);
     removeFile($svg_input);
   }
-
-  verbose('Done.');
 }
 
 /**
