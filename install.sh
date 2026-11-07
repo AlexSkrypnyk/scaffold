@@ -1029,6 +1029,8 @@ process_internal() {
 # Turn off command tracing until xtrace_restore().
 #
 # SCRIPT_DEBUG traces every expanded command, which would print the token.
+# kcov reads coverage from the same trace, so the lines that run with tracing
+# off are marked as excluded.
 #
 xtrace_suspend() {
   xtrace_was_on=0
@@ -1045,7 +1047,9 @@ xtrace_suspend() {
 # Turn command tracing back on when xtrace_suspend() turned it off.
 #
 xtrace_restore() {
+  # LCOV_EXCL_START
   [ "${xtrace_was_on:-0}" != "1" ] || set -x
+  # LCOV_EXCL_STOP
 }
 
 ##
@@ -1055,8 +1059,10 @@ github_token_set() {
   local status=0
 
   xtrace_suspend
+  # LCOV_EXCL_START
   [ -n "${SCAFFOLD_GITHUB_TOKEN:-}" ] || status=1
   xtrace_restore
+  # LCOV_EXCL_STOP
 
   return "${status}"
 }
@@ -1071,8 +1077,10 @@ gh_run() {
   local status=0
 
   xtrace_suspend
+  # LCOV_EXCL_START
   GH_TOKEN="${SCAFFOLD_GITHUB_TOKEN:-}" GITHUB_TOKEN="" gh "$@" || status=$?
   xtrace_restore
+  # LCOV_EXCL_STOP
 
   return "${status}"
 }
@@ -1643,6 +1651,8 @@ github_apply_ruleset() {
 # @param $1 string Branch the pull requests target (default: main)
 #
 github_workflow_has_pull_request() {
+  # The awk program is not bash, so kcov cannot trace its lines.
+  # LCOV_EXCL_START
   awk -v branch="${1:-main}" -v sq="'" '
     function unquote(value) {
       gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
@@ -1715,6 +1725,7 @@ github_workflow_has_pull_request() {
     }
     END { exit (found && !filtered && (!has_branches || branch_matches)) ? 0 : 1 }
   '
+  # LCOV_EXCL_STOP
 }
 
 ##
@@ -2007,9 +2018,11 @@ github_git_push() {
   local status=0
 
   xtrace_suspend
+  # LCOV_EXCL_START
   # shellcheck disable=SC2016
   SCAFFOLD_GITHUB_TOKEN="${SCAFFOLD_GITHUB_TOKEN:-}" GIT_TERMINAL_PROMPT=0 git_write -c credential.helper= -c 'credential.helper=!f() { echo username=x-access-token; echo "password=${SCAFFOLD_GITHUB_TOKEN}"; }; f' push -q "${1}" "HEAD:refs/heads/${2}" || status=$?
   xtrace_restore
+  # LCOV_EXCL_STOP
 
   return "${status}"
 }

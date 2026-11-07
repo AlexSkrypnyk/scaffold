@@ -65,6 +65,10 @@ gh() {
     "run list "*)
       count="$(cat "${GH_RUN_LIST_COUNT}" 2>/dev/null || echo 0)"
       echo "$((count + 1))" >"${GH_RUN_LIST_COUNT}"
+      if [ "$((count + 1))" = "${GH_RUN_LIST_FAIL_AT:-0}" ]; then
+        echo "gh: Server Error (HTTP 500)" >&2
+        return 1
+      fi
       [ "${count}" -lt "${#GH_RUN_LISTS[@]}" ] || count=$((${#GH_RUN_LISTS[@]} - 1))
       [ "${count}" -lt 0 ] || printf '%s' "${GH_RUN_LISTS[count]}"
       ;;
@@ -2123,4 +2127,49 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
   run github_create_repo
   assert_failure
   assert_output_contains "Push with 'git push -u origin main', then run 'curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github' to apply the settings."
+}
+
+@test "github_wait_for_runs reports a run list that fails after the runs appeared" {
+  github_setup
+  github_pushed_sha="abc"
+  GH_RUN_LISTS=($'in_progress\t\tTest PHP')
+  GH_RUN_LIST_FAIL_AT=2
+
+  run github_wait_for_runs
+  assert_failure
+  assert_output_contains "  CI: could not list the runs (gh: Server Error (HTTP 500))"
+}
+
+@test "parse_args sets every feature toggle" {
+  # Option, variable, expected value.
+  local cases=(
+    "--php" "use_php" "y"
+    "--phar" "use_php_command_build" "y"
+    "--no-phar" "use_php_command_build" "n"
+    "--nodejs" "use_nodejs" "y"
+    "--no-nodejs" "use_nodejs" "n"
+    "--shell" "use_shell" "y"
+    "--no-shell" "use_shell" "n"
+    "--shell-command-name=tool" "shell_command_name" "tool"
+    "--no-docker" "use_docker" "n"
+    "--php-script-name=tool" "php_script_name" "tool"
+    "--release-drafter" "use_release_drafter" "y"
+    "--no-release-drafter" "use_release_drafter" "n"
+    "--pr-autoassign" "use_pr_autoassign" "y"
+    "--no-pr-autoassign" "use_pr_autoassign" "n"
+    "--funding" "use_funding" "y"
+    "--no-funding" "use_funding" "n"
+    "--pr-template" "use_pr_template" "y"
+    "--no-pr-template" "use_pr_template" "n"
+    "--renovate" "use_renovate" "y"
+    "--no-renovate" "use_renovate" "n"
+    "--docs" "use_docs" "y"
+    "--no-docs" "use_docs" "n"
+  )
+  local i
+
+  for ((i = 0; i < ${#cases[@]}; i += 3)); do
+    parse_args "${cases[i]}"
+    assert_equal "${!cases[i + 1]}" "${cases[i + 2]}"
+  done
 }
