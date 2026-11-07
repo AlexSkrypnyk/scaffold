@@ -33,7 +33,7 @@ jobs:
             PATCH=0
             while read -r TAG; do
               NUMBER="${TAG#"refs/tags/${PREFIX}."}"
-              # Skip tags such as '26.11.0-rc1' that are not 'YY.M.N'.
+              # Skip tags with a suffix, such as 'YY.M.N-rc1'.
               case "${NUMBER}" in
                 '' | *[!0-9]*) continue ;;
               esac
