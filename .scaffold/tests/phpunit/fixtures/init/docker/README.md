@@ -49,13 +49,13 @@
 -| `--option1` | `default1`    | Option with a default value.       |
 -| `--option2` | None          | Flag that takes no value.          |
 -
--Run the Node.js script with 1 argument:
+-Run the Node.js script:
 -
 -```bash
 -./nodejs-script value/of/argument
 -```
 -
--Run the shell script and answer its prompts:
+-Run the shell script:
 -
 -```bash
 -./force-crystal.sh

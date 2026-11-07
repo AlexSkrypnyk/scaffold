@@ -32,7 +32,7 @@
  ./nodejs-script value/of/argument
 -```
 -
--Run the shell script and answer its prompts:
+-Run the shell script:
 -
 -```bash
 -./force-crystal.sh
