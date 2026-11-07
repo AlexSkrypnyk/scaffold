@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22, 24]
 
     steps:
       - name: Checkout code
@@ -48,7 +48,7 @@ jobs:
         run: npm install
 
       - name: Check coding standards
-        if: matrix.node == 22
+        if: matrix.node == 24
         run: npm run lint
         continue-on-error: ${{ vars.CI_LINT_IGNORE_FAILURE == '1' }}
 
@@ -57,7 +57,7 @@ jobs:
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Check code coverage threshold
-        if: matrix.node == 22
+        if: matrix.node == 24
         run: |
           RATE=$(grep -o 'line-rate="[0-9.]*"' .logs/cobertura-coverage.xml | head -1 | tr -cd '0-9.')
           PERCENT=$(awk "BEGIN {printf \"%.2f\", $RATE*100}")
@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7
-        if: matrix.node == 22 && env.CODECOV_TOKEN != ''
+        if: matrix.node == 24 && env.CODECOV_TOKEN != ''
         with:
           files: .logs/cobertura-coverage.xml
           fail_ci_if_error: true
