@@ -1,0 +1,171 @@
+---
+title: GitHub repository setup
+sidebar_position: 9
+---
+
+# GitHub repository setup
+
+`install.sh` can apply a fixed set of general settings, labels and a default branch ruleset to your project's GitHub repository. This page is for developers who publish a Scaffold project on GitHub. Follow it to configure the repository during an install or later, on a project that already exists.
+
+The GitHub step changes only the repository on GitHub. It works on a repository that exists, so create and push the repository first.
+
+## Before you begin
+
+- Install [GitHub CLI](https://cli.github.com). `install.sh` calls `gh` for every GitHub request.
+- Create a GitHub token and export it as `SCAFFOLD_GITHUB_TOKEN`:
+
+  ```bash
+  export SCAFFOLD_GITHUB_TOKEN=github_pat_xxx
+  ```
+
+  Replace `github_pat_xxx` with your token. `install.sh` sends only this token. It ignores the account `gh` is logged in with and any `GITHUB_TOKEN` in your shell.
+
+A fine-grained token needs these repository permissions:
+
+| Permission | Needed for |
+|---|---|
+| Metadata: read | Reading the repository (always granted) |
+| Administration: write | General settings and the ruleset |
+| Issues: write | Labels |
+
+You can limit a fine-grained token to the repositories it manages. A classic token needs the `repo` scope.
+
+When `gh` or the token is missing, `install.sh` prints what's missing and the command to run later. An install carries on without the GitHub step and exits 0. The `github` command stops with exit code 1.
+
+## Configure the repository during an install
+
+To configure the repository as part of an interactive install, answer `y` to the **Configure GitHub repository settings** prompt. The prompt appears only when `gh` and the token are both available. It defaults to `n`.
+
+The install then asks for the owner, the repository and each section. It reads the repository from GitHub before the section prompts, so the **Description** prompt shows the current description. Press <kbd>Enter</kbd> to keep it.
+
+Without prompts, pass `--github`:
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | \
+  bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe" --github
+```
+
+The settings go to GitHub after `Initialization complete.`, so the project files are ready even when a request fails.
+
+## Configure an existing project
+
+To configure the repository of a project that already exists, run the `github` command in the project's root directory:
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github
+```
+
+The `github` command leaves the project files untouched and needs no template. With no other options, it prompts for the owner, the repository and each section. Any option turns off the prompts and applies every section that isn't turned off:
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | \
+  bash -s -- github --github-owner=acme --github-repo=acme-app --no-github-ruleset
+```
+
+The command ends with `GitHub repository settings complete.` Each section prints 1 line with what it changed.
+
+## How the owner and repository are found
+
+Each value comes from the first source that has it:
+
+| Value | Sources, in order |
+|---|---|
+| Owner | `--github-owner`, the `origin` remote, the login of the token |
+| Repository | `--github-repo`, the `origin` remote, the project name |
+
+The `github` command takes the current directory's name in place of the project name. `install.sh` reads `origin` only in the project's root directory and skips a remote that points at the Scaffold template.
+
+When `origin` names a different repository than the options, `install.sh` stops with an error. It never rewrites the remote.
+
+The owner and repository also set the defaults for `--namespace` and `--name`. An owner of `acme-org` gives the namespace `AcmeOrg`, and a repository of `Acme_App` gives the name `acme-app`. With those defaults, a non-interactive install needs only `--author`. An explicit `--namespace` or `--name` wins over the default. In an interactive install, the defaults appear on the **Namespace** and **Project** prompts.
+
+A derived value that fails validation names its source:
+
+```text
+Error: Name derived from --github-repo is invalid: 'acme.app'. Pass --name explicitly.
+```
+
+## What gets applied
+
+Each section reads the repository first and changes only what differs, so you can run it again safely. Each section has its own option to turn it off.
+
+### General settings
+
+General settings go to GitHub in 1 request:
+
+- Squash and rebase merges on, merge commits off. To change the methods, pass `--github-merge` with a comma-separated list of `merge`, `squash` and `rebase`.
+- Squash commits take the pull request title and an empty message.
+- Auto-merge, the update branch button and deleting the branch after a merge on.
+- Issues on. Wiki, projects and discussions off.
+- The description from `--github-description`. Without a value, the description stays as it is.
+
+### Labels
+
+`install.sh` creates or updates these labels:
+
+| Label | Color | Description |
+|---|---|---|
+| `AUTOMERGE` | `#934BF4` | Pull request has been approved and set to automerge |
+| `BLOCKED` | `#D93F0B` | Issue or pull request is blocked |
+| `CONFLICT` | `#BC143E` | Pull request has a conflict that needs to be resolved before it can be merged |
+| `Dependencies` | `#62E795` | Pull request was raised automatically by a dependency bot |
+| `DO NOT MERGE` | `#D93F0B` | Do not merge this pull request |
+| `Do not review` | `#D93F0B` | Do not review this pull request |
+| `Needs review` | `#5319E7` | Pull request needs a review from assigned developers |
+| `Ready for test` | `#0E8A16` | Pull request is ready for manual testing |
+| `Ready to be merged` | `#C2E0C6` | Pull request is ready to be merged (assigned after testing is complete) |
+| `Requires more work` | `#B60205` | Pull request was reviewed and reviewer(s) asked to work further on the pull request |
+| `UPSTREAM` | `#FBCA04` | Issue or pull request is related to an upstream project |
+| `URGENT` | `#D93F0B` | Pull request needs to be urgently reviewed |
+
+Names match without regard to case, as they do on GitHub. Other labels stay in place. To delete them, pass `--github-labels-prune`.
+
+### Default branch ruleset
+
+The `default-branch` ruleset protects the repository's default branch:
+
+- It blocks deleting the branch and force-pushing to it.
+- The admin repository role bypasses it, so the owner can still push directly.
+
+`install.sh` finds the ruleset by name. It updates an existing `default-branch` ruleset and creates one when none exists. An update keeps the ruleset's required status checks. A ruleset of another name stays as it is, so rename an existing ruleset to `default-branch` to have `install.sh` manage it.
+
+Rulesets on a private repository of a personal account need GitHub Pro. On a free plan, `install.sh` skips the ruleset and applies the other sections.
+
+## Preview the changes
+
+To print the requests `install.sh` would send without sending them, add `--dry-run`:
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --dry-run
+```
+
+A dry run still reads the repository to work out what would change, so it needs `gh` and the token too.
+
+## When a request fails
+
+A 403 skips only its section and names the missing permission:
+
+```text
+  Ruleset: skipped (token lacks Administration: write)
+```
+
+The other sections still run, and a skipped section doesn't change the exit code. Any other failure also lets the other sections run, then makes `install.sh` exit with code 1.
+
+## Options
+
+These options control the GitHub step. Each one also works with the `github` command, apart from `--github`:
+
+| Option | Default | Description |
+|---|---|---|
+| `--github`, `--no-github` | Off | Configures the repository after an install. |
+| `--github-owner=VALUE` | See [How the owner and repository are found](#how-the-owner-and-repository-are-found) | Sets the GitHub user or organization. |
+| `--github-repo=VALUE` | See [How the owner and repository are found](#how-the-owner-and-repository-are-found) | Sets the repository name. |
+| `--github-settings`, `--no-github-settings` | On | Applies the general settings. |
+| `--github-description=VALUE` | Unchanged | Sets the repository description. |
+| `--github-merge=VALUE` | `squash,rebase` | Sets the allowed merge methods: `merge`, `squash` and `rebase`. |
+| `--github-labels`, `--no-github-labels` | On | Applies the labels. |
+| `--github-labels-prune`, `--no-github-labels-prune` | Off | Deletes labels that aren't in the list. |
+| `--github-ruleset`, `--no-github-ruleset` | On | Applies the default branch ruleset. |
+| `--dry-run` | Off | Prints the requests without sending them. |
+
+Every interactive install also prints the non-interactive command that repeats your answers, before the **Proceed with project init** prompt. The command leaves out the token.
