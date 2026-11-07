@@ -291,7 +291,7 @@ create_phar_composer_json() {
     "require-dev": {
         "alexskrypnyk/phpunit-helpers": "^0.16.0",
         "bamarni/composer-bin-plugin": "^1.9.1",
-        "composer": ">=2.10.2"
+        "composer": ">=2.10.3"
     },
     "config": {
         "allow-plugins": {
