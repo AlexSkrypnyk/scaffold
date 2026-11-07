@@ -17,4 +17,4 @@
 -
  ## Documentation site
  
- Install the documentation site's dependencies, then run its Jest tests and spell check:
+ Install the documentation site's dependencies, build the site, then run its Jest tests and spell check:
