@@ -65,11 +65,10 @@ jobs:
         uses: actions/configure-pages@__HASH__ # __VERSION__
         id: pages
 
-      # Uncomment the following lines to deploy the documentation site.
-      # - name: Upload documentation site
-      #   uses: actions/upload-pages-artifact@__VERSION__
-      #   with:
-      #     path: "docs/build"
-      #
-      # - name: Deploy documentation site
-      #   uses: actions/deploy-pages@__VERSION__
+      - name: Upload documentation site
+        uses: actions/upload-pages-artifact@__HASH__ # __VERSION__
+        with:
+          path: "docs/build"
+
+      - name: Deploy documentation site
+        uses: actions/deploy-pages@__HASH__ # __VERSION__
