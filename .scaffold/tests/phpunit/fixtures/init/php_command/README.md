@@ -6,7 +6,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -42,12 +41,6 @@
+@@ -42,18 +41,12 @@
  chmod +x nodejs-script
  ```
  
@@ -19,6 +19,13 @@
  ## Usage
  
  Run the PHP command that Composer installs:
+ 
+ ```bash
+-vendor/bin/force-crystal
++vendor/bin/star-forge
+ ```
+ 
+ The command takes the following arguments and options:
 @@ -68,12 +61,6 @@
  
  ```bash

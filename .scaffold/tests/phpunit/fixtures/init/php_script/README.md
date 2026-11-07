@@ -6,7 +6,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -42,12 +41,6 @@
+@@ -42,38 +41,18 @@
  chmod +x nodejs-script
  ```
  
@@ -18,8 +18,23 @@
 -
  ## Usage
  
- Run the PHP command that Composer installs:
-@@ -68,12 +61,6 @@
+-Run the PHP command that Composer installs:
++Run the PHP script that Composer installs, with 1 argument:
+ 
+ ```bash
+-vendor/bin/force-crystal
++vendor/bin/force-crystal value
+ ```
+ 
+-The command takes the following arguments and options:
+-
+-| Name        | Default value | Description                        |
+-|-------------|---------------|------------------------------------|
+-| `arg1`      | None          | Description of the first argument. |
+-| `--option1` | `default1`    | Option with a default value.       |
+-| `--option2` | None          | Flag that takes no value.          |
+-
+ Run the Node.js script with 1 argument:
  
  ```bash
  ./nodejs-script value/of/argument

@@ -1,4 +1,4 @@
-@@ -26,16 +26,3 @@
+@@ -26,19 +26,6 @@
  
  To fix the ESLint and Prettier issues that the linters report, run `npm run lint-fix`. To write a coverage report to `.logs/`, run `npm run test-coverage`.
  
@@ -15,3 +15,6 @@
 -
 -To apply the formatting that shfmt reports, run the shfmt command with `-w` in place of `-d`.
 -
+ ## Documentation site
+ 
+ Install the documentation site's dependencies, then run its Jest tests and spell check:

@@ -1,4 +1,4 @@
-@@ -2,40 +2,3 @@
+@@ -2,43 +2,6 @@
  
  Thank you for considering a contribution to this project. Follow this guide to install the dependencies and run the same linters and tests that CI runs on your pull request. Run the section for each stack your change touches, from the repository root.
  
@@ -12,7 +12,7 @@
 -composer test
 -```
 -
--To fix the PHP_CodeSniffer and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, run `composer test-coverage`.
+-To fix the PHP_CodeSniffer and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, enable the PCOV or Xdebug extension and run `composer test-coverage`. Xdebug also needs `XDEBUG_MODE=coverage`.
 -
 -## Node.js
 -
@@ -39,3 +39,6 @@
 -
 -To apply the formatting that shfmt reports, run the shfmt command with `-w` in place of `-d`.
 -
+ ## Documentation site
+ 
+ Install the documentation site's dependencies, then run its Jest tests and spell check:
