@@ -16,8 +16,10 @@ permissions:
   pages: write
   id-token: write
 
+# A separate group from 'release-docs.yml', which runs on the same tags, so its
+# skipped run does not cancel this one.
 concurrency:
-  group: pages
+  group: scaffold-pages
   cancel-in-progress: true
 
 jobs:

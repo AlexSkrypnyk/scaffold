@@ -23,6 +23,11 @@ concurrency:
 jobs:
   release-docs:
     name: Release documentation
+    #;< META
+    # The Scaffold site deploys from 'scaffold-release-docs.yml'; this
+    # template's site would overwrite it.
+    if: github.repository != 'AlexSkrypnyk/scaffold'
+    #;> META
     runs-on: ubuntu-latest
 
     environment:
@@ -65,11 +70,10 @@ jobs:
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
         id: pages
 
-      # Uncomment the following lines to deploy the documentation site.
-      # - name: Upload documentation site
-      #   uses: actions/upload-pages-artifact@v3
-      #   with:
-      #     path: "docs/build"
-      #
-      # - name: Deploy documentation site
-      #   uses: actions/deploy-pages@v4
+      - name: Upload documentation site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
+        with:
+          path: "docs/build"
+
+      - name: Deploy documentation site
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5

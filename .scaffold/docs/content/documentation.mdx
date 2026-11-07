@@ -74,11 +74,15 @@ To set up Netlify previews:
 
 ## Publish the site to GitHub Pages
 
-The [Release docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docs.yml) workflow builds the site when you push a tag whose name has no `/`. You can also start it by hand from the **Actions** tab and enter a **Release version**. The site footer shows the tag name, or the version you entered.
+The [Release docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docs.yml) workflow builds the site and deploys it to GitHub Pages when you push a tag whose name has no `/`. You can also start it by hand from the **Actions** tab and enter a **Release version**. The site footer shows the tag name, or the version you entered.
 
-The workflow's upload and deploy steps ship commented out. To publish the site to GitHub Pages on each release, uncomment the `Upload documentation site` and `Deploy documentation site` steps at the end of `.github/workflows/release-docs.yml`.
+The workflow fails until 2 repository settings allow the deploy. Both are required. To set them up before your first release:
 
-The workflow runs in the `pages` concurrency group, so a new run cancels any run in progress. With the steps uncommented, only the most recent run deploys. The job deploys to the `github-pages` environment and sets its URL from the `Setup GitHub pages` step.
+1. In your GitHub repository, click **Settings > Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+2. Click **Settings > Environments > github-pages**. Under **Deployment branches and tags**, add a rule with the **Tag** ref type and the `*` name pattern. The `github-pages` environment accepts only the default branch by default, so a tag run can't deploy without this rule.
+3. Push a tag. In the **Actions** tab, confirm that the Release docs run passes and its job links to the published site.
+
+The workflow runs in the `pages` concurrency group, so a new run cancels any run in progress. Only the most recent run deploys. The job deploys to the `github-pages` environment and sets its URL from the `Setup GitHub pages` step.
 
 ## Embed a terminal recording
 
