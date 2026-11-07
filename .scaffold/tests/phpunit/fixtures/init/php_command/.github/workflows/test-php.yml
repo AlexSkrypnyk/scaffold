@@ -8,4 +8,4 @@
 +          ./dist/star-forge.phar || exit 1
  
        - name: Setup tmate session
-         if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}

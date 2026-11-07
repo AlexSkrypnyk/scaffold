@@ -25,6 +25,7 @@ jobs:
   test-shell:
     name: Shell (${{ matrix.os }})
     strategy:
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
@@ -107,6 +108,6 @@ jobs:
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
       - name: Setup tmate session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
         uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
         timeout-minutes: 30

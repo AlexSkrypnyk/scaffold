@@ -55,7 +55,7 @@ jobs:
         run: docker run --rm yodashut/force-crystal:test
 
       - name: Setup tmate session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
         uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
         timeout-minutes: 30
 
