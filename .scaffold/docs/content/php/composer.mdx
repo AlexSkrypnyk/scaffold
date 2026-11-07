@@ -59,7 +59,7 @@ The [`policy`](https://getcomposer.org/doc/06-config.md#policy) setting controls
 | `advisories.audit` | `"fail"` | `composer audit` fails when an installed package has a known advisory. |
 | `abandoned.audit` | `"report"` | `composer audit` lists abandoned packages and still passes. |
 
-Composer supports `policy` from version 2.10. To stop an older Composer from installing the project, `require-dev` declares `"composer": ">=2.10.2"`. Composer reads `require-dev` only in the root project, so projects that install your package keep their own Composer version. `composer install --no-dev` skips this version check.
+Composer supports `policy` from version 2.10. To stop an older Composer from installing the project, `require-dev` declares `"composer": ">=2.10.3"`. Composer reads `require-dev` only in the root project, so projects that install your package keep their own Composer version. `composer install --no-dev` skips this version check.
 
 To make Composer ignore an advisory after you review it, add its ID and your reason to `ignore-id` in `config.policy.advisories`:
 

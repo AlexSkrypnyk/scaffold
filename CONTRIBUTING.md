@@ -9,7 +9,7 @@ Scaffold is a multi-stack project template. The `.scaffold/` directory holds the
 Make sure you have the following:
 
 - PHP 8.3 or later with the `pcov` extension
-- Composer 2.10.2 or later
+- Composer 2.10.3 or later
 - Node.js 20.20.1 or later, with npm
 
 ## Local development
