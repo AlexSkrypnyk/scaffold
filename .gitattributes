@@ -1,6 +1,6 @@
 # Ignore files for distribution archives.
 
-# Uncomment the lines below in your project (or use init.sh script).
+# Uncomment the lines below in your project (or use install.sh script).
 # /.editorconfig   export-ignore
 # /.gitattributes  export-ignore
 # /.github         export-ignore

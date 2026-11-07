@@ -2,7 +2,7 @@ name: Test Scaffold
 
 # Workflow to **validate** the **integrity** of the scaffold template itself.
 # This workflow will be automatically removed from the scaffolded project
-# after running init.sh script.
+# after running install.sh script.
 
 on:
   push:

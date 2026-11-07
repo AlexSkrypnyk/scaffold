@@ -12,4 +12,4 @@ The workflow, `.github/workflows/assign-author.yml`, runs the [`toshimaru/auto-a
 
 The `pull_request_target` event starts the workflow, so GitHub runs the workflow file from the base branch. Its token can write to pull requests, even on a pull request from a fork. The workflow checks out no pull request code, so a fork's code never runs with that access.
 
-`init.sh` keeps the workflow by default. To leave it out, answer no to the `init.sh` prompt **Use GitHub PR author auto-assign** or pass `--no-pr-autoassign`. In an existing project, delete `.github/workflows/assign-author.yml`.
+`install.sh` keeps the workflow by default. To leave it out, answer no to the `install.sh` prompt **Use GitHub PR author auto-assign** or pass `--no-pr-autoassign`. In an existing project, delete `.github/workflows/assign-author.yml`.

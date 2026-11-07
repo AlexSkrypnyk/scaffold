@@ -1,6 +1,6 @@
-{"version":2,"width":80,"height":24,"idle_time_limit":3,"command":".\/init.sh"}
+{"version":2,"width":80,"height":24,"idle_time_limit":3,"command":".\/install.sh"}
 [0,"o","\u001b[?2004h$ "]
-[1,"o","./init.sh\r\r\n\u001b[?2004l\rPlease follow the prompts to adjust your project configuration\r\r\n\r\r\nNamespace (PascalCase): "]
+[1,"o","./install.sh\r\r\n\u001b[?2004l\rPlease follow the prompts to adjust your project configuration\r\r\n\r\r\nNamespace (PascalCase): "]
 [2,"o","MyNamespace\r\r\nProject: "]
 [3,"o","myproject\r\r\nAuthor: "]
 [4,"o","Alex\r\r\nUse PHP [Y/n]: "]

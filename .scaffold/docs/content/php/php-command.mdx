@@ -8,7 +8,7 @@ cspell: ignore alexskrypnyk
 
 In CLI command mode, your project is a console app built on the [Symfony Console component](https://symfony.com/doc/current/components/console.html). Use it for a tool with several commands or shared logic. This page is for developers building that tool from Scaffold. Follow it to add a command, test it and ship the app. For a tool that does 1 task with no dependencies, see [CLI script](./php-script.mdx).
 
-`init.sh` selects this mode by default. It replaces `php-command` with your project name, or with the value of `--php-command-name`, in filenames and file contents. This page uses the placeholder name, `php-command`.
+`install.sh` selects this mode by default. It replaces `php-command` with your project name, or with the value of `--php-command-name`, in filenames and file contents. This page uses the placeholder name, `php-command`.
 
 ## App structure
 
@@ -79,5 +79,5 @@ For the PHPUnit configuration and coverage reports, see [Testing](./testing.mdx)
 
 Ship the app as a PHAR, as a Composer package or both. Box compiles `bin/php-command` into the PHAR, and Composer links the same file into `vendor/bin`:
 
-- **As a PHAR:** A PHAR is 1 executable file that holds the app and its dependencies, so users need only PHP. `composer build` compiles it into `dist/php-command.phar`. When you push a tag, the `Release PHP` workflow builds the PHAR and attaches it to the GitHub release for the tag. `init.sh` sets up the PHAR build and release unless you pass `--no-phar`. For the build steps, the PHAR version and what `--no-phar` removes, see [PHP packaging](../ci/php-packaging.mdx).
+- **As a PHAR:** A PHAR is 1 executable file that holds the app and its dependencies, so users need only PHP. `composer build` compiles it into `dist/php-command.phar`. When you push a tag, the `Release PHP` workflow builds the PHAR and attaches it to the GitHub release for the tag. `install.sh` sets up the PHAR build and release unless you pass `--no-phar`. For the build steps, the PHAR version and what `--no-phar` removes, see [PHP packaging](../ci/php-packaging.mdx).
 - **As a Composer package:** Publish the project to Packagist.org, the Composer package registry. In a project that requires your package, developers run `vendor/bin/php-command`. The launcher looks for that project's autoloader first and falls back to its own, so it runs both as a dependency and from its own checkout. Git ignores `dist`, so the package holds no PHAR.

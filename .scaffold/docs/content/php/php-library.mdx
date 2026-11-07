@@ -7,10 +7,10 @@ sidebar_position: 4
 
 In library mode, your project is a Composer package that ships classes and no executable. Use it for a Behat context, a PHPUnit extension, a framework plugin or a PSR implementation. This page is for developers building a library from Scaffold. Follow it to select the mode and replace the placeholder class with your own.
 
-To select library mode, turn off both entry points, the [CLI command](./php-command.mdx) app and the [CLI script](./php-script.mdx), when you run `init.sh`:
+To select library mode, turn off both entry points, the [CLI command](./php-command.mdx) app and the [CLI script](./php-script.mdx), when you run `install.sh`:
 
 ```bash
-./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" \
+./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" \
   --php --no-php-command --no-php-script
 ```
 
@@ -18,7 +18,7 @@ Replace the namespace, name and author with your own. In interactive mode, answe
 
 ## What you get
 
-`init.sh` generates the following:
+`install.sh` generates the following:
 
 - `composer.json` with the PSR-4 autoloader and no `bin` section
 - `src/Example.php` and `tests/phpunit/Unit/ExampleUnitTest.php`, a placeholder class and its test
@@ -27,9 +27,9 @@ Replace the namespace, name and author with your own. In interactive mode, answe
 - PHPUnit, configured to report coverage of `src`
 - The `Test PHP` GitHub Actions workflow
 
-`init.sh` leaves out both entry points, `box.json`, the PHAR build and the `Release PHP` workflow. A library has no PHAR or script for that workflow to attach.
+`install.sh` leaves out both entry points, `box.json`, the PHAR build and the `Release PHP` workflow. A library has no PHAR or script for that workflow to attach.
 
-When Renovate is on, which is the default, `init.sh` adds a rule to `renovate.json` so that Renovate skips the `require` section of `composer.json`. Those constraints are your package's public contract, so change them by hand.
+When Renovate is on, which is the default, `install.sh` adds a rule to `renovate.json` so that Renovate skips the `require` section of `composer.json`. Those constraints are your package's public contract, so change them by hand.
 
 ## Add your classes
 

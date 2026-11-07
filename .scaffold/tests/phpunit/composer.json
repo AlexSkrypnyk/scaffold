@@ -59,6 +59,6 @@
             "phpcbf"
         ],
         "test": "phpunit",
-        "update-snapshots": "./vendor/bin/update-snapshots --test-dir=src testInit fixtures/init"
+        "update-snapshots": "./vendor/bin/update-snapshots --test-dir=src testInstall fixtures/install"
     }
 }

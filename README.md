@@ -22,11 +22,11 @@
 
 </div>
 
-Scaffold is a project template for Shell, PHP, NodeJS and Docker projects. The template ships working example code with tests, linters and GitHub Actions workflows. You run `init.sh` to name your project and keep only the stacks and features you pick.
+Scaffold is a project template for Shell, PHP, NodeJS and Docker projects. The template ships working example code with tests, linters and GitHub Actions workflows. You run `install.sh` to name your project and keep only the stacks and features you pick.
 
 ## Features
 
-The template holds every feature, and `init.sh` removes the ones you don't select:
+The template holds every feature, and `install.sh` removes the ones you don't select:
 
 - **Shell**
   - [Single-file script](shell-command.sh) with [BATS tests](tests/bats) and coverage
@@ -56,13 +56,13 @@ The template holds every feature, and `init.sh` removes the ones you don't selec
   - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md) and a [generated logo](logo.png)
   - A [documentation site](docs) built with [Docusaurus](https://docusaurus.io/)
   - Spell check with [CSpell](https://cspell.org/)
-  - An [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component, and the [terminal recorder](.scaffold/assets/update-assets.php) that renders Scaffold's `init.sh` walkthrough as an animated SVG
+  - An [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component, and the [terminal recorder](.scaffold/assets/update-assets.php) that renders Scaffold's `install.sh` walkthrough as an animated SVG
 - **Utility files**
   - [`.editorconfig`](.editorconfig), [`.gitignore`](.gitignore), [`.gitattributes`](.gitattributes)
   - [Renovate bot configuration](renovate.json)
   - [Pull request template](.github/PULL_REQUEST_TEMPLATE.md)
   - [Funding](.github/FUNDING.yml)
-  - [`init.sh`](init.sh), which applies the features you choose
+  - [`install.sh`](install.sh), which applies the features you choose
 - **AI agents**
   - [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) guidance for AI coding agents
   - Optional [architecture documentation](docs/content/architecture/README.md) with Mermaid or PlantUML diagrams, which an AI agent generates and updates with the [`update-architecture-docs`](.claude/skills/update-architecture-docs/SKILL.md) skill
@@ -70,37 +70,37 @@ The template holds every feature, and `init.sh` removes the ones you don't selec
 
 ## Create a project
 
-`init.sh` replaces the `yournamespace`, `yourproject` and `Your Name` strings with your own values. It then keeps the features you choose and removes the rest.
+`install.sh` replaces the `yournamespace`, `yourproject` and `Your Name` strings with your own values. It then keeps the features you choose and removes the rest.
 
 To create a project from a GitHub repository:
 
 1. On GitHub, click **Use this template > Create a new repository**.
 2. Clone your new repository.
-3. In the repository root, run [`./init.sh`](init.sh) and answer the prompts. Confirm that the script ends with `Initialization complete.`<br/>
-   ![An interactive init.sh run, from the first prompt to the summary](.scaffold/assets/init.svg)
+3. In the repository root, run [`./install.sh`](install.sh) and answer the prompts. Confirm that the script ends with `Initialization complete.`<br/>
+   ![An interactive install.sh run, from the first prompt to the summary](.scaffold/assets/install.svg)
 
 ### Non-interactive setup
 
-Pass options to `init.sh` to skip the prompts, for example in automation or from an AI agent. Any option switches the script to non-interactive mode. The `--namespace`, `--name` and `--author` options are required, and every other choice uses its default:
+Pass options to `install.sh` to skip the prompts, for example in automation or from an AI agent. Any option switches the script to non-interactive mode. The `--namespace`, `--name` and `--author` options are required, and every other choice uses its default:
 
 ```bash
-./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-Run `./init.sh --help` for the full list of options.
+Run `./install.sh --help` for the full list of options.
 
 ### Start without a checkout
 
 You can also download and run the script straight from getscaffold.dev. Run it in an **empty directory**. The script downloads Scaffold into that directory and then prompts you for the details:
 
 ```bash
-curl -fsSL https://getscaffold.dev/init.sh | bash
+curl -fsSL https://getscaffold.dev/install.sh | bash
 ```
 
 To run it non-interactively, pass the details as options instead:
 
 ```bash
-curl -fsSL https://getscaffold.dev/init.sh | \
+curl -fsSL https://getscaffold.dev/install.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
@@ -111,7 +111,7 @@ The script downloads the latest release. To pin a tag, branch or commit, add `--
 You can pull later template changes into a project generated from Scaffold and keep its own code. In Claude Code, ask Claude to "update scaffold" in your generated project. Claude fetches the [`update-consumer-scaffold`](.scaffold/skills/update-consumer-scaffold/SKILL.md) skill and follows its steps:
 
 1. Download the latest Scaffold release.
-2. Run `init.sh` again with your project's original answers.
+2. Run `install.sh` again with your project's original answers.
 3. Restore your project-specific files from git.
 4. Reconcile the differences.
 
