@@ -26,55 +26,63 @@
 - Your first feature as a list item
 - Your second feature as a list item
 - Your third feature as a list item
-- AI-maintained architecture documentation in `docs/content/architecture/` via the `update-architecture-docs` skill
+- Architecture documentation in `docs/content/architecture/`, which an AI agent regenerates with the `update-architecture-docs` skill when you ask it to "update architecture docs"
 
 ## Installation
 
+Install the PHP package with Composer:
 
-    composer require yodashut/force-crystal
+```bash
+composer require yodashut/force-crystal
+```
 
+Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
 
+```bash
+chmod +x nodejs-script
+```
 
-Download the latest release from GitHub releases page.
+Copy the shell script, `force-crystal.sh`, from this repository and make it executable:
 
-
-
-Download the latest release from GitHub releases page.
-
+```bash
+chmod +x force-crystal.sh
+```
 
 ## Usage
 
+Run the PHP command that Composer installs:
 
-    vendor/bin/force-crystal
+```bash
+vendor/bin/force-crystal
+```
 
-
-
-    ./nodejs-script value/of/argument
-
-
-
-    ./force-crystal.sh
-
-
-
-### CLI options
+The command takes the following arguments and options:
 
 | Name        | Default value | Description                        |
 |-------------|---------------|------------------------------------|
-| `arg1`      |               | Description of the first argument. |
+| `arg1`      | None          | Description of the first argument. |
 | `--option1` | `default1`    | Option with a default value.       |
-| `--option2` | None          | Option without a value.            |
+| `--option2` | None          | Flag that takes no value.          |
 
+Run the Node.js script with 1 argument:
 
-## Contributing
+```bash
+./nodejs-script value/of/argument
+```
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for local development setup and the
-linting and testing commands.
+Run the shell script and answer its prompts:
 
-## Updating
+```bash
+./force-crystal.sh
+```
 
-To pull the latest infrastructure from the template into this project, ask
-Claude Code to "update scaffold" - see [`AGENTS.md`](AGENTS.md) for details.
+## Contribute
+
+[`CONTRIBUTING.md`](CONTRIBUTING.md) lists the commands that install the dependencies and run the linters and tests.
+
+## Update from the template
+
+To pull the latest infrastructure from the Scaffold template into this project, ask Claude Code to "update scaffold". Claude Code follows the instructions in [`AGENTS.md`](AGENTS.md).
 
 ---
 _This repository was created using the [Scaffold](https://getscaffold.dev/) project template_

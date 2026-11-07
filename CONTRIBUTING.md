@@ -4,6 +4,14 @@ Contributions to Scaffold are welcome. Follow this guide to run the checks that 
 
 Scaffold is a multi-stack project template. The `.scaffold/` directory holds the template's own infrastructure, and [`init.sh`](init.sh) removes it from generated projects. Before you change template files, read the maintenance guide in [`.scaffold/CLAUDE.md`](.scaffold/CLAUDE.md). It documents the template architecture, the `init.sh` token system and the test and fixture workflow.
 
+## Before you begin
+
+Make sure you have the following:
+
+- PHP 8.3 or later with the `pcov` extension
+- Composer 2.10.2 or later
+- Node.js 20.20.1 or later, with npm
+
 ## Local development
 
 The example app is the code at the repository root that `init.sh` turns into a generated project. To test it, run the following commands from the repository root:
@@ -31,6 +39,8 @@ For a change to `init.sh`, also run its BATS unit tests in `.scaffold/tests/bats
 npm --prefix=.scaffold/tests/bats ci
 ./.scaffold/tests/bats/node_modules/.bin/bats .scaffold/tests/bats
 ```
+
+For a change to the getscaffold.dev pages in `.scaffold/docs`, follow [`.scaffold/docs/README.md`](.scaffold/docs/README.md) to build the site and run its tests.
 
 ### Update the fixtures
 

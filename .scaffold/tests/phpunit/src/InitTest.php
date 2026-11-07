@@ -999,6 +999,39 @@ final class InitTest extends UnitTestCase {
     $this->assertStringNotContainsString('created from the acme-app template', $agents);
   }
 
+  /**
+   * Initialization rewrites every file when the project path has spaces.
+   *
+   * The sweep helpers pass absolute paths to 'sed', so a space in the
+   * project path must not split a file name into separate arguments.
+   */
+  public function testInitInPathWithSpaces(): void {
+    self::$fixtures = NULL;
+
+    $target = self::$tmp . DIRECTORY_SEPARATOR . 'path with spaces';
+    $this->processRun('cp', ['-R', self::$sut, $target]);
+    $this->assertProcessSuccessful();
+
+    $this->processCwd = $target;
+    $this->processRun('bash', [
+      './init.sh',
+      '--namespace=AcmeApp',
+      '--name=acme-app',
+      '--author=Jane Doe',
+    ]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $composer = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'composer.json');
+    $this->assertStringContainsString('"name": "acmeapp/acme-app"', $composer);
+    $this->assertStringNotContainsString('yournamespace', $composer);
+
+    $readme = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'README.md');
+    $this->assertStringNotContainsString('yourproject', $readme);
+    $this->assertStringNotContainsString('#;', $readme);
+  }
+
   protected static function defaultAnswers(): array {
     return [
       'namespace' => 'YodasHut',

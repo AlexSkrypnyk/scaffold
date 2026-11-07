@@ -6,23 +6,44 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -39,9 +38,6 @@
+@@ -42,38 +41,18 @@
+ chmod +x nodejs-script
+ ```
  
- 
- 
--Download the latest release from GitHub releases page.
+-Copy the shell script, `force-crystal.sh`, from this repository and make it executable:
 -
+-```bash
+-chmod +x force-crystal.sh
+-```
 -
  ## Usage
  
+-Run the PHP command that Composer installs:
++Run the PHP script that Composer installs, with 1 argument:
  
-@@ -51,9 +47,6 @@
+ ```bash
+-vendor/bin/force-crystal
++vendor/bin/force-crystal value
+ ```
  
-     ./nodejs-script value/of/argument
- 
+-The command takes the following arguments and options:
 -
+-| Name        | Default value | Description                        |
+-|-------------|---------------|------------------------------------|
+-| `arg1`      | None          | Description of the first argument. |
+-| `--option1` | `default1`    | Option with a default value.       |
+-| `--option2` | None          | Flag that takes no value.          |
 -
--    ./force-crystal.sh
+ Run the Node.js script with 1 argument:
  
+ ```bash
+ ./nodejs-script value/of/argument
+-```
+-
+-Run the shell script and answer its prompts:
+-
+-```bash
+-./force-crystal.sh
+ ```
  
- 
+ ## Contribute

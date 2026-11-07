@@ -3,56 +3,52 @@ title: Renovate
 sidebar_position: 4
 ---
 
-# Renovate - Automated dependency updates
+# Renovate
 
-Scaffold configures [Renovate](https://renovatebot.com) to keep a project's dependencies up to date. Renovate scans the project files for dependencies, checks for newer versions and opens pull requests with the changes. This page is for maintainers who want to know which updates Renovate merges on its own, which ones stay manual and how to run Renovate on demand.
+[Renovate](https://renovatebot.com) is a bot that finds your project's dependencies, checks for newer versions and opens pull requests that update them. This page is for maintainers of a project created from Scaffold. It lists what Scaffold's `renovate.json` sets, which updates Renovate merges on its own and which ones you make by hand.
 
-The configuration lives in [`renovate.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/renovate.json).
+After you install the [Renovate GitHub app](https://github.com/apps/renovate) on your repository, the app reads [`renovate.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/renovate.json) and runs on its own schedule. To start a run between the app's runs, see [Run Renovate on demand](renovate-on-demand.mdx).
 
-## Configuration overview
+## Settings
 
 The following table lists the top-level settings in `renovate.json`:
 
-| Setting | Value | Description |
+| Setting | Value | Effect |
 |---|---|---|
-| `extends` | `config:recommended` | Inherits Renovate's recommended base configuration |
-| `automerge` | `true` | If true, Renovate merges a pull request after all its checks pass |
-| `rangeStrategy` | `bump` | Renovate raises the constraint to the new version, such as `^2.3.1` to `^2.3.2` |
-| `dependencyDashboard` | `true` | If true, Renovate opens a GitHub issue that tracks every pending update |
-| `pinDigests` | `true` | If true, Renovate pins Docker images and GitHub Actions to exact digests, so builds are reproducible |
-| `branchPrefix` | `deps/` | Renovate starts every branch name with this prefix |
+| `extends` | `config:recommended` | Inherits Renovate's recommended base configuration. |
+| `automerge` | `true` | If true, Renovate merges a pull request after all its checks pass. |
+| `rangeStrategy` | `bump` | Renovate raises the version constraint to the new version, such as `^2.3.1` to `^2.3.2`. |
+| `dependencyDashboard` | `true` | If true, Renovate opens the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/), a GitHub issue that lists pending updates, updates scheduled for later and failed updates. |
+| `pinDigests` | `true` | If true, Renovate pins Docker images and GitHub Actions to exact digests, so their versions are reproducible. |
+| `branchPrefix` | `deps/` | Renovate starts every branch name with `deps/`. |
 
 ## Update rules
 
-A catch-all rule in `packageRules` sets every package's group to `all dependencies`. Renovate batches the pending updates in that group into a shared pull request.
+Renovate applies the rules in `packageRules`. A catch-all rule puts every package in the `all dependencies` group, with the slug `all`, so Renovate batches the updates into 1 pull request on the `deps/all` branch. Major updates for GitHub Actions and Docker go into a second pull request, on `deps/major-all`.
 
-### Language version constraints
+The following table lists the updates each package manager gets:
 
-Renovate skips the language version constraints, so you update them by hand:
-
-| Constraint | Manager | Why |
+| Manager | Major updates | Minor and patch updates |
 |---|---|---|
-| `php` | Composer | A PHP version change affects the entire runtime environment |
-| `node`, `yarn` | npm | A Node.js or Yarn version change affects the build toolchain |
+| npm | No pull request | Merged automatically |
+| Composer | No pull request | Merged automatically |
+| GitHub Actions | Merged automatically | Merged automatically |
+| Docker | Merged automatically | Merged automatically |
 
-### Major version updates
+A major version can contain breaking changes, so Renovate leaves npm and Composer majors to you. To move a package to a new major version, edit its constraint, then run `composer update` or `npm install`.
 
-Renovate skips major updates for npm and Composer packages, because a major version can contain breaking changes. The following table lists the updates each manager receives:
+Renovate also skips the language version constraints, because each one changes the environment your code runs in. Update these constraints by hand:
 
-| Manager | Major updates | Minor/patch updates |
+| Constraint | File | What it changes |
 |---|---|---|
-| **npm** | Disabled | Enabled (automerge) |
-| **Composer** | Disabled | Enabled (automerge) |
-| **GitHub Actions** | Enabled (automerge) | Enabled (automerge) |
-| **Docker** | Enabled (automerge) | Enabled (automerge) |
+| `php` | `composer.json` | The PHP runtime |
+| `node`, `yarn` | `package.json` | The Node.js build toolchain |
 
-To move an npm or Composer package to a new major version, edit its constraint by hand, then run `composer update` or `npm install`.
+## Class library rule
 
-### Class library `require` constraints
+A class library's `require` block sets the oldest versions its consumers can install. The library commits no `composer.lock`, so bumping `require` changes nothing the library installs and only raises the minimum for every consumer.
 
-A class library's `require` block sets the oldest versions its consumers can install. The library doesn't commit `composer.lock`, so a `bump` of `require` changes nothing the library itself installs. It only raises the minimum for every consumer.
-
-When `init.sh` generates a class library, it adds this rule to `renovate.json`:
+For a class library, `init.sh` adds this rule to `renovate.json`:
 
 ```json
 {
@@ -63,48 +59,20 @@ When `init.sh` generates a class library, it adds this rule to `renovate.json`:
 }
 ```
 
-Renovate keeps updating `require-dev`, which consumers never install. The `matchFileNames` value limits the rule to the root `composer.json`, so a nested `composer.json`, such as a test fixture, still gets `require` updates.
+The rule matches only the root `composer.json`, so a nested `composer.json`, such as a test fixture, still gets `require` updates. Renovate keeps updating `require-dev`, which consumers never install.
 
-## Template initialization
+## Changes `init.sh` makes
 
-`init.sh` adjusts `renovate.json` to the features you select:
+`init.sh` adjusts `renovate.json` to the stacks you select:
 
-| Features selected | Changes to configuration |
+| Stacks selected | Changes to `renovate.json` |
 |---|---|
-| PHP + NodeJS | None: every rule stays |
-| PHP only | Removes the `node`/`yarn` language rule and `"npm"` from the rule that blocks major updates |
-| NodeJS only | Removes the `php` language rule and `"composer"` from the rule that blocks major updates |
-| Neither PHP nor NodeJS | Removes the language rules and the rule that blocks major updates |
-| PHP class library | Adds the rule that disables `require` updates in the root `composer.json` |
+| PHP and Node.js | None |
+| PHP only | Removes the `node`/`yarn` rule and `"npm"` from the rule that blocks major updates |
+| Node.js only | Removes the `php` rule and `"composer"` from the rule that blocks major updates |
+| Neither PHP nor Node.js | Removes the language rules and the rule that blocks major updates |
+| PHP class library | Adds the [class library rule](#class-library-rule) |
 
-When you answer no to "Use Renovate" or pass `--no-renovate`, `init.sh` deletes `renovate.json` and the `update-dependencies.yml` workflow.
+To leave Renovate out of a new project, answer no to the `init.sh` prompt **Use Renovate** or pass `--no-renovate`. `init.sh` then deletes `renovate.json` and the `update-dependencies.yml` workflow.
 
-## Run Renovate on demand
-
-The Renovate GitHub app updates dependencies on its own schedule. To get updates between its runs, start the **Update dependencies** workflow, [`update-dependencies.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/update-dependencies.yml), by hand. The workflow runs Renovate once with your `renovate.json`, and lifts the schedule and pull request limits for that run.
-
-The workflow pushes branches and opens pull requests with a token from the `RENOVATE_TOKEN` repository secret. Use a personal access token with the permissions in Renovate's [GitHub platform guide](https://docs.renovatebot.com/modules/platform/github/). The built-in `GITHUB_TOKEN` can't update workflow files, and its pull requests start no CI runs.
-
-To run Renovate on demand:
-
-1. Add the `RENOVATE_TOKEN` secret under **Settings > Secrets and variables > Actions**. You do this once per repository.
-2. In your repository on GitHub, click **Actions**.
-3. Select the **Update dependencies** workflow.
-4. Click **Run workflow** to open the run options.
-5. Optional: To list the updates in the job log without pushing anything, select **Dry run: report updates without pushing branches or opening pull requests.**
-6. Optional: To troubleshoot a run, select **Enable debug logging.**
-7. Click the green **Run workflow** button. After the run finishes, confirm that the dependency pull requests appear on the **Pull requests** tab.
-
-The workflow commits as `renovate[bot]`, the Renovate app's account, so the app and the workflow update the same branches and pull requests. To commit as another author, set the `RENOVATE_GIT_AUTHOR` repository variable to `Name <email@example.com>`. The workflow leaves the Dependency Dashboard to the app.
-
-## Dependency dashboard
-
-The [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) is a GitHub issue that lists the following:
-
-- Available updates scheduled for later
-- Updates that the configuration rules filter out
-- Failed update attempts and their reasons
-
-## Further reading
-
-For every Renovate option, see the [Renovate Docs](https://docs.renovatebot.com/).
+For every Renovate option, see the [Renovate documentation](https://docs.renovatebot.com/).

@@ -5,33 +5,41 @@ sidebar_position: 4
 
 # Linting
 
-Follow this page to check your shell scripts with ShellCheck and format them with shfmt. Install both tools before you run the commands. The [Test shell workflow](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml) runs both tools in CI, with the same shfmt options.
+[ShellCheck](https://github.com/koalaman/shellcheck) reports warnings and suggestions for Bash and `sh` scripts. [shfmt](https://github.com/mvdan/sh) formats them. This page is for developers who change the shell script or its tests in a project generated from Scaffold. Follow it to run both tools, fix the formatting and turn off a ShellCheck rule.
 
-## Usage
+`init.sh` names the script after your project by default, such as `acme-app.sh`. On this page, use your script's name in place of `shell-command.sh`.
 
-After `init.sh`, the script is named after your project, such as `acme-app.sh`. Use that name in place of `shell-command.sh` in the following commands.
+## Check the scripts
 
-To check the script and the tests, run the following commands in your project root:
+To check the script and the `.bash` and `.bats` files in `tests/bats`:
 
-```bash
-shellcheck shell-command.sh tests/bats/*.bash tests/bats/*.bats
-shfmt -i 2 -ci -s -d shell-command.sh tests/bats/*.bash tests/bats/*.bats
-```
+1. Install ShellCheck and shfmt.
+2. In your project root, run ShellCheck:
 
-ShellCheck reports problems in each file. With `-d`, shfmt prints a diff of the formatting changes it would make.
+   ```bash
+   shellcheck shell-command.sh tests/bats/*.bash tests/bats/*.bats
+   ```
 
-To fix the formatting, run the following command:
+   ShellCheck reports the problems in each file.
+
+3. Run shfmt with `-d`:
+
+   ```bash
+   shfmt -i 2 -ci -s -d shell-command.sh tests/bats/*.bash tests/bats/*.bats
+   ```
+
+   shfmt prints a diff of the formatting changes it would make.
+
+The [Test shell workflow](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml) runs both tools in CI, with the same shfmt options.
+
+## Fix the formatting
+
+To write the formatting changes back to each file, run shfmt with `-w`:
 
 ```bash
 shfmt -i 2 -ci -s -w shell-command.sh tests/bats/*.bash tests/bats/*.bats
 ```
 
-With `-w`, shfmt writes the formatted result back to each file.
+## ShellCheck settings
 
-## ShellCheck
-
-[ShellCheck](https://github.com/koalaman/shellcheck) reports warnings and suggestions for Bash and `sh` scripts. To turn off a rule for a whole file, add a `# shellcheck disable=` comment with the rule's code before the file's first command. `shell-command.sh` uses this comment for `SC2162`.
-
-## shfmt
-
-[shfmt](https://github.com/mvdan/sh) is a shell parser, formatter and interpreter. It supports POSIX shell, Bash and mksh.
+To turn off a ShellCheck rule for a whole file, add a comment such as `# shellcheck disable=SC2086` after the shebang line and before the file's first command. `shell-command.sh` uses this comment for `SC2162`.

@@ -1,0 +1,31 @@
+---
+title: Run Renovate on demand
+sidebar_position: 4.5
+---
+
+# Run Renovate on demand
+
+The Renovate GitHub app updates dependencies on the app's own schedule. To get updates between the app's runs, start the **Update dependencies** workflow, [`update-dependencies.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/update-dependencies.yml), by hand. This page is for maintainers of a project created from Scaffold. For what Renovate updates, see [Renovate](renovate.mdx).
+
+The workflow runs Renovate a single time with your `renovate.json`, and ignores the schedule and the pull request limits for that run. It commits as `renovate[bot]`, the Renovate app's account. It also updates the pull requests the app opened, so the app and the workflow share 1 set of branches. To commit as another author, set the `RENOVATE_GIT_AUTHOR` repository variable to `Name <email@example.com>`. Only the app updates the Dependency Dashboard issue.
+
+## Before you begin
+
+The workflow pushes branches and opens pull requests with the token in the `RENOVATE_TOKEN` repository secret. Without that secret, the workflow fails at its first step. The built-in `GITHUB_TOKEN` can't change files in `.github/workflows`, and its pull requests start no CI runs.
+
+To add the secret:
+
+1. Create a personal access token with the permissions in Renovate's [GitHub platform guide](https://docs.renovatebot.com/modules/platform/github/).
+2. Add the token as the `RENOVATE_TOKEN` secret under **Settings > Secrets and variables > Actions**.
+
+## Start a run
+
+To run Renovate on demand:
+
+1. In your repository on GitHub, click **Actions**.
+2. Select the **Update dependencies** workflow.
+3. Click **Run workflow** to open the run options.
+4. Optional: To list the updates in the job log without pushing anything, select **Dry run: report updates without pushing branches or opening pull requests.**
+5. Optional: To troubleshoot a run, select **Enable debug logging.**
+6. Click the green **Run workflow** button.
+7. After the run finishes, confirm that the **Pull requests** tab lists the dependency pull requests. On a dry run, the job log lists the updates.

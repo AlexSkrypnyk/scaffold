@@ -44,9 +44,20 @@ jobs:
         run: npm run test
         working-directory: '${{ github.workspace }}/docs'
 
+      # A step's 'if' can't read the 'secrets' context, so check the secrets here.
+      - name: Check Netlify secrets
+        id: netlify
+        env:
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+        run: |
+          if [ -n "${NETLIFY_SITE_ID}" ] && [ -n "${NETLIFY_AUTH_TOKEN}" ]; then
+            echo "enabled=true" >> "${GITHUB_OUTPUT}"
+          fi
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@d22a32a27c918fe470bbc562e984f80ec48c2668 # v4.0
-        if: ${{ env.NETLIFY_AUTH_TOKEN != '' && env.NETLIFY_SITE_ID != '' && github.event_name != 'schedule' }}
+        if: ${{ steps.netlify.outputs.enabled == 'true' && github.event_name != 'schedule' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-dir: 'docs/build'

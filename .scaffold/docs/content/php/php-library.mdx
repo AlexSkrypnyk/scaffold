@@ -5,16 +5,16 @@ sidebar_position: 4
 
 # Library
 
-In library mode, `init.sh` sets up a Composer package that ships classes and no executable, such as a Behat context, a PHPUnit extension, a framework plugin or a PSR implementation. It keeps the PHP tooling and drops both entry points: the [CLI command](./php-command.mdx) app and the [CLI script](./php-script.mdx).
+In library mode, your project is a Composer package that ships classes and no executable. Use it for a Behat context, a PHPUnit extension, a framework plugin or a PSR implementation. This page is for developers building a library from Scaffold. Follow it to select the mode and replace the placeholder class with your own.
 
-To select library mode, decline both entry points:
+To select library mode, turn off both entry points, the [CLI command](./php-command.mdx) app and the [CLI script](./php-script.mdx), when you run `init.sh`:
 
 ```bash
 ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" \
   --php --no-php-command --no-php-script
 ```
 
-Replace the namespace, name and author with your own. Interactively, answer "n" to both `Use CLI command app` and `Use simple script`.
+Replace the namespace, name and author with your own. In interactive mode, answer `n` to both the **Use CLI command app** and **Use simple script** prompts.
 
 ## What you get
 
@@ -27,12 +27,23 @@ Replace the namespace, name and author with your own. Interactively, answer "n" 
 - PHPUnit, configured to report coverage of `src`
 - The `Test PHP` GitHub Actions workflow
 
-`init.sh` leaves out `php-command`, `php-script`, `box.json` and the PHAR build. It also leaves out the `Release PHP` workflow, because that workflow exists to attach a build to each tagged release.
+`init.sh` leaves out both entry points, `box.json`, the PHAR build and the `Release PHP` workflow. A library has no PHAR or script for that workflow to attach.
 
-With Renovate enabled (`--renovate`, the default), `init.sh` excludes `require` in `composer.json` from Renovate updates. Those constraints are your package's public contract, so you change them by hand.
+When Renovate is on, which is the default, `init.sh` adds a rule to `renovate.json` so that Renovate skips the `require` section of `composer.json`. Those constraints are your package's public contract, so change them by hand.
 
 ## Add your classes
 
-Replace `Example` with your library's classes under `src/`. Declare them in the `AcmeApp\App\` namespace, where `AcmeApp` is your `--namespace` value. Cover each class with a test in `tests/phpunit/Unit/`.
+PHP_CodeSniffer and PHPStan both report an error when neither `src` nor `tests/phpunit` holds a PHP file, so add your first class before you delete the placeholders.
 
-Add a class of your own before you remove the placeholder pair. PHP_CodeSniffer and PHPStan both report an error when the project holds no PHP file.
+To replace the placeholder pair with your classes:
+
+1. Add your classes under `src/`, in the `AcmeApp\App\` namespace. `AcmeApp` is your `--namespace` value, and `App` stays as is.
+2. Cover each class with a test in `tests/phpunit/Unit/`. Give each test class a `#[CoversClass]` attribute, because `composer test` fails when a test has no coverage metadata.
+3. Delete `src/Example.php` and `tests/phpunit/Unit/ExampleUnitTest.php`.
+4. Run the tests:
+
+   ```bash
+   composer test
+   ```
+
+   Confirm that every test passes.

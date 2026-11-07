@@ -6,15 +6,22 @@ cspell: ignore docblocks drev drevops phpcbf
 
 # Linting
 
-You check PHP code with 3 tools: PHP_CodeSniffer for coding standards, PHPStan for static analysis and Rector for automated refactoring. This page shows how to run them and what each configuration file sets.
+Scaffold sets up 3 tools to check PHP code: PHP_CodeSniffer for coding standards, PHPStan for static analysis and Rector for automated refactoring. Use this page to run the tools in a Scaffold project and to look up what each configuration file sets.
 
-## Usage
+## Commands
 
-To check the code, run `composer lint`. It runs PHP_CodeSniffer, PHPStan and `rector --dry-run`, which report problems without changing files.
+The following table lists the lint commands:
 
-To fix what the tools can fix, run `composer lint-fix`. It runs Rector, then the PHP_CodeSniffer fixer, `phpcbf`. PHPStan has no fixer, so fix its errors by hand.
+| Command | What it does |
+|---------|--------------|
+| `composer lint` | Runs PHP_CodeSniffer, PHPStan and `rector --dry-run`. All 3 report problems without changing files. |
+| `composer lint-fix` | Fixes code with Rector, then with `phpcbf`, the PHP_CodeSniffer fixer. PHPStan has no fixer, so fix its errors by hand. |
 
-PHP_CodeSniffer and PHPStan check these paths, depending on the PHP mode you picked in `init.sh`:
+The `Test PHP` workflow runs `composer lint` in its PHP 8.4 job with the latest dependency versions. See [Test](../ci/test.mdx).
+
+## Checked paths
+
+PHP_CodeSniffer and PHPStan check these paths, depending on the PHP mode:
 
 | Path | PHP mode |
 |------|----------|
@@ -23,45 +30,45 @@ PHP_CodeSniffer and PHPStan check these paths, depending on the PHP mode you pic
 | `php-script` | A CLI script |
 | `tests/phpunit` | Every mode |
 
-`init.sh` renames `bin/php-command` or `php-script` to the name you choose and updates the path in `phpcs.xml` and `phpstan.neon`. To check another directory, add it to both files.
+`init.sh` renames `bin/php-command` or `php-script` to the name you choose and updates its path in `phpcs.xml`, `phpstan.neon` and `rector.php`. To check another directory with PHP_CodeSniffer and PHPStan, add it to `phpcs.xml` and `phpstan.neon`.
 
-The `Test PHP` workflow runs `composer lint` in 1 job of its matrix, the PHP 8.4 job with normal dependencies. See [Test](../ci/test).
+Rector checks every `.php` and `.inc` file outside `vendor` and `node_modules`, so a new directory needs no change to `rector.php`. It also checks the entry point, which has no extension, so `rector.php` lists it by name. To check another file with no extension, add its path to `withPaths()` in `rector.php`.
 
 ## PHP_CodeSniffer
 
-[PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) analyzes PHP files and detects violations of a coding standard.
+[PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer) checks PHP files against a coding standard.
 
-The [`phpcs.xml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpcs.xml) file is a minimal ruleset to customize. It lists the following standards:
+The [`phpcs.xml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpcs.xml) file is a minimal ruleset to customize. It lists the following standards and sniffs:
 
 - The Drupal coding standards, from the [`drupal/coder`](https://www.drupal.org/project/coder) package
 - The DrevOps standard, from the `drevops/phpcs-standard` package
 - `Generic.PHP.RequireStrictTypes`, which requires `declare(strict_types=1);` in every file
 
-Composer installs both packages as development dependencies. In test files, the ruleset allows long array lines and functions without a doc comment. The ruleset also turns on sniff codes, progress and colors in the output.
+Both packages are development dependencies. In test files, which end in `Test.php`, `TestCase.php` or `.test`, PHP_CodeSniffer allows long array lines and functions without a docblock. The ruleset's `arg` entries add sniff codes, progress and colors to the output.
 
-For every option a ruleset accepts, see [the Annotated Ruleset page](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-Ruleset).
+For every ruleset option, see [Annotated ruleset](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-Ruleset).
 
 ## PHPStan
 
-[PHPStan](https://phpstan.org/), the PHP Static Analysis Tool, finds errors in your code without running it. Like a compiler, it checks the code before you run it. It catches whole classes of bugs even before you write tests.
+[PHPStan](https://phpstan.org/) finds errors in your code without running it.
 
-The [`phpstan.neon`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpstan.neon) file sets `level` to `9`. PHPStan's strictest level is `10`. The template's code and tests pass at level `9`. Adjust the level in `phpstan.neon` to suit your project.
+The [`phpstan.neon`](https://github.com/AlexSkrypnyk/scaffold/blob/main/phpstan.neon) file sets `level` to `9`. The template's code and tests pass at that level. To make the checks stricter or looser, change `level`. Level `10` is the strictest.
 
-Test methods and data providers don't need parameter docblocks, so PHPStan ignores the `no value type specified in iterable type array` error in `tests/phpunit`.
+PHPStan ignores the `no value type specified in iterable type array` error in `tests/phpunit`, so test methods and data providers can take `array` parameters without a docblock that types their values.
 
-For the full configuration reference, see the [PHPStan website](https://phpstan.org/config-reference).
+For every setting, see the [PHPStan config reference](https://phpstan.org/config-reference).
 
 ## Rector
 
 [Rector](https://getrector.com/) upgrades and refactors PHP code automatically.
 
-The [`rector.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/rector.php) file is a starting configuration to customize. It turns on the following rules:
+The [`rector.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/rector.php) file is a starting configuration to customize. It lists the following sets and rules:
 
 - The PHP 8.3 upgrade set
 - The `deadCode`, `codeQuality`, `codingStyle`, `typeDeclarations`, `naming`, `instanceOf`, `earlyReturn` and `phpunitCodeQuality` prepared sets
-- The PHPUnit sets for the PHPUnit version installed by Composer
+- The PHPUnit sets for the PHPUnit version that Composer installs
 - `DeclareStrictTypesRector`, which adds `declare(strict_types=1);` to each file
 
-It also turns off 12 rules from those sets. Rector processes every `.php` and `.inc` file in the project, skipping `vendor` and `node_modules`, so it picks up `.php` files in a new directory without a change.
+It also lists 12 rules from those sets to skip. Rector replaces fully qualified class names in code with `use` imports. It leaves global classes such as `\Exception` and the names in docblocks as written.
 
-For the full configuration reference, see the [Rector website](https://getrector.com/documentation/).
+For every setting, see the [Rector documentation](https://getrector.com/documentation/).

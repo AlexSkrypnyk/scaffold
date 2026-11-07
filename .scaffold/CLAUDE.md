@@ -73,6 +73,8 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
+- `DOCS` - Documentation-site content outside `docs/`, such as the docs section
+  of `CONTRIBUTING.dist.md`, removed by `remove_docs()`
 - `AI` - AI agents configuration (`CLAUDE.md`, `AGENTS.md`, `.claude/`)
 - `AI_ARCH_DOCS` - AI architecture documentation in `docs/content/architecture/` (relocated to `docs/architecture/` by `remove_docs()` when the docs site is disabled, with path references rewritten)
 - `AI_ARCH_DOCS_MERMAID` - Mermaid-specific sections of the `update-architecture-docs` skill
@@ -162,17 +164,10 @@ one:
     both error out when pointed at a project holding no PHP file
   - The other two modes drop that pair in `remove_php_library()`
 
-**Key Challenge:** PHP_CodeSniffer cannot scan files without `.php` extension.
-
-**Solution:** Temporary rename workaround in `composer.json`:
-
-```json
-"lint": [
-"cp php-script php-script.php && phpcs; rm php-script.php"
-]
-```
-
-Same pattern used in `phpcs.xml` (`<file>php-script.php</file>`).
+`php-script` and `bin/php-command` have no `.php` extension, so `phpcs.xml`,
+`phpstan.neon` and `rector.php` list them by name inside `PHP_SCRIPT` and
+`PHP_COMMAND` token blocks. Each tool checks a file named explicitly whatever
+its extension.
 
 ## Testing the Template
 

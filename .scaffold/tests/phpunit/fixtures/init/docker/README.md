@@ -8,43 +8,58 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -31,39 +28,12 @@
+@@ -30,50 +27,18 @@
+ 
  ## Installation
  
+-Install the PHP package with Composer:
++Pull the Docker image from Docker Hub:
  
--    composer require yodashut/force-crystal
+ ```bash
+-composer require yodashut/force-crystal
++docker pull yodashut/force-crystal
+ ```
  
- 
+-Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
 -
--Download the latest release from GitHub releases page.
+-```bash
+-chmod +x nodejs-script
+-```
 -
+-Copy the shell script, `force-crystal.sh`, from this repository and make it executable:
 -
--
--Download the latest release from GitHub releases page.
--
+-```bash
+-chmod +x force-crystal.sh
+-```
 -
  ## Usage
  
+-Run the PHP command that Composer installs:
++Run a container from the Docker image:
  
--    vendor/bin/force-crystal
- 
+ ```bash
+-vendor/bin/force-crystal
+-```
 -
--
--    ./nodejs-script value/of/argument
--
--
--
--    ./force-crystal.sh
--
--
--
--### CLI options
+-The command takes the following arguments and options:
 -
 -| Name        | Default value | Description                        |
 -|-------------|---------------|------------------------------------|
--| `arg1`      |               | Description of the first argument. |
+-| `arg1`      | None          | Description of the first argument. |
 -| `--option1` | `default1`    | Option with a default value.       |
--| `--option2` | None          | Option without a value.            |
+-| `--option2` | None          | Flag that takes no value.          |
+-
+-Run the Node.js script with 1 argument:
+-
+-```bash
+-./nodejs-script value/of/argument
+-```
+-
+-Run the shell script and answer its prompts:
+-
+-```bash
+-./force-crystal.sh
++docker run --rm yodashut/force-crystal
+ ```
  
- 
- ## Contributing
+ ## Contribute

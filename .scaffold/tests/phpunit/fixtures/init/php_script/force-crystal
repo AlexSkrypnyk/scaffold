@@ -107,7 +107,7 @@ function verbose(string $string, ...$args): array {
 // @codeCoverageIgnoreStart
 ini_set('display_errors', 1);
 
-if (PHP_SAPI != 'cli' || !empty($_SERVER['REMOTE_ADDR'])) {
+if (PHP_SAPI !== 'cli' || !empty($_SERVER['REMOTE_ADDR'])) {
   die('This script can be only ran from the command line.');
 }
 
@@ -122,7 +122,7 @@ if (getenv('SCRIPT_RUN_SKIP') != 1) {
   });
 
   try {
-    $argv = is_array($_SERVER['argv'] ?? NULL) ? array_filter($_SERVER['argv'], 'is_string') : [];
+    $argv = is_array($_SERVER['argv'] ?? NULL) ? array_filter($_SERVER['argv'], is_string(...)) : [];
     $argc = is_scalar($_SERVER['argc'] ?? NULL) ? (int) $_SERVER['argc'] : 0;
     // main() throws exceptions instead of returning an exit code.
     main($argv, $argc);
@@ -130,7 +130,7 @@ if (getenv('SCRIPT_RUN_SKIP') != 1) {
   catch (\ErrorException $exception) {
     if ($exception->getSeverity() <= E_USER_WARNING) {
       verbose(PHP_EOL . 'RUNTIME ERROR: ' . $exception->getMessage() . PHP_EOL);
-      exit($exception->getCode() == 0 ? 1 : $exception->getCode());
+      exit($exception->getCode() === 0 ? 1 : $exception->getCode());
     }
   }
   catch (\Exception $exception) {

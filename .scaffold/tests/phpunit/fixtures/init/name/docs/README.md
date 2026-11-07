@@ -2,5 +2,5 @@
 -# ForceCrystal documentation
 +# StarForge documentation
  
- This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+ `docs` holds the source of this project's documentation site, which is built with [Docusaurus](https://docusaurus.io/). Follow this page to run the site locally and build it. Run every command from the `docs` directory.
  

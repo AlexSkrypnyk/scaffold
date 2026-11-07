@@ -5,40 +5,30 @@ sidebar_position: 5
 
 # Release Drafter
 
-[Release Drafter](https://github.com/release-drafter/release-drafter) is a GitHub Action that keeps a draft GitHub release up to date. The draft lists the pull requests merged since the last release, with their authors. This page is for maintainers of a project created from Scaffold. It covers how to pick a versioning scheme and what the release notes configuration sets.
-
-`init.sh` keeps Release Drafter by default. To leave it out of a new project, answer no to the `init.sh` prompt **Use GitHub release drafter**, or pass `--no-release-drafter` to `init.sh`. To remove it from an existing project, delete `.github/workflows/draft-release-notes.yml` and `.github/release-drafter.yml`.
+[Release Drafter](https://github.com/release-drafter/release-drafter) is a GitHub Action that keeps a draft GitHub release up to date. The draft lists the pull requests merged since the last release, with their authors. This page is for maintainers of a project created from Scaffold. It covers when the draft updates, how it gets its version and what each setting in its configuration does.
 
 ## Workflow
 
-The `Draft release notes` workflow in `.github/workflows/draft-release-notes.yml` runs Release Drafter on every push to the `main` branch and on every tag push. Each run updates the draft from the settings in `.github/release-drafter.yml`. The workflow authenticates with `GITHUB_TOKEN`, the token GitHub creates for every run, so you add no secret.
+The `Draft release notes` workflow, `.github/workflows/draft-release-notes.yml`, runs Release Drafter on every push to the `main` branch and on every tag push. Each run updates the draft from `.github/release-drafter.yml`. The workflow authenticates with `GITHUB_TOKEN`, the token GitHub creates for every run, so it needs no secret.
 
-To release, publish the draft as it is or edit it first. The [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page of the Scaffold repository shows releases drafted this way.
+To release, publish the draft on your repository's **Releases** page. Edit it first if you need to. The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows releases drafted this way.
 
-## Versioning scheme configuration
+`init.sh` keeps Release Drafter by default. To leave it out of a new project, answer no to the `init.sh` prompt **Use GitHub release drafter**, or pass `--no-release-drafter`. To remove it from an existing project, delete `.github/workflows/draft-release-notes.yml` and `.github/release-drafter.yml`.
 
-Each draft gets its version from 1 of 2 versioning schemes:
+## Version schemes
 
-- **[SemVer (Semantic Versioning)](https://semver.org/)**, the default: Release Drafter bumps the last release's version. Scaffold's configuration makes every draft bump the minor version, so `2.4.3` becomes `2.5.0`. See [`version-resolver.default: minor`](#version-resolverdefault-minor).
-- **[CalVer (Calendar Versioning)](https://calver.org/)**: the workflow builds a `YY.M.0` version from the run date, such as `25.1.0` for January 2025 or `25.12.0` for December 2025. The patch number is always `0`, so the draft for a second release in the same month carries the same version and tag as the first release.
+The workflow reads the `RELEASE_VERSION_SCHEME` repository variable to pick the versioning scheme of each draft:
 
-The `RELEASE_VERSION_SCHEME` repository variable selects the scheme. The value `calver` selects CalVer. Any other value, or no variable, selects SemVer.
+| `RELEASE_VERSION_SCHEME` | Scheme | Next version |
+|---|---|---|
+| Unset, or any value other than `calver` | [Semantic Versioning (SemVer)](https://semver.org/) | The last release's version with the minor part bumped, so `2.4.3` becomes `2.5.0` |
+| `calver` | [Calendar Versioning (CalVer)](https://calver.org/) | `YY.M.0` from the run date, such as `25.1.0` for January 2025 or `25.12.0` for December 2025 |
 
-### Choose a versioning scheme
+Under CalVer, the patch number is always `0`. After you publish a release, the next draft in the same month gets the same version and tag as that release.
 
-SemVer needs no setup. To switch to CalVer:
+Set the variable on the **Variables** tab of your repository's **Settings > Secrets and variables > Actions**. After you set it to `calver`, the **Set version** step of the next `Draft release notes` run logs `Using CalVer:` and the version.
 
-1. In your repository on GitHub, click **Settings**.
-2. Click **Secrets and variables > Actions**.
-3. Click the **Variables** tab.
-4. Click **New repository variable**.
-5. In **Name**, enter `RELEASE_VERSION_SCHEME`.
-6. In **Value**, enter `calver`.
-7. Click **Add variable**.
-
-Confirm that the workflow's **Set version** step logs `Using CalVer:` followed by the version on its next run.
-
-## Release notes
+## Configuration
 
 Scaffold's [`.github/release-drafter.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/release-drafter.yml) sets the release name, the tag and the layout of the notes:
 
@@ -47,55 +37,33 @@ import MyComponentSource from '!!raw-loader!../../../../.github/release-drafter.
 
 <CodeBlock language="jsx">{MyComponentSource}</CodeBlock>
 
-The following sections describe each setting.
+Several settings use `$RESOLVED_VERSION`, the next version. Under SemVer, Release Drafter calculates it from `version-resolver`. Under CalVer, the workflow passes the CalVer version to Release Drafter, which uses it as `$RESOLVED_VERSION`.
 
-### `name-template: '$RESOLVED_VERSION'`
+The following table describes each setting:
 
-- **What it does**: Sets the release name.
-- **Variables**: `$RESOLVED_VERSION` is the next version. Under SemVer, `version-resolver` calculates it. Under CalVer, the workflow sets it.
-- **Example**: If the last release is `2.4.3` and `version-resolver` bumps the minor version, the next version is `2.5.0`. The draft release is named `2.5.0`.
+| Setting | Effect | Example |
+|---|---|---|
+| `name-template` | Sets the release name. | A next version of `2.5.0` names the draft `2.5.0`. |
+| `tag-template` | Sets the Git tag that publishing the release creates. | A next version of `2.5.0` creates the tag `2.5.0`. |
+| `change-template` | Formats each merged pull request from its title (`$TITLE`), its author's username (`$AUTHOR`) and its number (`$NUMBER`). | Pull request 42, titled `Fix bug` and opened by `Alice`, appears as `- Fix bug @Alice (#42)`. |
+| `change-title-escapes` | Escapes `\`, `<`, `*`, `_` and `&` in `$TITLE`, so Markdown doesn't format them. | `Fix <bug> & improvements` appears in the Markdown as `Fix \<bug> \& improvements`. |
+| `version-resolver.default` | Sets the version part to bump when no label rule matches. A label rule maps pull request labels to a version part, and the file defines none, so every SemVer draft bumps the minor version. | `2.4.3` becomes `2.5.0`. |
+| `template` | Sets the layout of the release notes. | See the following table. |
 
-### `tag-template: '$RESOLVED_VERSION'`
+To stop titles from creating mentions, add `@` to the `change-title-escapes` string. Add `#` to stop issue links, and a backtick to stop code formatting. The author mention comes from `@$AUTHOR` in `change-template`, so it stays.
 
-- **What it does**: Sets the Git tag that publishing the release creates.
-- **Variables**: `$RESOLVED_VERSION`, as in `name-template`.
-- **Example**: If the next version is `2.5.0`, the Git tag is `2.5.0`.
+The following table lists the lines of `template`:
 
-### `change-template: '- $TITLE @$AUTHOR (#$NUMBER)'`
+| Line | Renders as |
+|---|---|
+| `## What's new since $PREVIOUS_TAG` | A heading naming the last release's tag, such as `## What's new since 2.4.3` |
+| `$CHANGES` | Every merged pull request, formatted by `change-template` |
+| `**Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$RESOLVED_VERSION` | A link that compares the last tag with the new version, such as `https://github.com/owner/repo/compare/2.4.3...2.5.0` |
+| `$CONTRIBUTORS` | The usernames of the people who authored or committed changes in the release, such as `@Alice and @Bob` |
 
-- **What it does**: Formats each merged pull request in the release notes.
-- **Variables**: `$TITLE` is the pull request title. `$AUTHOR` is the username of the pull request author. `$NUMBER` is the pull request number.
-- **Example**: Pull request `42`, titled `Fix bug` and opened by `Alice`, appears as `- Fix bug @Alice (#42)`.
+For 2 merged pull requests, `$CHANGES` renders as:
 
-### `change-title-escapes: '\<*_&'`
-
-- **What it does**: Escapes characters in `$TITLE` so Markdown doesn't format them.
-- **Characters**: `\`, `<`, `*`, `_` and `&`. Add `@` and `#` to stop titles from creating mentions and issue links, and add a backtick to stop code formatting. `@$AUTHOR` in `change-template` still mentions the author.
-- **Example**: A pull request titled `Fix <bug> & improvements` appears in the Markdown of the notes as `Fix \<bug> \& improvements`.
-
-### `version-resolver.default: minor`
-
-- **What it does**: Sets the version part to bump when no label rule matches. A label rule maps pull request labels to a version part, and Scaffold's configuration defines none. Every draft bumps the minor version.
-- **Override**: Under CalVer, the workflow passes its own version to Release Drafter. That version replaces the resolved version.
-
-### `template: |`
-
-- **What it does**: Sets the layout of the release notes.
-- **Variables**: The template holds these lines and placeholders:
-
-    - **`## What's new since $PREVIOUS_TAG`**: A heading naming the last release's tag.
-        - **Example**: If the previous tag was `2.4.3`, this renders as `## What's new since 2.4.3`.
-
-    - **`$CHANGES`**: Every merged pull request, formatted by `change-template`.
-        - **Example**: 2 merged pull requests render as:
-
-          ```text
-          - Fix bug @Alice (#42)
-          - Add feature @Bob (#43)
-          ```
-
-    - **`**Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$RESOLVED_VERSION`**: A link that compares the previous tag with the new version. `$OWNER` and `$REPOSITORY` name your repository.
-        - **Example**: The rendered URL is `https://github.com/owner/repo/compare/2.4.3...2.5.0`.
-
-    - **`$CONTRIBUTORS`**: The usernames of the people who authored or committed changes in this release.
-        - **Example**: If Alice and Bob contributed, the line lists `@Alice` and `@Bob`.
+```text
+- Fix bug @Alice (#42)
+- Add feature @Bob (#43)
+```

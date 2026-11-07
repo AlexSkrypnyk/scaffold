@@ -5,48 +5,27 @@ sidebar_position: 5
 
 # CI
 
-Scaffold ships GitHub Actions workflows that lint, test and release your project. This section describes each workflow, for anyone maintaining a project created from Scaffold.
+Scaffold ships continuous integration (CI) workflows that lint, test and release your project, and a configuration for Renovate, a bot that updates your dependencies. This section is for maintainers of a project created from Scaffold. Use it to look up what each workflow runs, when it runs and how to change its behavior.
 
-Continuous integration (CI) is the practice of merging changes into a shared repository often. A CI service runs automated builds and tests on each merge to catch bugs early. CI is also the base for continuous delivery and continuous deployment, together called CI/CD. Read more about CI:
+The workflows run on GitHub Actions, the CI service built into GitHub. A workflow is a YAML file in your repository's `.github/workflows` directory. An event starts it, such as a push, a pull request, a schedule or a manual run. Each workflow runs 1 or more jobs, and each job runs its steps in order on a runner, a machine GitHub provides.
 
-- [Wikipedia](https://en.wikipedia.org/wiki/Continuous_integration).
-- [GitHub](https://resources.github.com/ci-cd/).
-- [Atlassian](https://www.atlassian.com/continuous-delivery/continuous-integration).
+The following table lists the pages in this section:
 
-## GitHub Actions
+| Page | Covers |
+|---|---|
+| [Test](test.mdx) | The workflows that lint and test your code and check coverage against a threshold |
+| [Release](release.mdx) | The workflows that run when you release, and the assets they publish |
+| [Auto assign PR](auto-assign-pr.mdx) | The workflow that assigns each pull request to its author |
+| [Renovate](renovate.mdx) | The updates Renovate makes on its schedule |
+| [Run Renovate on demand](renovate-on-demand.mdx) | Starting Renovate by hand |
+| [Release Drafter](release-drafter.mdx) | The workflow that drafts release notes, and its settings |
+| [PHP packaging](php-packaging.mdx) | Building a PHP console app into a single PHAR file |
+| [SSH into a GitHub Actions runner](ssh-runner.mdx) | Opening a shell on the runner of a test workflow's job |
 
-GitHub Actions is GitHub's CI/CD service, so your builds need no external CI tool. A workflow is a YAML file in your repository's `.github/workflows` directory. Events such as pushes, pull requests, a schedule or a manual start trigger it. Each workflow runs 1 or more jobs, and each job runs its steps in order on a runner, a machine GitHub provides.
+## Background reading
 
-The pages in this section cover what Scaffold ships:
+For more on CI and continuous delivery, together called CI/CD, see these pages:
 
-- [Test](/ci/test): the workflow that lints and tests your code
-- [Release](/ci/release): the workflows that run when you release
-- [Auto assign PR](/ci/auto-assign-pr): the workflow that assigns each pull request to its author
-- [Renovate](/ci/renovate): the bot that opens pull requests to update dependencies
-- [Release drafter](/ci/release-drafter): the workflow that drafts release notes
-- [PHP packaging](/ci/php-packaging): building a PHP console app into a single PHAR file
-
-### SSH into a GitHub Actions runner
-
-The `Test PHP`, `Test Node.js`, `Test shell` and `Test Docker` workflows end each test job with a **Setup tmate session** step. That step runs the [mxschmitt/action-tmate](https://github.com/mxschmitt/action-tmate) action, which shares the runner's terminal over SSH through tmate. GitHub runs the step only when you start the workflow by hand with **Enable terminal session.** selected. The step comes after the job's other steps and runs even when one of them fails.
-
-The action connects to the public tmate server. If that server is unavailable, follow the [action-tmate README](https://github.com/mxschmitt/action-tmate#readme) to use a tmate server of your own.
-
-You need write access to the repository and an SSH client. To open an SSH session on a runner:
-
-1. In your repository on GitHub, click **Actions**.
-2. Select the workflow to debug, such as **Test PHP**.
-3. Click **Run workflow** to open the run options.
-4. Select the **Enable terminal session.** checkbox.
-5. In the run options, click the green **Run workflow** button.
-6. Click the new run.
-7. Click the job to debug. After the other steps finish, the **Setup tmate session** step prints the SSH details in the job log:
-
-   ```text
-   SSH: ssh qdpBWKjyXTsEsaSQxR8EscUuH@nyc1.tmate.io
-   or: ssh -i <path-to-private-SSH-key> qdpBWKjyXTsEsaSQxR8EscUuH@nyc1.tmate.io
-   ```
-
-8. In your terminal, run the first `ssh` command from the log. If your SSH client needs a specific private key, run the second command with the path to that key.
-
-The session stays open until you exit the shell, or until 30 minutes after GitHub starts the step.
+- [Continuous integration on Wikipedia](https://en.wikipedia.org/wiki/Continuous_integration)
+- [CI/CD on GitHub Resources](https://resources.github.com/ci-cd/)
+- [Continuous integration on Atlassian](https://www.atlassian.com/continuous-delivery/continuous-integration)

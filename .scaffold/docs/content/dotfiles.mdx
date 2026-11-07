@@ -5,11 +5,11 @@ sidebar_position: 6
 
 # Dotfiles
 
-Scaffold adds 3 dotfiles to every generated project. They set editor formatting, the files Git tracks and the contents of release archives. This page is for developers who want to know what each file sets before they change it.
+Scaffold adds `.editorconfig`, `.gitignore` and `.gitattributes` to every generated project. They set editor formatting, the files Git ignores and the contents of distribution archives. This page is for developers about to change them.
 
 ## `.editorconfig`
 
-`.editorconfig` sets the indentation and formatting rules for each file type. Editors that support the [EditorConfig](https://editorconfig.org/) standard apply those rules, so every supporting editor writes files the same way.
+`.editorconfig` sets the indentation and formatting rules for each file type. Editors that support the [EditorConfig](https://editorconfig.org/) standard apply those rules, so every supporting editor applies the same indentation and whitespace settings.
 
 The template's [`.editorconfig`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.editorconfig) sets the following defaults for every file:
 
@@ -17,21 +17,29 @@ The template's [`.editorconfig`](https://github.com/AlexSkrypnyk/scaffold/blob/m
 - Indentation with 2 spaces
 - Trailing whitespace trimmed and a final newline added
 
-A section for `.json`, `.lock` and `.xml` files sets 4-space indentation instead.
+`.json`, `.lock` and `.xml` files get 4-space indentation instead.
 
 ## `.gitignore`
 
-`.gitignore` lists the files and directories that Git doesn't track, such as dependencies and build artifacts.
+`.gitignore` lists the paths Git ignores, such as dependencies and build artifacts. `init.sh` removes the template's [`.gitignore`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitignore) entries for the features you don't select.
 
-The template's [`.gitignore`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitignore) covers what PHP and Node.js projects commonly produce. `init.sh` removes the entries for languages you don't select.
+In the generated project, Git ignores the following paths:
+
+- `/.logs`, which holds code coverage reports and test logs
+- `/.artifacts/`, which holds temporary output from AI agents and developers
+- On a PHP project, `/vendor`, `/composer.lock` and `/.phpunit.cache`, plus `/dist` and `/vendor-bin` when the project builds a PHAR
+- On a Node.js project, `/node_modules`, `/package-lock.json` and `/yarn.lock`
+- When you select AI agents, `/.claude/settings.local.json` and `/.claude/skills/update-consumer-scaffold/`, both described in [AI integration](./ai-integration.mdx)
+
+When you select AI agents, the file also holds `!/.claude/`. That line lets you commit `.claude/settings.json` even when a global `.gitignore` ignores `.claude`.
 
 To ignore temporary files your operating system creates, use a [global `.gitignore`](https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer). For the pattern syntax, see the [`gitignore` documentation](https://git-scm.com/docs/gitignore).
 
 ## `.gitattributes`
 
-`.gitattributes` sets Git attributes path by path. In a generated project, it marks files and directories `export-ignore`, so `git archive` leaves them out of distribution archives. GitHub builds the source archive of a release with `git archive`.
+`.gitattributes` sets Git attributes path by path. In a generated project, it marks files and directories `export-ignore`, so `git archive` leaves them out of distribution archives. The template's [`.gitattributes`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitattributes) holds its `export-ignore` lines commented out. `init.sh` removes the lines for the features you don't select and uncomments the rest.
 
-The template's [`.gitattributes`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitattributes) holds its `export-ignore` lines commented out, and `init.sh` uncomments them. In the generated project, `git archive` leaves out the following paths:
+In the generated project, `git archive` leaves out the following paths:
 
 - `.editorconfig`, `.gitattributes`, `.gitignore`, `.github` and `logo.png`
 - `docs`, when the project has a `docs` directory

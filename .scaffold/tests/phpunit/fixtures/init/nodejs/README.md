@@ -6,41 +6,37 @@
  [![Test Node.js](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml)
  [![Test Shell](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml)
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
-@@ -31,10 +30,7 @@
+@@ -30,12 +29,6 @@
+ 
  ## Installation
  
- 
--    composer require yodashut/force-crystal
- 
+-Install the PHP package with Composer:
 -
+-```bash
+-composer require yodashut/force-crystal
+-```
 -
- Download the latest release from GitHub releases page.
+ Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
  
+ ```bash
+@@ -49,20 +42,6 @@
+ ```
  
-@@ -45,10 +41,7 @@
  ## Usage
- 
- 
--    vendor/bin/force-crystal
- 
 -
+-Run the PHP command that Composer installs:
 -
-     ./nodejs-script value/of/argument
- 
- 
-@@ -55,15 +48,6 @@
- 
-     ./force-crystal.sh
- 
+-```bash
+-vendor/bin/force-crystal
+-```
 -
--
--### CLI options
+-The command takes the following arguments and options:
 -
 -| Name        | Default value | Description                        |
 -|-------------|---------------|------------------------------------|
--| `arg1`      |               | Description of the first argument. |
+-| `arg1`      | None          | Description of the first argument. |
 -| `--option1` | `default1`    | Option with a default value.       |
--| `--option2` | None          | Option without a value.            |
+-| `--option2` | None          | Flag that takes no value.          |
  
+ Run the Node.js script with 1 argument:
  
- ## Contributing

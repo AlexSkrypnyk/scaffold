@@ -6,51 +6,45 @@ cspell: ignore kcov
 
 # Testing
 
-Follow this page to run and write tests for your shell script with [BATS](https://github.com/bats-core/bats-core). The template ships the BATS configuration and example tests in [`tests/bats`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/bats).
+You test your shell script with [BATS](https://github.com/bats-core/bats-core), the Bash Automated Testing System, and CI measures coverage with kcov. This page is for developers who change the shell script or its tests in a project generated from Scaffold. Follow it to run the tests, write your own and find the coverage reports.
 
-## BATS
+## Run the tests
 
-[BATS](https://github.com/bats-core/bats-core) is a TAP-compliant testing framework for Bash. It verifies that the UNIX programs you write behave as expected.
+The example tests use [BATS Helpers](https://bats-helpers.drevops.com/), a library that adds assertions, data providers, mocking and step runners to BATS.
 
 To run the tests from your project root:
 
-1. Install BATS and the BATS Helpers library from [`tests/bats/package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/package.json):
+1. Install BATS and BATS Helpers with npm from [`tests/bats/package.json`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/package.json):
 
    ```bash
    npm ci --prefix tests/bats
    ```
 
-2. Run every test:
+2. Commit your changes to the script, because `shell-command.bats` runs the script from a copy of your last commit.
+3. Run every test:
 
    ```bash
    ./tests/bats/node_modules/.bin/bats tests/bats
    ```
 
-   Confirm that BATS reports no failures.
+   Confirm that BATS reports no failures. 2 of the example tests call a live joke API, so they fail without network access.
 
 ## Write tests
 
-[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) holds 4 example tests. Each test runs the script in 1 of the following ways:
+[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) holds 4 example tests. Each test runs the script with the `tui_run` function from BATS Helpers, which feeds answers to the script's prompts. The tests cover the following cases:
 
-- With answers typed at its prompts, calling the live joke API
-- With a topic argument, calling the live joke API
-- With an `n` answer to its `Proceed?` question
-- With a mocked `curl` call
+- Answers to the topic prompt and the `Proceed?` question, calling the live joke API
+- A topic answer and `SHOULD_PROCEED=y`, so the script skips the `Proceed?` question and calls the live joke API
+- A topic answer and `SHOULD_PROCEED=n`, so the script stops
+- A topic answer and a mock of the `curl` call, set up with the `steps_run` function from BATS Helpers
 
-The 2 tests that call the live joke API need network access.
-
-`shell-command.bats` loads [`_helper.bash`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/_helper.bash), which sets up the BATS environment for every test:
+`shell-command.bats` loads [`_helper.bash`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/_helper.bash), which sets up every test:
 
 - It stops the run unless you start BATS from the project root.
 - It loads BATS Helpers.
 - It creates a temporary build directory and runs each test inside it.
-
-`shell-command.bats` sets `BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1`, so its tests run against a copy of your last commit. Commit your changes to the script before you run the tests.
+- It copies your last commit into the build directory when a test file sets `BATS_HELPERS_FIXTURE_EXPORT_CODEBASE_ENABLED=1`, as `shell-command.bats` does.
 
 ## Coverage
 
-In CI, the [Test shell workflow](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml) measures coverage with kcov on the `ubuntu-latest` runner. It writes HTML and Cobertura (`cobertura.xml`) reports to `.logs/.coverage-html` and uploads the `.logs/.coverage-html` directory as a build artifact. When the `CODECOV_TOKEN` secret is set, it also uploads the reports to [Codecov](https://codecov.io/).
-
-## BATS Helpers
-
-[BATS Helpers](https://bats-helpers.drevops.com/) adds assertions, data providers, helpers, mocking and step runners to BATS. Its source lives on [GitHub](https://github.com/drevops/bats-helpers). The example tests use its `tui_run` function to run the script with prompt answers and its `steps_run` function to mock `curl`.
+In CI, the [Test shell workflow](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml) runs the tests under kcov on the `ubuntu-latest` runner to measure coverage. It writes HTML and Cobertura (`cobertura.xml`) reports to `.logs/.coverage-html` and uploads that directory as a build artifact. When the `CODECOV_TOKEN` secret is set, it also uploads the reports to [Codecov](https://codecov.io/).

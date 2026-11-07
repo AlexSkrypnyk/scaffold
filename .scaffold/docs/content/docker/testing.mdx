@@ -5,12 +5,18 @@ sidebar_position: 4
 
 # Testing
 
-The [`test-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docker.yml) workflow lints the `Dockerfile` and checks that the image builds and starts. It runs on every push to `main` and on every pull request to `main` or a `feature/**` branch. Its test job runs the following steps:
+The [`test-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-docker.yml) workflow lints the `Dockerfile` and checks that the image builds and that a container from it exits without an error. This page is for developers who change the `Dockerfile` or `entrypoint.sh` in a project generated from Scaffold. It covers when the workflow runs and what it checks.
 
-1. Lints the `Dockerfile` with Hadolint. See [Linting](linting).
+## When the workflow runs
+
+The workflow runs on every push to `main` and on every pull request that targets `main` or a `feature/**` branch. When a pull request breaks the `Dockerfile` or `entrypoint.sh`, the workflow fails, so you see the break before you merge. The workflow also has daily and manual runs. See [Trigger conditions](../ci/test.mdx#trigger-conditions).
+
+## What the workflow checks
+
+The workflow's `Docker` job runs the following steps:
+
+1. Lints the `Dockerfile` with Hadolint. To let the job pass when Hadolint fails, set the `CI_LINT_IGNORE_FAILURE` repository variable to `1`. See [Linting](./linting.mdx).
 2. Builds the image with Docker Buildx.
-3. Runs a container from the image, which runs `entrypoint.sh`. The step fails when the container exits with an error.
+3. Runs a container from the image. The step fails when `entrypoint.sh` exits with an error.
 
-A pull request that breaks the `Dockerfile` or `entrypoint.sh` fails this workflow before it's merged. When the `CI_LINT_IGNORE_FAILURE` repository variable is `1`, a Hadolint failure lets the workflow pass.
-
-On a push to `main`, after the test job passes, the same workflow publishes a `canary` image. See [Publishing](publishing).
+On a push to `main`, after the `Docker` job passes, the `Docker canary` job publishes a `canary` image. See [Publishing](./publishing.mdx).

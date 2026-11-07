@@ -1,12 +1,19 @@
-@@ -4,11 +4,6 @@
- setting up a local environment and running the linting and tests.
+@@ -2,18 +2,6 @@
  
+ Thank you for considering a contribution to this project. Follow this guide to install the dependencies and run the same linters and tests that CI runs on your pull request. Run the section for each stack your change touches, from the repository root.
  
--    composer install
--    composer lint
--    composer test
+-## PHP
 -
+-Install the dependencies, then run the linters and the tests:
 -
+-```bash
+-composer install
+-composer lint
+-composer test
+-```
+-
+-To fix the PHP_CodeSniffer and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, enable the PCOV or Xdebug extension and run `composer test-coverage`. Xdebug also needs `XDEBUG_MODE=coverage`.
+-
+ ## Node.js
  
-     npm install
-     npm run lint
+ Install the dependencies, then run the linters and the tests:

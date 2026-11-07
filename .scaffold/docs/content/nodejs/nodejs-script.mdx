@@ -1,36 +1,41 @@
 ---
-title: NodeJS CLI Script
+title: NodeJS CLI script
 sidebar_position: 2
 ---
 
-# CLI Script
+# CLI script
 
-[`nodejs-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/nodejs-script) is a NodeJS template for a single-file command-line interface (CLI) script. It uses only the Node.js standard library, so you can distribute and run it as 1 file. This page shows how to turn the template into your own script and test it.
+[`nodejs-script`](https://github.com/AlexSkrypnyk/scaffold/blob/main/nodejs-script) is a template for a single-file NodeJS command-line interface (CLI) script. It uses only the Node.js standard library, so you can distribute and run it as 1 file. This page is for developers who build their own script from the template in a project generated from Scaffold. Follow it to turn the template into your script.
+
+## Template features
 
 The template provides the following:
 
-- **Portable shebang**: With the first line, `#!/usr/bin/env node`, your system runs the script with the `node` executable found on your `PATH`.
-- **Help**: `printHelp()` prints the usage information. Before it checks the argument count, `main()` calls `printHelp()` and stops when any argument is `help`, `--help`, `-h` or `-?`.
-- **Argument check**: `main()` throws an error unless it gets exactly 1 argument.
-- **Error handling**: The entry point is the code at the end of the file that calls `main()`. It catches an error thrown by `main()`, prints `ERROR:` followed by the message and exits with code `1`.
+- **Portable shebang**: With the first line, `#!/usr/bin/env node`, your system runs the script with the `node` executable on your `PATH`.
+- **Help**: `printHelp()` prints the usage information. When any argument is `help`, `--help`, `-h` or `-?`, `main()` calls `printHelp()` and returns before it checks the argument count.
+- **Argument check**: `main()` throws an error unless it gets exactly 1 argument after the script path.
+- **Error handling**: The code at the end of the file, called the entry point, calls `main()`. When `main()` throws an error, the entry point prints `ERROR:` and the message, then exits with code `1`.
 - **Buffered output**: `verbose()` records each message in an internal buffer and prints it to standard output. It returns the buffer, so a test can assert on the output.
 - **Quiet mode**: Set `SCRIPT_QUIET` to any non-empty value except `0` to stop `verbose()` printing. It still records the messages.
-- **Exports for tests**: The file exports `main()`, `printHelp()` and `verbose()`. The entry point runs only when Node.js runs the file directly. Set `SCRIPT_RUN_SKIP` to `1` to skip it even then.
+- **Exports for tests**: The file exports `main()`, `printHelp()` and `verbose()`. The entry point runs only when Node.js runs the file directly, so `require()` loads the functions without running the entry point. To skip the entry point on a direct run too, set `SCRIPT_RUN_SKIP` to `1`.
 
 ## Adapt the script
 
-The header comment at the top of `nodejs-script` lists the changes that turn the template into your script. `main()` gets `argv`, which holds the script path followed by the arguments, and `argc`, the length of `argv`.
+The header comment at the top of `nodejs-script` lists the changes that turn the template into your script. `main()` takes 2 parameters: `argv` holds the script path followed by the arguments, and `argc` is the length of `argv`.
 
 To adapt the script:
 
 1. In the header comment, replace `NodeJS CLI script template` with your script's name.
-2. Optional: To rename the file, rename it and replace `nodejs-script` with the new filename in the header comment and in these files:
-   - `package.json`
-   - `eslint.config.js`
-   - `.c8rc.json`
-   - `tests/nodejs/_helper.js`
-   - `.github/workflows/release-nodejs.yml`
-3. In `main()`, change the `if (argc < 2 || argc > 2) {` line to check for your argument count plus 1, because `argc` counts the script path. For a script that takes 2 arguments, change both `2` values to `3`.
+2. Optional: Rename the file:
+   1. Rename `nodejs-script` to your filename.
+   2. Replace `nodejs-script` with the new filename in the header comment and in these files:
+      - `package.json`, including its `prettier.overrides` entry
+      - `README.md`
+      - `eslint.config.js`
+      - `.c8rc.json`
+      - `tests/nodejs/_helper.js`
+      - `.github/workflows/release-nodejs.yml`
+3. In the `if (argc < 2 || argc > 2) {` line in `main()`, change both `2` values to your argument count plus 1. For a script that takes 2 arguments, use `3`.
 4. Update the text in `printHelp()` with your script's usage.
 5. In `main()`, replace the `// Add the script logic here.` comment and the `verbose()` line after it with your script's logic.
 6. Remove the `To adopt script template:` block from the header comment.
@@ -44,16 +49,4 @@ To adapt the script:
 
 ## Test the script
 
-The [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs) directory holds example unit and functional tests for the script. [Testing](./testing.mdx) shows how to run them.
-
-[`_helper.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/_helper.js) provides 2 helpers:
-
-- `runMain()` requires the script and calls `main()` in the test process. It returns the buffered output, so a test asserts on it without spawning a process.
-- `runScript()` runs the script as a separate process. It returns the exit code and the output.
-
-Each example test uses 1 of the helpers:
-
-- [`script.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.test.js) is a unit test. It calls `main()` through `runMain()` with different arguments and options.
-- [`script.functional.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.functional.test.js) is a functional test. It runs the script through `runScript()` the way your script's users run it.
-
-The test runner runs every entry in each file's `cases` array as a test. After you adapt the script, update the entries to match its arguments and output. To add a test, copy an entry and change its values.
+The [`tests/nodejs`](https://github.com/AlexSkrypnyk/scaffold/tree/main/tests/nodejs) directory holds example tests for the template. After you adapt the script, update those tests to match its arguments and output. See [Write tests](./testing.mdx#write-tests).
