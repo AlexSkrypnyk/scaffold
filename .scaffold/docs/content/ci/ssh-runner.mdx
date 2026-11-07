@@ -7,7 +7,7 @@ sidebar_position: 7
 
 Follow this page to open a shell on the runner of a test job, so you can debug a failure on the machine where it happened. It's for maintainers with write access to the repository and an SSH client.
 
-The `Test PHP`, `Test Node.js`, `Test shell` and `Test Docker` workflows end each test job with a **Setup tmate session** step. The step uses the [mxschmitt/action-tmate](https://github.com/mxschmitt/action-tmate) action, which shares the runner's terminal over SSH through a tmate server. GitHub runs the step only on a run you start by hand. It runs last, even when an earlier step fails.
+The `Test PHP`, `Test Node.js`, `Test shell` and `Test Docker` workflows end each test job with a **Setup tmate session** step. The step uses the [mxschmitt/action-tmate](https://github.com/mxschmitt/action-tmate) action, which shares the runner's terminal over SSH through a tmate server. GitHub runs the step only on a run you start by hand with the **Enable terminal session.** checkbox selected. It runs last, even when an earlier step fails.
 
 The workflows use the action's default server, the public tmate server. The [action-tmate README](https://github.com/mxschmitt/action-tmate#readme) states that the public tmate servers shut down in July 2025. Before you start, set the **Setup tmate session** step of the workflow you debug to use a tmate server you host, as that README explains.
 

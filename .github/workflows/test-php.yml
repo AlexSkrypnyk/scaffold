@@ -132,7 +132,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Setup tmate session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
         uses: mxschmitt/action-tmate@35b54afac29c97fb54faba5b513f8fbd1882f113 # v3
         timeout-minutes: 30
   # yamllint disable-line #;< PHP_PHAR
@@ -170,7 +170,7 @@ jobs:
           ./dist/php-command.phar || exit 1
 
       - name: Setup tmate session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal }}
+        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
         uses: mxschmitt/action-tmate@35b54afac29c97fb54faba5b513f8fbd1882f113 # v3
         timeout-minutes: 30
   # yamllint disable-line #;> PHP_PHAR
