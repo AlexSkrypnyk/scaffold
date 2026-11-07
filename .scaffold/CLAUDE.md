@@ -73,6 +73,8 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
+- `DOCS` - Documentation-site content outside `docs/`, such as the docs section
+  of `CONTRIBUTING.dist.md`, removed by `remove_docs()`
 - `AI` - AI agents configuration (`CLAUDE.md`, `AGENTS.md`, `.claude/`)
 - `AI_ARCH_DOCS` - AI architecture documentation in `docs/content/architecture/` (relocated to `docs/architecture/` by `remove_docs()` when the docs site is disabled, with path references rewritten)
 - `AI_ARCH_DOCS_MERMAID` - Mermaid-specific sections of the `update-architecture-docs` skill

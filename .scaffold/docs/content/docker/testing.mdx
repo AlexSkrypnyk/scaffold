@@ -15,8 +15,8 @@ The workflow runs on every push to `main` and on every pull request that targets
 
 The workflow's `Docker` job runs the following steps:
 
-1. Lints the `Dockerfile` with Hadolint. To let the job pass when Hadolint fails, set the `CI_LINT_IGNORE_FAILURE` repository variable to `1`. See [Linting](linting).
+1. Lints the `Dockerfile` with Hadolint. To let the job pass when Hadolint fails, set the `CI_LINT_IGNORE_FAILURE` repository variable to `1`. See [Linting](./linting.mdx).
 2. Builds the image with Docker Buildx.
 3. Runs a container from the image. The step fails when `entrypoint.sh` exits with an error.
 
-On a push to `main`, after the `Docker` job passes, the `Docker canary` job publishes a `canary` image. See [Publishing](publishing).
+On a push to `main`, after the `Docker` job passes, the `Docker canary` job publishes a `canary` image. See [Publishing](./publishing.mdx).

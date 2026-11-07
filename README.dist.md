@@ -73,11 +73,11 @@ docker pull yournamespace/yourproject
 ## Usage
 
 [//]: # (#;< PHP)
-[//]: # (#;< !PHP_LIBRARY)
+[//]: # (#;< PHP_COMMAND)
 Run the PHP command that Composer installs:
 
 ```bash
-vendor/bin/yourproject
+vendor/bin/php-command
 ```
 
 The command takes the following arguments and options:
@@ -88,7 +88,15 @@ The command takes the following arguments and options:
 | `--option1` | `default1`    | Option with a default value.       |
 | `--option2` | None          | Flag that takes no value.          |
 
-[//]: # (#;> !PHP_LIBRARY)
+[//]: # (#;> PHP_COMMAND)
+[//]: # (#;< PHP_SCRIPT)
+Run the PHP script that Composer installs, with 1 argument:
+
+```bash
+vendor/bin/php-script value
+```
+
+[//]: # (#;> PHP_SCRIPT)
 [//]: # (#;< PHP_LIBRARY)
 Call the PHP library's classes from your code:
 

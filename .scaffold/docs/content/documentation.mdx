@@ -59,7 +59,7 @@ To accept a word CSpell doesn't know, add it to the `words` list in `docs/cspell
 
 ## Preview pull requests on Netlify
 
-The Test Docs workflow builds and tests the site on every push to `main`. It also runs on every pull request into `main` or into a branch that matches `feature/**`. When the repository has the `NETLIFY_SITE_ID` and `NETLIFY_AUTH_TOKEN` secrets, the workflow deploys each build to Netlify and comments the preview link on the pull request. GitHub doesn't pass these secrets to pull requests from forks, so those get no preview.
+The Test Docs workflow builds and tests the site on every push to `main`. It also runs on every pull request into `main` or into a branch that matches `feature/**`. When the repository has the `NETLIFY_SITE_ID` and `NETLIFY_AUTH_TOKEN` secrets, the workflow deploys each build except scheduled runs to Netlify and comments the preview link on the pull request. GitHub doesn't pass these secrets to pull requests from forks, so those get no preview.
 
 To set up Netlify previews:
 
@@ -74,7 +74,7 @@ To set up Netlify previews:
 
 ## Publish the site to GitHub Pages
 
-The [Release docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docs.yml) workflow builds the site on every tag push. You can also start it by hand from the **Actions** tab and enter a **Release version**. The site footer shows the tag name, or the version you entered.
+The [Release docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docs.yml) workflow builds the site when you push a tag whose name has no `/`. You can also start it by hand from the **Actions** tab and enter a **Release version**. The site footer shows the tag name, or the version you entered.
 
 The workflow's upload and deploy steps ship commented out. To publish the site to GitHub Pages on each release, uncomment the `Upload documentation site` and `Deploy documentation site` steps at the end of `.github/workflows/release-docs.yml`.
 

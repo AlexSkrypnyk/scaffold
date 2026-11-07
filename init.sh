@@ -678,6 +678,8 @@ remove_docs() {
 
   rm -f .github/workflows/test-docs.yml || true
   rm -f .github/workflows/release-docs.yml || true
+
+  remove_tokens_with_content "DOCS"
 }
 
 remove_test_actions() {

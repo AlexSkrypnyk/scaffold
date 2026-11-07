@@ -13,10 +13,10 @@ The following table lists the image tags each workflow pushes:
 
 | Tag | Workflow | When |
 |---|---|---|
-| `canary` | [`test-docker.yml`](testing) | On a push to `main`, after the workflow's tests pass |
+| `canary` | [`test-docker.yml`](./testing.mdx) | On a push to `main`, after the workflow's tests pass |
 | The Git tag's name and `latest` | [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) | On a push of a Git tag whose name has no `/` |
 
-The `canary` tag points to the latest passing build of `main`, so you can try changes between tagged releases. The workflows never publish an image from a pull request, including one from a fork. To change the image tags for a release, edit the `docker/metadata-action` step in `release-docker.yml`.
+The `canary` tag points to the image from the last `Docker canary` job that finished on `main`, so you can try changes between tagged releases. The workflows never publish an image from a pull request, including one from a fork. To change the image tags for a release, edit the `docker/metadata-action` step in `release-docker.yml`.
 
 ## Set up Docker Hub credentials
 

@@ -13,7 +13,7 @@ composer lint
 composer test
 ```
 
-To fix the PHP_CodeSniffer and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, run `composer test-coverage`.
+To fix the PHP_CodeSniffer and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, enable the PCOV or Xdebug extension and run `composer test-coverage`. Xdebug also needs `XDEBUG_MODE=coverage`.
 
 [//]: # (#;> PHP)
 [//]: # (#;< NODEJS)
@@ -59,3 +59,16 @@ docker run --rm yournamespace/yourproject
 The container prints `yourproject is running`.
 
 [//]: # (#;> DOCKER)
+[//]: # (#;< DOCS)
+## Documentation site
+
+Install the documentation site's dependencies, then run its Jest tests and spell check:
+
+```bash
+npm --prefix docs install
+npm --prefix docs test
+```
+
+[`docs/README.md`](docs/README.md) shows how to preview and build the site.
+
+[//]: # (#;> DOCS)
