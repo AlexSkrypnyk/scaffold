@@ -14,7 +14,7 @@ Every test workflow, including the Docker and documentation workflows, runs on t
 
 - A pull request that targets `main` or any branch that begins with `feature/`, such as a pull request from `feature/new-button` to `feature/new-layout`.
 - A push to `main`, such as the merge of a pull request.
-- A daily scheduled run at 04:23 UTC, which shows whether the project still builds when nobody has pushed. To leave it out, run `init.sh` with `--no-schedule` or answer no to **Use scheduled builds**. In an existing project, delete the `schedule` block from each `.github/workflows/test-*.yml` file.
+- A daily scheduled run at 04:23 UTC, which shows whether the project still builds when nobody has pushed. To leave it out, run `install.sh` with `--no-schedule` or answer no to **Use scheduled builds**. In an existing project, delete the `schedule` block from each `.github/workflows/test-*.yml` file.
 
 You can also start the PHP, Node.js, Shell and Docker workflows by hand from the **Actions** tab. To open a terminal session on the runner, see [SSH into a GitHub Actions runner](ssh-runner.mdx).
 
@@ -77,7 +77,7 @@ The `Shell (ubuntu-latest)` job uploads the coverage report as an artifact.
 
 ## Test Actions
 
-The `Test Actions` workflow runs on `ubuntu-latest` and lints and audits the workflow files in `.github/workflows`. `init.sh` leaves it out of new projects by default. To add it, answer yes to **Use GitHub Actions linting** or pass `--test-actions`.
+The `Test Actions` workflow runs on `ubuntu-latest` and lints and audits the workflow files in `.github/workflows`. `install.sh` leaves it out of new projects by default. To add it, answer yes to **Use GitHub Actions linting** or pass `--test-actions`.
 
 The following table lists its checks:
 

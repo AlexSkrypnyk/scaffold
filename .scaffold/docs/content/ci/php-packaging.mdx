@@ -6,7 +6,7 @@ cspell: ignore bamarni yourproject
 
 # PHP packaging
 
-A PHP Archive (PHAR) bundles a PHP app and its dependencies into 1 executable file, the way a JAR file bundles a Java app. A user needs only the file and PHP to run it, so the format suits command-line tools, cron jobs and daemons. This page is for maintainers of a Scaffold CLI command app who ship it as a PHAR. It covers how the PHAR is built, versioned and released. It also lists the `box.json` settings. In your project, `init.sh` has replaced `php-command` and `yourproject` with your command and project names.
+A PHP Archive (PHAR) bundles a PHP app and its dependencies into 1 executable file, the way a JAR file bundles a Java app. A user needs only the file and PHP to run it, so the format suits command-line tools, cron jobs and daemons. This page is for maintainers of a Scaffold CLI command app who ship it as a PHAR. It covers how the PHAR is built, versioned and released. It also lists the `box.json` settings. In your project, `install.sh` has replaced `php-command` and `yourproject` with your command and project names.
 
 ## Build
 
@@ -73,7 +73,7 @@ The [Box documentation](https://box-project.github.io/box/) lists every setting.
 
 ## Remove the PHAR build
 
-`init.sh` keeps the PHAR build in a CLI command app by default. Answering no to **Build PHAR**, or passing `--no-phar`, removes the following:
+`install.sh` keeps the PHAR build in a CLI command app by default. Answering no to **Build PHAR**, or passing `--no-phar`, removes the following:
 
 - `box.json`
 - The `build` script and the `bamarni/composer-bin-plugin` entries in `composer.json`, and `vendor-bin` in its `reset` script

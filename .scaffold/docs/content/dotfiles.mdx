@@ -21,7 +21,7 @@ The template's [`.editorconfig`](https://github.com/AlexSkrypnyk/scaffold/blob/m
 
 ## `.gitignore`
 
-`.gitignore` lists the paths Git ignores, such as dependencies and build artifacts. `init.sh` removes the template's [`.gitignore`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitignore) entries for the features you don't select.
+`.gitignore` lists the paths Git ignores, such as dependencies and build artifacts. `install.sh` removes the template's [`.gitignore`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitignore) entries for the features you don't select.
 
 In the generated project, Git ignores the following paths:
 
@@ -37,7 +37,7 @@ To ignore temporary files your operating system creates, use a [global `.gitigno
 
 ## `.gitattributes`
 
-`.gitattributes` sets Git attributes path by path. In a generated project, it marks files and directories `export-ignore`, so `git archive` leaves them out of distribution archives. The template's [`.gitattributes`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitattributes) holds its `export-ignore` lines commented out. `init.sh` removes the lines for the features you don't select and uncomments the rest.
+`.gitattributes` sets Git attributes path by path. In a generated project, it marks files and directories `export-ignore`, so `git archive` leaves them out of distribution archives. The template's [`.gitattributes`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.gitattributes) holds its `export-ignore` lines commented out. `install.sh` removes the lines for the features you don't select and uncomments the rest.
 
 In the generated project, `git archive` leaves out the following paths:
 

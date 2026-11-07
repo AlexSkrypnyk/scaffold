@@ -1,6 +1,6 @@
 # PHPUnit tests for Scaffold
 
-This suite tests the Scaffold template itself. It runs `init.sh` in each configuration and compares the result with the fixtures in this directory's `fixtures/init`. It also tests the Composer scripts in the root `composer.json` and the terminal recorder script in `.scaffold/assets`. Run it after every change to the repository, including the example app.
+This suite tests the Scaffold template itself. It runs `install.sh` in each configuration and compares the result with the fixtures in this directory's `fixtures/install`. It also tests the Composer scripts in the root `composer.json` and the terminal recorder script in `.scaffold/assets`. Run it after every change to the repository, including the example app.
 
 The suite needs PHP 8.3 or later with the `pcov` extension, because it runs the root `composer test-coverage` script in a copy of the template.
 

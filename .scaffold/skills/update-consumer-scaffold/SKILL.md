@@ -12,7 +12,7 @@ project's infrastructure to the latest version of the
 ([getscaffold.dev](https://getscaffold.dev)).
 
 The strategy is: download a fresh copy of the latest Scaffold, re-run its
-`init.sh` with the answers this project was originally created with, then restore
+`install.sh` with the answers this project was originally created with, then restore
 the project's own code on top. This refreshes the template-managed
 infrastructure (CI workflows, linting and test configuration, docs scaffolding,
 Docker, etc.) without discarding the project's source code.
@@ -42,6 +42,7 @@ only the missing ones:
   "Bash(rm:*)",
   "Bash(sed:*)",
   "Bash(tar:*)",
+  "Bash(./install.sh)",
   "Bash(./init.sh)"
 ]
 ```
@@ -56,7 +57,7 @@ If all entries are already present, proceed to Step 1.
 ## Step 1: Detect the original init answers
 
 Inspect the initialised project to reconstruct the answers it was created with.
-These map directly to `init.sh` options (run `./init.sh --help` on a fresh
+These map directly to `install.sh` options (run `./install.sh --help` on a fresh
 checkout for the full list).
 
 **Identity:**
@@ -118,7 +119,7 @@ back to the branch CI runs on (see `.github/workflows/`), defaulting to `main`.
 gh release list --repo AlexSkrypnyk/scaffold --limit 5
 ```
 
-Pick the latest non-draft release. **Print the version and the full `init.sh`
+Pick the latest non-draft release. **Print the version and the full `install.sh`
 command you assembled in Step 1, and confirm both with the user before making
 any changes.** This is the single most important checkpoint - the rest of the
 process is destructive to the working tree.
@@ -180,32 +181,35 @@ rm scaffold.tar.gz
 `https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz` with
 `curl -fsSL ... -o scaffold.tar.gz` instead, then extract the same way.)
 
-## Step 6: Run init.sh
+## Step 6: Run install.sh
 
-Run `init.sh` from the project root, non-interactively, passing **every**
+Run `install.sh` from the project root, non-interactively, passing **every**
 detected choice explicitly (identity plus each feature's on/off state and any
-custom names). Passing options switches `init.sh` to non-interactive mode.
+custom names). Passing options switches `install.sh` to non-interactive mode.
 
 Example for a project that uses every default feature:
 
 ```bash
-./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
 Example for a shell-only project with a custom command name and no docs:
 
 ```bash
-./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php --no-nodejs --shell --shell-command-name=acme --no-docs
+./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-php --no-nodejs --shell --shell-command-name=acme --no-docs
 ```
 
 Example for a class-only PHP library with no entry point:
 
 ```bash
-./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" --php --no-php-command --no-php-script --no-nodejs --no-shell
+./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe" --php --no-php-command --no-php-script --no-nodejs --no-shell
 ```
 
 Build the command from the Step 1 detection. Do not pass `--keep`: the refreshed
-`init.sh` should be removed exactly as it was on the initial setup.
+`install.sh` should be removed exactly as it was on the initial setup.
+
+Older releases ship the script as `init.sh`. When the extracted tree has
+`init.sh` and no `install.sh`, run `./init.sh` with the same options.
 
 ## Step 7: Restore project-specific code from git
 
@@ -284,12 +288,12 @@ Push the branch and open a pull request summarising the update (use the
 
 ## Important notes
 
-- Always confirm the version and the assembled `init.sh` command with the user
+- Always confirm the version and the assembled `install.sh` command with the user
   before starting (Step 2).
 - Never overwrite project-specific code: `src/`, tests, the renamed
   command/script/shell files, and project documentation are restored from git in
   Step 7.
-- `init.sh` deletes `.scaffold/`, `init.sh`, `LICENSE` and other
+- `install.sh` deletes `.scaffold/`, `install.sh`, `LICENSE` and other
   template-only files - the same way it did on the initial setup. Restore the
   project's own `LICENSE` from git if it kept one.
 - After the update, verify workflow branch references match the project's
@@ -312,5 +316,5 @@ call must contain exactly ONE simple command. No exceptions.
 - Use multiple separate Bash tool calls, one command per call.
 - Use non-interactive flags or options for scripts that support them (e.g.
   `composer --no-interaction`, the `--namespace=`/`--name=`/`--author=` and
-  feature options for `init.sh`).
+  feature options for `install.sh`).
 - For git commits, use `git commit -m "Message here."`.

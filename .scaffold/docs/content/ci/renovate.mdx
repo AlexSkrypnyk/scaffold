@@ -48,7 +48,7 @@ Renovate also skips the language version constraints, because each one changes t
 
 A class library's `require` block sets the oldest versions its consumers can install. The library commits no `composer.lock`, so bumping `require` changes nothing the library installs and only raises the minimum for every consumer.
 
-For a class library, `init.sh` adds this rule to `renovate.json`:
+For a class library, `install.sh` adds this rule to `renovate.json`:
 
 ```json
 {
@@ -61,9 +61,9 @@ For a class library, `init.sh` adds this rule to `renovate.json`:
 
 The rule matches only the root `composer.json`, so a nested `composer.json`, such as a test fixture, still gets `require` updates. Renovate keeps updating `require-dev`, which consumers never install.
 
-## Changes `init.sh` makes
+## Changes `install.sh` makes
 
-`init.sh` adjusts `renovate.json` to the stacks you select:
+`install.sh` adjusts `renovate.json` to the stacks you select:
 
 | Stacks selected | Changes to `renovate.json` |
 |---|---|
@@ -73,6 +73,6 @@ The rule matches only the root `composer.json`, so a nested `composer.json`, suc
 | Neither PHP nor Node.js | Removes the language rules and the rule that blocks major updates |
 | PHP class library | Adds the [class library rule](#class-library-rule) |
 
-To leave Renovate out of a new project, answer no to the `init.sh` prompt **Use Renovate** or pass `--no-renovate`. `init.sh` then deletes `renovate.json` and the `update-dependencies.yml` workflow.
+To leave Renovate out of a new project, answer no to the `install.sh` prompt **Use Renovate** or pass `--no-renovate`. `install.sh` then deletes `renovate.json` and the `update-dependencies.yml` workflow.
 
 For every Renovate option, see the [Renovate documentation](https://docs.renovatebot.com/).

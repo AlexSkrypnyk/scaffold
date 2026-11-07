@@ -11,12 +11,12 @@ template itself**, not for projects created from it.
 
 This scaffold template provides a multi-stack project initialization system. It
 contains working examples for Shell, PHP, and NodeJS projects that users
-customize via `./init.sh`. The `.scaffold/` directory contains template-specific
+customize via `./install.sh`. The `.scaffold/` directory contains template-specific
 infrastructure that gets removed after initialization.
 
 ## Template Architecture
 
-### Initialization System (`init.sh`)
+### Initialization System (`install.sh`)
 
 The initialization script performs three main operations:
 
@@ -31,7 +31,7 @@ The initialization script performs three main operations:
 
 ### Curl bootstrap
 
-When `init.sh` runs without the template present (for example fetched and piped straight from `curl` into an empty directory), it downloads the Scaffold archive into the current directory, extracts it with `tar --strip-components=1`, and re-executes the on-disk copy so init proceeds normally. Presence of the `.scaffold/` directory is the sentinel for "template already here". The archive URL is resolved in precedence order: the `SCAFFOLD_ARCHIVE_URL` environment variable, the `--ref=<tag|branch|commit>` option, then the latest GitHub release (falling back to the `main` branch). The re-exec reconnects stdin to `/dev/tty` in interactive mode so prompts work despite the pipe, and bootstrapping refuses a non-empty directory. The curl-bootstrap PHPUnit tests (`testInitViaCurlBootstrapsIntoEmptyDir`, `testInitViaCurlBootstrapRefusesNonEmptyDir`) stay off the network by pointing `SCAFFOLD_ARCHIVE_URL` at a local `file://` tarball built from the SUT.
+When `install.sh` runs without the template present (for example fetched and piped straight from `curl` into an empty directory), it downloads the Scaffold archive into the current directory, extracts it with `tar --strip-components=1`, and re-executes the on-disk copy so init proceeds normally. Presence of the `.scaffold/` directory is the sentinel for "template already here". The archive URL is resolved in precedence order: the `SCAFFOLD_ARCHIVE_URL` environment variable, the `--ref=<tag|branch|commit>` option, then the latest GitHub release (falling back to the `main` branch). The re-exec reconnects stdin to `/dev/tty` in interactive mode so prompts work despite the pipe, and bootstrapping refuses a non-empty directory. The curl-bootstrap PHPUnit tests (`testInstallViaCurlBootstrapsIntoEmptyDir`, `testInstallViaCurlBootstrapRefusesNonEmptyDir`) stay off the network by pointing `SCAFFOLD_ARCHIVE_URL` at a local `file://` tarball built from the SUT.
 
 ### Token System for Conditional Content
 
@@ -49,7 +49,7 @@ Content blocks can be conditionally included/excluded using special tokens:
 
 **How it works:**
 
-- `init.sh` calls `remove_tokens_with_content()` for disabled features
+- `install.sh` calls `remove_tokens_with_content()` for disabled features
 - Uses `sed` to delete lines between `#;< TOKEN` and `#;> TOKEN` markers
 - Removal prefix-matches token names (removing `AI` also removes `AI_ARCH_DOCS*` blocks), so blocks of the same token family must be siblings, never nested
 - Prefix `!` inverts the condition
@@ -90,7 +90,7 @@ Content blocks can be conditionally included/excluded using special tokens:
 
 ### String Conversion Functions
 
-`init.sh` provides `convert_string()` for consistent naming:
+`install.sh` provides `convert_string()` for consistent naming:
 
 - `namespace` / `class_name` - PascalCase for PHP classes
 - `package_name` - kebab-case for package identifiers
@@ -122,7 +122,7 @@ template-owned `.claude` paths explicitly:
 `.claude` needs that split because it is the one directory holding both
 template-owned and consumer-owned files. The `update-consumer-scaffold` skill
 carries the consumer's `.claude` across its clean-the-root step and then extracts
-a fresh template on top, so `init.sh` runs over a merged tree. Sweeping the whole
+a fresh template on top, so `install.sh` runs over a merged tree. Sweeping the whole
 of `.claude` rewrites the consumer's own skills, agents and local settings -
 including the fetched copy of the update skill, which then names the consumer's
 repository and makes the next update pull the wrong project. Excluding the whole
@@ -130,16 +130,16 @@ of `.claude` instead strands the `AI_ARCH_DOCS_MERMAID` / `AI_ARCH_DOCS_PLANTUML
 blocks in the shipped `update-architecture-docs` skill.
 
 **Shipping a new file under `.claude` means adding its path to `sweep_files()`.**
-`testInitProcessesShippedClaudeFiles` fails when a shipped `.claude` file keeps a
+`testInstallProcessesShippedClaudeFiles` fails when a shipped `.claude` file keeps a
 `#;` marker or an unsubstituted placeholder, and
-`testInitPreservesConsumerClaudeFiles` fails when a consumer-owned `.claude` file
+`testInstallPreservesConsumerClaudeFiles` fails when a consumer-owned `.claude` file
 is modified at all.
 
 ## PHP Template Features
 
 ### PHP Modes
 
-The template carries every PHP pattern at once and `init.sh` keeps the selected
+The template carries every PHP pattern at once and `install.sh` keeps the selected
 one:
 
 1. **`src/` + `bin/php-command`** - Symfony Console app
@@ -195,13 +195,13 @@ separate from the repo root, with its own `composer.json`, `phpcs.xml`,
 - **Run the suite that matches your change.** Repo-root `composer lint` /
   `composer test` cover ONLY the example application (`src/`, `tests/`) and pass
   even when the template is broken. A green root lint is NOT proof the init suite
-  is green - any change to `init.sh`, template files, or fixtures must be
+  is green - any change to `install.sh`, template files, or fixtures must be
   validated from the init suite:
 
 ```bash
 cd .scaffold/tests/phpunit
 composer lint    # phpcs (Drupal standard), phpstan level 9, rector
-composer test    # InitTest snapshot suite
+composer test    # InstallTest snapshot suite
 ```
 
 - **Coding standard is Drupal.** Comment lines wrap at 80 characters
@@ -210,7 +210,7 @@ composer test    # InitTest snapshot suite
   row) with `@param list<string>` so phpstan level 9 stays clean.
 
 - **Shell scripts must pass `shfmt`.** The `Shell` and `Test Scaffold` CI jobs
-  run `shfmt -i 2 -ci -s` (via `luizm/action-sh-checker`) over `init.sh` and the
+  run `shfmt -i 2 -ci -s` (via `luizm/action-sh-checker`) over `install.sh` and the
   `*.sh` / `.bats` files, and it is strict about redirect spacing (`>"$f"`, not
   `> "$f"`). Format shell edits to match before pushing.
 
@@ -274,20 +274,20 @@ Example from `tests/bats/shell-command.bats`:
 
 ### Init Script Testing with Fixtures
 
-The `init.sh` script is tested in `.scaffold/tests/phpunit/` using a
+The `install.sh` script is tested in `.scaffold/tests/phpunit/` using a
 **baseline + diff** fixture pattern similar to Vortex.
 
 #### Fixture Structure
 
-- **`fixtures/init/_baseline/`** - Full expected state after running `init.sh`
+- **`fixtures/install/_baseline/`** - Full expected state after running `install.sh`
   with default answers
-- **`fixtures/init/<test-name>/`** - Contains only DIFFERENCES (patches) from
+- **`fixtures/install/<test-name>/`** - Contains only DIFFERENCES (patches) from
   baseline for specific test scenarios
 - **`.expected/`** - Stores the baseline state for comparison
 
 #### Test Scenarios
 
-Each test scenario in `InitTest.php` validates a specific configuration:
+Each test scenario in `InstallTest.php` validates a specific configuration:
 
 - `_baseline` - Default configuration (all features enabled)
 - `name` - Custom namespace/project/author names
@@ -307,14 +307,14 @@ cd .scaffold/tests/phpunit
 composer test
 
 # Run specific test scenario
-./vendor/bin/phpunit --filter testInit
-./vendor/bin/phpunit --filter 'testInit with data set "name"'
+./vendor/bin/phpunit --filter testInstall
+./vendor/bin/phpunit --filter 'testInstall with data set "name"'
 ```
 
 #### Updating Fixtures
 
 **IMPORTANT:** Only update fixtures when you intentionally changed the
-`init.sh` behavior or template files.
+`install.sh` behavior or template files.
 
 ```bash
 cd .scaffold/tests/phpunit
@@ -334,14 +334,14 @@ composer update-snapshots
 
 **When to update fixtures:**
 
-- After changing `init.sh` logic (string replacement, token removal)
-- After modifying template files that `init.sh` processes
+- After changing `install.sh` logic (string replacement, token removal)
+- After modifying template files that `install.sh` processes
 - After adding/removing conditional features
 - After updating dependencies that affect generated files
 
 **Workflow:**
 
-1. Make changes to `init.sh` or template files
+1. Make changes to `install.sh` or template files
 2. Run tests: `composer test` (will fail with "Differences between directories")
 3. Review the differences carefully
 4. If changes are correct: `composer update-snapshots`
@@ -366,23 +366,23 @@ npm run build # Build static site
 
 ## Terminal recordings
 
-The `init.sh` walkthrough shown in `README.md` and on the getscaffold.dev site
+The `install.sh` walkthrough shown in `README.md` and on the getscaffold.dev site
 is a single asciinema recording rendered two ways by
 `.scaffold/assets/update-assets.php`:
 
-- `.scaffold/assets/init.svg` - an animated SVG embedded in `README.md`
+- `.scaffold/assets/install.svg` - an animated SVG embedded in `README.md`
   (GitHub renders animated SVG but cannot run JavaScript).
-- `.scaffold/docs/static/img/init.cast` - an asciicast played by the
+- `.scaffold/docs/static/img/install.cast` - an asciicast played by the
   `AsciinemaPlayer` component in `.scaffold/docs/content/README.mdx`.
 
-Regenerate both after changing `init.sh` or its prompts:
+Regenerate both after changing `install.sh` or its prompts:
 
 ```bash
 php .scaffold/assets/update-assets.php
 ```
 
-The generator records `./init.sh` against a disposable `git stash create` export
-of the working tree, so it captures uncommitted `init.sh` changes and never
+The generator records `./install.sh` against a disposable `git stash create` export
+of the working tree, so it captures uncommitted `install.sh` changes and never
 touches the real tree. It needs `asciinema`, `expect`, `node`, and `npm`;
 svg-term is installed on demand into the git-ignored
 `.scaffold/assets/node_modules`.
@@ -394,7 +394,7 @@ before each answer, and `canonicalizeCast()` cuts the recorded output into 1
 event per step at those markers, spaced `STEP_DELAY` apart. The recorded
 timing and the terminal's chunking never reach the committed files. Any output
 that varies between runs (a progress meter, a timestamp) breaks this, so keep
-`init.sh`'s interactive output deterministic.
+`install.sh`'s interactive output deterministic.
 
 The pure cast helpers are unit-tested in
 `.scaffold/tests/phpunit/src/UpdateAssetsTest.php`, which also guards that the
@@ -413,7 +413,7 @@ GitHub Actions workflows test the **scaffold template itself**:
 - `.github/workflows/test-docs.yml` - Validate documentation site
 - `.github/workflows/test-actions.yml` - Lint workflow files (yamllint,
   actionlint) and audit them for security with zizmor
-- `.github/workflows/scaffold-test.yml` - Integration test of `init.sh`
+- `.github/workflows/scaffold-test.yml` - Integration test of `install.sh`
 
 ### GitHub Actions linting (`test-actions.yml`)
 
@@ -423,9 +423,9 @@ SARIF to the Security tab). Accepted zizmor findings are documented per-rule in
 the repository-root `zizmor.yml`.
 
 Unlike the other `scaffold-*` maintenance workflows, this one is a **selectable
-consumer feature**: `init.sh` offers "Use GitHub Actions linting" (off by
+consumer feature**: `install.sh` offers "Use GitHub Actions linting" (off by
 default; `--test-actions` / `--no-test-actions` non-interactively). When not
-selected, `init.sh` removes `test-actions.yml`, `.github/.yamllint-for-gha.yml`
+selected, `install.sh` removes `test-actions.yml`, `.github/.yamllint-for-gha.yml`
 and `zizmor.yml`. The `scaffold-release-docs.yml` entry in `zizmor.yml` is
 stripped on init because that workflow is template-only.
 
@@ -435,11 +435,11 @@ stripped on init because that workflow is template-only.
 - `.github/workflows/release-docs.yml` - Deploy documentation
 - `.github/workflows/draft-release-notes.yml` - Auto-generate release notes
 
-### Testing `init.sh`
+### Testing `install.sh`
 
 The `scaffold-test.yml` workflow validates initialization:
 
-1. Runs `init.sh` with test values
+1. Runs `install.sh` with test values
 2. Verifies string replacements
 3. Confirms token removal
 4. Tests that generated project passes linting/tests
@@ -455,7 +455,7 @@ The `scaffold-test.yml` workflow validates initialization:
    python-specific-config
    # #;> PYTHON
    ```
-3. **Update `init.sh`**:
+3. **Update `install.sh`**:
   - Add feature selection prompt
   - Call `remove_tokens_with_content "PYTHON"` if disabled
 4. **Add CI workflow** `.github/workflows/test-python.yml`
@@ -495,7 +495,7 @@ In `.github/workflows/`:
 **Critical:** All template files must end with a newline character.
 
 This matches `.editorconfig` setting `insert_final_newline = true` and prevents
-issues when files are concatenated or processed by init.sh.
+issues when files are concatenated or processed by install.sh.
 
 ## Maintenance Commands
 
@@ -510,8 +510,8 @@ composer update --with-all-dependencies
 # Rebuild PHAR after changes
 composer build
 
-# Test init.sh locally (creates test project)
-./init.sh --namespace=TestProject --name=test-project --author="Test Author"
+# Test install.sh locally (creates test project)
+./install.sh --namespace=TestProject --name=test-project --author="Test Author"
 ```
 
 ## Template Release Process
@@ -528,7 +528,7 @@ composer build
 When maintaining the template:
 
 - **Test both template AND initialized projects** - Template tests run on
-  scaffold itself; also test that `init.sh` produces working projects
+  scaffold itself; also test that `install.sh` produces working projects
 - **Preserve token markers** - Don't accidentally remove `#;< TOKEN` markers
   when editing
 - **Consider all stack combinations** - Features can be enabled/disabled

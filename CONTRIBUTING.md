@@ -2,7 +2,7 @@
 
 Contributions to Scaffold are welcome. Follow this guide to run the checks that cover your change before you open a pull request.
 
-Scaffold is a multi-stack project template. The `.scaffold/` directory holds the template's own infrastructure, and [`init.sh`](init.sh) removes it from generated projects. Before you change template files, read the maintenance guide in [`.scaffold/CLAUDE.md`](.scaffold/CLAUDE.md). It documents the template architecture, the `init.sh` token system and the test and fixture workflow.
+Scaffold is a multi-stack project template. The `.scaffold/` directory holds the template's own infrastructure, and [`install.sh`](install.sh) removes it from generated projects. Before you change template files, read the maintenance guide in [`.scaffold/CLAUDE.md`](.scaffold/CLAUDE.md). It documents the template architecture, the `install.sh` token system and the test and fixture workflow.
 
 ## Before you begin
 
@@ -14,7 +14,7 @@ Make sure you have the following:
 
 ## Local development
 
-The example app is the code at the repository root that `init.sh` turns into a generated project. To test it, run the following commands from the repository root:
+The example app is the code at the repository root that `install.sh` turns into a generated project. To test it, run the following commands from the repository root:
 
 ```bash
 composer install
@@ -24,7 +24,7 @@ composer test
 
 The example app also holds NodeJS and shell code. [`CONTRIBUTING.dist.md`](CONTRIBUTING.dist.md) lists the lint and test commands for every stack.
 
-The template suite runs `init.sh` and compares its output with fixtures that hold the generated example app. The root suite can pass even when the template is broken, so run the template suite from the repository root for every change:
+The template suite runs `install.sh` and compares its output with fixtures that hold the generated example app. The root suite can pass even when the template is broken, so run the template suite from the repository root for every change:
 
 ```bash
 cd .scaffold/tests/phpunit
@@ -33,7 +33,7 @@ composer lint
 composer test
 ```
 
-For a change to `init.sh`, also run its BATS unit tests in `.scaffold/tests/bats`. Run the following commands from the repository root:
+For a change to `install.sh`, also run its BATS unit tests in `.scaffold/tests/bats`. Run the following commands from the repository root:
 
 ```bash
 npm --prefix=.scaffold/tests/bats ci
@@ -44,7 +44,7 @@ For a change to the getscaffold.dev pages in `.scaffold/docs`, follow [`.scaffol
 
 ### Update the fixtures
 
-The fixtures live in `.scaffold/tests/phpunit/fixtures/init`. When a change alters the `init.sh` output, the template suite fails with `Differences between directories`. To update the fixtures:
+The fixtures live in `.scaffold/tests/phpunit/fixtures/install`. When a change alters the `install.sh` output, the template suite fails with `Differences between directories`. To update the fixtures:
 
 1. Review the differences, and confirm that each one comes from your change.
 2. Unstage any other work. `composer update-snapshots` commits everything staged, together with the regenerated fixtures.

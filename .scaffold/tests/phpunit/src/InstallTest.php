@@ -14,12 +14,12 @@ use Symfony\Component\Process\ExecutableFinder;
 /**
  * Class InitFunctionalTest.
  *
- * Functional tests for init.sh script.
+ * Functional tests for install.sh script.
  */
-final class InitTest extends UnitTestCase {
+final class InstallTest extends UnitTestCase {
 
-  #[DataProvider('dataProviderInit')]
-  public function testInit(
+  #[DataProvider('dataProviderInstall')]
+  public function testInstall(
     array $answers = [],
     array $expected = [],
     ?SerializableClosure $before = NULL,
@@ -34,7 +34,7 @@ final class InitTest extends UnitTestCase {
 
     $answers = self::tuiEntries(array_replace(self::defaultAnswers(), $answers));
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [], $answers);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', [], $answers);
 
     $this->assertProcessSuccessful();
 
@@ -59,7 +59,7 @@ final class InitTest extends UnitTestCase {
     }
   }
 
-  public static function dataProviderInit(): \Iterator {
+  public static function dataProviderInstall(): \Iterator {
     yield self::BASELINE_DATASET => [
         [],
     ];
@@ -209,13 +209,13 @@ final class InitTest extends UnitTestCase {
   /**
    * Non-interactive runs must produce the same result as interactive defaults.
    */
-  #[DataProvider('dataProviderInitNonInteractive')]
-  public function testInitNonInteractive(array $arguments, string $diffs_name): void {
+  #[DataProvider('dataProviderInstallNonInteractive')]
+  public function testInstallNonInteractive(array $arguments, string $diffs_name): void {
     // Parity checks compare against the existing interactive fixtures, so a
     // divergence must surface as a failure to fix in code, never an update.
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
 
     $this->assertProcessSuccessful();
     $this->assertProcessOutputContains('Initialization complete.');
@@ -226,14 +226,14 @@ final class InitTest extends UnitTestCase {
 
     Replacer::versions()->replaceInDir(self::$sut);
 
-    $fixtures_init = self::$root . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'init';
-    $baseline = File::dir($fixtures_init . DIRECTORY_SEPARATOR . self::BASELINE_DIR);
-    $diffs = File::dir($fixtures_init . DIRECTORY_SEPARATOR . $diffs_name);
+    $fixtures_install = self::$root . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'install';
+    $baseline = File::dir($fixtures_install . DIRECTORY_SEPARATOR . self::BASELINE_DIR);
+    $diffs = File::dir($fixtures_install . DIRECTORY_SEPARATOR . $diffs_name);
 
     $this->assertSnapshotMatchesBaseline(self::$sut, $baseline, $diffs);
   }
 
-  public static function dataProviderInitNonInteractive(): \Iterator {
+  public static function dataProviderInstallNonInteractive(): \Iterator {
     $identity = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'];
 
     yield 'all defaults' => [
@@ -281,10 +281,10 @@ final class InitTest extends UnitTestCase {
   /**
    * The script initialises a project when fetched and piped through curl.
    */
-  public function testInitViaCurlWithArgs(): void {
+  public function testInstallViaCurlWithArgs(): void {
     self::$fixtures = NULL;
 
-    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'install.sh';
     $script = sprintf(
       'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
       escapeshellarg($url),
@@ -306,10 +306,10 @@ final class InitTest extends UnitTestCase {
   /**
    * Piping through curl without options fails cleanly instead of hanging.
    */
-  public function testInitViaCurlWithoutArgs(): void {
+  public function testInstallViaCurlWithoutArgs(): void {
     self::$fixtures = NULL;
 
-    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'install.sh';
     $script = sprintf('set -o pipefail; curl -fsSL %s | bash -s --', escapeshellarg($url));
 
     $this->processRun('bash', ['-c', $script]);
@@ -327,15 +327,15 @@ final class InitTest extends UnitTestCase {
   /**
    * The script bootstraps the template when piped into an empty directory.
    *
-   * With no template present, init.sh downloads and extracts the Scaffold into
-   * the current directory, then initialises it. The archive is injected via
-   * SCAFFOLD_ARCHIVE_URL so the test never reaches the network.
+   * With no template present, install.sh downloads and extracts the Scaffold
+   * into the current directory, then initialises it. The archive is injected
+   * via SCAFFOLD_ARCHIVE_URL so the test never reaches the network.
    */
-  public function testInitViaCurlBootstrapsIntoEmptyDir(): void {
+  public function testInstallViaCurlBootstrapsIntoEmptyDir(): void {
     self::$fixtures = NULL;
 
     // GitHub archives nest everything under a top-level directory, so the
-    // pristine SUT copy is archived under its own basename. init.sh strips
+    // pristine SUT copy is archived under its own basename. install.sh strips
     // that component on extraction, as with a real GitHub tarball.
     $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
     $this->processRun('tar', ['-czf', $archive, '-C', dirname(self::$sut), basename(self::$sut)]);
@@ -343,7 +343,7 @@ final class InitTest extends UnitTestCase {
 
     $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'bootstrap-target');
 
-    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'install.sh';
     $script = sprintf(
       'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
       escapeshellarg($url),
@@ -370,12 +370,48 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
+   * Bootstrapping an archive that ships 'init.sh' re-runs that script.
+   *
+   * Archives of older refs name the script 'init.sh', so the re-run must not
+   * assume 'install.sh' is on disk after extraction.
+   */
+  public function testInstallViaCurlBootstrapsArchiveWithInitScript(): void {
+    self::$fixtures = NULL;
+
+    $piped = self::$tmp . DIRECTORY_SEPARATOR . 'install.sh';
+    File::copy(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $piped);
+    File::copy(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', self::$sut . DIRECTORY_SEPARATOR . 'init.sh');
+    File::remove(self::$sut . DIRECTORY_SEPARATOR . 'install.sh');
+
+    $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
+    $this->processRun('tar', ['-czf', $archive, '-C', dirname(self::$sut), basename(self::$sut)]);
+    $this->assertProcessSuccessful();
+
+    $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'init-script-target');
+
+    $script = sprintf(
+      'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
+      escapeshellarg('file://' . $piped),
+      escapeshellarg('Curl Author'),
+    );
+
+    $this->processCwd = $target;
+    $this->processRun('bash', ['-c', $script], [], ['SCAFFOLD_ARCHIVE_URL' => 'file://' . $archive]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+    $this->assertStringContainsString('CurlNs', (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'composer.json'));
+    $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'init.sh');
+    $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.scaffold');
+  }
+
+  /**
    * Bootstrapping refuses to run in a directory that already has files.
    *
    * The run must abort before anything is downloaded when the current
    * directory is not empty, so pre-existing files are never clobbered.
    */
-  public function testInitViaCurlBootstrapRefusesNonEmptyDir(): void {
+  public function testInstallViaCurlBootstrapRefusesNonEmptyDir(): void {
     self::$fixtures = NULL;
 
     $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
@@ -385,7 +421,7 @@ final class InitTest extends UnitTestCase {
     $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'nonempty-target');
     File::dump($target . DIRECTORY_SEPARATOR . 'keep.txt', 'existing');
 
-    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'install.sh';
     $script = sprintf(
       'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
       escapeshellarg($url),
@@ -413,7 +449,7 @@ final class InitTest extends UnitTestCase {
    * abort proves the bootstrap completed and control reached the interactive
    * collector; a real user with a terminal answers the prompts instead.
    */
-  public function testInitViaCurlBootstrapsThenPromptsWithoutOptions(): void {
+  public function testInstallViaCurlBootstrapsThenPromptsWithoutOptions(): void {
     self::$fixtures = NULL;
 
     $archive = self::$tmp . DIRECTORY_SEPARATOR . 'scaffold.tar.gz';
@@ -422,7 +458,7 @@ final class InitTest extends UnitTestCase {
 
     $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'prompt-target');
 
-    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'install.sh';
     $script = sprintf('set -o pipefail; curl -fsSL %s | bash', escapeshellarg($url));
 
     $this->processCwd = $target;
@@ -445,7 +481,7 @@ final class InitTest extends UnitTestCase {
    * run without leaving debris that would trip the empty-directory guard on
    * a retry.
    */
-  public function testInitViaCurlBootstrapCleansUpInvalidArchive(): void {
+  public function testInstallViaCurlBootstrapCleansUpInvalidArchive(): void {
     self::$fixtures = NULL;
 
     // An archive that extracts to content but has no '.scaffold' directory.
@@ -457,7 +493,7 @@ final class InitTest extends UnitTestCase {
 
     $target = File::mkdir(self::$tmp . DIRECTORY_SEPARATOR . 'invalid-target');
 
-    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'init.sh';
+    $url = 'file://' . self::$sut . DIRECTORY_SEPARATOR . 'install.sh';
     $script = sprintf(
       'set -o pipefail; curl -fsSL %s | bash -s -- --namespace=CurlNs --name=curl-proj --author=%s',
       escapeshellarg($url),
@@ -479,15 +515,15 @@ final class InitTest extends UnitTestCase {
   /**
    * The initialised project keeps the updater skill pointing upstream.
    *
-   * The bulk `scaffold` -> project rewrite in init.sh would otherwise
+   * The bulk `scaffold` -> project rewrite in install.sh would otherwise
    * mangle the self-update skill URL, name, and trigger. They are
    * token-protected, so a regression here must fail rather than be
    * silently re-baselined.
    */
-  public function testInitPreservesUpdateSkillReferences(): void {
+  public function testInstallPreservesUpdateSkillReferences(): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', [
       '--namespace=AcmeApp',
       '--name=acme-app',
       '--author=Jane Doe',
@@ -508,15 +544,15 @@ final class InitTest extends UnitTestCase {
   /**
    * The initialised project keeps the Scaffold attribution footer intact.
    *
-   * The bulk `scaffold` -> project rewrite in init.sh would otherwise
+   * The bulk `scaffold` -> project rewrite in install.sh would otherwise
    * mangle the README footer link text and domain into a project-named URL
    * that does not exist. The phrase is token-protected, so a regression must
    * fail rather than be silently re-baselined.
    */
-  public function testInitPreservesAttributionFooter(): void {
+  public function testInstallPreservesAttributionFooter(): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', [
       '--namespace=AcmeApp',
       '--name=acme-app',
       '--author=Jane Doe',
@@ -533,16 +569,16 @@ final class InitTest extends UnitTestCase {
   /**
    * The initialised project keeps a LICENSE matching its declared metadata.
    *
-   * init.sh must not delete LICENSE: without it GitHub cannot detect the
+   * install.sh must not delete LICENSE: without it GitHub cannot detect the
    * project's license and the README badge renders "not identified", while
    * composer.json and package.json still declare GPL-3.0-or-later. A
    * regression here must fail rather than be silently re-baselined by
    * update-snapshots.
    */
-  public function testInitKeepsLicense(): void {
+  public function testInstallKeepsLicense(): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', [
       '--namespace=AcmeApp',
       '--name=acme-app',
       '--author=Jane Doe',
@@ -570,15 +606,15 @@ final class InitTest extends UnitTestCase {
   /**
    * Declining both PHP entry points leaves the tooling and no stubs.
    *
-   * A class-only package has no command and no script, so init.sh must
+   * A class-only package has no command and no script, so install.sh must
    * generate neither - while keeping 'src' in the linting and test
    * configuration and dropping the 'composer.json' bin section, which
    * 'composer normalize' rejects once it is empty.
    */
-  public function testInitPhpLibraryShipsNoEntryPoint(): void {
+  public function testInstallPhpLibraryShipsNoEntryPoint(): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', [
       '--namespace=AcmeApp',
       '--name=acme-app',
       '--author=Jane Doe',
@@ -628,13 +664,13 @@ final class InitTest extends UnitTestCase {
    * Only the class library stops Renovate from bumping 'require' constraints.
    *
    * @param list<string> $arguments
-   *   Command-line arguments passed to init.sh.
+   *   Command-line arguments passed to install.sh.
    */
-  #[DataProvider('dataProviderInitRenovateRequireRule')]
-  public function testInitRenovateRequireRule(array $arguments, bool $expected): void {
+  #[DataProvider('dataProviderInstallRenovateRequireRule')]
+  public function testInstallRenovateRequireRule(array $arguments, bool $expected): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
 
     $this->assertProcessSuccessful();
 
@@ -651,7 +687,7 @@ final class InitTest extends UnitTestCase {
     $this->assertSame($expected, in_array($rule, $config['packageRules'], TRUE));
   }
 
-  public static function dataProviderInitRenovateRequireRule(): \Iterator {
+  public static function dataProviderInstallRenovateRequireRule(): \Iterator {
     yield 'php library' => [['--no-php-command', '--no-php-script'], TRUE];
     yield 'php library without nodejs' => [['--no-php-command', '--no-php-script', '--no-nodejs'], TRUE];
     yield 'php command' => [['--php-command', '--no-php-script'], FALSE];
@@ -662,10 +698,10 @@ final class InitTest extends UnitTestCase {
   /**
    * The class library initialises cleanly when Renovate is deselected.
    */
-  public function testInitPhpLibraryWithoutRenovate(): void {
+  public function testInstallPhpLibraryWithoutRenovate(): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', ['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe', '--no-php-command', '--no-php-script', '--no-renovate']);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', ['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe', '--no-php-command', '--no-php-script', '--no-renovate']);
 
     $this->assertProcessSuccessful();
     $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'renovate.json');
@@ -676,13 +712,13 @@ final class InitTest extends UnitTestCase {
    * Only a project that builds a PHAR keeps the Box build scaffolding.
    *
    * @param list<string> $arguments
-   *   Command-line arguments passed to init.sh.
+   *   Command-line arguments passed to install.sh.
    */
-  #[DataProvider('dataProviderInitPharBuildScaffolding')]
-  public function testInitPharBuildScaffolding(array $arguments, bool $expected): void {
+  #[DataProvider('dataProviderInstallPharBuildScaffolding')]
+  public function testInstallPharBuildScaffolding(array $arguments, bool $expected): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
 
     $this->assertProcessSuccessful();
 
@@ -707,7 +743,7 @@ final class InitTest extends UnitTestCase {
     $this->assertSame($expected, str_contains($gitignore, '/vendor-bin'));
   }
 
-  public static function dataProviderInitPharBuildScaffolding(): \Iterator {
+  public static function dataProviderInstallPharBuildScaffolding(): \Iterator {
     yield 'php command' => [['--php-command', '--no-php-script'], TRUE];
     yield 'php command without phar' => [['--php-command', '--no-phar'], FALSE];
     yield 'php script' => [['--no-php-command', '--php-script'], FALSE];
@@ -721,7 +757,7 @@ final class InitTest extends UnitTestCase {
    * generated suppression config, so consumer projects stay clean without a
    * manual check.
    */
-  public function testInitTestActionsPassesZizmor(): void {
+  public function testInstallTestActionsPassesZizmor(): void {
     self::$fixtures = NULL;
 
     $zizmor = (new ExecutableFinder())->find('zizmor');
@@ -731,7 +767,7 @@ final class InitTest extends UnitTestCase {
     }
 
     $arguments = ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker', '--test-actions'];
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
     $this->assertProcessSuccessful();
 
     $this->processRun($zizmor, ['--offline', '--config', 'zizmor.yml', '.github/workflows']);
@@ -742,18 +778,18 @@ final class InitTest extends UnitTestCase {
    * The shared Claude settings ship and are trimmed to the selected features.
    *
    * @param list<string> $arguments
-   *   Command-line arguments passed to init.sh.
+   *   Command-line arguments passed to install.sh.
    * @param list<string> $present
    *   Permission rules that must be present in the settings file.
    * @param list<string> $absent
    *   Permission rules that must be absent from the settings file.
    */
-  #[DataProvider('dataProviderInitClaudeSettings')]
-  public function testInitClaudeSettings(array $arguments, array $present, array $absent): void {
+  #[DataProvider('dataProviderInstallClaudeSettings')]
+  public function testInstallClaudeSettings(array $arguments, array $present, array $absent): void {
     self::$fixtures = NULL;
 
     $arguments = array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments);
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
     $this->assertProcessSuccessful();
 
     $claude_dir = self::$sut . DIRECTORY_SEPARATOR . '.claude';
@@ -779,7 +815,7 @@ final class InitTest extends UnitTestCase {
     $this->assertStringContainsString('/.artifacts/', $gitignore);
   }
 
-  public static function dataProviderInitClaudeSettings(): \Iterator {
+  public static function dataProviderInstallClaudeSettings(): \Iterator {
     // Docker is off by default, so its rules are trimmed unless enabled.
     // Mermaid is the default diagram format, so the PlantUML rule is trimmed
     // unless that format is selected.
@@ -837,10 +873,10 @@ final class InitTest extends UnitTestCase {
   /**
    * Disabling AI agents removes the Claude settings with the '.claude' dir.
    */
-  public function testInitClaudeSettingsRemovedWithoutAi(): void {
+  public function testInstallClaudeSettingsRemovedWithoutAi(): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', ['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe', '--no-ai']);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', ['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe', '--no-ai']);
     $this->assertProcessSuccessful();
 
     $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . '.claude' . DIRECTORY_SEPARATOR . 'settings.json');
@@ -851,7 +887,7 @@ final class InitTest extends UnitTestCase {
    * Consumer-owned files under '.claude' survive an init run byte-for-byte.
    *
    * The update flow keeps the consumer's '.claude' across its wipe, then
-   * extracts the template on top. init.sh then runs over a tree holding both
+   * extracts the template on top. install.sh then runs over a tree holding both
    * template-owned and consumer-owned files.
    *
    * A sweep that reaches the consumer-owned '.claude' tree rewrites the
@@ -861,8 +897,8 @@ final class InitTest extends UnitTestCase {
    * @param string $path
    *   Path of the consumer-owned file, relative to '.claude'.
    */
-  #[DataProvider('dataProviderInitPreservesConsumerClaudeFiles')]
-  public function testInitPreservesConsumerClaudeFiles(string $path): void {
+  #[DataProvider('dataProviderInstallPreservesConsumerClaudeFiles')]
+  public function testInstallPreservesConsumerClaudeFiles(string $path): void {
     self::$fixtures = NULL;
 
     $claude_dir = self::$sut . DIRECTORY_SEPARATOR . '.claude';
@@ -870,7 +906,7 @@ final class InitTest extends UnitTestCase {
     $planted = self::consumerClaudeContent();
     File::dump($file, $planted);
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', [
       '--namespace=AcmeApp',
       '--name=acme-app',
       '--author=Jane Doe',
@@ -883,7 +919,7 @@ final class InitTest extends UnitTestCase {
     $this->assertSame($planted, (string) file_get_contents($file));
   }
 
-  public static function dataProviderInitPreservesConsumerClaudeFiles(): \Iterator {
+  public static function dataProviderInstallPreservesConsumerClaudeFiles(): \Iterator {
     // The skill the consumer fetches on demand to run the next update.
     yield 'update skill' => ['skills/update-consumer-scaffold/SKILL.md'];
     // Personal Claude Code overrides, git-ignored and never template-owned.
@@ -894,7 +930,7 @@ final class InitTest extends UnitTestCase {
   }
 
   /**
-   * Every string init.sh sweeps for, in a consumer-owned file.
+   * Every string install.sh sweeps for, in a consumer-owned file.
    *
    * Each line carries a needle from process_internal() or a token marker the
    * block and comment helpers act on. Any helper that reaches this file
@@ -928,18 +964,18 @@ final class InitTest extends UnitTestCase {
    * unsubstituted placeholder survives under '.claude'.
    *
    * @param list<string> $arguments
-   *   Command-line arguments passed to init.sh.
+   *   Command-line arguments passed to install.sh.
    * @param string $present
    *   Heading of the diagram-format section that must survive.
    * @param string $absent
    *   Heading of the diagram-format section that must be removed.
    */
-  #[DataProvider('dataProviderInitProcessesShippedClaudeFiles')]
-  public function testInitProcessesShippedClaudeFiles(array $arguments, string $present, string $absent): void {
+  #[DataProvider('dataProviderInstallProcessesShippedClaudeFiles')]
+  public function testInstallProcessesShippedClaudeFiles(array $arguments, string $present, string $absent): void {
     self::$fixtures = NULL;
 
     $arguments = array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments);
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
 
     $this->assertProcessSuccessful();
     $this->assertProcessOutputContains('Initialization complete.');
@@ -961,7 +997,7 @@ final class InitTest extends UnitTestCase {
     }
   }
 
-  public static function dataProviderInitProcessesShippedClaudeFiles(): \Iterator {
+  public static function dataProviderInstallProcessesShippedClaudeFiles(): \Iterator {
     $mermaid = '## Diagram format: Mermaid';
     $plantuml = '## Diagram format: PlantUML';
 
@@ -976,10 +1012,10 @@ final class InitTest extends UnitTestCase {
    * the attribution footer. A bare-word sweep reaches ordinary prose and
    * paths that merely contain the word, and rewrites those too.
    */
-  public function testInitKeepsOrdinaryScaffoldWord(): void {
+  public function testInstallKeepsOrdinaryScaffoldWord(): void {
     self::$fixtures = NULL;
 
-    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'init.sh', [
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', [
       '--namespace=AcmeApp',
       '--name=acme-app',
       '--author=Jane Doe',
@@ -1005,7 +1041,7 @@ final class InitTest extends UnitTestCase {
    * The sweep helpers pass absolute paths to 'sed', so a space in the
    * project path must not split a file name into separate arguments.
    */
-  public function testInitInPathWithSpaces(): void {
+  public function testInstallInPathWithSpaces(): void {
     self::$fixtures = NULL;
 
     $target = self::$tmp . DIRECTORY_SEPARATOR . 'path with spaces';
@@ -1014,7 +1050,7 @@ final class InitTest extends UnitTestCase {
 
     $this->processCwd = $target;
     $this->processRun('bash', [
-      './init.sh',
+      './install.sh',
       '--namespace=AcmeApp',
       '--name=acme-app',
       '--author=Jane Doe',

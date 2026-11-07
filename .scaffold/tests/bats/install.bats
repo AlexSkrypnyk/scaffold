@@ -1,15 +1,15 @@
 #!/usr/bin/env bats
 #
-# Unit tests for init.sh.
+# Unit tests for install.sh.
 #
-# Variables under test are assigned by the sourced init.sh, which shellcheck
+# Variables under test are assigned by the sourced install.sh, which shellcheck
 # does not follow, so disable "unassigned variable" (SC2154) here. The 'curl'
-# mocks are invoked indirectly by init.sh functions under 'run' and cannot be
+# mocks are invoked indirectly by install.sh functions under 'run' and cannot be
 # traced statically, so "function never invoked" (SC2329) is disabled too.
 # shellcheck disable=SC2034,SC2154,SC2329
 
 load _helper
-load "../../../init.sh"
+load "../../../install.sh"
 
 @test "convert_string converts to each conversion type" {
   local input="I am a_string-With spaces 13"
@@ -788,7 +788,7 @@ TOKENS
 @test "parse_args prints usage for --help" {
   run parse_args --help
   assert_success
-  assert_output_contains "Usage: ./init.sh"
+  assert_output_contains "Usage: ./install.sh"
 }
 
 @test "parse_args prints the version for --version" {
@@ -1345,6 +1345,44 @@ create_release_project() {
   popd >/dev/null || return 1
 
   assert_failure
+}
+
+@test "bootstrapped_script prefers install.sh" {
+  local tmpdir="${BATS_TEST_TMPDIR}/both"
+  mkdir -p "${tmpdir}"
+  touch "${tmpdir}/install.sh" "${tmpdir}/init.sh"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run bootstrapped_script
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_output "./install.sh"
+}
+
+@test "bootstrapped_script falls back to init.sh" {
+  local tmpdir="${BATS_TEST_TMPDIR}/legacy"
+  mkdir -p "${tmpdir}"
+  touch "${tmpdir}/init.sh"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run bootstrapped_script
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_output "./init.sh"
+}
+
+@test "bootstrapped_script defaults to install.sh" {
+  local tmpdir="${BATS_TEST_TMPDIR}/none"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run bootstrapped_script
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_output "./install.sh"
 }
 
 @test "resolve_archive_url prefers SCAFFOLD_ARCHIVE_URL" {

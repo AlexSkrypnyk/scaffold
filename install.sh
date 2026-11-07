@@ -15,16 +15,16 @@
 #
 # @usage:
 # Interactive prompt:
-# ./init.sh
+# ./install.sh
 #
 # Interactive one-liner (downloads Scaffold, then prompts):
-# curl -fsSL https://getscaffold.dev/init.sh | bash
+# curl -fsSL https://getscaffold.dev/install.sh | bash
 #
 # Non-interactive:
-# ./init.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+# ./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 #
 # Non-interactive one-liner (for AI agents and automation):
-# curl -fsSL https://getscaffold.dev/init.sh | \
+# curl -fsSL https://getscaffold.dev/install.sh | \
 #   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 #
 # When run without the template present (for example piped from curl in an
@@ -32,7 +32,7 @@
 # directory and then initializes it. The directory must be empty. Piping with
 # no options prompts interactively; pass options to run unattended.
 #
-# Run "./init.sh --help" for the full list of options.
+# Run "./install.sh --help" for the full list of options.
 #
 # shellcheck disable=SC2162,SC2015
 
@@ -858,7 +858,7 @@ process_internal() {
 
 usage() {
   cat <<'USAGE'
-Usage: ./init.sh [OPTIONS]
+Usage: ./install.sh [OPTIONS]
 
 Initialise a new project from the Scaffold template.
 
@@ -868,10 +868,10 @@ unspecified choices use their defaults, and --namespace, --name and --author
 are required.
 
 One-liner (interactive - downloads Scaffold, then prompts):
-  curl -fsSL https://getscaffold.dev/init.sh | bash
+  curl -fsSL https://getscaffold.dev/install.sh | bash
 
 One-liner (non-interactive):
-  curl -fsSL https://getscaffold.dev/init.sh | \
+  curl -fsSL https://getscaffold.dev/install.sh | \
     bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 
 When run without the template present (e.g. piped from curl in an empty
@@ -912,7 +912,7 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --ai-arch-docs[=VALUE]         AI architecture docs: mermaid, plantuml or
                                  none (default: mermaid).
   --no-ai-arch-docs              Disable AI architecture docs.
-  --keep                         Keep this init script (default: removed).
+  --keep                         Keep this install script (default: removed).
 
 Other:
   --ref=VALUE                    Bootstrap from a tag, branch or commit when the
@@ -1268,6 +1268,22 @@ dir_is_empty() {
 }
 
 ##
+# Resolve the installer script that the extracted template ships.
+#
+# Archives of older refs ship the script as 'init.sh'.
+#
+# @return string Path of the script to re-run, relative to the current dir.
+#
+bootstrapped_script() {
+  if [ ! -f "./install.sh" ] && [ -f "./init.sh" ]; then
+    echo "./init.sh"
+    return 0
+  fi
+
+  echo "./install.sh"
+}
+
+##
 # Resolve the URL of the template archive to download.
 #
 # Precedence: an explicit SCAFFOLD_ARCHIVE_URL wins (an exact archive URL);
@@ -1381,11 +1397,14 @@ bootstrap_template() {
   # the terminal (a piped stdin is already at EOF) when one is actually
   # reachable; other modes keep the inherited stdin so non-interactive and CI
   # runs, where /dev/tty exists but cannot be opened, are unaffected.
+  local script
+  script="$(bootstrapped_script)"
+
   if [ "${interactive}" = "1" ] && : 2>/dev/null </dev/tty; then
-    exec bash "./init.sh" "$@" </dev/tty
+    exec bash "${script}" "$@" </dev/tty
   fi
 
-  exec bash "./init.sh" "$@"
+  exec bash "${script}" "$@"
 }
 
 #-------------------------------------------------------------------------------

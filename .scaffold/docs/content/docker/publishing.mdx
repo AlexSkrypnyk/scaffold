@@ -29,4 +29,4 @@ Both workflows sign in to Docker Hub with 2 repository secrets. To add them:
 
 ## Override the image name
 
-Both workflows publish to the image name from `init.sh`. To publish to another image without editing the workflows, set the `DOCKER_IMAGE` repository or organization variable to that image name. Create it on the **Variables** tab of the same settings page, because the workflows ignore a secret with that name. For example, point `DOCKER_IMAGE` at a throwaway Docker Hub repository to test the pipeline end to end.
+Both workflows publish to the image name from `install.sh`. To publish to another image without editing the workflows, set the `DOCKER_IMAGE` repository or organization variable to that image name. Create it on the **Variables** tab of the same settings page, because the workflows ignore a secret with that name. For example, point `DOCKER_IMAGE` at a throwaway Docker Hub repository to test the pipeline end to end.

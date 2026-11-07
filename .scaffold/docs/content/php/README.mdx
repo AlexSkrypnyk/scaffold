@@ -5,11 +5,11 @@ sidebar_position: 3
 
 # PHP
 
-PHP is on by default in `init.sh`, which sets up your project as a Composer package with PHP linting and tests. Start here to pick a PHP mode and find its tooling.
+PHP is on by default in `install.sh`, which sets up your project as a Composer package with PHP linting and tests. Start here to pick a PHP mode and find its tooling.
 
-`init.sh` keeps 1 of 3 PHP modes and deletes the files of the other 2. Pick the mode that matches what you build:
+`install.sh` keeps 1 of 3 PHP modes and deletes the files of the other 2. Pick the mode that matches what you build:
 
-| Mode | What you build | `init.sh` options |
+| Mode | What you build | `install.sh` options |
 |------|----------------|-------------------|
 | [PHP CLI command](./php-command.mdx) | A Symfony Console app with several commands | Selected by default. `--php-command` also selects it. |
 | [PHP CLI script](./php-script.mdx) | A self-contained single-file script | `--php-script`, which also turns off the command app |
@@ -21,4 +21,4 @@ Every mode uses the same tooling:
 - [Linting](./linting.mdx): PHP_CodeSniffer, PHPStan and Rector
 - [Testing](./testing.mdx): PHPUnit and code coverage
 
-To leave PHP out, pass `--no-php` to `init.sh`.
+To leave PHP out, pass `--no-php` to `install.sh`.

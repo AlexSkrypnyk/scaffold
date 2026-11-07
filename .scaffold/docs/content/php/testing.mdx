@@ -5,7 +5,7 @@ sidebar_position: 6
 
 # Testing
 
-A Scaffold project tests PHP code with [PHPUnit](https://phpunit.de/) 11, and `init.sh` keeps the example tests for the PHP mode you pick: [CLI command](./php-command.mdx), [CLI script](./php-script.mdx) or [library](./php-library.mdx). This page is for developers running and writing tests in a Scaffold project. Use it to run the tests, find the coverage reports and look up the PHPUnit settings.
+A Scaffold project tests PHP code with [PHPUnit](https://phpunit.de/) 11, and `install.sh` keeps the example tests for the PHP mode you pick: [CLI command](./php-command.mdx), [CLI script](./php-script.mdx) or [library](./php-library.mdx). This page is for developers running and writing tests in a Scaffold project. Use it to run the tests, find the coverage reports and look up the PHPUnit settings.
 
 ## Test layout
 
@@ -14,7 +14,7 @@ PHPUnit runs every test in `tests/phpunit/`. Put each test in 1 of 2 directories
 - `Unit/` for tests that call your code directly
 - `Functional/` for tests that run a whole command or script
 
-The `autoload-dev` section of `composer.json` maps the `YourNamespace\App\Tests\` namespace to `tests/phpunit`. `init.sh` replaces `YourNamespace` with your namespace, in the tests and in `composer.json`.
+The `autoload-dev` section of `composer.json` maps the `YourNamespace\App\Tests\` namespace to `tests/phpunit`. `install.sh` replaces `YourNamespace` with your namespace, in the tests and in `composer.json`.
 
 ## Commands
 

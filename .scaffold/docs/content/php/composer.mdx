@@ -22,7 +22,7 @@ The following table lists the metadata, dependency and autoloading sections:
 | Development autoloading | `autoload-dev` | PSR-4 autoloading of the `YourNamespace\App\Tests\` namespace from `tests/phpunit`, plus a classmap of that directory. |
 | Executables | `bin` | The entry point that Composer links into `vendor/bin` in projects that install the package: `bin/php-command` for a CLI command app or `php-script` for a CLI script. A library has no `bin` section. |
 
-`init.sh` replaces `YourNamespace` with your namespace and renames the entry point to the name you choose.
+`install.sh` replaces `YourNamespace` with your namespace and renames the entry point to the name you choose.
 
 ## Scripts
 
@@ -34,7 +34,7 @@ The following table lists the Composer scripts. Run a script by its name, for ex
 | `lint-fix` | Fixes the code with Rector, then with `phpcbf`, the PHP_CodeSniffer fixer. PHPStan has no fixer. |
 | `test` | Runs the PHPUnit tests without a coverage report. |
 | `test-coverage` | Runs the PHPUnit tests and writes the coverage reports. |
-| `build` | Builds a PHAR file with Box. Only a CLI command app has this script, and `init.sh` keeps it unless you pass `--no-phar`. See [PHP packaging](../ci/php-packaging.mdx). |
+| `build` | Builds a PHAR file with Box. Only a CLI command app has this script, and `install.sh` keeps it unless you pass `--no-phar`. See [PHP packaging](../ci/php-packaging.mdx). |
 | `reset` | Deletes `vendor` and `composer.lock`. In a project that builds a PHAR, it also deletes `vendor-bin`. |
 
 ## Configuration
@@ -43,7 +43,7 @@ The following table lists the settings in the `config` section, apart from `poli
 
 | Setting | Value | Effect |
 |---------|-------|--------|
-| `allow-plugins` | 3 plugins | Lets `dealerdirect/phpcodesniffer-composer-installer`, `ergebnis/composer-normalize` and `bamarni/composer-bin-plugin` run. In a project that doesn't build a PHAR, `init.sh` removes `bamarni/composer-bin-plugin` from this list and from `require-dev`. |
+| `allow-plugins` | 3 plugins | Lets `dealerdirect/phpcodesniffer-composer-installer`, `ergebnis/composer-normalize` and `bamarni/composer-bin-plugin` run. In a project that doesn't build a PHAR, `install.sh` removes `bamarni/composer-bin-plugin` from this list and from `require-dev`. |
 | `discard-changes` | `true` | In a non-interactive update, Composer discards local changes to installed dependencies. |
 | `sort-packages` | `true` | `composer require` keeps the packages in `composer.json` sorted by name. |
 

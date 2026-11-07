@@ -3,17 +3,17 @@
 
 /**
  * @file
- * Generate the animated SVG and asciicast recording of init.sh.
+ * Generate the animated SVG and asciicast recording of install.sh.
  *
- * Records an interactive `./init.sh` session against a throwaway copy of the
+ * Records an interactive `./install.sh` session against a throwaway copy of the
  * current git tree, then produces two artefacts from that single recording:
  *
- * - `.scaffold/assets/init.svg` - an animated SVG embedded in the README
+ * - `.scaffold/assets/install.svg` - an animated SVG embedded in the README
  *   (GitHub renders animated SVG but cannot run JavaScript).
- * - `.scaffold/docs/static/img/init.cast` - an asciicast played by the
+ * - `.scaffold/docs/static/img/install.cast` - an asciicast played by the
  *   Docusaurus `AsciinemaPlayer` component (interactive playback).
  *
- * `init.sh` rewrites the tree in place and deletes itself, so the recording
+ * `install.sh` rewrites the tree in place and deletes itself, so the recording
  * always runs in a disposable workspace exported with `git archive HEAD`.
  *
  * The recorded timing is discarded: the cast is rebuilt with 1 event per
@@ -59,7 +59,7 @@ define('RECORD_PROJECT', 'myproject');
 define('RECORD_AUTHOR', 'Alex');
 
 /**
- * Build the expect script that drives init.sh's interactive prompts.
+ * Build the expect script that drives install.sh's interactive prompts.
  *
  * Types the three identity answers and accepts the default for every remaining
  * prompt, mirroring a "keep everything" run.
@@ -71,7 +71,7 @@ define('RECORD_AUTHOR', 'Alex');
  * a prompt that arrived in 2 reads.
  *
  * @param string $workspace_dir
- *   Directory holding the disposable copy of init.sh.
+ *   Directory holding the disposable copy of install.sh.
  * @param string $namespace
  *   Value typed at the "Namespace" prompt.
  * @param string $project
@@ -105,7 +105,7 @@ cd "{$workspace_dir}"
 set env(PS1) {\$ }
 spawn bash --norc --noprofile
 
-expect "\\$ " { answer "./init.sh" }
+expect "\\$ " { answer "./install.sh" }
 reply "Namespace (PascalCase)" "{$namespace}"
 reply "Project" "{$project}"
 reply "Author" "{$author}"
@@ -162,7 +162,7 @@ function sanitizeCast(string $content, string $workspace_dir, string $home): str
   // churn the committed cast on each regeneration.
   $header = json_decode($lines[0], TRUE);
   if (is_array($header)) {
-    $header['command'] = './init.sh';
+    $header['command'] = './install.sh';
     unset($header['timestamp'], $header['env']);
     $lines[0] = (string) json_encode($header);
   }
@@ -286,7 +286,7 @@ function main(): void {
   $project_dir = dirname($script_dir, 2);
   $assets_dir = $script_dir;
 
-  verbose('Scaffold - init.sh recording generator');
+  verbose('Scaffold - install.sh recording generator');
   verbose('======================================');
 
   checkDependencies();
@@ -300,28 +300,28 @@ function main(): void {
   $workspace_dir = createWorkspace($project_dir, $tmp_dir);
   verbose('Workspace: ' . $workspace_dir);
 
-  $expect_script = $tmp_dir . '/init.exp';
-  $cast_file = $tmp_dir . '/init-raw.cast';
-  $svg_input = $tmp_dir . '/init-svg.cast';
+  $expect_script = $tmp_dir . '/install.exp';
+  $cast_file = $tmp_dir . '/install-raw.cast';
+  $svg_input = $tmp_dir . '/install-svg.cast';
 
   try {
     file_put_contents($expect_script, buildInitExpectScript($workspace_dir, RECORD_NAMESPACE, RECORD_PROJECT, RECORD_AUTHOR));
     chmod($expect_script, 0755);
 
-    verbose('Recording init.sh...');
+    verbose('Recording install.sh...');
     recordSession($cast_file, $expect_script);
 
     $raw = (string) file_get_contents($cast_file);
     $home = (string) getenv('HOME');
     $clean = canonicalizeCast(sanitizeCast($raw, $workspace_dir, $home));
 
-    $cast_dest = $project_dir . '/.scaffold/docs/static/img/init.cast';
+    $cast_dest = $project_dir . '/.scaffold/docs/static/img/install.cast';
     file_put_contents($cast_dest, $clean);
     verbose('Cast written: ' . $cast_dest);
 
     file_put_contents($svg_input, appendEndPause($clean, END_PAUSE));
 
-    $svg_file = $assets_dir . '/init.svg';
+    $svg_file = $assets_dir . '/install.svg';
     verbose('Rendering SVG...');
     renderSvg($svg_input, $svg_file, $assets_dir);
     verbose('SVG written: ' . $svg_file);
@@ -378,7 +378,7 @@ function installSvgTerm(string $assets_dir): void {
  * Export the current git tree into a disposable workspace directory.
  *
  * Uses `git stash create` so uncommitted changes to tracked files (e.g. an
- * in-progress init.sh) are recorded, falling back to HEAD when the tree is
+ * in-progress install.sh) are recorded, falling back to HEAD when the tree is
  * clean. `git stash create` only builds stash commit objects - it never
  * touches the working tree or the stash list.
  *
@@ -391,7 +391,7 @@ function installSvgTerm(string $assets_dir): void {
  *   Path to the created workspace directory.
  */
 function createWorkspace(string $project_dir, string $tmp_dir): string {
-  $workspace_dir = $tmp_dir . '/init-record-' . bin2hex(random_bytes(6));
+  $workspace_dir = $tmp_dir . '/install-record-' . bin2hex(random_bytes(6));
   mkdir($workspace_dir, 0755, TRUE);
 
   $stash = trim((string) shell_exec(sprintf('git -C %s stash create 2>/dev/null', escapeshellarg($project_dir))));
@@ -407,7 +407,7 @@ function createWorkspace(string $project_dir, string $tmp_dir): string {
   $output = [];
   exec($cmd, $output);
 
-  if (!is_file($workspace_dir . '/init.sh')) {
+  if (!is_file($workspace_dir . '/install.sh')) {
     throw new \RuntimeException('Failed to export git archive: ' . implode("\n", $output));
   }
 
@@ -415,7 +415,7 @@ function createWorkspace(string $project_dir, string $tmp_dir): string {
 }
 
 /**
- * Record an init.sh session with asciinema driven by an expect script.
+ * Record an install.sh session with asciinema driven by an expect script.
  *
  * @param string $cast_file
  *   Path to write the recorded cast.

@@ -41,7 +41,7 @@ final class UpdateAssetsTest extends TestCase {
     $this->assertStringNotContainsString('sleep', (string) $script);
 
     $session = implode("\n", [
-      'expect "\$ " { answer "./init.sh" }',
+      'expect "\$ " { answer "./install.sh" }',
       'reply "Namespace (PascalCase)" "MyNs"',
       'reply "Project" "myproj"',
       'reply "Author" "Jane"',
@@ -73,7 +73,7 @@ final class UpdateAssetsTest extends TestCase {
 
   public function testSanitizeCastCleansHeaderAndPaths(): void {
     $cast = implode("\n", [
-      '{"version":2,"width":80,"height":24,"timestamp":123,"command":"expect /x/init.exp","env":{"SHELL":"/bin/sh"}}',
+      '{"version":2,"width":80,"height":24,"timestamp":123,"command":"expect /x/install.exp","env":{"SHELL":"/bin/sh"}}',
       '[0.1, "o", "spawn bash --norc\r\n"]',
       '',
       '[0.2, "o", "at /work/ws now\r\n"]',
@@ -88,7 +88,7 @@ final class UpdateAssetsTest extends TestCase {
       $this->fail('Sanitized cast header is not valid JSON.');
     }
 
-    $this->assertSame('./init.sh', $header['command']);
+    $this->assertSame('./install.sh', $header['command']);
     $this->assertArrayNotHasKey('timestamp', $header);
     $this->assertArrayNotHasKey('env', $header);
     $this->assertCount(4, $lines, 'Empty lines are dropped and events are kept.');
@@ -125,8 +125,8 @@ final class UpdateAssetsTest extends TestCase {
     ];
 
     yield 'steps are cut at markers and spaced by STEP_DELAY' => [
-      ['[0.05, "o", "$ "]', '[0.06, "o", "' . $m . '"]', '[3.3, "o", "./init.sh\r\n"]', '[3.7, "o", "Name: "]', '[3.71, "o", "' . $m . 'Acme\r\n"]'],
-      ['[0,"o","$ "]', '[1,"o","./init.sh\r\nName: "]', '[2,"o","Acme\r\n"]'],
+      ['[0.05, "o", "$ "]', '[0.06, "o", "' . $m . '"]', '[3.3, "o", "./install.sh\r\n"]', '[3.7, "o", "Name: "]', '[3.71, "o", "' . $m . 'Acme\r\n"]'],
+      ['[0,"o","$ "]', '[1,"o","./install.sh\r\nName: "]', '[2,"o","Acme\r\n"]'],
     ];
 
     yield 'marker split across chunk boundary is joined first' => [
@@ -177,7 +177,7 @@ final class UpdateAssetsTest extends TestCase {
       self::HEADER,
       '[0.051, "o", "spawn bash --norc --noprofile\r\n"]',
       '[0.052, "o", "$ ' . $m . '"]',
-      '[3.338, "o", "./init.sh\r\n"]',
+      '[3.338, "o", "./install.sh\r\n"]',
       '[3.757, "o", "Namespace: "]',
       '[3.758, "o", "' . $m . '"]',
       '[7.322, "o", "MyNamespace\r\nSummary\r\n"]',
@@ -188,7 +188,7 @@ final class UpdateAssetsTest extends TestCase {
     $second = implode("\n", [
       self::HEADER,
       '[0.1, "o", "spawn bash --norc --noprofile\r\n$ "]',
-      '[0.2, "o", "' . $m . './init.sh\r\nNamespace: ' . $m . 'MyNa"]',
+      '[0.2, "o", "' . $m . './install.sh\r\nNamespace: ' . $m . 'MyNa"]',
       '[1.5, "o", "mespace\r\nSummary\r\nline 1\r\n"]',
       '[1.500038, "o", "line 2\r\n"]',
       '[1.6, "o", "' . $m . '"]',
@@ -199,7 +199,7 @@ final class UpdateAssetsTest extends TestCase {
     $this->assertSame(implode("\n", [
       self::HEADER,
       '[0,"o","$ "]',
-      '[1,"o","./init.sh\r\nNamespace: "]',
+      '[1,"o","./install.sh\r\nNamespace: "]',
       '[2,"o","MyNamespace\r\nSummary\r\nline 1\r\nline 2\r\n"]',
     ]) . "\n", canonicalizeCast($first));
   }

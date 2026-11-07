@@ -12,12 +12,12 @@ Scaffold is a project template for Shell, PHP, NodeJS and Docker projects. Each 
 
 ## Quick start
 
-The `init.sh` script turns the template into your project. It replaces `yournamespace`, `yourproject`, `Your Name` and other placeholders with your answers to its prompts. It removes the features you turn down.
+The `install.sh` script turns the template into your project. It replaces `yournamespace`, `yourproject`, `Your Name` and other placeholders with your answers to its prompts. It removes the features you turn down.
 
-The following recording shows a run of `init.sh`:
+The following recording shows a run of `install.sh`:
 
 <AsciinemaPlayer
-  src="/img/init.cast"
+  src="/img/install.cast"
   autoPlay={true}
   loop={true}
   controls={true}
@@ -30,7 +30,7 @@ To create a project:
 2. Run the following command:
 
    ```bash
-   curl -fsSL https://getscaffold.dev/init.sh | bash
+   curl -fsSL https://getscaffold.dev/install.sh | bash
    ```
 
    The script downloads the latest Scaffold release into the directory.
@@ -44,21 +44,21 @@ To create a project:
 Any command-line option turns off the prompts. You must then pass `--namespace`, `--name` and `--author`. The script uses the default for every other choice. For automation and AI agents, run the following command in place of the step 2 command:
 
 ```bash
-curl -fsSL https://getscaffold.dev/init.sh | \
+curl -fsSL https://getscaffold.dev/install.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
 Replace the 3 values with a PascalCase namespace, a lowercase hyphenated project name and your name.
 
-To start from a tag, branch or commit in place of the latest release, add `--ref` to the no-prompt command, such as `--ref=1.2.3`. To list every option and its default, run `curl -fsSL https://getscaffold.dev/init.sh | bash -s -- --help`.
+To start from a tag, branch or commit in place of the latest release, add `--ref` to the no-prompt command, such as `--ref=1.2.3`. To list every option and its default, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- --help`.
 
 ## Start from a downloaded release
 
-To run `init.sh` from a local copy:
+To run `install.sh` from a local copy:
 
 1. Download the latest release from [GitHub](https://github.com/AlexSkrypnyk/scaffold/releases/latest).
 2. Extract the archive.
-3. In the extracted directory, run `./init.sh`.
+3. In the extracted directory, run `./install.sh`.
 4. Follow steps 3-5 of the quick start.
 
 ## What's next
