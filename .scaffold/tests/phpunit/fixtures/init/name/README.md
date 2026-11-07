@@ -63,7 +63,7 @@
  
  The command takes the following arguments and options:
 @@ -73,7 +73,7 @@
- Run the shell script and answer its prompts:
+ Run the shell script:
  
  ```bash
 -./force-crystal.sh

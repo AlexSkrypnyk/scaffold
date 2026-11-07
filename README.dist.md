@@ -90,10 +90,10 @@ The command takes the following arguments and options:
 
 [//]: # (#;> PHP_COMMAND)
 [//]: # (#;< PHP_SCRIPT)
-Run the PHP script that Composer installs, with 1 argument:
+Run the PHP script that Composer installs:
 
 ```bash
-vendor/bin/php-script value
+vendor/bin/php-script
 ```
 
 [//]: # (#;> PHP_SCRIPT)
@@ -109,7 +109,7 @@ echo (new Example())->greet('World');
 [//]: # (#;> PHP_LIBRARY)
 [//]: # (#;> PHP)
 [//]: # (#;< NODEJS)
-Run the Node.js script with 1 argument:
+Run the Node.js script:
 
 ```bash
 ./nodejs-script value/of/argument
@@ -117,7 +117,7 @@ Run the Node.js script with 1 argument:
 
 [//]: # (#;> NODEJS)
 [//]: # (#;< SHELL)
-Run the shell script and answer its prompts:
+Run the shell script:
 
 ```bash
 ./shell-command.sh

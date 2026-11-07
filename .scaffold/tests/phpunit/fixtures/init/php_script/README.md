@@ -19,11 +19,10 @@
  ## Usage
  
 -Run the PHP command that Composer installs:
-+Run the PHP script that Composer installs, with 1 argument:
++Run the PHP script that Composer installs:
  
  ```bash
--vendor/bin/force-crystal
-+vendor/bin/force-crystal value
+ vendor/bin/force-crystal
  ```
  
 -The command takes the following arguments and options:
@@ -34,13 +33,13 @@
 -| `--option1` | `default1`    | Option with a default value.       |
 -| `--option2` | None          | Flag that takes no value.          |
 -
- Run the Node.js script with 1 argument:
+ Run the Node.js script:
  
  ```bash
  ./nodejs-script value/of/argument
 -```
 -
--Run the shell script and answer its prompts:
+-Run the shell script:
 -
 -```bash
 -./force-crystal.sh

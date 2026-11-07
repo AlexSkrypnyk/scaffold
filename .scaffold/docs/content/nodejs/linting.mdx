@@ -37,7 +37,7 @@ To add a file to both tools:
 
 1. In `package.json`, add the file's path to the ESLint command and the Prettier command of both the `lint` and `lint-fix` scripts.
 2. In `eslint.config.js`, add the path to the `files` array, which lists the files the ESLint rules apply to.
-3. For a file with no `.js` extension, add an entry for it to `prettier.overrides` in `package.json` with the `babel` parser, as the entry for `nodejs-script` does.
+3. For a JavaScript file with no file extension, add an entry for it to `prettier.overrides` in `package.json` with the `babel` parser, as the entry for `nodejs-script` does.
 
 ## ESLint settings
 
