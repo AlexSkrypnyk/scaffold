@@ -409,7 +409,6 @@ AGENTS
   mkdir -p "${tmpdir}/.github/workflows"
   touch "${tmpdir}/.github/workflows/test-actions.yml"
   touch "${tmpdir}/.github/.yamllint-for-gha.yml"
-  touch "${tmpdir}/.github/actionlint.yaml"
   touch "${tmpdir}/zizmor.yml"
 
   pushd "${tmpdir}" >/dev/null || return 1
@@ -418,7 +417,6 @@ AGENTS
 
   assert_file_not_exists "${tmpdir}/.github/workflows/test-actions.yml"
   assert_file_not_exists "${tmpdir}/.github/.yamllint-for-gha.yml"
-  assert_file_not_exists "${tmpdir}/.github/actionlint.yaml"
   assert_file_not_exists "${tmpdir}/zizmor.yml"
 }
 
