@@ -103,6 +103,8 @@ proc reply {label {text ""}} {
 cd "{$workspace_dir}"
 
 set env(PS1) {\$ }
+# A token in the maintainer's shell would add the GitHub prompts.
+if {[info exists env(SCAFFOLD_GITHUB_TOKEN)]} { unset env(SCAFFOLD_GITHUB_TOKEN) }
 spawn bash --norc --noprofile
 
 expect "\\$ " { answer "./install.sh" }

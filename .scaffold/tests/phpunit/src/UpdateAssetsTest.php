@@ -39,6 +39,7 @@ final class UpdateAssetsTest extends TestCase {
     $this->assertStringNotContainsString('send -h', (string) $script);
     $this->assertStringNotContainsString('send_human', (string) $script);
     $this->assertStringNotContainsString('sleep', (string) $script);
+    $this->assertStringContainsString('unset env(SCAFFOLD_GITHUB_TOKEN)', (string) $script);
 
     $session = implode("\n", [
       'expect "\$ " { answer "./install.sh" }',
