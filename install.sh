@@ -89,7 +89,17 @@ github_merge=""
 github_labels=""
 github_labels_prune=""
 github_ruleset=""
+github_required_checks=""
+github_create=""
+github_visibility=""
+github_push=""
+github_wait_checks=""
+github_wait_timeout=""
 dry_run=0
+
+# Seconds between CI polls, and seconds the first CI run may take to appear.
+github_poll_interval=10
+github_runs_timeout=60
 
 # Where a derived identity value came from, named in validation errors.
 # Empty when the value was typed or passed as its own option.
@@ -106,6 +116,19 @@ github_repo_default=""
 
 # Repository state read from the GitHub API as "key=value" lines.
 github_repo_state=""
+
+# Whether the repository exists on GitHub: "y", "n", or empty before the read.
+github_repo_exists=""
+
+# Set once this run creates the repository, and to the pushed commit.
+github_created=0
+github_pushed_sha=""
+
+# The required status checks rule computed from CI, as a JSON object.
+github_checks_rule=""
+
+# App that owns the check runs of GitHub Actions workflows.
+GITHUB_ACTIONS_APP_ID=15368
 
 # Labels applied to the GitHub repository as "name|colour|description".
 GITHUB_LABELS=(
@@ -1166,12 +1189,20 @@ github_apply_defaults() {
   : "${github_labels_prune:=n}"
   : "${github_ruleset:=y}"
   : "${github_merge:=squash,rebase}"
+  : "${github_required_checks:=y}"
+  : "${github_create:=n}"
+  : "${github_visibility:=public}"
+  : "${github_push:=y}"
+  : "${github_wait_checks:=y}"
+  : "${github_wait_timeout:=1800}"
 }
 
 ##
 # Read the repository state that the sections compare against.
 #
-# @return int 1 when the repository cannot be read.
+# Sets github_repo_exists to "y", or to "n" on a 404.
+#
+# @return int 0 when read, 3 when the repository does not exist, 1 otherwise.
 #
 github_load_repo() {
   if [[ ! ${github_owner} =~ ^[A-Za-z0-9-]+$ ]]; then
@@ -1189,16 +1220,24 @@ github_load_repo() {
 
   if output="$(gh_run api "repos/${github_owner}/${github_repo}" --jq ". as \$repo | [${keys}][] | \"\\(.)=\\(\$repo[.] | if . == null then \"\" else . end)\"" 2>&1)"; then
     github_repo_state="${output}"
+    github_repo_exists="y"
     return 0
   fi
 
   if [[ ${output} == *"HTTP 404"* ]]; then
-    echo "Error: GitHub repository ${github_owner}/${github_repo} does not exist, or the token cannot access it." >&2
-    return 1
+    github_repo_exists="n"
+    return 3
   fi
 
   echo "Error: Could not read GitHub repository ${github_owner}/${github_repo}: ${output//$'\n'/ }" >&2
   return 1
+}
+
+##
+# Report a repository that does not exist and is not being created.
+#
+github_missing_error() {
+  echo "Error: GitHub repository ${github_owner}/${github_repo} does not exist, or the token cannot access it. Pass --github-create to create it." >&2
 }
 
 ##
@@ -1366,9 +1405,10 @@ github_apply_settings() {
 #
 github_apply_labels() {
   local slug="${github_owner}/${github_repo}"
-  local output
+  local output=""
 
-  if ! output="$(gh_run api "repos/${slug}/labels" --paginate --jq '.[] | [.name, .color, (.description // "")] | join("\t")' 2>&1)"; then
+  # A dry run that would create the repository has no labels to read.
+  if [ "${github_repo_exists}" != "n" ] && ! output="$(gh_run api "repos/${slug}/labels" --paginate --jq '.[] | [.name, .color, (.description // "")] | join("\t")' 2>&1)"; then
     github_section_error "Labels" "Issues: read" "${output}"
     return $?
   fi
@@ -1475,13 +1515,21 @@ JSON
 # Create the default branch ruleset, or update it when it exists.
 #
 # The update body replaces the rules and bypass actors, so the ones this script
-# does not manage, such as required status checks, are read and sent back.
+# does not manage are read and sent back. A given required status checks rule
+# replaces the existing one; without it, the existing one is kept.
+#
+# @param $1 string Required status checks rule as a JSON object (optional)
 #
 github_apply_ruleset() {
+  local checks_rule="${1:-}"
   local slug="${github_owner}/${github_repo}"
-  local output
+  local output=""
+  local details="${GITHUB_RULESET_NAME}"
 
-  if ! output="$(gh_run api "repos/${slug}/rulesets" --paginate --jq ".[] | select(.name == \"${GITHUB_RULESET_NAME}\" and .source_type == \"Repository\") | .id" 2>&1)"; then
+  [ -z "${checks_rule}" ] || details="${details} with required checks"
+
+  # A dry run that would create the repository has no rulesets to read.
+  if [ "${github_repo_exists}" != "n" ] && ! output="$(gh_run api "repos/${slug}/rulesets" --paginate --jq ".[] | select(.name == \"${GITHUB_RULESET_NAME}\" and .source_type == \"Repository\") | .id" 2>&1)"; then
     github_section_error "Ruleset" "Administration: read" "${output}"
     return $?
   fi
@@ -1489,13 +1537,16 @@ github_apply_ruleset() {
   local id="${output%%$'\n'*}"
 
   if [ -z "${id}" ]; then
-    github_call "Ruleset" "Administration: write" api --method POST "repos/${slug}/rulesets" --silent --input - <<<"$(github_ruleset_body)" || return $?
-    github_report "Ruleset" "would create" "created" "${GITHUB_RULESET_NAME}"
+    github_call "Ruleset" "Administration: write" api --method POST "repos/${slug}/rulesets" --silent --input - <<<"$(github_ruleset_body "${checks_rule}")" || return $?
+    github_report "Ruleset" "would create" "created" "${details}"
     return 0
   fi
 
+  local managed='.type != "deletion" and .type != "non_fast_forward"'
+  [ -z "${checks_rule}" ] || managed="${managed} and .type != \"required_status_checks\""
+
   # Prints the unmanaged rules on line 1 and the unmanaged actors on line 2.
-  local jq_kept='([.rules[]? | select(.type != "deletion" and .type != "non_fast_forward") | tojson] | join(", ")), ([.bypass_actors[]? | select((.actor_type == "RepositoryRole" and .actor_id == 5) | not) | tojson] | join(", "))'
+  local jq_kept="([.rules[]? | select(${managed}) | tojson] | join(\", \")), ([.bypass_actors[]? | select((.actor_type == \"RepositoryRole\" and .actor_id == 5) | not) | tojson] | join(\", \"))"
 
   if ! output="$(gh_run api "repos/${slug}/rulesets/${id}" --jq "${jq_kept}" 2>&1)"; then
     github_section_error "Ruleset" "Administration: read" "${output}"
@@ -1506,8 +1557,413 @@ github_apply_ruleset() {
   local kept_actors=""
   [[ ${output} != *$'\n'* ]] || kept_actors="${output#*$'\n'}"
 
+  if [ -n "${checks_rule}" ]; then
+    kept_rules="${kept_rules:+${kept_rules}, }${checks_rule}"
+  fi
+
   github_call "Ruleset" "Administration: write" api --method PUT "repos/${slug}/rulesets/${id}" --silent --input - <<<"$(github_ruleset_body "${kept_rules}" "${kept_actors}")" || return $?
-  github_report "Ruleset" "would update" "updated" "${GITHUB_RULESET_NAME}"
+  github_report "Ruleset" "would update" "updated" "${details}"
+}
+
+##
+# Check whether a workflow file read from stdin has a 'pull_request' trigger.
+#
+# Reads the top-level 'on' key in its string, list and map forms. Comments
+# are ignored, and 'pull_request_target' does not count.
+#
+github_workflow_has_pull_request() {
+  awk '
+    /^on:/ {
+      in_on = 1
+      rest = $0
+      sub(/^on:/, "", rest)
+      sub(/#.*/, "", rest)
+      if (rest ~ /(^|[^a-z_])pull_request([^a-z_]|$)/) found = 1
+      next
+    }
+    in_on && /^[^[:space:]#]/ { in_on = 0 }
+    in_on && /^[[:space:]]+(-[[:space:]]+)?pull_request[[:space:]]*(:|$)/ { found = 1 }
+    END { exit found ? 0 : 1 }
+  '
+}
+
+##
+# Build the required status checks rule from a list of check names.
+#
+# @param $1 string Check names, 1 per line
+#
+github_checks_rule_json() {
+  local checks=""
+  local name
+
+  while IFS= read -r name; do
+    [ -n "${name}" ] || continue
+    name="${name//\\/\\\\}"
+    name="${name//\"/\\\"}"
+    checks="${checks:+${checks}, }{\"context\": \"${name}\", \"integration_id\": ${GITHUB_ACTIONS_APP_ID}}"
+  done <<<"${1}"
+
+  [ -n "${checks}" ] || return 0
+
+  echo "{\"type\": \"required_status_checks\", \"parameters\": {\"strict_required_status_checks_policy\": false, \"do_not_enforce_on_create\": false, \"required_status_checks\": [${checks}]}}"
+}
+
+##
+# Work out the required checks from the latest commit on the default branch.
+#
+# Only GitHub Actions checks from workflows with a 'pull_request' trigger
+# count, because a push-only check never reports on a pull request and would
+# block every one. Each check is traced through its check suite to the
+# workflow file at that commit, read through the API so no checkout is needed.
+#
+# Sets github_checks_rule, left empty when no check qualifies.
+#
+# @return int 0 on success, 2 when skipped on a 403, 1 otherwise.
+#
+github_compute_checks() {
+  local slug="${github_owner}/${github_repo}"
+  local branch
+  branch="$(github_state default_branch)"
+  branch="${branch:-main}"
+  github_checks_rule=""
+
+  local output
+
+  if ! output="$(gh_run api "repos/${slug}/commits/${branch}/check-runs" --paginate --jq ".check_runs[] | select(.app.id == ${GITHUB_ACTIONS_APP_ID} and .conclusion != \"skipped\" and .conclusion != \"cancelled\" and .conclusion != \"neutral\") | [(.check_suite.id | tostring), .head_sha, .name] | join(\"\\t\")" 2>&1)"; then
+    github_section_error "Required checks" "Checks: read" "${output}"
+    return $?
+  fi
+
+  local suites="|"
+  local check_names=""
+  local line suite sha name path decision
+
+  while IFS= read -r line; do
+    [ -n "${line}" ] || continue
+    suite="${line%%$'\t'*}"
+    line="${line#*$'\t'}"
+    sha="${line%%$'\t'*}"
+    name="${line#*$'\t'}"
+
+    # Each check suite is 1 workflow run, so its file is read once.
+    if [[ ${suites} == *"|${suite}:"* ]]; then
+      decision="${suites#*|"${suite}":}"
+      decision="${decision%%|*}"
+    else
+      decision="n"
+
+      if ! path="$(gh_run api "repos/${slug}/actions/runs?check_suite_id=${suite}" --jq '.workflow_runs[0].path // ""' 2>&1)"; then
+        github_section_error "Required checks" "Actions: read" "${path}"
+        return $?
+      fi
+
+      if [ -n "${path}" ] && gh_run api -H "Accept: application/vnd.github.raw" "repos/${slug}/contents/${path}?ref=${sha}" 2>/dev/null | github_workflow_has_pull_request; then
+        decision="y"
+      fi
+
+      suites="${suites}${suite}:${decision}|"
+    fi
+
+    [ "${decision}" = "n" ] || check_names="${check_names}${name}"$'\n'
+  done <<<"${output}"
+
+  check_names="$(printf '%s' "${check_names}" | sort -u)"
+
+  if [ -z "${check_names}" ]; then
+    echo "  Required checks: none found on ${branch}"
+    return 0
+  fi
+
+  github_checks_rule="$(github_checks_rule_json "${check_names}")"
+  echo "  Required checks: ${check_names//$'\n'/, }"
+}
+
+##
+# Print the command that adds the required checks once CI has run.
+#
+github_rerun_hint() {
+  echo "  After CI finishes, run the following command to require its checks:"
+  echo "    curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --github-owner=${github_owner} --github-repo=${github_repo} --no-github-settings --no-github-labels"
+}
+
+##
+# Wait for the CI runs of the pushed commit to finish.
+#
+# Polls instead of using 'timeout', which macOS does not ship. An interrupt
+# stops the wait and prints the command to finish the job later.
+#
+# @return int 0 when every run finished, 1 when none appeared or the deadline
+#   passed.
+#
+github_wait_for_runs() {
+  local slug="${github_owner}/${github_repo}"
+  local jq_runs='.[] | [.status, (.conclusion // ""), .name] | join("\t")'
+  local runs=""
+  local deadline=$((SECONDS + github_runs_timeout))
+
+  trap 'github_wait_interrupted' INT
+
+  echo "  Waiting for the CI runs of the pushed commit"
+
+  while :; do
+    runs="$(gh_run run list --repo "${slug}" --commit "${github_pushed_sha}" --json status,conclusion,name --jq "${jq_runs}" 2>/dev/null || true)"
+    [ -z "${runs}" ] || break
+
+    if [ "${SECONDS}" -ge "${deadline}" ]; then
+      trap - INT
+      echo "  CI: no runs started within ${github_runs_timeout}s"
+      return 1
+    fi
+
+    sleep "${github_poll_interval}"
+  done
+
+  deadline=$((SECONDS + github_wait_timeout))
+
+  while grep -qv $'^completed\t' <<<"${runs}"; do
+    if [ "${SECONDS}" -ge "${deadline}" ]; then
+      trap - INT
+      echo "  CI: runs still in progress after ${github_wait_timeout}s"
+      return 1
+    fi
+
+    sleep "${github_poll_interval}"
+    runs="$(gh_run run list --repo "${slug}" --commit "${github_pushed_sha}" --json status,conclusion,name --jq "${jq_runs}" 2>/dev/null || true)"
+  done
+
+  trap - INT
+
+  local total
+  local failed
+  total="$(grep -c . <<<"${runs}")"
+  failed="$(awk -F '\t' '$2 != "success" && $2 != "skipped" && $2 != "neutral" { print $3 }' <<<"${runs}")"
+
+  echo "  CI: ${total} runs finished"
+
+  if [ -n "${failed}" ]; then
+    echo "  Warning: these runs failed, so pull requests stay blocked until CI passes: ${failed//$'\n'/, }"
+  fi
+
+  return 0
+}
+
+##
+# Stop waiting for CI on an interrupt.
+#
+github_wait_interrupted() {
+  echo
+  echo "  CI: waiting was interrupted, so the ruleset has no required checks."
+  github_rerun_hint
+  exit 130
+}
+
+##
+# Check the prerequisites of creating and pushing a repository.
+#
+# @return int 0 when 'git' is installed and git user.email is set.
+#
+github_creation_prerequisites() {
+  if ! has_command git; then
+    echo "Skipping repository creation: 'git' is not installed."
+    return 1
+  fi
+
+  if [ -z "$(git config user.email 2>/dev/null || true)" ]; then
+    echo "Skipping repository creation: git user.email is not set. Run 'git config --global user.email \"you@example.com\"' first."
+    return 1
+  fi
+}
+
+##
+# Run a 'git' call that changes the repository, or print it under --dry-run.
+#
+git_write() {
+  if [ "${dry_run}" != "1" ]; then
+    git "$@"
+    return
+  fi
+
+  local call
+  printf -v call ' %q' "$@"
+  echo "  [dry-run] git${call}"
+}
+
+##
+# Print the path of this script when it is removed at the end of the run.
+#
+# "${BASH_SOURCE[0]}" is empty when the script is piped through 'curl ... |
+# bash', so only a real file on disk is printed.
+#
+self_removal_path() {
+  local script_path="${BASH_SOURCE[0]:-}"
+
+  [ "${remove_self}" != "n" ] || return 0
+  [ -n "${script_path}" ] && [ -f "${script_path}" ] || return 0
+
+  echo "${script_path}"
+}
+
+##
+# Remove this script, unless --keep was passed or it was piped.
+#
+remove_self_script() {
+  local script_path
+  script_path="$(self_removal_path)"
+
+  [ -z "${script_path}" ] || rm -- "${script_path}" || true
+}
+
+##
+# Print a pathspec that leaves this script out of a commit.
+#
+# The script is removed only at the very end of the run, after the commit, so
+# it never reaches the project's history. Prints nothing when the script stays
+# or lives outside the current directory.
+#
+github_self_exclude() {
+  local script_path
+  script_path="$(self_removal_path)"
+
+  [ -n "${script_path}" ] || return 0
+
+  script_path="${script_path#"${PWD}"/}"
+  script_path="${script_path#./}"
+
+  [[ ${script_path} != /* ]] || return 0
+
+  echo ":(exclude)${script_path}"
+}
+
+##
+# Push with SCAFFOLD_GITHUB_TOKEN, independent of local git credentials.
+#
+# The empty helper clears any configured one, and the inline helper reads the
+# token from the environment, so it never appears on the command line.
+#
+# @param $1 string Repository URL
+# @param $2 string Branch to push
+#
+github_git_push() {
+  # shellcheck disable=SC2016
+  SCAFFOLD_GITHUB_TOKEN="${SCAFFOLD_GITHUB_TOKEN:-}" GIT_TERMINAL_PROMPT=0 git_write -c credential.helper= -c 'credential.helper=!f() { echo username=x-access-token; echo "password=${SCAFFOLD_GITHUB_TOKEN}"; }; f' push -q "${1}" "HEAD:refs/heads/${2}"
+}
+
+##
+# Create the GitHub repository and push the local commits to it.
+#
+# Initialises git and commits every file when needed. An existing 'origin'
+# is never rewritten.
+#
+# @return int 1 when any step failed.
+#
+github_create_repo() {
+  local slug="${github_owner}/${github_repo}"
+  local url="https://github.com/${slug}.git"
+  local exclude
+  local fresh=0
+
+  github_creation_prerequisites || return 1
+
+  exclude="$(github_self_exclude)"
+
+  echo "  Creating ${github_visibility} repository ${slug}"
+
+  if [ ! -e .git ]; then
+    fresh=1
+    git_write init -q || return 1
+    git_write symbolic-ref HEAD refs/heads/main || return 1
+  fi
+
+  if [ "${fresh}" = "1" ] || ! git rev-parse --verify -q HEAD >/dev/null 2>&1; then
+    git_write add -A -- . ${exclude:+"${exclude}"} || return 1
+    git_write commit -q -m "Initial commit." || return 1
+  elif [ -n "$(git status --porcelain -- . ${exclude:+"${exclude}"} 2>/dev/null)" ]; then
+    echo "  Warning: uncommitted changes are not pushed."
+  fi
+
+  local rc=0
+  github_call "Repository" "Administration: write" repo create "${slug}" "--${github_visibility}" || rc=$?
+  [ "${rc}" -eq 0 ] || return 1
+
+  if [ "${fresh}" = "1" ] || ! git remote get-url origin >/dev/null 2>&1; then
+    git_write remote add origin "${url}" || return 1
+  fi
+
+  github_created=1
+
+  if [ "${github_push}" = "n" ]; then
+    echo "  Push: skipped"
+  else
+    local branch="main"
+    [ "${fresh}" = "1" ] || branch="$(git symbolic-ref --short HEAD 2>/dev/null || echo main)"
+
+    if ! github_git_push "${url}" "${branch}"; then
+      echo "  Push: failed" >&2
+      return 1
+    fi
+
+    git_write config "branch.${branch}.remote" origin
+    git_write config "branch.${branch}.merge" "refs/heads/${branch}"
+
+    if [ "${dry_run}" != "1" ]; then
+      github_pushed_sha="$(git rev-parse HEAD)"
+      echo "  Pushed ${branch} to ${url}"
+    fi
+  fi
+
+  # A dry run creates nothing, so there is no new state to read.
+  [ "${dry_run}" = "1" ] || github_load_repo
+}
+
+##
+# Apply the ruleset to a repository this run created.
+#
+# The ruleset goes on first without checks. After the first CI run finishes,
+# its pull-request checks are added.
+#
+github_apply_new_ruleset() {
+  github_apply_ruleset || return $?
+
+  if [ "${dry_run}" = "1" ]; then
+    if [ "${github_wait_checks}" != "n" ] && [ "${github_push}" != "n" ]; then
+      echo "  CI: would wait for the first CI run and require its checks"
+    fi
+
+    return 0
+  fi
+
+  if [ "${github_wait_checks}" = "n" ] || [ -z "${github_pushed_sha}" ]; then
+    github_rerun_hint
+    return 0
+  fi
+
+  if ! github_wait_for_runs; then
+    github_rerun_hint
+    return 0
+  fi
+
+  github_compute_checks || return $?
+
+  [ -n "${github_checks_rule}" ] || return 0
+
+  github_apply_ruleset "${github_checks_rule}"
+}
+
+##
+# Apply the ruleset to an existing repository, with the checks of its latest
+# CI run when requested.
+#
+github_apply_existing_ruleset() {
+  if [ "${github_required_checks}" != "y" ]; then
+    github_apply_ruleset
+    return
+  fi
+
+  github_compute_checks || return $?
+
+  github_apply_ruleset "${github_checks_rule}" || return $?
+
+  [ -n "${github_checks_rule}" ] || github_rerun_hint
 }
 
 ##
@@ -1522,8 +1978,19 @@ configure_github() {
   echo "Configuring GitHub repository ${github_owner}/${github_repo}"
   [ "${dry_run}" != "1" ] || echo "  Dry run: nothing is changed."
 
-  if [ -z "${github_repo_state}" ]; then
-    github_load_repo || return 1
+  if [ -z "${github_repo_exists}" ]; then
+    local rc=0
+    github_load_repo || rc=$?
+    [ "${rc}" -eq 0 ] || [ "${rc}" -eq 3 ] || return 1
+  fi
+
+  if [ "${github_repo_exists}" = "n" ]; then
+    if [ "${github_create}" != "y" ]; then
+      github_missing_error
+      return 1
+    fi
+
+    github_create_repo || return 1
   fi
 
   local failed=0
@@ -1536,8 +2003,10 @@ configure_github() {
     github_run_section github_apply_labels || failed=1
   fi
 
-  if [ "${github_ruleset}" = "y" ]; then
-    github_run_section github_apply_ruleset || failed=1
+  if [ "${github_ruleset}" = "y" ] && [ "${github_created}" = "1" ]; then
+    github_run_section github_apply_new_ruleset || failed=1
+  elif [ "${github_ruleset}" = "y" ]; then
+    github_run_section github_apply_existing_ruleset || failed=1
   fi
 
   if [ "${failed}" = "1" ]; then
@@ -1551,13 +2020,33 @@ configure_github() {
 ##
 # Prompt for the GitHub repository and the sections to apply.
 #
-# @return int 1 when the repository cannot be read.
+# A repository that does not exist is offered for creation, and the creation
+# prompts appear only then.
+#
+# @return int 1 when the repository cannot be read or is not created.
 #
 github_collect_interactive() {
   github_owner="$(ask "  GitHub owner" "${github_owner}")"
   github_repo="$(ask "  GitHub repository" "${github_repo}")"
 
-  github_load_repo || return 1
+  local rc=0
+  github_load_repo || rc=$?
+
+  if [ "${rc}" -eq 3 ]; then
+    if [ "${github_create}" != "y" ]; then
+      github_create="$(ask_yesno "  ${github_owner}/${github_repo} does not exist. Create it")"
+      [ "${github_create}" = "y" ] || return 1
+    fi
+
+    github_creation_prerequisites || return 1
+
+    github_visibility="$(ask_choice "  Visibility" "public" "public private")"
+  elif [ "${rc}" -ne 0 ]; then
+    return 1
+  elif [ "${github_create}" = "y" ]; then
+    echo "  ${github_owner}/${github_repo} already exists, so only its settings are applied."
+    github_create="n"
+  fi
 
   github_settings="$(ask_yesno "  Apply general settings")"
   if [ "${github_settings}" = "y" ]; then
@@ -1572,21 +2061,34 @@ github_collect_interactive() {
 
   github_ruleset="$(ask_yesno "  Protect the default branch with a ruleset")"
 
-  : "${github_merge:=squash,rebase}"
+  if [ "${github_ruleset}" = "y" ] && [ "${github_create}" = "y" ]; then
+    github_wait_checks="$(ask_yesno "    Wait for the first CI run and require its checks")"
+  elif [ "${github_ruleset}" = "y" ]; then
+    github_required_checks="$(ask_yesno "    Require checks from the latest CI run")"
+  fi
+
+  github_apply_defaults
 }
 
 ##
 # Offer to configure the GitHub repository during an interactive install.
 #
-# The prompts appear only when the prerequisites pass.
+# The prompts appear only when the prerequisites pass. Without a '.git'
+# directory the offer is to create the repository.
 #
 collect_github_interactive() {
   use_github="n"
 
   github_prerequisites || return 0
 
-  use_github="$(ask_yesno "Configure GitHub repository settings" "N")"
-  [ "${use_github}" = "y" ] || return 0
+  if [ ! -e .git ] && github_creation_prerequisites >/dev/null; then
+    use_github="$(ask_yesno "Create a GitHub repository" "N")"
+    [ "${use_github}" = "y" ] || return 0
+    github_create="y"
+  else
+    use_github="$(ask_yesno "Configure GitHub repository settings" "N")"
+    [ "${use_github}" = "y" ] || return 0
+  fi
 
   github_default_identity "${project}"
   github_collect_interactive || use_github="n"
@@ -1718,6 +2220,21 @@ GitHub repository (needs GitHub CLI and SCAFFOLD_GITHUB_TOKEN):
                                  Delete labels not in the list (default: off).
   --github-ruleset, --no-github-ruleset
                                  Default branch ruleset (default: on).
+  --github-required-checks, --no-github-required-checks
+                                 Require the pull-request checks of the latest
+                                 CI run on the default branch (default: on).
+  --github-create, --no-github-create
+                                 Create the repository when it does not exist:
+                                 initialise git, commit, create and push
+                                 (default: off). Implies --github.
+  --github-visibility=VALUE      Visibility of a created repository: public or
+                                 private (default: public).
+  --github-push, --no-github-push
+                                 Push a created repository (default: on).
+  --github-wait-checks, --no-github-wait-checks
+                                 After creating, wait for the first CI run and
+                                 require its checks (default: on).
+  --github-wait-timeout=SECONDS  How long to wait for CI (default: 1800).
   --dry-run                      Print the GitHub changes without making them.
 
 Environment:
@@ -1840,6 +2357,36 @@ parse_args() {
       --no-github-labels-prune) github_labels_prune="n" ;;
       --github-ruleset) github_ruleset="y" ;;
       --no-github-ruleset) github_ruleset="n" ;;
+      --github-required-checks) github_required_checks="y" ;;
+      --no-github-required-checks) github_required_checks="n" ;;
+      --github-create)
+        github_create="y"
+        use_github="y"
+        ;;
+      --no-github-create) github_create="n" ;;
+      --github-visibility=*)
+        github_visibility="${1#*=}"
+        case "${github_visibility}" in
+          public | private) ;;
+          *)
+            echo "Error: Invalid value for --github-visibility: ${github_visibility}. Allowed values: public, private." >&2
+            echo "Run with --help for usage." >&2
+            exit 1
+            ;;
+        esac
+        ;;
+      --github-push) github_push="y" ;;
+      --no-github-push) github_push="n" ;;
+      --github-wait-checks) github_wait_checks="y" ;;
+      --no-github-wait-checks) github_wait_checks="n" ;;
+      --github-wait-timeout=*)
+        github_wait_timeout="${1#*=}"
+        if [[ ! ${github_wait_timeout} =~ ^[0-9]+$ ]]; then
+          echo "Error: Invalid value for --github-wait-timeout: ${github_wait_timeout}. Pass a number of seconds." >&2
+          echo "Run with --help for usage." >&2
+          exit 1
+        fi
+        ;;
       --dry-run) dry_run=1 ;;
 
       --ref=*) archive_ref="${1#*=}" ;;
@@ -1994,10 +2541,19 @@ print_summary() {
   echo "Configure GitHub repository      : ${use_github}"
   if [ "${use_github}" = "y" ]; then
     echo "  Repository                     : ${github_owner}/${github_repo}"
+    if [ "${github_create}" = "y" ]; then
+      echo "  Create and push                : y"
+      echo "    Visibility                   : ${github_visibility}"
+    fi
     echo "  General settings               : ${github_settings}"
     echo "  Labels                         : ${github_labels}"
     echo "    Delete labels not in list    : ${github_labels_prune}"
     echo "  Default branch ruleset         : ${github_ruleset}"
+    if [ "${github_ruleset}" = "y" ] && [ "${github_create}" = "y" ]; then
+      echo "    Wait for CI, require checks  : ${github_wait_checks}"
+    elif [ "${github_ruleset}" = "y" ]; then
+      echo "    Require latest CI checks     : ${github_required_checks}"
+    fi
   fi
   echo "---------------------------------"
   echo
@@ -2066,6 +2622,8 @@ print_reproduce_command() {
 
   if [ "${use_github}" = "y" ]; then
     args+=("--github")
+    [ "${github_create}" != "y" ] || args+=("--github-create")
+    [ "${github_create}" != "y" ] || [ "${github_visibility}" = "public" ] || args+=("--github-visibility=${github_visibility}")
     [ "${github_owner}" = "${github_owner_default}" ] || args+=("--github-owner=${github_owner}")
     [ "${github_repo}" = "${github_repo_default}" ] || args+=("--github-repo=${github_repo}")
     [ "${github_settings}" = "y" ] || args+=("--no-github-settings")
@@ -2073,6 +2631,8 @@ print_reproduce_command() {
     [ "${github_labels}" = "y" ] || args+=("--no-github-labels")
     [ "${github_labels_prune}" != "y" ] || args+=("--github-labels-prune")
     [ "${github_ruleset}" = "y" ] || args+=("--no-github-ruleset")
+    [ "${github_ruleset}" != "y" ] || [ "${github_create}" != "y" ] || [ "${github_wait_checks}" = "y" ] || args+=("--no-github-wait-checks")
+    [ "${github_ruleset}" != "y" ] || [ "${github_create}" = "y" ] || [ "${github_required_checks}" = "y" ] || args+=("--no-github-required-checks")
   fi
 
   local command="./install.sh"
@@ -2432,15 +2992,6 @@ process_project() {
 
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 
-  # "${BASH_SOURCE[0]}" is the script's own path when run as a file, and is
-  # empty (or a bare shell name) when piped through 'curl ... | bash'. Only a
-  # real on-disk script is removed - never the interpreter (e.g. "/bin/bash"
-  # when invoked as 'curl ... | /bin/bash -s').
-  local script_path="${BASH_SOURCE[0]:-}"
-  if [ "${remove_self}" != "n" ] && [ -n "${script_path}" ] && [ -f "${script_path}" ]; then
-    rm -- "${script_path}" || true
-  fi
-
   echo
   echo "Initialization complete."
 }
@@ -2485,6 +3036,9 @@ main() {
   if [ "${use_github}" = "y" ]; then
     configure_github || exit 1
   fi
+
+  # Last, so a failed or interrupted run keeps the script for a re-run.
+  remove_self_script
 }
 
 # Run main only when the script is executed, not when it is sourced. When

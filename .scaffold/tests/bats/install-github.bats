@@ -3,9 +3,10 @@
 # Unit tests for the GitHub repository configuration in install.sh.
 #
 # 'gh' and 'has_command' are replaced with functions. Calls that pass '--jq'
-# are reads and land in GH_READS; every other call is a write and lands in
-# GH_WRITES together with any request body, so the tests assert the exact
-# writes of each section.
+# or a '-H' header are reads and land in GH_READS; every other call is a write
+# and lands in GH_WRITES together with any request body, so the tests assert
+# the exact writes of each section. 'git push' is replaced too and logs to
+# GH_WRITES; every other git command runs for real.
 #
 # Variables under test are assigned by the sourced install.sh, which shellcheck
 # does not follow (SC2034, SC2153, SC2154). Each test runs in its own subshell,
@@ -19,7 +20,7 @@ load "../../../install.sh"
 gh() {
   echo "${GH_TOKEN-}|${GITHUB_TOKEN-}" >>"${GH_ENV}"
 
-  if [[ " $* " == *" --jq "* ]]; then
+  if [[ " $* " == *" --jq "* ]] || [ "${2:-}" = "-H" ]; then
     echo "gh $*" >>"${GH_READS}"
   else
     echo "gh $*" >>"${GH_WRITES}"
@@ -32,13 +33,52 @@ gh() {
     return 1
   fi
 
+  local count
+
   case "$*" in
     "api user --jq .login") echo "${GH_LOGIN}" ;;
-    "api repos/acme/app --jq "*) echo "${GH_STATE}" ;;
+    "api repos/acme/app --jq "*)
+      if [ "${GH_MISSING}" = "1" ] && [ ! -f "${GH_CREATED}" ]; then
+        echo "gh: Not Found (HTTP 404)" >&2
+        return 1
+      fi
+      echo "${GH_STATE}"
+      ;;
+    "repo create "*)
+      touch "${GH_CREATED}"
+      echo "https://github.com/acme/app"
+      ;;
     "api repos/acme/app/labels "*) printf '%s' "${GH_LABELS}" ;;
-    "api repos/acme/app/rulesets --paginate "*) echo "${GH_RULESET_ID}" ;;
+    "api repos/acme/app/rulesets --paginate "*)
+      if [ -f "${GH_RULESET_CREATED}" ]; then echo "7"; else echo "${GH_RULESET_ID}"; fi
+      ;;
+    "api --method POST repos/acme/app/rulesets "*) touch "${GH_RULESET_CREATED}" ;;
     "api repos/acme/app/rulesets/"*" --jq "*) echo "${GH_RULESET_KEPT}" ;;
+    "api repos/acme/app/commits/"*"/check-runs "*) printf '%s' "${GH_CHECK_RUNS}" ;;
+    "api repos/acme/app/actions/runs?check_suite_id="*)
+      grep "^${2#*check_suite_id=} " <<<"${GH_SUITE_PATHS}" | cut -d ' ' -f 2
+      ;;
+    "api -H Accept: application/vnd.github.raw repos/acme/app/contents/"*)
+      local path="${4#repos/acme/app/contents/}"
+      cat "${GH_WORKFLOWS}/$(basename "${path%%\?*}")" 2>/dev/null || return 1
+      ;;
+    "run list "*)
+      count="$(cat "${GH_RUN_LIST_COUNT}" 2>/dev/null || echo 0)"
+      echo "$((count + 1))" >"${GH_RUN_LIST_COUNT}"
+      [ "${count}" -lt "${#GH_RUN_LISTS[@]}" ] || count=$((${#GH_RUN_LISTS[@]} - 1))
+      [ "${count}" -lt 0 ] || printf '%s' "${GH_RUN_LISTS[count]}"
+      ;;
   esac
+}
+
+git() {
+  if [[ " $* " != *" push "* ]]; then
+    command git "$@"
+    return
+  fi
+
+  echo "git push ${*: -2} [token=${SCAFFOLD_GITHUB_TOKEN-} prompt=${GIT_TERMINAL_PROMPT-}]" >>"${GH_WRITES}"
+  return "${GIT_PUSH_STATUS:-0}"
 }
 
 # Repository state with every general setting already applied.
@@ -107,6 +147,26 @@ github_setup() {
   GH_RULESET_KEPT=""
   GH_FAIL_MATCH=""
   GH_FAIL_OUTPUT=""
+  GH_MISSING=0
+  GH_CREATED="${BATS_TEST_TMPDIR}/gh.created"
+  GH_RULESET_CREATED="${BATS_TEST_TMPDIR}/gh.ruleset-created"
+  GH_CHECK_RUNS=""
+  GH_SUITE_PATHS=""
+  GH_WORKFLOWS="${BATS_TEST_TMPDIR}/workflows"
+  GH_RUN_LISTS=()
+  GH_RUN_LIST_COUNT="${BATS_TEST_TMPDIR}/gh.run-list-count"
+  GIT_PUSH_STATUS=0
+  rm -f "${GH_CREATED}" "${GH_RULESET_CREATED}" "${GH_RUN_LIST_COUNT}"
+  mkdir -p "${GH_WORKFLOWS}"
+
+  # Commits need an identity, and the developer's own git config stays out.
+  export GIT_CONFIG_GLOBAL="${BATS_TEST_TMPDIR}/gitconfig"
+  export GIT_CONFIG_NOSYSTEM=1
+  command git config --global user.email "jane@example.com"
+  command git config --global user.name "Jane Doe"
+
+  github_poll_interval=0
+  github_runs_timeout=0
 
   has_command() { return 0; }
   SCAFFOLD_GITHUB_TOKEN="test-token"
@@ -455,14 +515,20 @@ enter_repo() {
   assert_equal "$(github_state missing_key)" ""
 }
 
-@test "github_load_repo reports a missing repository" {
+@test "github_load_repo returns 3 and records a missing repository" {
   github_setup
   GH_FAIL_MATCH="api repos/acme/app --jq *"
   GH_FAIL_OUTPUT="gh: Not Found (HTTP 404)"
 
-  run github_load_repo
-  assert_failure
-  assert_output "Error: GitHub repository acme/app does not exist, or the token cannot access it."
+  local rc=0
+  github_load_repo >"${BATS_TEST_TMPDIR}/out" 2>&1 || rc=$?
+
+  assert_equal "${rc}" "3"
+  assert_equal "${github_repo_exists}" "n"
+  assert_file_not_contains "${BATS_TEST_TMPDIR}/out" "Error"
+
+  run github_missing_error
+  assert_output "Error: GitHub repository acme/app does not exist, or the token cannot access it. Pass --github-create to create it."
 }
 
 @test "github_load_repo reports any other read failure" {
@@ -829,8 +895,8 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
 
   run configure_github
   assert_success
-  assert_output_not_contains "General settings"
-  assert_output_not_contains "Labels"
+  assert_output_not_contains "  General settings:"
+  assert_output_not_contains "  Labels:"
   assert_output_contains "  Ruleset: created default-branch"
 }
 
@@ -944,9 +1010,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
 
   run github_main
   assert_success
-  assert_output_not_contains "General settings"
+  assert_output_not_contains "  General settings:"
   assert_output_contains "  Labels: 0 created, 0 updated, 12 unchanged, 0 deleted"
-  assert_output_not_contains "Ruleset"
+  assert_output_not_contains "  Ruleset:"
 }
 
 @test "github_main exits 1 when a section fails" {
@@ -971,7 +1037,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_success
   assert_output_contains "  General settings: updated"
   assert_output_contains "  Labels: 12 created, 0 updated, 0 unchanged"
-  assert_output_not_contains "Ruleset"
+  assert_output_not_contains "  Ruleset:"
   assert_file_contains "${GH_WRITES}" "-f description=New description"
 }
 
@@ -991,14 +1057,54 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_equal "${github_ruleset}" "n"
 }
 
-@test "github_collect_interactive skips the section prompts when the repository is missing" {
+@test "github_collect_interactive stops when a missing repository is not created" {
   github_setup
   GH_FAIL_MATCH="api repos/acme/app --jq *"
   GH_FAIL_OUTPUT="gh: Not Found (HTTP 404)"
 
-  run github_collect_interactive <<<"$(printf 'acme\napp\n')"
+  # Owner, repository, create.
+  run github_collect_interactive <<<"$(printf 'acme\napp\nn\n')"
   assert_failure
-  assert_output_contains "does not exist"
+
+  run cat "${GH_WRITES}"
+  assert_output ""
+}
+
+@test "github_collect_interactive offers to create a missing repository" {
+  github_setup
+  GH_FAIL_MATCH="api repos/acme/app --jq *"
+  GH_FAIL_OUTPUT="gh: Not Found (HTTP 404)"
+
+  # Owner, repository, create, visibility, settings, description, labels,
+  # prune, ruleset, wait for CI.
+  github_collect_interactive <<<"$(printf 'acme\napp\ny\nprivate\ny\nAcme\ny\nn\ny\nn\n')"
+
+  assert_equal "${github_create}" "y"
+  assert_equal "${github_visibility}" "private"
+  assert_equal "${github_description}" "Acme"
+  assert_equal "${github_wait_checks}" "n"
+  assert_equal "${github_required_checks}" "y"
+}
+
+@test "github_collect_interactive applies settings only when the repository to create exists" {
+  github_setup
+  github_create="y"
+
+  # Owner, repository, settings, description, labels, ruleset, required checks.
+  run github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\nn\n')"
+  assert_success
+  assert_output_contains "acme/app already exists, so only its settings are applied."
+}
+
+@test "github_collect_interactive asks for the latest CI checks on an existing repository" {
+  github_setup
+
+  # Owner, repository, settings, labels, ruleset, required checks.
+  github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\nn\n')"
+
+  assert_equal "${github_create}" "n"
+  assert_equal "${github_required_checks}" "n"
+  assert_equal "${github_wait_checks}" "y"
 }
 
 @test "collect_github_interactive configures the repository on request" {
@@ -1033,7 +1139,8 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_FAIL_MATCH="api repos/acme/app --jq *"
   GH_FAIL_OUTPUT="gh: Not Found (HTTP 404)"
 
-  collect_github_interactive <<<"$(printf 'y\nacme\napp\n')" 2>/dev/null
+  # Configure, owner, repository, create.
+  collect_github_interactive <<<"$(printf 'y\nacme\napp\nn\n')" 2>/dev/null
 
   assert_equal "${use_github}" "n"
 }
@@ -1277,4 +1384,629 @@ default_answers() {
 
   run print_reproduce_command
   assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-owner=other --github-repo=repo --no-github-settings --github-description=New\ description --no-github-labels --github-labels-prune --no-github-ruleset'
+}
+
+#-------------------------------------------------------------------------------
+# Required checks
+#-------------------------------------------------------------------------------
+
+@test "github_workflow_has_pull_request reads every form of the 'on' key" {
+  # Workflow file, expected status.
+  local cases=(
+    $'on: pull_request\njobs: {}' "0"
+    $'on: [push, pull_request]\njobs: {}' "0"
+    $'on:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\njobs: {}' "0"
+    $'on:\n  - push\n  - pull_request\njobs: {}' "0"
+    $'name: Test\non:\n  pull_request:\njobs: {}' "0"
+    $'on:\n  push:\n    branches: [main]\njobs:\n  pull_request:\n    runs-on: ubuntu-latest' "1"
+    $'on: push\njobs: {}' "1"
+    $'on: pull_request_target\njobs: {}' "1"
+    $'on:\n  pull_request_target:\njobs: {}' "1"
+    $'on: push # pull_request later\njobs: {}' "1"
+    $'on:\n  # pull_request:\n  push:\njobs: {}' "1"
+    $'jobs: {}' "1"
+  )
+  local i
+
+  for ((i = 0; i < ${#cases[@]}; i += 2)); do
+    run github_workflow_has_pull_request <<<"${cases[i]}"
+    assert_status "${cases[i + 1]}"
+  done
+}
+
+@test "github_checks_rule_json builds the rule and escapes the names" {
+  run github_checks_rule_json $'Test PHP\nSay "hi"'
+  assert_output '{"type": "required_status_checks", "parameters": {"strict_required_status_checks_policy": false, "do_not_enforce_on_create": false, "required_status_checks": [{"context": "Test PHP", "integration_id": 15368}, {"context": "Say \"hi\"", "integration_id": 15368}]}}'
+
+  run github_checks_rule_json ""
+  assert_output ""
+}
+
+# Check runs on 'main': 2 from a pull-request workflow (suite 1), 1 from a
+# push-only workflow (suite 2), and 1 from a suite with no workflow file.
+checks_setup() {
+  GH_CHECK_RUNS=$'1\tabc\tTest PHP\n1\tabc\tLint\n2\tabc\tRelease notes\n3\tabc\tDynamic\n1\tabc\tTest PHP\n'
+  GH_SUITE_PATHS=$'1 .github/workflows/test.yml\n2 .github/workflows/release.yml\n3 '
+  printf 'on:\n  push:\n  pull_request:\njobs: {}\n' >"${GH_WORKFLOWS}/test.yml"
+  printf 'on:\n  push:\n    branches: [main]\njobs: {}\n' >"${GH_WORKFLOWS}/release.yml"
+}
+
+@test "github_compute_checks keeps only the checks of pull-request workflows" {
+  github_setup
+  github_load_repo
+  checks_setup
+
+  github_compute_checks >"${BATS_TEST_TMPDIR}/out"
+
+  assert_file_contains "${BATS_TEST_TMPDIR}/out" "  Required checks: Lint, Test PHP"
+  assert_equal "${github_checks_rule}" "$(github_checks_rule_json $'Lint\nTest PHP')"
+
+  # Each check suite and each workflow file is read once.
+  run grep -c "check_suite_id=1" "${GH_READS}"
+  assert_output "1"
+  run grep -c "contents/.github/workflows/test.yml?ref=abc" "${GH_READS}"
+  assert_output "1"
+  assert_file_contains "${GH_READS}" 'api repos/acme/app/commits/main/check-runs --paginate --jq .check_runs[] | select(.app.id == 15368 and .conclusion != "skipped" and .conclusion != "cancelled" and .conclusion != "neutral")'
+}
+
+@test "github_compute_checks reports when no check qualifies" {
+  github_setup
+  github_load_repo
+
+  github_compute_checks >"${BATS_TEST_TMPDIR}/out"
+
+  assert_file_contains "${BATS_TEST_TMPDIR}/out" "  Required checks: none found on main"
+  assert_equal "${github_checks_rule}" ""
+}
+
+@test "github_compute_checks skips on a 403 and names the permission" {
+  github_setup
+  github_load_repo
+  checks_setup
+
+  GH_FAIL_MATCH="api repos/acme/app/commits/*"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+  run github_compute_checks
+  assert_status 2
+  assert_output "  Required checks: skipped (token lacks Checks: read)"
+
+  GH_FAIL_MATCH="api repos/acme/app/actions/*"
+  run github_compute_checks
+  assert_status 2
+  assert_output "  Required checks: skipped (token lacks Actions: read)"
+}
+
+@test "github_apply_ruleset puts a given checks rule in a new ruleset" {
+  github_setup
+  local rule
+  rule="$(github_checks_rule_json "Test PHP")"
+
+  run github_apply_ruleset "${rule}"
+  assert_success
+  assert_output "  Ruleset: created default-branch with required checks"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method POST repos/acme/app/rulesets --silent --input -
+$(ruleset_body "${rule}")"
+}
+
+@test "github_apply_ruleset replaces the existing required checks with a given rule" {
+  github_setup
+  GH_RULESET_ID="42"
+  GH_RULESET_KEPT='{"type":"pull_request"}'
+  local rule
+  rule="$(github_checks_rule_json "Test PHP")"
+
+  run github_apply_ruleset "${rule}"
+  assert_success
+  assert_output "  Ruleset: updated default-branch with required checks"
+  assert_file_contains "${GH_READS}" '.type != "required_status_checks"'
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/rulesets/42 --silent --input -
+$(ruleset_body "{\"type\":\"pull_request\"}, ${rule}")"
+}
+
+@test "github_apply_ruleset keeps the existing required checks without a rule" {
+  github_setup
+  GH_RULESET_ID="42"
+
+  github_apply_ruleset >/dev/null
+
+  assert_file_not_contains "${GH_READS}" '.type != "required_status_checks"'
+}
+
+@test "github_apply_existing_ruleset adds the checks of the latest CI run" {
+  github_setup
+  github_load_repo
+  checks_setup
+
+  run github_apply_existing_ruleset
+  assert_success
+  assert_output "  Required checks: Lint, Test PHP
+  Ruleset: created default-branch with required checks"
+}
+
+@test "github_apply_existing_ruleset prints the re-run command when no check qualifies" {
+  github_setup
+  github_load_repo
+
+  run github_apply_existing_ruleset
+  assert_success
+  assert_output "  Required checks: none found on main
+  Ruleset: created default-branch
+  After CI finishes, run the following command to require its checks:
+    curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --github-owner=acme --github-repo=app --no-github-settings --no-github-labels"
+}
+
+@test "github_apply_existing_ruleset leaves the checks alone with --no-github-required-checks" {
+  github_setup
+  github_load_repo
+  checks_setup
+  github_required_checks="n"
+
+  run github_apply_existing_ruleset
+  assert_success
+  assert_output "  Ruleset: created default-branch"
+  assert_file_not_contains "${GH_READS}" "check-runs"
+}
+
+#-------------------------------------------------------------------------------
+# Waiting for CI
+#-------------------------------------------------------------------------------
+
+@test "github_wait_for_runs waits until every run has finished" {
+  github_setup
+  github_pushed_sha="abc"
+  github_runs_timeout=5
+  GH_RUN_LISTS=(
+    ""
+    $'in_progress\t\tTest PHP\ncompleted\tsuccess\tLint'
+    $'completed\tsuccess\tTest PHP\ncompleted\tsuccess\tLint'
+  )
+
+  run github_wait_for_runs
+  assert_success
+  assert_output "  Waiting for the CI runs of the pushed commit
+  CI: 2 runs finished"
+  assert_file_contains "${GH_READS}" "gh run list --repo acme/app --commit abc --json status,conclusion,name"
+
+  run cat "${GH_RUN_LIST_COUNT}"
+  assert_output "3"
+}
+
+@test "github_wait_for_runs warns about failed runs" {
+  github_setup
+  github_pushed_sha="abc"
+  GH_RUN_LISTS=($'completed\tfailure\tTest PHP\ncompleted\tskipped\tDocs\ncompleted\tsuccess\tLint\ncompleted\tcancelled\tShell')
+
+  run github_wait_for_runs
+  assert_success
+  assert_output "  Waiting for the CI runs of the pushed commit
+  CI: 4 runs finished
+  Warning: these runs failed, so pull requests stay blocked until CI passes: Test PHP, Shell"
+}
+
+@test "github_wait_for_runs gives up when no run starts" {
+  github_setup
+  github_pushed_sha="abc"
+
+  run github_wait_for_runs
+  assert_failure
+  assert_output "  Waiting for the CI runs of the pushed commit
+  CI: no runs started within 0s"
+}
+
+@test "github_wait_for_runs gives up at the deadline" {
+  github_setup
+  github_pushed_sha="abc"
+  github_wait_timeout=0
+  GH_RUN_LISTS=($'in_progress\t\tTest PHP')
+
+  run github_wait_for_runs
+  assert_failure
+  assert_output "  Waiting for the CI runs of the pushed commit
+  CI: runs still in progress after 0s"
+}
+
+@test "github_wait_interrupted prints the re-run command and exits 130" {
+  github_setup
+
+  run github_wait_interrupted
+  assert_status 130
+  assert_output_contains "CI: waiting was interrupted, so the ruleset has no required checks."
+  assert_output_contains "bash -s -- github --github-owner=acme --github-repo=app --no-github-settings --no-github-labels"
+}
+
+#-------------------------------------------------------------------------------
+# Repository creation
+#-------------------------------------------------------------------------------
+
+# Enter a project directory holding 1 file.
+enter_project() {
+  local dir="${BATS_TEST_TMPDIR}/${1}"
+  mkdir -p "${dir}"
+  echo "content" >"${dir}/README.md"
+  cd "${dir}" || return 1
+}
+
+creation_setup() {
+  github_setup
+  GH_MISSING=1
+  GH_STATE="$(state_new)"
+  GH_LABELS=""
+  github_create="y"
+  remove_self="n"
+}
+
+@test "github_create_repo initialises git, commits, creates and pushes" {
+  creation_setup
+  enter_project "create_fresh"
+
+  run github_create_repo
+  assert_success
+  assert_output "  Creating public repository acme/app
+https://github.com/acme/app
+  Pushed main to https://github.com/acme/app.git"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh repo create acme/app --public
+git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token prompt=0]"
+
+  run git log --format=%s
+  assert_output "Initial commit."
+  run git ls-files
+  assert_output "README.md"
+  run git remote get-url origin
+  assert_output "https://github.com/acme/app.git"
+  run git config branch.main.merge
+  assert_output "refs/heads/main"
+}
+
+@test "github_create_repo leaves this script out of the initial commit" {
+  creation_setup
+  enter_project "create_exclude"
+  remove_self="y"
+  echo "script" >install.sh
+  self_removal_path() { echo "./install.sh"; }
+
+  github_create_repo >/dev/null
+
+  run git ls-files
+  assert_output "README.md"
+  assert_file_exists install.sh
+}
+
+@test "github_create_repo commits everything in a repository without commits" {
+  creation_setup
+  enter_project "create_no_commits"
+  command git init -q
+
+  run github_create_repo
+  assert_success
+
+  run git log --format=%s
+  assert_output "Initial commit."
+}
+
+@test "github_create_repo adds origin to a repository with commits" {
+  creation_setup
+  enter_project "create_no_origin"
+  command git init -q -b trunk
+  command git add README.md
+  command git commit -q -m "Existing."
+
+  run github_create_repo
+  assert_success
+  assert_output_contains "Pushed trunk to https://github.com/acme/app.git"
+  assert_output_not_contains "Warning"
+
+  run git log --format=%s
+  assert_output "Existing."
+  run git remote get-url origin
+  assert_output "https://github.com/acme/app.git"
+}
+
+@test "github_create_repo keeps an existing origin and warns about uncommitted changes" {
+  creation_setup
+  enter_project "create_origin"
+  command git init -q -b main
+  command git add README.md
+  command git commit -q -m "Existing."
+  command git remote add origin "git@github.com:acme/app.git"
+  echo "changed" >README.md
+
+  run github_create_repo
+  assert_success
+  assert_output_contains "  Warning: uncommitted changes are not pushed."
+
+  run git remote get-url origin
+  assert_output "git@github.com:acme/app.git"
+  assert_file_contains "${GH_WRITES}" "git push https://github.com/acme/app.git HEAD:refs/heads/main"
+}
+
+@test "github_create_repo creates a private repository without pushing" {
+  creation_setup
+  enter_project "create_no_push"
+  github_visibility="private"
+  github_push="n"
+
+  run github_create_repo
+  assert_success
+  assert_output_contains "  Push: skipped"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh repo create acme/app --private"
+}
+
+@test "github_create_repo stops when the push fails" {
+  creation_setup
+  enter_project "create_push_fails"
+  GIT_PUSH_STATUS=1
+
+  run github_create_repo
+  assert_failure
+  assert_output_contains "  Push: failed"
+}
+
+@test "github_create_repo stops when the repository cannot be created" {
+  creation_setup
+  enter_project "create_fails"
+  GH_FAIL_MATCH="repo create *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+
+  run github_create_repo
+  assert_failure
+  assert_file_not_contains "${GH_WRITES}" "git push"
+}
+
+@test "github_create_repo skips creation without git or a git email" {
+  creation_setup
+  enter_project "create_no_email"
+  command git config --global --unset user.email
+
+  run github_create_repo
+  assert_failure
+  assert_output_contains "Skipping repository creation: git user.email is not set."
+  assert_dir_not_exists .git
+
+  has_command() { [ "${1}" != "git" ]; }
+  run github_create_repo
+  assert_failure
+  assert_output "Skipping repository creation: 'git' is not installed."
+  assert_no_writes
+}
+
+@test "github_create_repo prints every step under --dry-run" {
+  creation_setup
+  enter_project "create_dry_run"
+  dry_run=1
+
+  run github_create_repo
+  assert_success
+  assert_output_contains "  [dry-run] git init -q"
+  assert_output_contains "  [dry-run] git add -A -- ."
+  assert_output_contains "  [dry-run] gh repo create acme/app --public"
+  assert_output_contains "  [dry-run] git remote add origin https://github.com/acme/app.git"
+  assert_output_contains "  [dry-run] git -c credential.helper= -c credential.helper"
+  assert_dir_not_exists .git
+  assert_no_writes
+}
+
+@test "configure_github creates the repository, waits for CI and requires its checks" {
+  creation_setup
+  enter_project "configure_create"
+  checks_setup
+  GH_RUN_LISTS=($'completed\tsuccess\tTest PHP')
+
+  run configure_github
+  assert_success
+  assert_output_contains "  Creating public repository acme/app"
+  assert_output_contains "  General settings: updated"
+  assert_output_contains "  Labels: 12 created, 0 updated, 0 unchanged"
+  assert_output_contains "  Ruleset: created default-branch"
+  assert_output_contains "  CI: 1 runs finished"
+  assert_output_contains "  Required checks: Lint, Test PHP"
+  assert_output_contains "  Ruleset: updated default-branch with required checks"
+  assert_output_contains "GitHub repository settings complete."
+
+  # The first ruleset goes on before CI, the second adds its checks.
+  assert_file_contains "${GH_WRITES}" "gh api --method POST repos/acme/app/rulesets --silent --input -"
+  assert_file_contains "${GH_WRITES}" "gh api --method PUT repos/acme/app/rulesets/7 --silent --input -"
+}
+
+@test "configure_github prints the re-run command when CI never starts" {
+  creation_setup
+  enter_project "configure_no_ci"
+
+  run configure_github
+  assert_success
+  assert_output_contains "  CI: no runs started within 0s"
+  assert_output_contains "  After CI finishes, run the following command to require its checks:"
+  assert_file_not_contains "${GH_WRITES}" "--method PUT"
+}
+
+@test "configure_github skips waiting with --no-github-wait-checks" {
+  creation_setup
+  enter_project "configure_no_wait"
+  github_wait_checks="n"
+
+  run configure_github
+  assert_success
+  assert_output_contains "  After CI finishes, run the following command to require its checks:"
+  assert_file_not_contains "${GH_READS}" "run list"
+}
+
+@test "configure_github previews a creation under --dry-run" {
+  creation_setup
+  enter_project "configure_dry_run"
+  dry_run=1
+
+  run configure_github
+  assert_success
+  assert_output_contains "  [dry-run] gh repo create acme/app --public"
+  assert_output_contains "  Labels: 12 to create, 0 to update, 0 unchanged"
+  assert_output_contains "  Ruleset: would create default-branch"
+  assert_output_contains "  CI: would wait for the first CI run and require its checks"
+  assert_no_writes
+  assert_dir_not_exists .git
+}
+
+@test "configure_github fails for a missing repository without --github-create" {
+  creation_setup
+  github_create="n"
+
+  run configure_github
+  assert_failure
+  assert_output_contains "Pass --github-create to create it."
+  assert_no_writes
+}
+
+@test "collect_github_interactive offers to create a repository without .git" {
+  creation_setup
+  enter_project "interactive_create"
+  github_create=""
+  project="app"
+  github_owner=""
+  github_repo=""
+  GH_LOGIN="acme"
+
+  # Create, owner, repository, visibility, settings, description, labels,
+  # prune, ruleset, wait for CI.
+  collect_github_interactive <<<"$(printf 'y\n\n\n\ny\n\ny\nn\ny\ny\n')"
+
+  assert_equal "${use_github}" "y"
+  assert_equal "${github_create}" "y"
+  assert_equal "${github_visibility}" "public"
+  assert_equal "${github_wait_checks}" "y"
+}
+
+@test "collect_github_interactive offers settings without .git when git cannot commit" {
+  creation_setup
+  enter_project "interactive_no_email"
+  command git config --global --unset user.email
+  github_create=""
+
+  run collect_github_interactive <<<"$(printf 'n\n')"
+  assert_success
+  assert_equal "${github_create}" ""
+}
+
+@test "print_reproduce_command lists the creation answers that differ" {
+  github_setup
+  default_answers
+  use_github="y"
+  github_create="y"
+  github_visibility="private"
+  github_wait_checks="n"
+  github_owner_default="acme"
+  github_repo_default="app"
+
+  run print_reproduce_command
+  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-create --github-visibility=private --no-github-wait-checks'
+
+  github_create="n"
+  github_required_checks="n"
+  run print_reproduce_command
+  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --no-github-required-checks'
+}
+
+@test "parse_args sets the creation and CI options" {
+  parse_args --github-create --github-visibility=private --no-github-push --no-github-wait-checks --github-wait-timeout=60 --no-github-required-checks
+
+  assert_equal "${use_github}" "y"
+  assert_equal "${github_create}" "y"
+  assert_equal "${github_visibility}" "private"
+  assert_equal "${github_push}" "n"
+  assert_equal "${github_wait_checks}" "n"
+  assert_equal "${github_wait_timeout}" "60"
+  assert_equal "${github_required_checks}" "n"
+
+  parse_args --no-github-create --github-push --github-wait-checks --github-required-checks
+  assert_equal "${github_create}" "n"
+  assert_equal "${github_push}" "y"
+  assert_equal "${github_wait_checks}" "y"
+  assert_equal "${github_required_checks}" "y"
+}
+
+@test "parse_args rejects an invalid visibility or wait timeout" {
+  run parse_args --github-visibility=internal
+  assert_failure
+  assert_output_contains "Error: Invalid value for --github-visibility: internal. Allowed values: public, private."
+
+  run parse_args --github-wait-timeout=soon
+  assert_failure
+  assert_output_contains "Error: Invalid value for --github-wait-timeout: soon. Pass a number of seconds."
+}
+
+#-------------------------------------------------------------------------------
+# Self-removal
+#-------------------------------------------------------------------------------
+
+@test "remove_self_script removes the script unless it is kept" {
+  local dir="${BATS_TEST_TMPDIR}/self_removal"
+  mkdir -p "${dir}"
+  echo "script" >"${dir}/install.sh"
+  cd "${dir}" || return 1
+  self_removal_path() { [ "${remove_self}" = "n" ] || echo "./install.sh"; }
+
+  remove_self="n"
+  remove_self_script
+  assert_file_exists "${dir}/install.sh"
+
+  remove_self="y"
+  remove_self_script
+  assert_file_not_exists "${dir}/install.sh"
+}
+
+@test "self_removal_path prints nothing for --keep or a missing file" {
+  remove_self="n"
+  run self_removal_path
+  assert_output ""
+
+  remove_self="y"
+  run self_removal_path
+  assert_output_contains "install.sh"
+}
+
+@test "github_self_exclude names the script relative to the current directory" {
+  local dir="${BATS_TEST_TMPDIR}/self_exclude"
+  mkdir -p "${dir}"
+  cd "${dir}" || return 1
+
+  # Script path, expected pathspec.
+  local cases=(
+    "./install.sh" ":(exclude)install.sh"
+    "${dir}/install.sh" ":(exclude)install.sh"
+    "/elsewhere/install.sh" ""
+    "" ""
+  )
+  local i
+
+  for ((i = 0; i < ${#cases[@]}; i += 2)); do
+    SELF_PATH="${cases[i]}"
+    self_removal_path() { [ -z "${SELF_PATH}" ] || echo "${SELF_PATH}"; }
+    run github_self_exclude
+    assert_output "${cases[i + 1]}"
+  done
+}
+
+@test "main removes the script last, and keeps it when the GitHub step fails" {
+  github_setup
+  local dir="${BATS_TEST_TMPDIR}/main_self_removal"
+  mkdir -p "${dir}/.scaffold"
+  cd "${dir}" || return 1
+  self_removal_path() { echo "${dir}/install.sh"; }
+  process_project() { echo "processed"; }
+
+  echo "script" >"${dir}/install.sh"
+  configure_github() { return 1; }
+  run main --namespace=AcmeApp --name=acme-app --author="Jane Doe" --github
+  assert_failure
+  assert_file_exists "${dir}/install.sh"
+
+  configure_github() { echo "configured"; }
+  run main --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  assert_success
+  assert_file_not_exists "${dir}/install.sh"
 }
