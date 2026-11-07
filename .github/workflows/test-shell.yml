@@ -112,7 +112,9 @@ jobs:
         shell: bash
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 
-      - name: Setup tmate session
+      - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: mxschmitt/action-tmate@35b54afac29c97fb54faba5b513f8fbd1882f113 # v3
+        uses: owenthereal/action-upterm@95a37de421619d5caf052b4c796c894b1f663afb # v2
         timeout-minutes: 30
+        with:
+          limit-access-to-actor: true

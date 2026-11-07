@@ -17,11 +17,11 @@
         "daemonized",
         "lhotari",
         "mksh",
-        "mxschmitt",
+        "owenthereal",
         "ruleset",
         "softprops",
-        "tmate",
-        "toshimaru"
+        "toshimaru",
+        "upterm"
     ],
     "overrides": [
         {

@@ -1,7 +1,7 @@
-@@ -133,40 +133,3 @@
-         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-         uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
+@@ -135,42 +135,3 @@
          timeout-minutes: 30
+         with:
+           limit-access-to-actor: true
 -
 -  build-php:
 -    name: Build PHAR
@@ -35,7 +35,9 @@
 -          ./dist/force-crystal.phar --version
 -          ./dist/force-crystal.phar || exit 1
 -
--      - name: Setup tmate session
+-      - name: Setup upterm session
 -        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
--        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
+-        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
 -        timeout-minutes: 30
+-        with:
+-          limit-access-to-actor: true

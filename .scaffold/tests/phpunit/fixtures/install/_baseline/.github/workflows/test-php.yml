@@ -129,10 +129,12 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Setup tmate session
+      - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
+        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
         timeout-minutes: 30
+        with:
+          limit-access-to-actor: true
 
   build-php:
     name: Build PHAR
@@ -166,7 +168,9 @@ jobs:
           ./dist/force-crystal.phar --version
           ./dist/force-crystal.phar || exit 1
 
-      - name: Setup tmate session
+      - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: mxschmitt/action-tmate@__HASH__ # __VERSION__
+        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
         timeout-minutes: 30
+        with:
+          limit-access-to-actor: true
