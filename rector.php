@@ -28,6 +28,15 @@ use Rector\TypeDeclaration\Rector\StmtsAwareInterface\DeclareStrictTypesRector;
 return RectorConfig::configure()
   ->withPaths([
     __DIR__ . '/**',
+    // #;< !PHP_LIBRARY
+    // Extensionless entry points, which the file extensions below don't match.
+    // #;> !PHP_LIBRARY
+    // #;< PHP_COMMAND
+    __DIR__ . '/bin/php-command',
+    // #;> PHP_COMMAND
+    // #;< PHP_SCRIPT
+    __DIR__ . '/php-script',
+    // #;> PHP_SCRIPT
   ])
   ->withPhpSets(php83: TRUE)
   ->withPreparedSets(

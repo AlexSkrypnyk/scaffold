@@ -30,9 +30,9 @@ PHP_CodeSniffer and PHPStan check these paths, depending on the PHP mode:
 | `php-script` | A CLI script |
 | `tests/phpunit` | Every mode |
 
-`init.sh` renames `bin/php-command` or `php-script` to the name you choose and updates its path in `phpcs.xml` and `phpstan.neon`. To check another directory with these 2 tools, add it to `phpcs.xml` and `phpstan.neon`.
+`init.sh` renames `bin/php-command` or `php-script` to the name you choose and updates its path in `phpcs.xml`, `phpstan.neon` and `rector.php`. To check another directory with PHP_CodeSniffer and PHPStan, add it to `phpcs.xml` and `phpstan.neon`.
 
-Rector checks every `.php` and `.inc` file outside `vendor` and `node_modules`, so a new directory needs no change to `rector.php`.
+Rector checks every `.php` and `.inc` file outside `vendor` and `node_modules`, so a new directory needs no change to `rector.php`. It also checks the extensionless entry point, which `rector.php` lists by name. To check another file with no extension, add its path to `withPaths()` in `rector.php`.
 
 ## PHP_CodeSniffer
 

@@ -153,7 +153,8 @@ to_pascalcase() { echo "${1}" | awk -F'[-_ ]' '{for(i=1;i<=NF;i++) $i=toupper(su
 #
 # '.claude' holds both template-owned and consumer-owned files, so it is
 # excluded from the recursive search and its shipped paths are searched
-# explicitly.
+# explicitly. Paths are NUL-terminated, so callers read them with 'xargs -0'
+# and a space in the project path stays inside 1 argument.
 #
 # @param $1 string Needle (string to find)
 # @param $2 string Path relative to the project root to search instead of the
@@ -164,12 +165,12 @@ sweep_files() {
   local target="${2:-}"
 
   if [ -n "${target}" ]; then
-    grep -rIl "${needle}" "$(pwd)/${target}" 2>/dev/null || true
+    grep -rIl --null "${needle}" "$(pwd)/${target}" 2>/dev/null || true
     return 0
   fi
 
-  grep -rIl --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir=".claude" --exclude-dir="vendor" --exclude-dir="node_modules" "${needle}" "$(pwd)" || true
-  grep -rIl "${needle}" "$(pwd)/.claude/settings.json" "$(pwd)/.claude/skills/update-architecture-docs" 2>/dev/null || true
+  grep -rIl --null --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir=".claude" --exclude-dir="vendor" --exclude-dir="node_modules" "${needle}" "$(pwd)" || true
+  grep -rIl --null "${needle}" "$(pwd)/.claude/settings.json" "$(pwd)/.claude/skills/update-architecture-docs" 2>/dev/null || true
 }
 
 ##
@@ -183,14 +184,14 @@ replace_string_content() {
   local replacement="${2}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  sweep_files "${needle}" | xargs sed "${sed_opts[@]}" "s!${needle}!${replacement}!g" || true
+  sweep_files "${needle}" | xargs -0 sed "${sed_opts[@]}" "s!${needle}!${replacement}!g" || true
 }
 
 remove_string_content() {
   local token="${1}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  sweep_files "${token}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/^${token}/d" || true
+  sweep_files "${token}" | LC_ALL=C.UTF-8 xargs -0 sed "${sed_opts[@]}" -e "/^${token}/d" || true
 }
 
 remove_string_content_line() {
@@ -198,7 +199,7 @@ remove_string_content_line() {
   local target="${2:-}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  sweep_files "${token}" "${target}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+  sweep_files "${token}" "${target}" | LC_ALL=C.UTF-8 xargs -0 sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
 ##
@@ -231,7 +232,7 @@ remove_tokens_with_content() {
   local token="${1}"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  sweep_files "#;> $token" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
+  sweep_files "#;> $token" | LC_ALL=C.UTF-8 xargs -0 sed "${sed_opts[@]}" -e "/#;< $token/,/#;> $token/d" || true
 }
 
 uncomment_line() {
@@ -246,7 +247,7 @@ remove_special_comments() {
   local token="#;"
   local sed_opts
   sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-  sweep_files "${token}" | LC_ALL=C.UTF-8 xargs sed "${sed_opts[@]}" -e "/${token}/d" || true
+  sweep_files "${token}" | LC_ALL=C.UTF-8 xargs -0 sed "${sed_opts[@]}" -e "/${token}/d" || true
 }
 
 #-------------------------------------------------------------------------------
