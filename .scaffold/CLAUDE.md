@@ -425,8 +425,8 @@ the repository-root `zizmor.yml`.
 Unlike the other `scaffold-*` maintenance workflows, this one is a **selectable
 consumer feature**: `init.sh` offers "Use GitHub Actions linting" (off by
 default; `--test-actions` / `--no-test-actions` non-interactively). When not
-selected, `init.sh` removes `test-actions.yml`, `.github/.yamllint-for-gha.yml`,
-`.github/actionlint.yaml` and `zizmor.yml`. The `scaffold-release-docs.yml` entry in `zizmor.yml` is
+selected, `init.sh` removes `test-actions.yml`, `.github/.yamllint-for-gha.yml`
+and `zizmor.yml`. The `scaffold-release-docs.yml` entry in `zizmor.yml` is
 stripped on init because that workflow is template-only.
 
 ### Release Workflows

@@ -61,7 +61,7 @@ Every job uploads the `.logs` directory as an artifact.
 
 ## Test shell
 
-The `Test shell` workflow runs 1 job on each of these runners: `ubuntu-latest`, `ubuntu-24.04`, `ubuntu-26.04`, `macos-15` and `macos-26`. On macOS, the job first installs the current Bash with Homebrew. Every job installs the BATS testing framework with `npm ci` in `tests/bats`.
+The `Test shell` workflow runs 1 job on each of these runners: `ubuntu-latest`, `ubuntu-24.04`, `macos-latest` and `macos-15`. Each OS runs its latest image and the version before it. On macOS, the job first installs the current Bash with Homebrew. Every job installs the BATS testing framework with `npm ci` in `tests/bats`.
 
 The following table lists which jobs run each check:
 
@@ -84,7 +84,7 @@ The following table lists its checks:
 | Check | Configuration |
 |---|---|
 | [`yamllint`](https://github.com/adrienverge/yamllint) lints the workflow YAML. | [`.github/.yamllint-for-gha.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/.yamllint-for-gha.yml) |
-| [`actionlint`](https://github.com/rhysd/actionlint) lints the workflows. | `.github/actionlint.yaml` declares runner labels that `actionlint` lacks, such as `ubuntu-26.04`. |
+| [`actionlint`](https://github.com/rhysd/actionlint) lints the workflows. | None. To use a runner label missing from the `actionlint` built-in list, add a [`.github/actionlint.yaml`](https://github.com/rhysd/actionlint/blob/main/docs/config.md) file. |
 | [`zizmor`](https://docs.zizmor.sh/) runs security analysis and uploads the results to the repository's **Security** tab. | `zizmor.yml` in the repository root lists the accepted findings and explains each one. |
 
 ## Repository variables

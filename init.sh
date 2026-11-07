@@ -686,7 +686,6 @@ remove_docs() {
 remove_test_actions() {
   rm -f .github/workflows/test-actions.yml || true
   rm -f .github/.yamllint-for-gha.yml || true
-  rm -f .github/actionlint.yaml || true
   rm -f zizmor.yml || true
 }
 
