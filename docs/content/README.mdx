@@ -66,6 +66,14 @@ Documentation is published to GitHub Pages on release (tag) using
 the [Release docs](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docs.yml)
 GitHub Action.
 
+Before the first release, set up 2 repository settings. The deploy fails
+without them.
+
+1. In **Settings > Pages**, set **Source** to **GitHub Actions**.
+2. In **Settings > Environments > github-pages**, add a deployment rule with
+   the **Tag** ref type and the `*` name pattern. The `github-pages`
+   environment accepts only the default branch by default.
+
 This GitHub Action is designed to automatically build and publish documentation
 to GitHub Pages.
 
