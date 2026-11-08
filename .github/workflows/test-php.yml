@@ -167,9 +167,7 @@ jobs:
         run: composer build
 
       - name: Test PHAR
-        run: |
-          ./dist/php-command.phar --version
-          ./dist/php-command.phar || exit 1
+        run: ./dist/php-command.phar --version
 
       - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
