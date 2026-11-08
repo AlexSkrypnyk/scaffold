@@ -1,4 +1,4 @@
-@@ -50,7 +50,7 @@
+@@ -50,13 +50,13 @@
  
        - name: Set PHAR version
          run: |
@@ -7,18 +7,14 @@
  
        - name: Build PHAR
          run: composer build
-@@ -57,8 +57,8 @@
  
        - name: Test PHAR
-         run: |
--          ./dist/force-crystal.phar --version
--          ./dist/force-crystal.phar || exit 1
-+          ./dist/star-forge.phar --version
-+          ./dist/star-forge.phar || exit 1
+-        run: ./dist/force-crystal.phar --version
++        run: ./dist/star-forge.phar --version
  
        - name: Create Release
          uses: softprops/action-gh-release@__HASH__ # __VERSION__
-@@ -65,4 +65,4 @@
+@@ -63,4 +63,4 @@
          with:
            tag_name: ${{ env.RELEASE_VERSION }}
            files: |

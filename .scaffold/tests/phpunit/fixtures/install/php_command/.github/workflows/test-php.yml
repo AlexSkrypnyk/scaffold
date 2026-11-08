@@ -1,11 +1,9 @@
-@@ -165,8 +165,8 @@
+@@ -164,7 +164,7 @@
+         run: composer build
  
        - name: Test PHAR
-         run: |
--          ./dist/force-crystal.phar --version
--          ./dist/force-crystal.phar || exit 1
-+          ./dist/star-forge.phar --version
-+          ./dist/star-forge.phar || exit 1
+-        run: ./dist/force-crystal.phar --version
++        run: ./dist/star-forge.phar --version
  
        - name: Setup upterm session
          if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}

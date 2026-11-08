@@ -32,7 +32,7 @@
          },
          blog: false,
          theme: {
-@@ -86,18 +86,18 @@
+@@ -82,18 +82,18 @@
        image: 'img/social-card.jpg',
        navbar: {
          logo: {
@@ -54,7 +54,7 @@
              label: 'GitHub',
              position: 'right',
              title: 'View source on GitHub',
-@@ -113,10 +113,10 @@
+@@ -109,10 +109,10 @@
          links: [
            {
              label: 'GitHub',
