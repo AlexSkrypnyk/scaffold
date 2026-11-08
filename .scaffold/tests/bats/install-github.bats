@@ -2173,3 +2173,18 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
     assert_equal "${!cases[i + 1]}" "${cases[i + 2]}"
   done
 }
+
+@test "github_apply_existing_ruleset applies the ruleset to an empty repository" {
+  github_setup
+  github_load_repo
+  GH_FAIL_MATCH="api repos/acme/app/commits/*"
+  GH_FAIL_OUTPUT='{"message":"No commit found for SHA: main","status":"422"}gh: No commit found for SHA: main (HTTP 422)'
+
+  run github_apply_existing_ruleset
+  assert_success
+  assert_output "  Required checks: none found, because main has no commits
+  Ruleset: created default-branch
+  After CI finishes, run the following command to require its checks:
+    curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --github-owner=acme --github-repo=app --no-github-settings --no-github-labels"
+  assert_file_contains "${GH_WRITES}" "gh api --method POST repos/acme/app/rulesets --silent --input -"
+}
