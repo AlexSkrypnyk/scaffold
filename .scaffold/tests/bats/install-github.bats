@@ -2188,3 +2188,14 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
     curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --github-owner=acme --github-repo=app --no-github-settings --no-github-labels"
   assert_file_contains "${GH_WRITES}" "gh api --method POST repos/acme/app/rulesets --silent --input -"
 }
+
+@test "github_compute_checks reports any other 422 as a failure" {
+  github_setup
+  github_load_repo
+  GH_FAIL_MATCH="api repos/acme/app/commits/*"
+  GH_FAIL_OUTPUT="gh: Validation Failed (HTTP 422)"
+
+  run github_compute_checks
+  assert_status 1
+  assert_output "  Required checks: failed (gh: Validation Failed (HTTP 422))"
+}

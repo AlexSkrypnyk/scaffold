@@ -1777,7 +1777,7 @@ github_compute_checks() {
 
   if ! output="$(gh_run api "repos/${slug}/commits/${ref}/check-runs" --paginate --jq ".check_runs[] | select(.app.id == ${GITHUB_ACTIONS_APP_ID} and .conclusion != \"skipped\" and .conclusion != \"cancelled\" and .conclusion != \"neutral\") | [(.check_suite.id | tostring), .head_sha, .name] | join(\"\\t\")" 2>&1)"; then
     # An empty repository has no commit on its default branch to read.
-    if [[ ${output} == *"HTTP 422"* ]]; then
+    if [[ ${output} == *"No commit found for SHA"* ]]; then
       echo "  Required checks: none found, because ${branch} has no commits"
       return 0
     fi
