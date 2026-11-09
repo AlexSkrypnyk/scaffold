@@ -2199,3 +2199,16 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
   assert_status 1
   assert_output "  Required checks: failed (gh: Validation Failed (HTTP 422))"
 }
+
+@test "configure_github prints the re-run command when the first CI run has no qualifying checks" {
+  creation_setup
+  enter_project "configure_no_checks"
+  GH_RUN_LISTS=($'completed\tsuccess\tTest PHP')
+
+  run configure_github
+  assert_success
+  assert_output_contains "  CI: 1 runs finished"
+  assert_output_contains "  Required checks: none found on main"
+  assert_output_contains "  After CI finishes, run the following command to require its checks:"
+  assert_file_not_contains "${GH_WRITES}" "--method PUT"
+}

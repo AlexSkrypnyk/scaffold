@@ -2131,7 +2131,10 @@ github_apply_new_ruleset() {
 
   github_compute_checks || return $?
 
-  [ -n "${github_checks_rule}" ] || return 0
+  if [ -z "${github_checks_rule}" ]; then
+    github_rerun_hint
+    return 0
+  fi
 
   github_apply_ruleset "${github_checks_rule}"
 }
