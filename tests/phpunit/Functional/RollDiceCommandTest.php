@@ -25,17 +25,12 @@ final class RollDiceCommandTest extends TestCase {
   use ApplicationTrait;
   use AssertArrayTrait;
 
-  /**
-   * @param array<string, string> $input
-   * @param list<int> $rolls
-   * @param list<string> $expected_output
-   */
   #[DataProvider('dataProviderExecute')]
   public function testExecute(array $input, array $rolls, array $expected_output, bool $expected_fail = FALSE): void {
     $builder = $this->getMockBuilder(RollDiceCommand::class);
     $builder->onlyMethods(['rollDie']);
     $mock = $builder->getMock();
-    $mock->expects($this->exactly(count($rolls)))->method('rollDie')->willReturnOnConsecutiveCalls(...$rolls);
+    $mock->expects($this->exactly(count($rolls)))->method('rollDie')->willReturnOnConsecutiveCalls(...array_values($rolls));
 
     $this->applicationInitFromCommand($mock);
     $output = $this->applicationRun($input, [], $expected_fail);
@@ -67,11 +62,7 @@ final class RollDiceCommandTest extends TestCase {
     $output = $this->applicationRun(['--sides' => '2', '--count' => '100']);
 
     $this->assertMatchesRegularExpression('/^Rolled 100d2: [12](, [12]){99}$/m', $output);
-    $this->assertMatchesRegularExpression('/^Total: (\d+)$/m', $output);
-
-    preg_match('/^Total: (\d+)$/m', $output, $matches);
-    $this->assertGreaterThanOrEqual(100, (int) $matches[1]);
-    $this->assertLessThanOrEqual(200, (int) $matches[1]);
+    $this->assertMatchesRegularExpression('/^Total: (1\d\d|200)$/m', $output);
   }
 
 }

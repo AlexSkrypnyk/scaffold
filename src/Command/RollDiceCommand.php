@@ -81,12 +81,13 @@ class RollDiceCommand extends Command {
    *   When the value is not an integer within the range.
    */
   protected function parseInteger(mixed $value, string $name, int $min, int $max): int {
-    $parsed = is_string($value) ? filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => $min, 'max_range' => $max]]) : FALSE;
+    $range = ['min_range' => $min, 'max_range' => $max];
+    $parsed = is_string($value) ? filter_var($value, FILTER_VALIDATE_INT, ['options' => $range]) : FALSE;
 
     if ($parsed === FALSE) {
-      $range = $max === PHP_INT_MAX ? sprintf('an integer of at least %d', $min) : sprintf('an integer from %d to %d', $min, $max);
+      $expected = $max === PHP_INT_MAX ? sprintf('an integer of at least %d', $min) : sprintf('an integer from %d to %d', $min, $max);
 
-      throw new \InvalidArgumentException(sprintf('The "--%s" option must be %s.', $name, $range));
+      throw new \InvalidArgumentException(sprintf('The "--%s" option must be %s.', $name, $expected));
     }
 
     return $parsed;
