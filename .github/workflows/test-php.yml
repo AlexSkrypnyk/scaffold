@@ -169,7 +169,7 @@ jobs:
       - name: Test PHAR
         run: |
           ./dist/php-command.phar --version
-          ./dist/php-command.phar || exit 1
+          ./dist/php-command.phar list || exit 1
 
       - name: Setup upterm session
         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
