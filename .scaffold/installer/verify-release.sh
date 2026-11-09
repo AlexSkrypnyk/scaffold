@@ -4,7 +4,7 @@
 #
 # Passes when 'SHA256SUMS.asc' is a valid signature of 'SHA256SUMS' made with
 # the Scaffold signing key, and every file that 'SHA256SUMS' names matches its
-# checksum. The key comes from '.scaffold/PUBLIC_KEY.asc'.
+# checksum. The key comes from 'install-key.asc' in the repository root.
 #
 # @usage:
 # .scaffold/installer/verify-release.sh <directory>
@@ -14,9 +14,9 @@ set -euo pipefail
 
 # 'gpg --verify' accepts a signature from any key in the keyring, so the
 # signing key is pinned by fingerprint.
-SCAFFOLD_SIGNING_KEY_FINGERPRINT="755E824E80F849135F5F4043E71EDB25C4F6D89D"
+SCAFFOLD_SIGNING_KEY_FINGERPRINT="86F077A2E80667D7CF4A3320EDEAF2FCD434756C"
 
-SCAFFOLD_PUBLIC_KEY="${SCAFFOLD_PUBLIC_KEY:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/PUBLIC_KEY.asc}"
+SCAFFOLD_PUBLIC_KEY="${SCAFFOLD_PUBLIC_KEY:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/install-key.asc}"
 
 main() {
   local dir="${1:-}"

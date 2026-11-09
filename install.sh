@@ -993,6 +993,7 @@ process_internal() {
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
   rm -f SECURITY.md || true
+  rm -f install-key.asc || true
   rm -Rf ".scaffold" || true
 
   remove_scaffold_workflows

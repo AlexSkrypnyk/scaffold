@@ -31,7 +31,7 @@ gpg_signed_by() {
 }
 
 @test "SCAFFOLD_PUBLIC_KEY points at the published key" {
-  assert_equal "${SCAFFOLD_PUBLIC_KEY}" "$(pwd)/.scaffold/PUBLIC_KEY.asc"
+  assert_equal "${SCAFFOLD_PUBLIC_KEY}" "$(pwd)/install-key.asc"
   assert_file_exists "${SCAFFOLD_PUBLIC_KEY}"
 }
 
