@@ -139,6 +139,35 @@ ZIZMOR
   assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
 }
 
+@test "remove_scaffold_workflows removes every scaffold workflow and its zizmor entry" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_scaffold_workflows"
+  mkdir -p "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/workflows/scaffold-test.yml" "${tmpdir}/.github/workflows/scaffold-release-installer.yml" "${tmpdir}/.github/workflows/release-php.yml"
+  create_zizmor_yml "${tmpdir}"
+  echo "      - scaffold-release-installer.yml" >>"${tmpdir}/zizmor.yml"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_scaffold_workflows
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/.github/workflows/scaffold-test.yml"
+  assert_file_not_exists "${tmpdir}/.github/workflows/scaffold-release-installer.yml"
+  assert_file_exists "${tmpdir}/.github/workflows/release-php.yml"
+  assert_file_not_contains "${tmpdir}/zizmor.yml" "scaffold-release-installer.yml"
+  assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
+}
+
+@test "remove_scaffold_workflows is a no-op without scaffold workflows" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_scaffold_workflows_none"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run remove_scaffold_workflows
+  popd >/dev/null || return 1
+
+  assert_success
+}
+
 @test "remove_zizmor_entry is a no-op without a zizmor.yml" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_zizmor_absent"
   mkdir -p "${tmpdir}"
@@ -1432,19 +1461,36 @@ create_release_project() {
   assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/feature-x.tar.gz"
 }
 
-@test "resolve_archive_url uses the latest release tag by default" {
+@test "resolve_archive_url prefers --ref over the installer version" {
   SCAFFOLD_ARCHIVE_URL=""
+  SCAFFOLD_VERSION="9.9.9"
+  archive_ref="feature-x"
+  run resolve_archive_url
+  assert_success
+  assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/feature-x.tar.gz"
+}
+
+@test "resolve_archive_url uses the release of a release installer" {
+  SCAFFOLD_ARCHIVE_URL=""
+  SCAFFOLD_VERSION="9.9.9"
   archive_ref=""
-  curl() { echo '{"tag_name": "9.9.9"}'; }
+  curl() {
+    echo "curl must not be called" >&2
+    return 1
+  }
   run resolve_archive_url
   assert_success
   assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/9.9.9.tar.gz"
 }
 
-@test "resolve_archive_url falls back to main when no release is found" {
+@test "resolve_archive_url uses main for the development installer" {
   SCAFFOLD_ARCHIVE_URL=""
+  SCAFFOLD_VERSION="dev"
   archive_ref=""
-  curl() { return 1; }
+  curl() {
+    echo "curl must not be called" >&2
+    return 1
+  }
   run resolve_archive_url
   assert_success
   assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz"

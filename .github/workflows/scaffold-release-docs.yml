@@ -59,16 +59,18 @@ jobs:
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "Release version: $version"
 
-      - name: Bake version into install.sh
-        working-directory: ${{ github.workspace }}
-        run: |
-          escaped=$(printf '%s' "${RELEASE_VERSION}" | sed -e 's/[\\&|]/\\&/g')
-          sed -i "s|^SCAFFOLD_VERSION=\"dev\"|SCAFFOLD_VERSION=\"${escaped}\"|" install.sh
-          grep '^SCAFFOLD_VERSION=' install.sh
-
       - name: Build documentation site
         run: npm run build
         working-directory: '${{ github.workspace }}/.scaffold/docs'
+
+      # getscaffold.dev serves the installer of the latest release at
+      # '/install.sh' and '/init.sh', so the release site carries no copy.
+      - name: Check that the site holds no installer
+        working-directory: ${{ github.workspace }}
+        run: |
+          for file in install.sh init.sh; do
+            [ ! -e ".scaffold/docs/build/${file}" ] || { echo "::error::The release build holds ${file}."; exit 1; }
+          done
 
       - name: Setup GitHub pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6

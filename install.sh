@@ -43,8 +43,8 @@
 set -euo pipefail
 [ "${SCRIPT_DEBUG-}" = "1" ] && set -x
 
-# Scaffold version. Rewritten to the release tag when the script is published
-# for download from getscaffold.dev; stays "dev" in a plain checkout.
+# Scaffold version. The release workflow rewrites it to the release tag in the
+# 'install.sh' it attaches to the release; stays "dev" in a plain checkout.
 SCAFFOLD_VERSION="dev"
 
 # Identity values. Populated from options or interactive prompts.
@@ -153,7 +153,8 @@ GITHUB_LABELS=(
 GITHUB_RULESET_NAME="default-branch"
 
 # Ref (tag, branch, or commit) to bootstrap the template from when the script is
-# run without the template present. Empty means "use the latest release".
+# run without the template present. Empty means "use the release of
+# SCAFFOLD_VERSION", or the default branch for "dev".
 archive_ref=""
 
 # Sub-command: "install" initialises the template, "github" only configures
@@ -296,6 +297,19 @@ remove_zizmor_entry() {
   [ -f zizmor.yml ] || return 0
 
   remove_string_content_line "${1}" "zizmor.yml"
+}
+
+##
+# Remove the template's own 'scaffold-*' workflows and their zizmor entries.
+#
+remove_scaffold_workflows() {
+  local workflow
+
+  for workflow in .github/workflows/scaffold-*.yml; do
+    [ -e "${workflow}" ] || continue
+    rm -f "${workflow}"
+    remove_zizmor_entry "${workflow##*/}"
+  done
 }
 
 ##
@@ -979,11 +993,10 @@ process_internal() {
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
   rm -f SECURITY.md || true
+  rm -f install-key.asc || true
   rm -Rf ".scaffold" || true
-  rm -f ".github/workflows/scaffold-test.yml" || true
-  rm -f ".github/workflows/scaffold-release-docs.yml" || true
 
-  remove_zizmor_entry "scaffold-release-docs.yml"
+  remove_scaffold_workflows
 
   protect_skill_references
 
@@ -2436,7 +2449,8 @@ Environment:
 
 Other:
   --ref=VALUE                    Bootstrap from a tag, branch or commit when the
-                                 template is absent (default: latest release).
+                                 template is absent (default: the release of
+                                 this installer, or 'main' for 'dev').
   --yes, -y                      Run non-interactively using defaults.
   --help, -h                     Show this help and exit.
   --version                      Print the version ("dev" unless released).
@@ -2993,9 +3007,9 @@ bootstrapped_script() {
 # Resolve the URL of the template archive to download.
 #
 # Precedence: an explicit SCAFFOLD_ARCHIVE_URL wins (an exact archive URL);
-# then --ref pins to a tag, branch, or commit; otherwise the latest published
-# release is used, falling back to the default branch when the repository has
-# no releases.
+# then --ref pins to a tag, branch, or commit; then a release installer uses
+# the archive of its own version, so it installs the release it came from.
+# The development installer uses the default branch.
 #
 # @return string Archive URL.
 #
@@ -3010,11 +3024,8 @@ resolve_archive_url() {
     return 0
   fi
 
-  local tag
-  tag="$(curl -fsSL "https://api.github.com/repos/AlexSkrypnyk/scaffold/releases/latest" 2>/dev/null | grep '"tag_name":' | head -n 1 | sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' || true)"
-
-  if [ -n "${tag}" ]; then
-    echo "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/${tag}.tar.gz"
+  if [ "${SCAFFOLD_VERSION}" != "dev" ]; then
+    echo "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/${SCAFFOLD_VERSION}.tar.gz"
     return 0
   fi
 

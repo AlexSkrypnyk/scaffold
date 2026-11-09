@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "copy-install": "cp ../../install.sh static/install.sh && cp ../../install.sh static/init.sh",
+    "copy-install": "node scripts/copy-installer.js",
     "prestart": "npm run copy-install",
     "start": "docusaurus start",
     "prebuild": "npm run copy-install",

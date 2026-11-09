@@ -35,7 +35,7 @@ The initialization script performs three main operations:
 
 ### Curl bootstrap
 
-When `install.sh` runs without the template present (for example fetched and piped straight from `curl` into an empty directory), it downloads the Scaffold archive into the current directory, extracts it with `tar --strip-components=1`, and re-executes the on-disk copy so init proceeds normally. Presence of the `.scaffold/` directory is the sentinel for "template already here". The archive URL is resolved in precedence order: the `SCAFFOLD_ARCHIVE_URL` environment variable, the `--ref=<tag|branch|commit>` option, then the latest GitHub release (falling back to the `main` branch). The re-exec reconnects stdin to `/dev/tty` in interactive mode so prompts work despite the pipe, and bootstrapping refuses a non-empty directory. The curl-bootstrap PHPUnit tests (`testInstallViaCurlBootstrapsIntoEmptyDir`, `testInstallViaCurlBootstrapRefusesNonEmptyDir`) stay off the network by pointing `SCAFFOLD_ARCHIVE_URL` at a local `file://` tarball built from the SUT.
+When `install.sh` runs without the template present (for example fetched and piped straight from `curl` into an empty directory), it downloads the Scaffold archive into the current directory, extracts it with `tar --strip-components=1`, and re-executes the on-disk copy so init proceeds normally. Presence of the `.scaffold/` directory is the sentinel for "template already here". The archive URL is resolved in precedence order: the `SCAFFOLD_ARCHIVE_URL` environment variable, the `--ref=<tag|branch|commit>` option, then the tag in `SCAFFOLD_VERSION` for a release installer, or the `main` branch for the `dev` installer. The re-exec reconnects stdin to `/dev/tty` in interactive mode so prompts work despite the pipe, and bootstrapping refuses a non-empty directory. The curl-bootstrap PHPUnit tests (`testInstallViaCurlBootstrapsIntoEmptyDir`, `testInstallViaCurlBootstrapRefusesNonEmptyDir`) stay off the network by pointing `SCAFFOLD_ARCHIVE_URL` at a local `file://` tarball built from the SUT.
 
 ### Token System for Conditional Content
 
@@ -465,6 +465,45 @@ stripped on init because that workflow is template-only.
 - `.github/workflows/release-php.yml` - Build and publish PHAR
 - `.github/workflows/release-docs.yml` - Deploy documentation
 - `.github/workflows/draft-release-notes.yml` - Auto-generate release notes
+- `.github/workflows/scaffold-release-installer.yml` - Attach the signed and
+  attested installer to a published release
+- `.github/workflows/scaffold-release-docs.yml` - Deploy getscaffold.dev on a tag
+
+`install.sh` removes every `.github/workflows/scaffold-*.yml` from a generated
+project, so a workflow for the template alone takes the `scaffold-` prefix.
+
+### Installer releases
+
+getscaffold.dev/install.sh and /init.sh serve the `install.sh` attached to the latest release, so a release build of the docs site holds no `install.sh` or `init.sh`. `.scaffold/docs/scripts/copy-installer.js` removes both when `RELEASE_VERSION` is set, and `scaffold-release-docs.yml` fails when either is in the build. Every other build copies the repository-root `install.sh` to both paths, so the Netlify development site (`scaffold-docs.netlify.app`, the `main` branch) and local builds serve the `dev` installer.
+
+`scaffold-release-installer.yml` runs when a release is published:
+
+1. Reads `install.sh` from the tag, or `init.sh` for older tags, and stamps `SCAFFOLD_VERSION="dev"` with the tag.
+2. Pipes the stamped installer into `bash` in an empty directory, so it bootstraps and initializes the tag's template.
+3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, and `GPG_PASSPHRASE` when the key has one. Both are secrets of the `release` environment.
+4. Checks the signature against `install-key.asc` and its pinned fingerprint with `.scaffold/installer/verify-release.sh`.
+5. Attests `install.sh` and `SHA256SUMS`, uploads the 3 files with `--clobber`, and verifies the uploaded copies.
+6. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer.
+
+Run it from the **Actions** tab with a version to attach the installer to an existing release, such as one published before this workflow existed. The workflow rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
+
+`install-key.asc` in the repository root is the public half of the `Scaffold Release Signing` key, fingerprint `86F0 77A2 E806 67D7 CF4A 3320 EDEA F2FC D434 756C`. It expires on 2028-11-08. `process_internal()` removes it from generated projects.
+
+To extend the key before it expires, run `gpg --quick-set-expire 86F077A2E80667D7CF4A3320EDEAF2FCD434756C 2y`, then export the public half again. The fingerprint stays the same:
+
+```bash
+gpg --armor --output install-key.asc --export 86F077A2E80667D7CF4A3320EDEAF2FCD434756C
+```
+
+A new key needs a new `install-key.asc`, the new fingerprint in `verify-release.sh` and in the "Verify the installer" section of `.scaffold/docs/content/README.mdx`, and a note in the release notes.
+
+To give the workflow the signing key, create the `release` environment, then store the private key and its passphrase there:
+
+```bash
+gh api -X PUT repos/AlexSkrypnyk/scaffold/environments/release
+gpg --armor --export-secret-keys 86F077A2E80667D7CF4A3320EDEAF2FCD434756C | gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold
+gh secret set GPG_PASSPHRASE --env release --repo AlexSkrypnyk/scaffold
+```
 
 ### Testing `install.sh`
 
