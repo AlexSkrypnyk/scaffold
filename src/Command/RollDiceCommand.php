@@ -19,12 +19,12 @@ class RollDiceCommand extends Command {
   /**
    * Minimum number of sides on a die.
    */
-  const MIN_SIDES = 2;
+  protected const int MIN_SIDES = 2;
 
   /**
    * Maximum number of dice in a single roll.
    */
-  const MAX_COUNT = 100;
+  protected const int MAX_COUNT = 100;
 
   /**
    * {@inheritdoc}
