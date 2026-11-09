@@ -1196,7 +1196,7 @@ SETTINGS
   echo "<?php // command" >"${tmpdir}/bin/php-command"
   echo "<?php // script" >"${tmpdir}/php-script"
   echo "<?php // library" >"${tmpdir}/src/Example.php"
-  echo "<?php // joke" >"${tmpdir}/src/Command/JokeCommand.php"
+  echo "<?php // roll dice" >"${tmpdir}/src/Command/RollDiceCommand.php"
   echo "<?php // library test" >"${tmpdir}/tests/phpunit/Unit/ExampleUnitTest.php"
 
   namespace="AcmeApp"

@@ -606,7 +606,7 @@ remove_php_command() {
   rmdir bin >/dev/null 2>&1 || true
   rm -Rf src/Command || true
   rm -f tests/phpunit/Functional/ApplicationFunctionalTestCase.php || true
-  rm -f tests/phpunit/Functional/JokeCommandTest.php || true
+  rm -f tests/phpunit/Functional/RollDiceCommandTest.php || true
   rm -f tests/phpunit/Functional/SayHelloCommandTest.php || true
   rm -f docs/content/php/php-command.mdx || true
 

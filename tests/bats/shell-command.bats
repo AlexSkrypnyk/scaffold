@@ -45,7 +45,7 @@ export SCRIPT_FILE="shell-command.sh"
   for _ in $(seq 1 20); do
     tui_run 2
     assert_success
-    [[ ${output} =~ Rolled:\ [12]$ ]]
+    assert_any_line_matches_case "^Rolled: [12]$"
   done
 }
 

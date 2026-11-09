@@ -26,9 +26,9 @@ The following table lists the 2 example commands:
 | Class | Command name | What it does |
 |---|---|---|
 | `SayHelloCommand` | `say-hello` | Prints a greeting and returns `Command::SUCCESS`. Sets a description and a help text. |
-| `JokeCommand` | `joke` | Fetches a random joke from `https://official-joke-api.appspot.com/jokes/TOPIC/random` and prints its setup and punchline. The optional `--topic` option sets `TOPIC` and defaults to `general`. If the request fails or the joke lacks a setup or a punchline, prints `Unable to retrieve a joke.` and returns `Command::FAILURE`. |
+| `RollDiceCommand` | `roll-dice` | Rolls dice and prints each roll and the total. The `--sides` option sets the sides on each die: at least 2, with `6` as the default. The `--count` option sets the number of dice: 1 to 100, with `1` as the default. If an option is out of range or isn't a whole number, prints an error and returns `Command::FAILURE`. |
 
-The launcher makes `JokeCommand` the default with `setDefaultCommand()`, so `./bin/php-command` with no command name runs `joke`.
+The launcher makes `RollDiceCommand` the default with `setDefaultCommand()`, so `./bin/php-command` with no command name runs `roll-dice`.
 
 After `composer install`, run the `say-hello` command from the project root:
 
@@ -44,7 +44,7 @@ Each command is a class in `src/Command/` that you register in `bin/php-command`
 
 1. In `src/Command/`, copy an example class to a new file named after your class:
    - For a command with no input, copy `SayHelloCommand.php`.
-   - For a command with options, copy `JokeCommand.php`.
+   - For a command with options, copy `RollDiceCommand.php`.
 2. In the new file, rename the class to match the new filename.
 3. In `configure()`, set the name, description and help text of the command and add its arguments and options.
 4. In `execute()`, replace the example code with your logic. Return `Command::SUCCESS` or `Command::FAILURE`.
@@ -65,7 +65,7 @@ The command tests live in [`tests/phpunit/Functional/`](https://github.com/AlexS
 - `applicationInitFromCommand()` builds an app around 1 command.
 - `applicationRun()` runs the app and returns its output.
 
-[`SayHelloCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/SayHelloCommandTest.php) checks the greeting. [`JokeCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/JokeCommandTest.php) mocks `getContent()` to return fixture responses in place of the joke API.
+[`SayHelloCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/SayHelloCommandTest.php) checks the greeting. [`RollDiceCommandTest.php`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/phpunit/Functional/RollDiceCommandTest.php) mocks `rollDie()` to return fixed rolls, so it can check the exact output.
 
 Both tests carry the `#[Group('command')]` attribute. To run only that group, run the following command:
 

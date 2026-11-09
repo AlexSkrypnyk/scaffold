@@ -27,16 +27,18 @@ To run the tests from your project root:
    ./tests/bats/node_modules/.bin/bats tests/bats
    ```
 
-   Confirm that BATS reports no failures. 2 of the example tests call a live joke API, so they fail without network access.
+   Confirm that BATS reports no failures.
 
 ## Write tests
 
-[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) holds 4 example tests. Each test runs the script with the `tui_run` function from BATS Helpers, which feeds answers to the script's prompts. The tests cover the following cases:
+[`shell-command.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/shell-command.bats) holds 6 example tests. Each test runs the script with the `tui_run` function from BATS Helpers, which feeds answers to the script's prompts. The tests check the output with BATS Helpers assertions such as `assert_output_contains` and `assert_any_line_matches_case`. They cover the following cases:
 
-- Answers to the topic prompt and the `Proceed?` question, calling the live joke API
-- A topic answer and `SHOULD_PROCEED=y`, so the script skips the `Proceed?` question and calls the live joke API
-- A topic answer and `SHOULD_PROCEED=n`, so the script stops
-- A topic answer and a mock of the `curl` call, set up with the `steps_run` function from BATS Helpers
+- Answers to the sides prompt and the `Proceed?` question
+- A sides answer and `SHOULD_PROCEED=y`, so the script skips the `Proceed?` question
+- A sides answer and `SHOULD_PROCEED=n`, so the script stops
+- 20 rolls of a 2-sided die, each checked to be `1` or `2`
+- A sides answer with a leading zero, read as a base-10 number
+- Sides answers outside 2-100 or not whole numbers, so the script exits with an error
 
 `shell-command.bats` loads [`_helper.bash`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/_helper.bash), which sets up every test:
 
