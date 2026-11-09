@@ -1,8 +1,8 @@
 name: Release Scaffold installer
 
 # Attaches 'install.sh', 'SHA256SUMS' and 'SHA256SUMS.asc' to a release, with a
-# build attestation for 'install.sh' and 'SHA256SUMS'. getscaffold.dev redirects
-# '/install.sh' to the 'install.sh' of the latest release.
+# build attestation for 'install.sh' and 'SHA256SUMS'. getscaffold.dev serves
+# the 'install.sh' of the latest release at '/install.sh'.
 #
 # A manual run attaches the installer to an existing release again.
 
@@ -137,8 +137,7 @@ jobs:
           gh attestation verify .uploaded/install.sh --repo "${GITHUB_REPOSITORY}"
           gh attestation verify .uploaded/SHA256SUMS --repo "${GITHUB_REPOSITORY}"
 
-      # Follows the Cloudflare redirect of getscaffold.dev and the GitHub
-      # redirect of 'releases/latest' to the uploaded installer.
+      # Each URL must serve the uploaded installer byte for byte.
       - name: Verify latest installer
         env:
           GH_TOKEN: ${{ github.token }}

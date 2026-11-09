@@ -5,8 +5,8 @@
  *
  * A build without RELEASE_VERSION, such as a local server or the development
  * site, serves the repository-root 'install.sh' of the commit it was built
- * from. A release build serves no installer: getscaffold.dev redirects both
- * paths to the 'install.sh' attached to the latest GitHub release.
+ * from. A release build serves no installer: getscaffold.dev serves the
+ * 'install.sh' attached to the latest GitHub release at both paths.
  */
 
 const fs = require('node:fs');
@@ -21,7 +21,7 @@ const DEV_INSTALLER = path.join(ROOT_DIR, 'install.sh');
 const TARGETS = ['install.sh', 'init.sh'];
 
 // Removes the targets in a release build, so a copy left by an earlier
-// development build never ships behind the redirect.
+// development build never ships to getscaffold.dev.
 const copyInstaller = (releaseVersion, staticDir = STATIC_DIR) => {
   for (const target of TARGETS) {
     const destination = path.join(staticDir, target);

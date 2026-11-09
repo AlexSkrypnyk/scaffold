@@ -474,17 +474,7 @@ project, so a workflow for the template alone takes the `scaffold-` prefix.
 
 ### Installer releases
 
-getscaffold.dev is GitHub Pages behind a proxied Cloudflare zone. GitHub Pages can't send redirects, so a Cloudflare **Single Redirect** rule does:
-
-| Field | Value |
-|---|---|
-| When incoming requests match | `(http.host eq "getscaffold.dev" and http.request.uri.path in {"/install.sh" "/init.sh"})` |
-| URL redirect type | Static |
-| URL | `https://github.com/AlexSkrypnyk/scaffold/releases/latest/download/install.sh` |
-| Status code | 302 |
-| Preserve query string | Off |
-
-The rule lives in the Cloudflare dashboard, outside this repository. A release build of the docs site holds no `install.sh` or `init.sh`: `.scaffold/docs/scripts/copy-installer.js` removes both when `RELEASE_VERSION` is set, and `scaffold-release-docs.yml` fails when either is in the build. Every other build copies the repository-root `install.sh` to both paths, so the Netlify development site (`scaffold-docs.netlify.app`, the `main` branch) and local builds serve the `dev` installer.
+getscaffold.dev/install.sh and /init.sh serve the `install.sh` attached to the latest release, so a release build of the docs site holds no `install.sh` or `init.sh`. `.scaffold/docs/scripts/copy-installer.js` removes both when `RELEASE_VERSION` is set, and `scaffold-release-docs.yml` fails when either is in the build. Every other build copies the repository-root `install.sh` to both paths, so the Netlify development site (`scaffold-docs.netlify.app`, the `main` branch) and local builds serve the `dev` installer.
 
 `scaffold-release-installer.yml` runs when a release is published:
 
@@ -493,7 +483,7 @@ The rule lives in the Cloudflare dashboard, outside this repository. A release b
 3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, and `GPG_PASSPHRASE` when the key has one. Both are secrets of the `release` environment.
 4. Checks the signature against `.scaffold/PUBLIC_KEY.asc` and its pinned fingerprint with `.scaffold/installer/verify-release.sh`.
 5. Attests `install.sh` and `SHA256SUMS`, uploads the 3 files with `--clobber`, and verifies the uploaded copies.
-6. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer. This step fails when the Cloudflare rule is missing.
+6. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer.
 
 Run it from the **Actions** tab with a version to attach the installer to an existing release, such as one published before this workflow existed. The workflow rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
 

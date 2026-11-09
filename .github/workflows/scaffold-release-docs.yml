@@ -63,8 +63,8 @@ jobs:
         run: npm run build
         working-directory: '${{ github.workspace }}/.scaffold/docs'
 
-      # Cloudflare redirects '/install.sh' and '/init.sh' to the installer of
-      # the latest release, so the release site carries no copy of its own.
+      # getscaffold.dev serves the installer of the latest release at
+      # '/install.sh' and '/init.sh', so the release site carries no copy.
       - name: Check that the site holds no installer
         working-directory: ${{ github.workspace }}
         run: |
