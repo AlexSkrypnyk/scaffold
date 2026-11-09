@@ -106,6 +106,15 @@ curl -fsSL https://getscaffold.dev/install.sh | \
 
 The script downloads the latest release. To pin a tag, branch or commit, add `--ref` after `bash -s --` in the non-interactive command, for example `--ref=1.2.3`. Any option turns off the prompts, so `--ref` needs the 3 required options with it.
 
+getscaffold.dev runs the `install.sh` attached to the latest release. Each release signs that file's checksum with GPG and records a GitHub build attestation for it. To check the installer before it runs, verify its attestation with [GitHub CLI](https://cli.github.com):
+
+```bash
+curl -fsSLO https://github.com/AlexSkrypnyk/scaffold/releases/latest/download/install.sh
+gh attestation verify install.sh --repo AlexSkrypnyk/scaffold
+```
+
+[Verify the installer](https://getscaffold.dev/#verify-the-installer) also covers the GPG check and the signing key's fingerprint.
+
 ### Set up the GitHub repository
 
 With [GitHub CLI](https://cli.github.com) installed and a token in `SCAFFOLD_GITHUB_TOKEN`, the last prompt sets up the project's GitHub repository. In an empty directory it offers to create the repository, push the project and protect its default branch with the checks of the first CI run:

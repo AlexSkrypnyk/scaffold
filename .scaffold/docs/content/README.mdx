@@ -1,7 +1,7 @@
 ---
 title: Introduction
 sidebar_position: 1
-cspell: ignore yournamespace yourproject
+cspell: ignore yournamespace yourproject getscaffold Skrypnyk
 ---
 
 import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
@@ -53,6 +53,80 @@ curl -fsSL https://getscaffold.dev/install.sh | \
 Replace the 3 values with a PascalCase namespace, a lowercase hyphenated project name and your name.
 
 To start from a tag, branch or commit in place of the latest release, add `--ref` to the no-prompt command, such as `--ref=1.2.3`. To list every option and its default, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- --help`.
+
+## Verify the installer
+
+The installer runs on your machine with your permissions, so you can check it before it runs. getscaffold.dev/install.sh is a short script that downloads the `install.sh` attached to the latest GitHub release and runs it. Each release attaches 3 files:
+
+- `install.sh`, the installer of that release
+- `SHA256SUMS`, the SHA-256 checksum of `install.sh`
+- `SHA256SUMS.asc`, a GPG signature of `SHA256SUMS`
+
+GitHub Actions also records a build attestation for `install.sh` and `SHA256SUMS`. The attestation ties each file to the commit and the workflow run that built it.
+
+To verify the installer with the [GitHub CLI](https://cli.github.com), then run it:
+
+1. Download the installer of the latest release:
+
+   ```bash
+   curl -fsSLO https://github.com/AlexSkrypnyk/scaffold/releases/latest/download/install.sh
+   ```
+
+2. Verify the attestation of the installer:
+
+   ```bash
+   gh attestation verify install.sh --repo AlexSkrypnyk/scaffold
+   ```
+
+   The command fails when the file changed after the build or came from another repository's workflows.
+
+3. Create an empty project directory and run the verified installer from it:
+
+   ```bash
+   mkdir my-project
+   cd my-project
+   bash ../install.sh
+   ```
+
+To verify the installer with GPG in place of step 2, run the following commands in the directory that holds `install.sh`:
+
+```bash
+BASE=https://github.com/AlexSkrypnyk/scaffold/releases/latest/download
+RAW=https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main
+
+curl -fsSLO $BASE/SHA256SUMS
+curl -fsSLO $BASE/SHA256SUMS.asc
+curl -fsSLO $RAW/.scaffold/PUBLIC_KEY.asc
+
+# Check the fingerprint against the one below before trusting the key.
+gpg --show-keys --with-fingerprint PUBLIC_KEY.asc
+
+gpg --import PUBLIC_KEY.asc
+gpg --verify SHA256SUMS.asc SHA256SUMS
+sha256sum -c SHA256SUMS    # macOS: shasum -a 256 -c SHA256SUMS
+```
+
+The signing key belongs to the maintainer, Alex Skrypnyk. Its fingerprint is:
+
+```text
+755E 824E 80F8 4913 5F5F  4043 E71E DB25 C4F6 D89D
+```
+
+Confirm that `gpg --verify` reports a good signature from this key. A good signature from any other key in your keyring proves nothing about Scaffold.
+
+To verify a specific release, replace `latest/download` with `download/` and the version in each URL, such as `download/1.5.0`.
+
+Both checks trust the `AlexSkrypnyk/scaffold` repository. Anyone who controls the repository or the maintainer's account can rebuild the attestation and replace the key. Record the fingerprint on your first download and compare it on every later one.
+
+## Try unreleased changes
+
+The development site serves the `install.sh` of the `main` branch, and that installer downloads `main`. To create a project from unreleased changes, run the following command in a new empty directory:
+
+```bash
+curl -fsSL https://scaffold-docs.netlify.app/install.sh | bash
+```
+
+The development installer has no attestation and no signature.
 
 ## Start from a downloaded release
 
