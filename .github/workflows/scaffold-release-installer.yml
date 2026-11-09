@@ -1,8 +1,8 @@
 name: Release Scaffold installer
 
 # Attaches 'install.sh', 'SHA256SUMS' and 'SHA256SUMS.asc' to a release, with a
-# build attestation for 'install.sh' and 'SHA256SUMS'. getscaffold.dev serves a
-# stub at '/install.sh' that runs the 'install.sh' of the latest release.
+# build attestation for 'install.sh' and 'SHA256SUMS'. getscaffold.dev redirects
+# '/install.sh' to the 'install.sh' of the latest release.
 #
 # A manual run attaches the installer to an existing release again.
 
@@ -98,9 +98,17 @@ jobs:
           [ -n "${GPG_PRIVATE_KEY}" ] || { echo "::error::The GPG_PRIVATE_KEY secret of the 'release' environment is not set."; exit 1; }
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --import
 
+      # GPG_PASSPHRASE is needed only for a key that has a passphrase.
       - name: Sign checksums
         working-directory: .release
-        run: gpg --batch --yes --detach-sign --armor SHA256SUMS
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          if [ -n "${GPG_PASSPHRASE}" ]; then
+            echo "${GPG_PASSPHRASE}" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --detach-sign --armor SHA256SUMS
+          else
+            gpg --batch --yes --detach-sign --armor SHA256SUMS
+          fi
 
       # 'gpg --verify' accepts any key in the keyring, so the signature must
       # come from the fingerprint of the published key.
@@ -129,7 +137,8 @@ jobs:
           gh attestation verify .uploaded/install.sh --repo "${GITHUB_REPOSITORY}"
           gh attestation verify .uploaded/SHA256SUMS --repo "${GITHUB_REPOSITORY}"
 
-      # getscaffold.dev runs the installer at this URL.
+      # Follows the Cloudflare redirect of getscaffold.dev and the GitHub
+      # redirect of 'releases/latest' to the uploaded installer.
       - name: Verify latest installer
         env:
           GH_TOKEN: ${{ github.token }}
@@ -139,5 +148,8 @@ jobs:
             echo "Release ${RELEASE_VERSION} is not the latest release (${latest}), so the latest download is not checked."
             exit 0
           fi
-          curl -fsSL "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/install.sh" -o latest-install.sh
-          cmp latest-install.sh .release/install.sh || { echo '::error::The latest release download does not serve the uploaded installer.'; exit 1; }
+          for url in "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/install.sh" https://getscaffold.dev/install.sh https://getscaffold.dev/init.sh; do
+            curl -fsSL "${url}" -o latest-install.sh
+            cmp latest-install.sh .release/install.sh || { echo "::error::${url} does not serve the uploaded installer."; exit 1; }
+            echo "${url} serves the uploaded installer."
+          done

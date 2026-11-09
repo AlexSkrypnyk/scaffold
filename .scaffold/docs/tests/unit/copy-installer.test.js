@@ -1,41 +1,42 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { DEV_INSTALLER, RELEASE_INSTALLER, STATIC_DIR, TARGETS, copyInstaller, installerSource } from '../../scripts/copy-installer';
-
-describe('installerSource', () => {
-  test.each([
-    ['an unset version', undefined, DEV_INSTALLER],
-    ['an empty version', '', DEV_INSTALLER],
-    ['a release version', '1.5.0', RELEASE_INSTALLER],
-  ])('picks the installer for %s', (name, version, expected) => {
-    expect(installerSource(version)).toBe(expected);
-  });
-});
+import { DEV_INSTALLER, STATIC_DIR, TARGETS, copyInstaller } from '../../scripts/copy-installer';
 
 describe('copyInstaller', () => {
   let copy;
+  let remove;
 
   beforeEach(() => {
     copy = jest.spyOn(fs, 'copyFileSync').mockImplementation(() => {});
+    remove = jest.spyOn(fs, 'rmSync').mockImplementation(() => {});
   });
 
   afterEach(() => {
     copy.mockRestore();
+    remove.mockRestore();
   });
 
   test.each([
-    ['the development installer', undefined, DEV_INSTALLER],
-    ['the release stub', '1.5.0', RELEASE_INSTALLER],
-  ])('copies %s to every target', (name, version, expected) => {
-    expect(copyInstaller(version, '/site/static')).toBe(expected);
+    ['an unset version', undefined],
+    ['an empty version', ''],
+  ])('copies the development installer to every target with %s', (name, version) => {
+    expect(copyInstaller(version, '/site/static')).toBe(DEV_INSTALLER);
 
-    expect(copy.mock.calls).toEqual(TARGETS.map((target) => [expected, path.join('/site/static', target)]));
+    expect(copy.mock.calls).toEqual(TARGETS.map((target) => [DEV_INSTALLER, path.join('/site/static', target)]));
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  test('removes every target in a release build', () => {
+    expect(copyInstaller('1.5.0', '/site/static')).toBeNull();
+
+    expect(remove.mock.calls).toEqual(TARGETS.map((target) => [path.join('/site/static', target), { force: true }]));
+    expect(copy).not.toHaveBeenCalled();
   });
 
   test('copies into the static directory by default', () => {
-    copyInstaller('1.5.0');
+    copyInstaller(undefined);
 
-    expect(copy).toHaveBeenCalledWith(RELEASE_INSTALLER, path.join(STATIC_DIR, 'install.sh'));
+    expect(copy).toHaveBeenCalledWith(DEV_INSTALLER, path.join(STATIC_DIR, 'install.sh'));
   });
 });
 
@@ -43,10 +44,6 @@ test('serves the installer as install.sh and init.sh', () => {
   expect(TARGETS).toEqual(['install.sh', 'init.sh']);
 });
 
-test.each([DEV_INSTALLER, RELEASE_INSTALLER])('the installer %p exists', (file) => {
-  expect(fs.existsSync(file)).toBe(true);
-});
-
-test('the release stub runs the installer of the latest release', () => {
-  expect(fs.readFileSync(RELEASE_INSTALLER, 'utf8')).toContain('https://github.com/AlexSkrypnyk/scaffold/releases/latest/download/install.sh');
+test('the development installer exists', () => {
+  expect(fs.existsSync(DEV_INSTALLER)).toBe(true);
 });

@@ -59,34 +59,18 @@ jobs:
           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
           echo "Release version: $version"
 
-      # With RELEASE_VERSION set, the build serves the stub that runs the
-      # installer of the latest release at '/install.sh'.
       - name: Build documentation site
         run: npm run build
         working-directory: '${{ github.workspace }}/.scaffold/docs'
 
-      - name: Check release stub
+      # Cloudflare redirects '/install.sh' and '/init.sh' to the installer of
+      # the latest release, so the release site carries no copy of its own.
+      - name: Check that the site holds no installer
         working-directory: ${{ github.workspace }}
-        run: cmp .scaffold/docs/build/install.sh .scaffold/installer/install-latest.sh
-
-      # 'scaffold-release-installer.yml' attaches the installer to the release
-      # while this workflow runs. Deploying the stub before the latest release
-      # holds an installer would break the one-line installer.
-      - name: Wait for the latest release installer
-        working-directory: ${{ github.workspace }}
-        timeout-minutes: 20
         run: |
-          url="https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/install.sh"
-          for attempt in $(seq 1 30); do
-            if curl -fsSL "${url}" -o latest-install.sh && grep -q '^SCAFFOLD_VERSION=' latest-install.sh; then
-              echo "The latest release installer reports version $(bash latest-install.sh --version)."
-              exit 0
-            fi
-            echo "Attempt ${attempt}: ${url} does not serve an installer yet."
-            sleep 30
+          for file in install.sh init.sh; do
+            [ ! -e ".scaffold/docs/build/${file}" ] || { echo "::error::The release build holds ${file}."; exit 1; }
           done
-          echo "::error::${url} does not serve an installer, so the stub is not deployed."
-          exit 1
 
       - name: Setup GitHub pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
