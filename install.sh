@@ -1776,6 +1776,12 @@ github_compute_checks() {
   local output
 
   if ! output="$(gh_run api "repos/${slug}/commits/${ref}/check-runs" --paginate --jq ".check_runs[] | select(.app.id == ${GITHUB_ACTIONS_APP_ID} and .conclusion != \"skipped\" and .conclusion != \"cancelled\" and .conclusion != \"neutral\") | [(.check_suite.id | tostring), .head_sha, .name] | join(\"\\t\")" 2>&1)"; then
+    # An empty repository has no commit on its default branch to read.
+    if [[ ${output} == *"No commit found for SHA"* ]]; then
+      echo "  Required checks: none found, because ${branch} has no commits"
+      return 0
+    fi
+
     github_section_error "Required checks" "Checks: read" "${output}"
     return $?
   fi
@@ -2125,7 +2131,10 @@ github_apply_new_ruleset() {
 
   github_compute_checks || return $?
 
-  [ -n "${github_checks_rule}" ] || return 0
+  if [ -z "${github_checks_rule}" ]; then
+    github_rerun_hint
+    return 0
+  fi
 
   github_apply_ruleset "${github_checks_rule}"
 }

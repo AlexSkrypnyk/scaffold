@@ -50,13 +50,12 @@ const config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        // #;< META
         gtag: {
-          // #;< META
           trackingID: 'G-6TBPDE9SZY',
-          // #;> META
-          // trackingID: 'G-',
           anonymizeIP: true,
         },
+        // #;> META
       }),
     ],
   ],
