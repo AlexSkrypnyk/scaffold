@@ -34,7 +34,7 @@ Any static hosting service can serve the `build` directory.
 
 | Build | `static/install.sh` and `static/init.sh` | What `/install.sh` serves |
 |---|---|---|
-| `RELEASE_VERSION` unset, such as a local server or the development site | Copies of the repository-root `install.sh` | The installer of the built commit |
+| `RELEASE_VERSION` unset, such as a local server or the development site | Copies of the repository-root `install.sh` | The install script of the built commit |
 | `RELEASE_VERSION` set, as in the release workflow | Removed | On getscaffold.dev, the `install.sh` attached to the latest GitHub release |
 
 Before you commit, run `npm test`. It runs the Jest tests and the CSpell spell check. CI runs the same command after it builds the site.

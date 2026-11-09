@@ -72,48 +72,85 @@ The template holds every feature, and `install.sh` removes the ones you don't se
 
 `install.sh` replaces the `yournamespace`, `yourproject` and `Your Name` strings with your own values. It then keeps the features you choose and removes the rest.
 
-To create a project from a GitHub repository:
+To create a project, run the following command in a new **empty directory**. It runs the install script of the latest published Scaffold release, which downloads that release into the directory and then prompts you for the details:
 
-1. On GitHub, click **Use this template > Create a new repository**.
-2. Clone your new repository.
-3. In the repository root, run [`./install.sh`](install.sh) and answer the prompts. Confirm that the script ends with `Initialization complete.`<br/>
-   ![An interactive install.sh run, from the first prompt to the summary](.scaffold/assets/install.svg)
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | bash
+```
+
+Answer the prompts, and confirm that the script ends with `Initialization complete.`
+
+![An interactive install.sh run, from the first prompt to the summary](.scaffold/assets/install.svg)
+
+<details>
+<summary>Verify the install script before you run it</summary>
+
+getscaffold.dev/install.sh serves the `install.sh` attached to the latest published release. Each release signs the checksum of that file with GPG and records a GitHub build attestation for it.
+
+1. Download the install script of the latest published release:
+
+   ```bash
+   curl -fsSLO https://getscaffold.dev/install.sh
+   ```
+
+2. Verify the install script with [GitHub CLI](https://cli.github.com):
+
+   ```bash
+   gh attestation verify install.sh --repo AlexSkrypnyk/scaffold
+   ```
+
+   Or verify it with GPG:
+
+   ```bash
+   BASE=https://github.com/AlexSkrypnyk/scaffold/releases/latest/download
+   RAW=https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main
+
+   curl -fsSLO $BASE/SHA256SUMS
+   curl -fsSLO $BASE/SHA256SUMS.asc
+   curl -fsSLO $RAW/install-key.asc
+
+   gpg --show-keys --with-fingerprint install-key.asc
+   gpg --import install-key.asc
+   gpg --verify SHA256SUMS.asc SHA256SUMS
+   sha256sum -c SHA256SUMS    # macOS: shasum -a 256 -c SHA256SUMS
+   ```
+
+   Confirm that `gpg --verify` reports a good signature from the key with this fingerprint:
+
+   ```text
+   86F0 77A2 E806 67D7 CF4A  3320 EDEA F2FC D434 756C
+   ```
+
+3. Create an empty project directory and run the verified install script from it:
+
+   ```bash
+   mkdir my-project
+   cd my-project
+   bash ../install.sh
+   ```
+
+[Verify the install script](https://getscaffold.dev/#verify-the-install-script) explains what each check proves.
+
+</details>
 
 ### Non-interactive setup
 
 Pass options to `install.sh` to skip the prompts, for example in automation or from an AI agent. Any option switches the script to non-interactive mode. The `--namespace`, `--name` and `--author` options are required, and every other choice uses its default:
 
 ```bash
-./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"
-```
-
-Run `./install.sh --help` for the full list of options.
-
-### Start without a checkout
-
-You can also download and run the script straight from getscaffold.dev. Run it in an **empty directory**. The script downloads Scaffold into that directory and then prompts you for the details:
-
-```bash
-curl -fsSL https://getscaffold.dev/install.sh | bash
-```
-
-To run it non-interactively, pass the details as options instead:
-
-```bash
 curl -fsSL https://getscaffold.dev/install.sh | \
   bash -s -- --namespace=AcmeApp --name=acme-app --author="Jane Doe"
 ```
 
-The script downloads the latest release. To pin a tag, branch or commit, add `--ref` after `bash -s --` in the non-interactive command, for example `--ref=1.2.3`. Any option turns off the prompts, so `--ref` needs the 3 required options with it.
+To pin a tag, branch or commit in place of the latest release, add `--ref` after `bash -s --`, for example `--ref=1.2.3`. To list every option, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- --help`.
 
-getscaffold.dev/install.sh serves the `install.sh` attached to the latest release. Each release signs that file's checksum with GPG and records a GitHub build attestation for it. To check the installer before it runs, verify its attestation with [GitHub CLI](https://cli.github.com):
+### Start from a GitHub template
 
-```bash
-curl -fsSLO https://getscaffold.dev/install.sh
-gh attestation verify install.sh --repo AlexSkrypnyk/scaffold
-```
+To create a project from a GitHub repository:
 
-[Verify the installer](https://getscaffold.dev/#verify-the-installer) also covers the GPG check and the signing key's fingerprint.
+1. On GitHub, click **Use this template > Create a new repository**.
+2. Clone your new repository.
+3. In the repository root, run [`./install.sh`](install.sh) and answer the prompts. The same options work here, such as `./install.sh --namespace=AcmeApp --name=acme-app --author="Jane Doe"`.
 
 ### Set up the GitHub repository
 
