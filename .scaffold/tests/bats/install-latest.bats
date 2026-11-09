@@ -2,7 +2,10 @@
 #
 # Unit tests for .scaffold/installer/install-latest.sh.
 #
-# shellcheck disable=SC2154
+# The stand-in installer bodies are single-quoted so they expand when the
+# stub runs them (SC2016). Each test sets SCAFFOLD_INSTALLER_URL in its own
+# subshell (SC2030, SC2031).
+# shellcheck disable=SC2016,SC2030,SC2031,SC2154
 
 load _helper
 load "../../installer/install-latest.sh"

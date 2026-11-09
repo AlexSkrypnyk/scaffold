@@ -1445,7 +1445,10 @@ create_release_project() {
   SCAFFOLD_ARCHIVE_URL=""
   SCAFFOLD_VERSION="9.9.9"
   archive_ref=""
-  curl() { echo "curl must not be called" >&2; return 1; }
+  curl() {
+    echo "curl must not be called" >&2
+    return 1
+  }
   run resolve_archive_url
   assert_success
   assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/refs/tags/9.9.9.tar.gz"
@@ -1455,7 +1458,10 @@ create_release_project() {
   SCAFFOLD_ARCHIVE_URL=""
   SCAFFOLD_VERSION="dev"
   archive_ref=""
-  curl() { echo "curl must not be called" >&2; return 1; }
+  curl() {
+    echo "curl must not be called" >&2
+    return 1
+  }
   run resolve_archive_url
   assert_success
   assert_output "https://github.com/AlexSkrypnyk/scaffold/archive/refs/heads/main.tar.gz"
