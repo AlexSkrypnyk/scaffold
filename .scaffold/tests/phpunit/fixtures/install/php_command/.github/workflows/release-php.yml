@@ -3,9 +3,9 @@
        - name: Test PHAR
          run: |
 -          ./dist/force-crystal.phar --version
--          ./dist/force-crystal.phar || exit 1
+-          ./dist/force-crystal.phar list || exit 1
 +          ./dist/star-forge.phar --version
-+          ./dist/star-forge.phar || exit 1
++          ./dist/star-forge.phar list || exit 1
  
        - name: Create Release
          uses: softprops/action-gh-release@__HASH__ # __VERSION__
