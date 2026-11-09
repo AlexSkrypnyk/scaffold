@@ -300,6 +300,19 @@ remove_zizmor_entry() {
 }
 
 ##
+# Remove the template's own 'scaffold-*' workflows and their zizmor entries.
+#
+remove_scaffold_workflows() {
+  local workflow
+
+  for workflow in .github/workflows/scaffold-*.yml; do
+    [ -e "${workflow}" ] || continue
+    rm -f "${workflow}"
+    remove_zizmor_entry "${workflow##*/}"
+  done
+}
+
+##
 # Remove tokens and their enclosed content from files.
 # Tokens use format: #;< TOKEN ... #;> TOKEN
 #
@@ -981,12 +994,8 @@ process_internal() {
 
   rm -f SECURITY.md || true
   rm -Rf ".scaffold" || true
-  local workflow
-  for workflow in .github/workflows/scaffold-*.yml; do
-    [ -e "${workflow}" ] || continue
-    rm -f "${workflow}"
-    remove_zizmor_entry "${workflow##*/}"
-  done
+
+  remove_scaffold_workflows
 
   protect_skill_references
 

@@ -41,6 +41,12 @@ gpg_signed_by() {
   assert_output_contains "fpr:::::::::${SCAFFOLD_SIGNING_KEY_FINGERPRINT}:"
 }
 
+@test "the script runs main when executed" {
+  run .scaffold/installer/verify-release.sh
+  assert_failure
+  assert_output_contains "Error: pass the directory that holds SHA256SUMS and SHA256SUMS.asc."
+}
+
 @test "main fails without a directory" {
   run main
   assert_failure

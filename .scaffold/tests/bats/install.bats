@@ -139,6 +139,35 @@ ZIZMOR
   assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
 }
 
+@test "remove_scaffold_workflows removes every scaffold workflow and its zizmor entry" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_scaffold_workflows"
+  mkdir -p "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/workflows/scaffold-test.yml" "${tmpdir}/.github/workflows/scaffold-release-installer.yml" "${tmpdir}/.github/workflows/release-php.yml"
+  create_zizmor_yml "${tmpdir}"
+  echo "      - scaffold-release-installer.yml" >>"${tmpdir}/zizmor.yml"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_scaffold_workflows
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/.github/workflows/scaffold-test.yml"
+  assert_file_not_exists "${tmpdir}/.github/workflows/scaffold-release-installer.yml"
+  assert_file_exists "${tmpdir}/.github/workflows/release-php.yml"
+  assert_file_not_contains "${tmpdir}/zizmor.yml" "scaffold-release-installer.yml"
+  assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
+}
+
+@test "remove_scaffold_workflows is a no-op without scaffold workflows" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_scaffold_workflows_none"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run remove_scaffold_workflows
+  popd >/dev/null || return 1
+
+  assert_success
+}
+
 @test "remove_zizmor_entry is a no-op without a zizmor.yml" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_zizmor_absent"
   mkdir -p "${tmpdir}"
