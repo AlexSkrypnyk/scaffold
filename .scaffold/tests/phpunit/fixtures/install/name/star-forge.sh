@@ -6,16 +6,14 @@
 # Interactive prompt:
 # ./star-forge.sh
 #
-# ./star-forge.sh "topic"
+# ./star-forge.sh 20
 #
 # shellcheck disable=SC2162
 
 set -euo pipefail
 [ "${SCRIPT_DEBUG-}" = "1" ] && set -x
 
-URL_ENDPOINT="${JOKE_URL_ENDPOINT:-https://official-joke-api.appspot.com/jokes/__TOPIC__/random}"
-
-topic="${1-}"
+sides="${1-}"
 
 # Flag to bypass the prompt to proceed.
 SHOULD_PROCEED="${SHOULD_PROCEED-}"
@@ -63,7 +61,15 @@ main() {
   echo "Follow the prompts"
   echo
 
-  [ -z "${topic}" ] && topic="$(ask "Joke topic" "general")"
+  [ -z "${sides}" ] && sides="$(ask "Number of sides" "6")"
+
+  # Limit to 3 digits so the value stays well below the $RANDOM ceiling of
+  # 32767, and force base 10 so a leading zero is not read as octal.
+  if [[ ! ${sides} =~ ^[0-9]{1,3}$ ]] || ((10#${sides} < 2 || 10#${sides} > 100)); then
+    echo "ERROR: Number of sides must be a whole number from 2 to 100, got '${sides}'." >&2
+    exit 1
+  fi
+  sides=$((10#${sides}))
 
   [ -z "${SHOULD_PROCEED}" ] && SHOULD_PROCEED="$(ask_yesno "Proceed?")"
 
@@ -74,22 +80,10 @@ main() {
   fi
 
   echo
-  echo "Fetching joke for topic: ${topic}..."
+  echo "Rolling a ${sides}-sided die..."
   echo
 
-  local url
-  url="${URL_ENDPOINT//__TOPIC__/${topic}}"
-
-  echo
-  echo "URL: ${url}"
-  echo
-
-  response="$(curl -sL "${url}")"
-  setup=$(echo "${response}" | sed -E 's/.*"setup":"([^"]+)".*/\1/')
-  punchline=$(echo "${response}" | sed -E 's/.*"punchline":"([^"]+)".*/\1/')
-
-  echo "$setup"
-  echo "$punchline"
+  echo "Rolled: $((RANDOM % sides + 1))"
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then

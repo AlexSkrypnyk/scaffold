@@ -10,25 +10,24 @@ This document is generated and maintained by an AI agent via the `update-archite
 
 ### Console application
 
-The PHP stack is a Symfony Console application. The `bin/force-crystal` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `joke` set as the default command.
+The PHP stack is a Symfony Console application. The `bin/force-crystal` entry script resolves the Composer autoloader, registers the commands from `src/Command/`, and hands control to the Symfony `Application`, with `roll-dice` set as the default command.
 
-Commands live in the `YodasHut\App\Command` namespace, autoloaded PSR-4 from `src/`. `JokeCommand` accepts a `--topic` option, fetches a random joke from a public API, and prints the setup and punchline; any fetch or decode error is reported and returned as a command failure. `SayHelloCommand` is a minimal second command showing the multi-command structure.
+Commands live in the `YodasHut\App\Command` namespace, autoloaded PSR-4 from `src/`. `RollDiceCommand` accepts `--sides` (default 6, at least 2) and `--count` (default 1, from 1 to 100) options, rolls the dice with `random_int()` in `rollDie()`, and prints each roll and the total; an out-of-range or non-integer option is reported and returned as a command failure. `SayHelloCommand` is a minimal second command showing the multi-command structure.
 
 ```mermaid
-%% Traced from: bin/force-crystal, src/Command/JokeCommand.php.
+%% Traced from: bin/force-crystal, src/Command/RollDiceCommand.php.
 sequenceDiagram
     participant User
     participant Entry as bin/force-crystal
     participant App as Symfony Console Application
-    participant Joke as JokeCommand
-    participant API as official-joke-api.appspot.com
-    User->>Entry: ./bin/force-crystal joke --topic=general
+    participant Roll as RollDiceCommand
+    User->>Entry: ./bin/force-crystal roll-dice --sides=6 --count=2
     Entry->>App: run()
-    App->>Joke: execute(input, output)
-    Joke->>API: GET /jokes/{topic}/random
-    API-->>Joke: JSON with setup and punchline
-    Joke-->>App: SUCCESS, or FAILURE on fetch or decode error
-    App-->>User: setup + punchline
+    App->>Roll: execute(input, output)
+    Roll->>Roll: parseInteger() validates --sides and --count
+    Roll->>Roll: rollDie() once per die
+    Roll-->>App: SUCCESS, or FAILURE on invalid option
+    App-->>User: each roll + total
 ```
 
 
@@ -57,21 +56,19 @@ The script is verified by the built-in Node test runner (`npm run test` over `te
 
 ## Shell script
 
-The shell stack is an interactive Bash script, `force-crystal.sh`. It collects a topic and a confirmation through `ask` and `ask_yesno` prompt helpers (each skipped when the value is already supplied as an argument or environment variable), fetches a random joke from a public API with `curl`, extracts the setup and punchline with `sed`, and prints them.
+The shell stack is an interactive Bash script, `force-crystal.sh`. It collects the number of sides on a die and a confirmation through `ask` and `ask_yesno` prompt helpers (each skipped when the value is already supplied as an argument or environment variable), rejects a number of sides outside 2-100, rolls the die with Bash's `$RANDOM`, and prints the result.
 
-`JOKE_URL_ENDPOINT` overrides the API endpoint, `SHOULD_PROCEED=y` bypasses the confirmation prompt, and `SCRIPT_DEBUG=1` enables trace output. The `main` invocation is guarded by a `BASH_SOURCE` check so BATS tests in `tests/bats/` can source the script and call its functions directly.
+`SHOULD_PROCEED=y` bypasses the confirmation prompt, and `SCRIPT_DEBUG=1` enables trace output. The `main` invocation is guarded by a `BASH_SOURCE` check so BATS tests in `tests/bats/` can source the script and call its functions directly.
 
 ```mermaid
 %% Traced from: force-crystal.sh.
 sequenceDiagram
     participant User
     participant Script as force-crystal.sh
-    participant API as official-joke-api.appspot.com
-    User->>Script: ./force-crystal.sh topic
-    Script->>User: prompts for topic and confirmation, skipped when supplied
-    Script->>API: curl GET /jokes/{topic}/random
-    API-->>Script: JSON response
-    Script-->>User: setup + punchline extracted with sed
+    User->>Script: ./force-crystal.sh sides
+    Script->>User: prompts for sides and confirmation, skipped when supplied
+    Script->>Script: validates sides as a whole number from 2 to 100
+    Script-->>User: rolled value from $RANDOM, or an error and exit 1
 ```
 
 

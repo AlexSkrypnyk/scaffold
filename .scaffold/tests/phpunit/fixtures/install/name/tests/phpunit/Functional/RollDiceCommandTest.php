@@ -11,8 +11,8 @@
  use PHPUnit\Framework\Attributes\DataProvider;
  use PHPUnit\Framework\Attributes\Group;
  use PHPUnit\Framework\TestCase;
--use YodasHut\App\Command\JokeCommand;
-+use JediTemple\App\Command\JokeCommand;
+-use YodasHut\App\Command\RollDiceCommand;
++use JediTemple\App\Command\RollDiceCommand;
  
  /**
-  * Functional test for the JokeCommand class.
+  * Functional test for the RollDiceCommand class.

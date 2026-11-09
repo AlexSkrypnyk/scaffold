@@ -20,14 +20,14 @@ The template provides the following:
 - **Confirmation**: The script asks `Proceed?` before it does its work. To continue, press <kbd>Enter</kbd> or answer `y` or `Y`. Any other answer, `yes` included, exits the script. To skip the question, set the `SHOULD_PROCEED` environment variable to `y`.
 - **`main` function**: The script's logic lives in `main`, which runs only when you run the script directly. Sourcing the script from another script loads its functions without running `main`.
 
-The example logic takes a joke topic as its first argument, or asks for one with `general` as the default. It then fetches a random joke from the Official Joke API and prints it. To call another URL, set the `JOKE_URL_ENDPOINT` environment variable, with `__TOPIC__` where the topic goes.
+The example logic takes the number of sides on a die as its first argument, or asks for it with `6` as the default. It exits with an error unless the number is a whole number from 2 to 100. It then rolls the die with Bash's `$RANDOM` and prints the result.
 
 ## Adapt the script
 
 To turn the template into your own command:
 
 1. Update the description and the `@usage` lines in the comment block at the top of the script.
-2. Replace the `topic="${1-}"` line with code that reads the arguments your command takes.
+2. Replace the `sides="${1-}"` line with code that reads the arguments your command takes.
 3. Replace the example logic in `main` with your own, including the validation of your arguments.
 4. Run the script from your project root:
 
@@ -35,7 +35,7 @@ To turn the template into your own command:
    ./shell-command.sh
    ```
 
-   Confirm that the script runs your logic. For comparison, the unchanged template prints `Follow the prompts` and asks for a joke topic.
+   Confirm that the script runs your logic. For comparison, the unchanged template prints `Follow the prompts` and asks for the number of sides.
 
 ## Test the script
 

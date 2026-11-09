@@ -131,7 +131,7 @@ composer test-coverage
 # Coverage reports: .logs/.coverage-html/index.html, .logs/cobertura.xml
 
 # Run specific test file
-./vendor/bin/phpunit tests/phpunit/Functional/JokeCommandTest.php
+./vendor/bin/phpunit tests/phpunit/Functional/RollDiceCommandTest.php
 
 # Run specific test method
 ./vendor/bin/phpunit --filter testMethodName

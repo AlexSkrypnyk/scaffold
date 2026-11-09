@@ -149,7 +149,7 @@ one:
 1. **`src/` + `bin/php-command`** - Symfony Console app
   - Multi-command structure
   - OOP architecture
-  - Example commands: `JokeCommand`, `SayHelloCommand`
+  - Example commands: `RollDiceCommand`, `SayHelloCommand`
 
 2. **`php-script`** - Standalone script
   - Zero dependencies
@@ -262,13 +262,25 @@ The scaffold includes advanced BATS testing utilities:
 Example from `tests/bats/shell-command.bats`:
 
 ```bash
+@test "Die can be rolled with user input" {
+  tui_run 6 y
+  assert_success
+  assert_output_contains "Rolling a 6-sided die..."
+  assert_output_contains "Rolled: "
+}
+```
+
+The example script makes no external calls, so `shell-command.bats` has no
+`steps_run()` mock. A script that calls an external command mocks it like this:
+
+```bash
 @test "Mocked endpoint" {
   declare -a STEPS=(
     '@curl -sL https://api.example.com # [{"data":"mocked"}]'
   )
   mocks="$(steps_run "setup")"
 
-  tui_run topic_name
+  tui_run
   assert_success
   assert_output_contains "mocked"
 

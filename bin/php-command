@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 use Symfony\Component\Console\Application;
-use YourNamespace\App\Command\JokeCommand;
+use YourNamespace\App\Command\RollDiceCommand;
 use YourNamespace\App\Command\SayHelloCommand;
 
 foreach ([
@@ -27,7 +27,7 @@ foreach ([
 // @codeCoverageIgnoreStart
 $application = new Application('Yourproject', '@yourproject-version@');
 
-$command = new JokeCommand();
+$command = new RollDiceCommand();
 $application->add($command);
 $application->setDefaultCommand((string) $command->getName());
 
