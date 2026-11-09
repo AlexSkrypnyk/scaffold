@@ -30,11 +30,11 @@ $ npm run build
 
 Any static hosting service can serve the `build` directory.
 
-`npm start` and `npm run build` first run `scripts/copy-installer.js`, which writes the installer that the site serves to `static/install.sh` and `static/init.sh`. Both are git-ignored copies. The source of the copies depends on the build:
+`npm start` and `npm run build` first run `scripts/copy-installer.js`, which manages the git-ignored `static/install.sh` and `static/init.sh`. What it does depends on the build:
 
-| Build | Source | What `/install.sh` runs |
+| Build | `static/install.sh` and `static/init.sh` | What `/install.sh` serves |
 |---|---|---|
-| `RELEASE_VERSION` set, as in the release workflow | `.scaffold/installer/install-latest.sh` | The `install.sh` attached to the latest GitHub release |
-| `RELEASE_VERSION` unset, such as a local server or the development site | The repository-root `install.sh` | The installer of the built commit |
+| `RELEASE_VERSION` unset, such as a local server or the development site | Copies of the repository-root `install.sh` | The installer of the built commit |
+| `RELEASE_VERSION` set, as in the release workflow | Removed | On getscaffold.dev, a Cloudflare redirect to the `install.sh` attached to the latest GitHub release |
 
 Before you commit, run `npm test`. It runs the Jest tests and the CSpell spell check. CI runs the same command after it builds the site.

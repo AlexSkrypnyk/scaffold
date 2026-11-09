@@ -56,7 +56,7 @@ To start from a tag, branch or commit in place of the latest release, add `--ref
 
 ## Verify the installer
 
-The installer runs on your machine with your permissions, so you can check it before it runs. getscaffold.dev/install.sh is a short script that downloads the `install.sh` attached to the latest GitHub release and runs it. Each release attaches 3 files:
+The installer runs on your machine with your permissions, so you can check it before it runs. getscaffold.dev/install.sh redirects to the `install.sh` attached to the latest GitHub release, so the file you check is the file the one-line command runs. Each release attaches 3 files:
 
 - `install.sh`, the installer of that release
 - `SHA256SUMS`, the SHA-256 checksum of `install.sh`
@@ -69,7 +69,7 @@ To verify the installer with the [GitHub CLI](https://cli.github.com), then run 
 1. Download the installer of the latest release:
 
    ```bash
-   curl -fsSLO https://github.com/AlexSkrypnyk/scaffold/releases/latest/download/install.sh
+   curl -fsSLO https://getscaffold.dev/install.sh
    ```
 
 2. Verify the attestation of the installer:
@@ -114,7 +114,7 @@ The signing key belongs to the maintainer, Alex Skrypnyk. Its fingerprint is:
 
 Confirm that `gpg --verify` reports a good signature from this key. A good signature from any other key in your keyring proves nothing about Scaffold.
 
-To verify a specific release, replace `latest/download` with `download/` and the version in each URL, such as `download/1.5.0`.
+To verify a specific release, download its files from `https://github.com/AlexSkrypnyk/scaffold/releases/download/1.5.0/` in place of the latest ones, with your version in place of `1.5.0`.
 
 Both checks trust the `AlexSkrypnyk/scaffold` repository. Anyone who controls the repository or the maintainer's account can rebuild the attestation and replace the key. Record the fingerprint on your first download and compare it on every later one.
 

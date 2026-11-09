@@ -474,21 +474,41 @@ project, so a workflow for the template alone takes the `scaffold-` prefix.
 
 ### Installer releases
 
-getscaffold.dev/install.sh and /init.sh serve `.scaffold/installer/install-latest.sh`, a stub that downloads `releases/latest/download/install.sh` and pipes it into `bash` with the same arguments. `.scaffold/docs/scripts/copy-installer.js` picks the stub when `RELEASE_VERSION` is set and the repository-root `install.sh` otherwise, so the Netlify development site (`scaffold-docs.netlify.app`, the `main` branch) and local builds serve the `dev` installer.
+getscaffold.dev is GitHub Pages behind a proxied Cloudflare zone. GitHub Pages can't send redirects, so a Cloudflare **Single Redirect** rule does:
+
+| Field | Value |
+|---|---|
+| When incoming requests match | `(http.host eq "getscaffold.dev" and http.request.uri.path in {"/install.sh" "/init.sh"})` |
+| URL redirect type | Static |
+| URL | `https://github.com/AlexSkrypnyk/scaffold/releases/latest/download/install.sh` |
+| Status code | 302 |
+| Preserve query string | Off |
+
+The rule lives in the Cloudflare dashboard, outside this repository. A release build of the docs site holds no `install.sh` or `init.sh`: `.scaffold/docs/scripts/copy-installer.js` removes both when `RELEASE_VERSION` is set, and `scaffold-release-docs.yml` fails when either is in the build. Every other build copies the repository-root `install.sh` to both paths, so the Netlify development site (`scaffold-docs.netlify.app`, the `main` branch) and local builds serve the `dev` installer.
 
 `scaffold-release-installer.yml` runs when a release is published:
 
 1. Reads `install.sh` from the tag, or `init.sh` for older tags, and stamps `SCAFFOLD_VERSION="dev"` with the tag.
 2. Pipes the stamped installer into `bash` in an empty directory, so it bootstraps and initializes the tag's template.
-3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, a secret of the `release` environment.
+3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, and `GPG_PASSPHRASE` when the key has one. Both are secrets of the `release` environment.
 4. Checks the signature against `.scaffold/PUBLIC_KEY.asc` and its pinned fingerprint with `.scaffold/installer/verify-release.sh`.
 5. Attests `install.sh` and `SHA256SUMS`, uploads the 3 files with `--clobber`, and verifies the uploaded copies.
+6. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer. This step fails when the Cloudflare rule is missing.
 
 Run it from the **Actions** tab with a version to attach the installer to an existing release, such as one published before this workflow existed. The workflow rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
 
-`scaffold-release-docs.yml` waits until `releases/latest/download/install.sh` serves an installer before it deploys the stub. When the signing step fails, the site keeps its previous deployment.
-
 `.scaffold/PUBLIC_KEY.asc` is the maintainer's key, which also signs Prompty releases. A new key needs a new `PUBLIC_KEY.asc`, the new fingerprint in `verify-release.sh` and in the "Verify the installer" section of `.scaffold/docs/content/README.mdx`, and a note in the release notes.
+
+To give the workflow the signing key, create the `release` environment, then export the private key and store it there:
+
+```bash
+gh api -X PUT repos/AlexSkrypnyk/scaffold/environments/release
+gpg --armor --export-secret-keys 755E824E80F849135F5F4043E71EDB25C4F6D89D > signing-key.asc
+gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold < signing-key.asc
+rm signing-key.asc
+```
+
+When the key has a passphrase, also run `gh secret set GPG_PASSPHRASE --env release --repo AlexSkrypnyk/scaffold` and enter it at the prompt.
 
 ### Testing `install.sh`
 
