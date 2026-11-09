@@ -14,4 +14,4 @@
 +export SCRIPT_FILE="star-forge.sh"
  
  # bats test_tags=smoke
- @test "Data can be fetched from the API with user input" {
+ @test "Die can be rolled with user input" {

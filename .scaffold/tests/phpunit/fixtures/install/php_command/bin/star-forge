@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 use Symfony\Component\Console\Application;
-use YodasHut\App\Command\JokeCommand;
+use YodasHut\App\Command\RollDiceCommand;
 use YodasHut\App\Command\SayHelloCommand;
 
 foreach ([
@@ -27,7 +27,7 @@ foreach ([
 // @codeCoverageIgnoreStart
 $application = new Application('ForceCrystal', '@force-crystal-version@');
 
-$command = new JokeCommand();
+$command = new RollDiceCommand();
 $application->add($command);
 $application->setDefaultCommand((string) $command->getName());
 

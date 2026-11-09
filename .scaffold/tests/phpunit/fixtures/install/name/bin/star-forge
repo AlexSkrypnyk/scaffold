@@ -9,7 +9,7 @@
 declare(strict_types=1);
 
 use Symfony\Component\Console\Application;
-use JediTemple\App\Command\JokeCommand;
+use JediTemple\App\Command\RollDiceCommand;
 use JediTemple\App\Command\SayHelloCommand;
 
 foreach ([
@@ -27,7 +27,7 @@ foreach ([
 // @codeCoverageIgnoreStart
 $application = new Application('StarForge', '@star-forge-version@');
 
-$command = new JokeCommand();
+$command = new RollDiceCommand();
 $application->add($command);
 $application->setDefaultCommand((string) $command->getName());
 
