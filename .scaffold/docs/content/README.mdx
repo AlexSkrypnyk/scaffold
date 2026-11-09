@@ -114,6 +114,8 @@ The signing key is `Scaffold Release Signing`, published as [`install-key.asc`](
 
 Confirm that `gpg --verify` reports a good signature from this key. A good signature from any other key in your keyring proves nothing about Scaffold.
 
+`gpg` also warns that the key isn't certified with a trusted signature. That warning is normal for a newly imported key, and the fingerprint match is the check that counts.
+
 To verify a specific release, download its files from `https://github.com/AlexSkrypnyk/scaffold/releases/download/1.5.0/` in place of the latest ones, with your version in place of `1.5.0`.
 
 Both checks trust the `AlexSkrypnyk/scaffold` repository. Anyone who controls the repository or the maintainer's account can rebuild the attestation and replace the key. Record the fingerprint on your first download and compare it on every later one.
