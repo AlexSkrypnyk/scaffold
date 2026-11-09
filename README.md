@@ -121,6 +121,8 @@ getscaffold.dev/install.sh serves the `install.sh` attached to the latest publis
    86F0 77A2 E806 67D7 CF4A  3320 EDEA F2FC D434 756C
    ```
 
+   `gpg` also warns that the key isn't certified with a trusted signature. That warning is normal for a newly imported key, and the fingerprint match is the check that counts.
+
 3. Create an empty project directory and run the verified install script from it:
 
    ```bash
