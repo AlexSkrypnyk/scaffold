@@ -56,7 +56,9 @@ jobs:
         run: composer build
 
       - name: Test PHAR
-        run: ./dist/force-crystal.phar --version
+        run: |
+          ./dist/force-crystal.phar --version
+          ./dist/force-crystal.phar || exit 1
 
       - name: Create Release
         uses: softprops/action-gh-release@__HASH__ # __VERSION__
