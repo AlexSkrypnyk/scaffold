@@ -2450,7 +2450,7 @@ Environment:
 Other:
   --ref=VALUE                    Bootstrap from a tag, branch or commit when the
                                  template is absent (default: the release of
-                                 this installer, or 'main' for 'dev').
+                                 this install script, or 'main' for 'dev').
   --yes, -y                      Run non-interactively using defaults.
   --help, -h                     Show this help and exit.
   --version                      Print the version ("dev" unless released).
