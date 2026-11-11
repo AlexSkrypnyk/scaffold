@@ -58,3 +58,6 @@ jobs:
           tag: ${{ steps.version.outputs.version }}
           name: ${{ steps.version.outputs.version }}
           version: ${{ steps.version.outputs.version }}
+          # A tag run otherwise targets the tag's commit and omits newer changes
+          # on 'main' from the draft.
+          commitish: main
