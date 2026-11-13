@@ -18,20 +18,28 @@ Every test workflow, including the Docker and documentation workflows, runs on t
 
 You can also start the PHP, Node.js, Shell and Docker workflows by hand from the **Actions** tab.
 
+## Windows
+
+The PHP, Node.js and Shell workflows can also run their jobs on `windows-latest`. `install.sh` leaves Windows out of new projects by default. To add it, answer yes to **Use Windows in CI** or pass `--windows`.
+
+Each job name ends with its runner, such as `PHP 8.4, Deps normal, windows-latest`. Linting, the coverage threshold and the coverage uploads run on `ubuntu-latest` only. On Windows, each job turns off Git's line ending conversion before the checkout, so scripts and fixtures keep LF line endings. The Node.js jobs also run the npm scripts with Git Bash, because `cmd.exe` doesn't expand the `tests/nodejs/*.test.js` glob.
+
+To remove Windows from an existing project, delete the `windows-latest` matrix entries and the Windows-only steps from each `.github/workflows/test-*.yml` file.
+
 [//]: # (#;< PHP)
 
 ## Test PHP
 
-The `Test PHP` workflow runs 6 jobs on `ubuntu-latest`: PHP 8.3, 8.4 and 8.5, each with 2 dependency sets. `Deps normal` installs the latest versions `composer.json` allows, and `Deps lowest` installs the lowest allowed versions. Composer installs with `--no-scripts`, and on PHP 8.5 also with `--ignore-platform-reqs`.
+The `Test PHP` workflow runs 6 jobs on `ubuntu-latest`: PHP 8.3, 8.4 and 8.5, each with 2 dependency sets. `Deps normal` installs the latest versions `composer.json` allows, and `Deps lowest` installs the lowest allowed versions. Composer installs with `--no-scripts`, and on PHP 8.5 also with `--ignore-platform-reqs`. With [Windows](#windows) on, the same 6 jobs also run on `windows-latest`.
 
 The following table lists which jobs run each check:
 
 | Check | Jobs |
 |---|---|
 | `composer validate` and `composer normalize --dry-run` | All |
-| Linting with `composer lint` | `PHP 8.4, Deps normal` |
+| Linting with `composer lint` | `PHP 8.4, Deps normal, ubuntu-latest` |
 | Tests with coverage through `composer test-coverage` | All |
-| Line coverage of at least the [`CI_CODE_COVERAGE_THRESHOLD`](#repository-variables) value | `PHP 8.4, Deps normal` |
+| Line coverage of at least the [`CI_CODE_COVERAGE_THRESHOLD`](#repository-variables) value | `PHP 8.4, Deps normal, ubuntu-latest` |
 
 Every job uploads the `.logs` directory as an artifact. For the coverage comment and the Codecov upload, see [Code coverage](#code-coverage).
 
@@ -43,15 +51,15 @@ In a command app with a PHAR, a separate `Build PHAR` job runs on PHP 8.4. It bu
 
 ## Test Node.js
 
-The `Test Node.js` workflow runs 3 jobs on `ubuntu-latest`: Node.js 20, 22 and 24. Each job installs dependencies with `npm install --ignore-scripts`.
+The `Test Node.js` workflow runs 3 jobs on `ubuntu-latest`: Node.js 20, 22 and 24. Each job installs dependencies with `npm install --ignore-scripts`. With [Windows](#windows) on, the same 3 jobs also run on `windows-latest`.
 
 The following table lists which jobs run each check:
 
 | Check | Jobs |
 |---|---|
-| Linting with `npm run lint` | `Node.js 24` |
+| Linting with `npm run lint` | `Node.js 24, ubuntu-latest` |
 | Tests with coverage through `npm run test-coverage` | All |
-| Line coverage of at least the [`CI_CODE_COVERAGE_THRESHOLD`](#repository-variables) value | `Node.js 24` |
+| Line coverage of at least the [`CI_CODE_COVERAGE_THRESHOLD`](#repository-variables) value | `Node.js 24, ubuntu-latest` |
 
 Every job uploads the `.logs` directory as an artifact.
 
@@ -61,17 +69,17 @@ Every job uploads the `.logs` directory as an artifact.
 
 ## Test shell
 
-The `Test shell` workflow runs 1 job on each of these runners: `ubuntu-latest`, `ubuntu-24.04`, `macos-latest` and `macos-15`. Each OS runs its latest image and the version before it. On macOS, the job first installs the current Bash with Homebrew. Every job installs the BATS testing framework with `npm ci --ignore-scripts` in `tests/bats`.
+The `Test shell` workflow runs 1 job on each of these runners: `ubuntu-latest`, `ubuntu-24.04`, `macos-latest` and `macos-15`. Ubuntu and macOS each run their latest image and the version before it. With [Windows](#windows) on, 1 more job runs on `windows-latest` under Git Bash. On macOS, the job first installs the current Bash with Homebrew. Every job installs the BATS testing framework with `npm ci --ignore-scripts` in `tests/bats`.
 
 The following table lists which jobs run each check:
 
 | Check | Jobs |
 |---|---|
-| Linting with ShellCheck and shfmt | `Shell (ubuntu-latest)` |
-| BATS tests, with coverage measured by kcov | `Shell (ubuntu-latest)` |
+| Linting with ShellCheck and shfmt | `Shell, ubuntu-latest` |
+| BATS tests, with coverage measured by kcov | `Shell, ubuntu-latest` |
 | BATS tests | Every other runner |
 
-The `Shell (ubuntu-latest)` job uploads the coverage report as an artifact.
+The `Shell, ubuntu-latest` job uploads the coverage report as an artifact.
 
 [//]: # (#;> SHELL)
 
@@ -105,9 +113,9 @@ The following table lists the job in each workflow that reports coverage:
 
 | Workflow | Job | Coverage report |
 |---|---|---|
-| `Test PHP` | `PHP 8.4, Deps normal` | `.logs/cobertura.xml` |
-| `Test Node.js` | `Node.js 24` | `.logs/cobertura-coverage.xml` |
-| `Test shell` | `Shell (ubuntu-latest)` | `.logs/.coverage-html` |
+| `Test PHP` | `PHP 8.4, Deps normal, ubuntu-latest` | `.logs/cobertura.xml` |
+| `Test Node.js` | `Node.js 24, ubuntu-latest` | `.logs/cobertura-coverage.xml` |
+| `Test shell` | `Shell, ubuntu-latest` | `.logs/.coverage-html` |
 
 On a pull request, the PHP job posts the summary from `.logs/coverage.txt` as a new comment and hides the previous one. The following screenshot shows that comment on an example [pull request](https://github.com/AlexSkrypnyk/scaffold/pull/39):
 

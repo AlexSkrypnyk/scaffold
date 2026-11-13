@@ -77,6 +77,9 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
+- `WINDOWS` - The `windows-latest` matrix entries and Windows-only steps in the
+  PHP, Node.js and Shell test workflows, removed by `remove_windows()` unless
+  `--windows` is passed (off by default)
 - `DOCS` - Documentation-site content outside `docs/`, such as the docs section
   of `CONTRIBUTING.dist.md`, removed by `remove_docs()`
 - `AI` - AI agents configuration (`CLAUDE.md`, `AGENTS.md`, `.claude/`)
@@ -313,7 +316,8 @@ Each test scenario in `InstallTest.php` validates a specific configuration:
 - `docker`, `docker_custom_image_name` - Docker enabled, with the default and
   a custom image name
 - Feature toggles: `no_release_drafter`, `no_pr_autoassign`, `no_funding`,
-  `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`, `no_phar`
+  `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`, `no_phar`,
+  `windows`
 - AI options: `no_ai`, `ai_arch_docs_plantuml`, `no_ai_arch_docs`, `no_docs_no_ai_arch_docs`
 
 #### Running Init Tests

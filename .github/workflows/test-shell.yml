@@ -21,7 +21,7 @@ env:
 
 jobs:
   test-shell:
-    name: Shell (${{ matrix.os }})
+    name: Shell, ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -30,12 +30,21 @@ jobs:
           - ubuntu-24.04
           - macos-latest
           - macos-15
+          # yamllint disable-line #;< WINDOWS
+          - windows-latest
+          # yamllint disable-line #;> WINDOWS
     runs-on: ${{ matrix.os }}
 
     permissions:
       contents: read
 
     steps:
+      # yamllint disable-line #;< WINDOWS
+      - name: Keep LF line endings on Windows
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+
+      # yamllint disable-line #;> WINDOWS
       - name: Install current Bash on macOS
         if: startsWith(matrix.os, 'macos-')
         run: brew install bash

@@ -19,7 +19,7 @@ env:
 
 jobs:
   test-shell:
-    name: Shell (${{ matrix.os }})
+    name: Shell, ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:

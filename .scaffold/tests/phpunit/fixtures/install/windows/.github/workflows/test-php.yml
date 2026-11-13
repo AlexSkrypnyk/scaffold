@@ -1,0 +1,16 @@
+@@ -28,10 +28,15 @@
+       matrix:
+         os:
+           - ubuntu-latest
++          - windows-latest
+         php-versions: ['8.3', '8.4', '8.5']
+         deps: ['normal', 'lowest']
+ 
+     steps:
++      - name: Keep LF line endings on Windows
++        if: runner.os == 'Windows'
++        run: git config --global core.autocrlf false
++
+       - name: Checkout code
+         uses: actions/checkout@__HASH__ # __VERSION__
+         with:

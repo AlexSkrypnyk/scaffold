@@ -49,7 +49,7 @@ case "$*" in
     printf 'completed\tsuccess\tTest PHP\ncompleted\tsuccess\tTest Shell\n'
     ;;
   "api repos/${slug}/commits/main/check-runs "*)
-    printf '1\tabc\tPHP 8.4, Deps normal\n1\tabc\tPHP 8.5, Deps normal\n2\tabc\tShell (ubuntu-latest)\n'
+    printf '1\tabc\tPHP 8.4, Deps normal, ubuntu-latest\n1\tabc\tPHP 8.5, Deps normal, ubuntu-latest\n2\tabc\tShell, ubuntu-latest\n'
     ;;
   "api repos/${slug}/actions/runs?check_suite_id="*)
     echo ".github/workflows/test.yml"

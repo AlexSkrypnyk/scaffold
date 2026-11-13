@@ -1,0 +1,19 @@
+@@ -28,6 +28,7 @@
+           - ubuntu-24.04
+           - macos-latest
+           - macos-15
++          - windows-latest
+     runs-on: ${{ matrix.os }}
+ 
+     permissions:
+@@ -34,6 +35,10 @@
+       contents: read
+ 
+     steps:
++      - name: Keep LF line endings on Windows
++        if: runner.os == 'Windows'
++        run: git config --global core.autocrlf false
++
+       - name: Install current Bash on macOS
+         if: startsWith(matrix.os, 'macos-')
+         run: brew install bash

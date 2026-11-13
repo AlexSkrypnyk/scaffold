@@ -1,0 +1,27 @@
+@@ -27,9 +27,14 @@
+       matrix:
+         os:
+           - ubuntu-latest
++          - windows-latest
+         node: [20, 22, 24]
+ 
+     steps:
++      - name: Keep LF line endings on Windows
++        if: runner.os == 'Windows'
++        run: git config --global core.autocrlf false
++
+       - name: Checkout code
+         uses: actions/checkout@__HASH__ # __VERSION__
+         with:
+@@ -39,6 +44,11 @@
+         uses: actions/setup-node@__HASH__ # __VERSION__
+         with:
+           node-version: ${{ matrix.node }}
++
++      # 'cmd.exe' does not expand the test file globs in the npm scripts.
++      - name: Run npm scripts with Bash on Windows
++        if: runner.os == 'Windows'
++        run: npm config set script-shell "C:\Program Files\Git\bin\bash.exe"
+ 
+       - name: Install dependencies
+         run: npm install --ignore-scripts
