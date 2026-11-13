@@ -6,7 +6,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -42,38 +41,18 @@
+@@ -48,38 +47,18 @@
  chmod +x nodejs-script
  ```
  

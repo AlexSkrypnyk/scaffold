@@ -3,7 +3,8 @@ name: Release PHP
 on:
   push:
     tags:
-      - '*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
 
 permissions: {}
 
@@ -30,7 +31,7 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           REPOSITORY_NAME: ${{ github.event.repository.name }}
         run: |
-          [[ "${GITHUB_REF_NAME}" =~ ^v?[0-9]+(\.[0-9]+){1,2}([-+][0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
+          [[ "${GITHUB_REF_NAME}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
           git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}" || { echo "::error::Tag '${GITHUB_REF_NAME}' is not on '${DEFAULT_BRANCH}'."; exit 1; }
           echo "RELEASE_VERSION=${GITHUB_REF_NAME}" >> "${GITHUB_ENV}"
           echo "RELEASE_NAME=${REPOSITORY_NAME}-php-${GITHUB_REF_NAME}" >> "${GITHUB_ENV}"
@@ -107,11 +108,11 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Create the release and upload its assets.
+      actions: read # Wait for the 'Draft release notes' runs.
+      contents: write # Attach the assets to the release.
 
-    # The release workflows of 1 tag share its release, so they publish in turn.
     concurrency:
-      group: release-${{ github.ref_name }}
+      group: release-php
       cancel-in-progress: false
 
     steps:
@@ -121,18 +122,31 @@ jobs:
           name: release-php
           path: .release
 
-      # Assets go on a draft before it is published, so the release can be
-      # immutable.
-      - name: Publish release
+      # Publishing stays with the maintainer, so the release is never published
+      # here.
+      - name: Attach assets to the release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
         run: |
-          if ! is_draft="$(gh release view "${GITHUB_REF_NAME}" --json isDraft --jq .isDraft 2>/dev/null)"; then
-            gh release create "${GITHUB_REF_NAME}" --verify-tag --draft --title "${GITHUB_REF_NAME}" --generate-notes
-            is_draft="true"
+          # A running Release Drafter sets its draft's tag back to its own guess.
+          for run in $(gh run list --workflow draft-release-notes.yml --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' 2>/dev/null || true); do
+            gh run watch "${run}" > /dev/null || true
+          done
+
+          if ! gh release view "${TAG}" > /dev/null 2>&1; then
+            # Release Drafter names its draft after the version it guesses,
+            # which can differ from the pushed tag.
+            draft="$(gh release list --json tagName,isDraft --jq '[.[] | select(.isDraft) | .tagName][0] // empty')"
+            if [ -n "${draft}" ]; then
+              gh release edit "${draft}" --tag "${TAG}" --title "${TAG}"
+              notes="$(gh release view "${TAG}" --json body --jq .body)"
+              printf '%s\n' "${notes//...${draft}/...${TAG}}" > "${RUNNER_TEMP}/notes.md"
+              gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md"
+            else
+              gh release create "${TAG}" --title "${TAG}" --generate-notes --draft --verify-tag
+            fi
           fi
-          gh release upload "${GITHUB_REF_NAME}" .release/* --clobber
-          if [ "${is_draft}" = "true" ]; then
-            gh release edit "${GITHUB_REF_NAME}" --draft=false
-          fi
+
+          gh release upload "${TAG}" .release/* --clobber

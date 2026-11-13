@@ -3,7 +3,8 @@ name: Release Node.js
 on:
   push:
     tags:
-      - '*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
 
 permissions: {}
 
@@ -24,15 +25,29 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      # The tag becomes part of asset names.
+      # The tag becomes part of asset names, and npm publishes the version in
+      # 'package.json'.
       - name: Check release tag
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           REPOSITORY_NAME: ${{ github.event.repository.name }}
         run: |
-          [[ "${GITHUB_REF_NAME}" =~ ^v?[0-9]+(\.[0-9]+){1,2}([-+][0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
+          [[ "${GITHUB_REF_NAME}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
+          version="$(jq -r .version package.json)"
+          [ "${version}" = "${GITHUB_REF_NAME}" ] || { echo "::error::Tag '${GITHUB_REF_NAME}' doesn't match version '${version}' in package.json. Release with 'npm version'."; exit 1; }
           git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}" || { echo "::error::Tag '${GITHUB_REF_NAME}' is not on '${DEFAULT_BRANCH}'."; exit 1; }
           echo "RELEASE_NAME=${REPOSITORY_NAME}-nodejs-${GITHUB_REF_NAME}" >> "${GITHUB_ENV}"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@__HASH__ # __VERSION__
+        with:
+          node-version: __VERSION__
+          package-manager-cache: false
+
+      - name: Pack package
+        run: |
+          mkdir -p .package
+          npm pack --ignore-scripts --pack-destination .package
 
       - name: Collect release assets
         run: |
@@ -47,7 +62,9 @@ jobs:
         id: attest
         uses: actions/attest-build-provenance@__HASH__ # __VERSION__
         with:
-          subject-path: .release/*
+          subject-path: |
+            .release/*
+            .package/*.tgz
 
       # Scorecard reads provenance from release assets only.
       - name: Add attestation bundle
@@ -70,7 +87,9 @@ jobs:
         uses: actions/upload-artifact@__HASH__ # __VERSION__
         with:
           name: release-nodejs
-          path: .release
+          path: |
+            .release
+            .package
           include-hidden-files: true
           if-no-files-found: error
 
@@ -80,11 +99,13 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Create the release and upload its assets.
+      actions: read # Wait for the other release runs.
+      contents: write # Upload the assets and publish the release.
+      id-token: write # Publish to npm with provenance.
 
-    # The release workflows of 1 tag share its release, so they publish in turn.
+    # Releases share Release Drafter's single draft, so 2 runs must not overlap.
     concurrency:
-      group: release-${{ github.ref_name }}
+      group: release
       cancel-in-progress: false
 
     steps:
@@ -92,20 +113,101 @@ jobs:
         uses: actions/download-artifact@__HASH__ # __VERSION__
         with:
           name: release-nodejs
-          path: .release
 
-      # Assets go on a draft before it is published, so the release can be
-      # immutable.
-      - name: Publish release
+      - name: Setup Node.js
+        uses: actions/setup-node@__HASH__ # __VERSION__
+        with:
+          node-version: __VERSION__
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+
+      # Authenticates through npm trusted publishing, so no npm token is stored.
+      - name: Publish to npm
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          package="$(find .package -name '*.tgz' | head -n 1)"
+          manifest="$(tar -xOzf "${package}" package/package.json)"
+
+          if [ "$(jq -r '.private // false' <<< "${manifest}")" = 'true' ]; then
+            echo 'The package is private, so it is not published to npm.'
+            exit 0
+          fi
+
+          name="$(jq -r .name <<< "${manifest}")"
+          if npm view "${name}@${TAG}" version > /dev/null 2>&1; then
+            echo "${name}@${TAG} is already on npm."
+            exit 0
+          fi
+
+          dist_tag='latest'
+          if [[ "${TAG}" == *-* ]]; then
+            dist_tag='next'
+          fi
+
+          npm publish "${package}" --provenance --access public --tag "${dist_tag}" --ignore-scripts
+
+      - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
         run: |
-          if ! is_draft="$(gh release view "${GITHUB_REF_NAME}" --json isDraft --jq .isDraft 2>/dev/null)"; then
-            gh release create "${GITHUB_REF_NAME}" --verify-tag --draft --title "${GITHUB_REF_NAME}" --generate-notes
-            is_draft="true"
+          workflows=(draft-release-notes.yml)
+          # The PHP release of the same tag attaches its assets first.
+          workflows+=(release-php.yml)
+
+          # A running Release Drafter sets its draft's tag back to its own guess.
+          for workflow in "${workflows[@]}"; do
+            for run in $(gh run list --workflow "${workflow}" --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' 2>/dev/null || true); do
+              gh run watch "${run}" > /dev/null || true
+            done
+          done
+
+          state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' || echo 'none')"
+
+          if [ "${state}" = 'published' ]; then
+            echo "::error::Release '${TAG}' is already published. Release with 'npm version' and a tag push, not with the Publish release button."
+            exit 1
           fi
-          gh release upload "${GITHUB_REF_NAME}" .release/* --clobber
-          if [ "${is_draft}" = "true" ]; then
-            gh release edit "${GITHUB_REF_NAME}" --draft=false
+
+          # Release Drafter names its draft after the version it guesses, which
+          # can differ from the pushed tag.
+          draft=''
+          if [ "${state}" = 'none' ]; then
+            draft="$(gh release list --json tagName,isDraft --jq '[.[] | select(.isDraft) | .tagName][0] // empty')"
           fi
+
+          if [ -n "${draft}" ]; then
+            gh release edit "${draft}" --tag "${TAG}" --title "${TAG}"
+          elif [ "${state}" = 'none' ]; then
+            gh release create "${TAG}" --title "${TAG}" --generate-notes --draft --verify-tag
+          fi
+
+          prerelease='false'
+          if [[ "${TAG}" == *-* ]]; then
+            prerelease='true'
+          fi
+
+          # A release for an older version must not take "latest" from a newer one.
+          latest='false'
+          if [ "${prerelease}" = 'false' ]; then
+            if ! tags="$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName --jq '.[].tagName')"; then
+              echo '::error::Could not list the published releases.'
+              exit 1
+            fi
+            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sort -V | tail -n 1)"
+            if [ "${highest}" = "${TAG}" ]; then
+              latest='true'
+            fi
+          fi
+
+          gh release upload "${TAG}" .release/* --clobber
+
+          notes="$(gh release view "${TAG}" --json body --jq .body)"
+          if [ -n "${draft}" ]; then
+            notes="${notes//...${draft}/...${TAG}}"
+          fi
+          printf '%s\n' "${notes}" > "${RUNNER_TEMP}/notes.md"
+
+          gh release edit "${TAG}" --notes-file "${RUNNER_TEMP}/notes.md" --draft=false --prerelease="${prerelease}" --latest="${latest}" --verify-tag

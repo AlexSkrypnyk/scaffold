@@ -8,7 +8,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -30,50 +27,18 @@
+@@ -30,56 +27,18 @@
  
  ## Installation
  
@@ -20,7 +20,13 @@
 +docker pull acme/api-image
  ```
  
--Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
+-Install the Node.js package with npm:
+-
+-```bash
+-npm install --global @yodashut/force-crystal
+-```
+-
+-Or download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
 -
 -```bash
 -chmod +x nodejs-script

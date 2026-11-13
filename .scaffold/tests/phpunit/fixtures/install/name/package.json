@@ -26,5 +26,5 @@
 -        "force-crystal": "./nodejs-script"
 +        "star-forge": "./nodejs-script"
      },
-     "scripts": {
-         "lint": "eslint nodejs-script tests/nodejs eslint.config.js && prettier --check nodejs-script \"tests/nodejs/**/*.js\" eslint.config.js",
+     "files": [
+         "nodejs-script"

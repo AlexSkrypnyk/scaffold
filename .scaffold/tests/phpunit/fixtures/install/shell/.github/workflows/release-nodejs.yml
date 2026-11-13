@@ -1,0 +1,9 @@
+@@ -154,8 +154,6 @@
+           TAG: ${{ github.ref_name }}
+         run: |
+           workflows=(draft-release-notes.yml)
+-          # The PHP release of the same tag attaches its assets first.
+-          workflows+=(release-php.yml)
+ 
+           # A running Release Drafter sets its draft's tag back to its own guess.
+           for workflow in "${workflows[@]}"; do

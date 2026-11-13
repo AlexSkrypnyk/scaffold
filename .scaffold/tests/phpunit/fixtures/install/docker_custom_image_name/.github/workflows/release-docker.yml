@@ -3,7 +3,8 @@ name: Release Docker
 on:
   push:
     tags:
-      - '*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
 
 permissions: {}
 
@@ -28,7 +29,7 @@ jobs:
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          [[ "${GITHUB_REF_NAME}" =~ ^v?[0-9]+(\.[0-9]+){1,2}([-+][0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
+          [[ "${GITHUB_REF_NAME}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
           git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}" || { echo "::error::Tag '${GITHUB_REF_NAME}' is not on '${DEFAULT_BRANCH}'."; exit 1; }
 
       - name: Set up QEMU

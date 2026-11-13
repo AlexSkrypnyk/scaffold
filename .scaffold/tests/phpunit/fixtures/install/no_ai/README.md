@@ -6,7 +6,7 @@
  
  ## Installation
  
-@@ -89,10 +88,6 @@
+@@ -95,10 +94,6 @@
  ```
  
  The command needs [GitHub CLI](https://cli.github.com) and a GitHub token in `SCAFFOLD_GITHUB_TOKEN`. The [GitHub repository setup](https://getscaffold.dev/github) page lists the permissions the token needs.

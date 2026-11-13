@@ -16,10 +16,10 @@
 -composer require yodashut/force-crystal
 -```
 -
- Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
+ Install the Node.js package with npm:
  
  ```bash
-@@ -49,20 +42,6 @@
+@@ -55,20 +48,6 @@
  ```
  
  ## Usage

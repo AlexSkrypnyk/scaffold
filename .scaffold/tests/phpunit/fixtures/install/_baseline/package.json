@@ -17,6 +17,9 @@
     "bin": {
         "force-crystal": "./nodejs-script"
     },
+    "files": [
+        "nodejs-script"
+    ],
     "scripts": {
         "lint": "eslint nodejs-script tests/nodejs eslint.config.js && prettier --check nodejs-script \"tests/nodejs/**/*.js\" eslint.config.js",
         "lint-fix": "eslint --fix nodejs-script tests/nodejs eslint.config.js && prettier --write nodejs-script \"tests/nodejs/**/*.js\" eslint.config.js",

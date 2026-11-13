@@ -1,4 +1,4 @@
-@@ -51,7 +51,7 @@
+@@ -52,7 +52,7 @@
  
        - name: Set PHAR version
          run: |
@@ -7,7 +7,7 @@
  
        - name: Build PHAR
          run: composer build
-@@ -58,13 +58,13 @@
+@@ -59,13 +59,13 @@
  
        - name: Test PHAR
          run: |
