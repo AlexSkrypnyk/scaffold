@@ -16,13 +16,13 @@ Every test workflow, including the Docker and documentation workflows, runs on t
 - A push to `main`, such as the merge of a pull request.
 - A daily scheduled run at 04:23 UTC, which shows whether the project still builds when nobody has pushed. To leave it out, run `install.sh` with `--no-schedule` or answer no to **Use scheduled builds**. In an existing project, delete the `schedule` block from each `.github/workflows/test-*.yml` file.
 
-You can also start the PHP, Node.js, Shell and Docker workflows by hand from the **Actions** tab. To open a terminal session on the runner, see [SSH into a GitHub Actions runner](ssh-runner.mdx).
+You can also start the PHP, Node.js, Shell and Docker workflows by hand from the **Actions** tab.
 
 [//]: # (#;< PHP)
 
 ## Test PHP
 
-The `Test PHP` workflow runs 6 jobs on `ubuntu-latest`: PHP 8.3, 8.4 and 8.5, each with 2 dependency sets. `Deps normal` installs the latest versions `composer.json` allows, and `Deps lowest` installs the lowest allowed versions. On PHP 8.5, Composer installs with `--ignore-platform-reqs`.
+The `Test PHP` workflow runs 6 jobs on `ubuntu-latest`: PHP 8.3, 8.4 and 8.5, each with 2 dependency sets. `Deps normal` installs the latest versions `composer.json` allows, and `Deps lowest` installs the lowest allowed versions. Composer installs with `--no-scripts`, and on PHP 8.5 also with `--ignore-platform-reqs`.
 
 The following table lists which jobs run each check:
 
@@ -43,7 +43,7 @@ In a command app with a PHAR, a separate `Build PHAR` job runs on PHP 8.4. It bu
 
 ## Test Node.js
 
-The `Test Node.js` workflow runs 3 jobs on `ubuntu-latest`: Node.js 20, 22 and 24. Each job installs dependencies with `npm install`.
+The `Test Node.js` workflow runs 3 jobs on `ubuntu-latest`: Node.js 20, 22 and 24. Each job installs dependencies with `npm install --ignore-scripts`.
 
 The following table lists which jobs run each check:
 
@@ -61,7 +61,7 @@ Every job uploads the `.logs` directory as an artifact.
 
 ## Test shell
 
-The `Test shell` workflow runs 1 job on each of these runners: `ubuntu-latest`, `ubuntu-24.04`, `macos-latest` and `macos-15`. Each OS runs its latest image and the version before it. On macOS, the job first installs the current Bash with Homebrew. Every job installs the BATS testing framework with `npm ci` in `tests/bats`.
+The `Test shell` workflow runs 1 job on each of these runners: `ubuntu-latest`, `ubuntu-24.04`, `macos-latest` and `macos-15`. Each OS runs its latest image and the version before it. On macOS, the job first installs the current Bash with Homebrew. Every job installs the BATS testing framework with `npm ci --ignore-scripts` in `tests/bats`.
 
 The following table lists which jobs run each check:
 

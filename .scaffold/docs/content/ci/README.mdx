@@ -20,7 +20,17 @@ The following table lists the pages in this section:
 | [Run Renovate on demand](renovate-on-demand.mdx) | Starting Renovate by hand |
 | [Release Drafter](release-drafter.mdx) | The workflow that drafts release notes, and its settings |
 | [PHP packaging](php-packaging.mdx) | Building a PHP console app into a single PHAR file |
-| [SSH into a GitHub Actions runner](ssh-runner.mdx) | Opening a shell on the runner of a test workflow's job |
+
+## Workflow security
+
+Every job gets a `GITHUB_TOKEN`, a token that can change your repository within the permissions the workflow grants. Every workflow Scaffold ships follows 4 rules that limit what a compromised step can do with it. Follow the same rules in any workflow you add:
+
+- Set `permissions: {}` at the top of the workflow, and grant each job only the permissions it uses. A job that checks out code needs `contents: read`.
+- Pin each action to a full commit SHA, with its version in a comment: `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7`. Renovate updates the SHA and the comment together.
+- Set `persist-credentials: false` on each `actions/checkout` step, so the token stays out of the checked-out repository's Git configuration.
+- Install dependencies with `npm ci --ignore-scripts` or `npm install --ignore-scripts`, and with `composer install --no-scripts`. The flags stop dependencies' install scripts from running with the job's token. Composer plugins listed in `config.allow-plugins` still run, because `composer lint`, `composer normalize` and `composer build` need them.
+
+The [Test Actions](test.mdx#test-actions) workflow runs zizmor, which reports a checkout without `persist-credentials: false`.
 
 ## Background reading
 
