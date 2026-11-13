@@ -43,11 +43,21 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
+      # The attestation adds the registry itself, so the name drops any
+      # Docker Hub prefix.
+      - name: Set image name
+        env:
+          DOCKER_IMAGE: ${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
+        run: |
+          image="${DOCKER_IMAGE#index.docker.io/}"
+          image="${image#docker.io/}"
+          echo "IMAGE_NAME=${image}" >> "${GITHUB_ENV}"
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@__HASH__ # __VERSION__
         with:
-          images: ${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
+          images: ${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         id: build
@@ -64,6 +74,6 @@ jobs:
       - name: Attest Docker image
         uses: actions/attest-build-provenance@__HASH__ # __VERSION__
         with:
-          subject-name: index.docker.io/${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
+          subject-name: index.docker.io/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true

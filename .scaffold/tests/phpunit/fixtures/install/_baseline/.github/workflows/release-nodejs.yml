@@ -71,6 +71,7 @@ jobs:
         with:
           name: release-nodejs
           path: .release
+          include-hidden-files: true
           if-no-files-found: error
 
   publish:
