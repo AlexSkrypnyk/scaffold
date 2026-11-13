@@ -1,4 +1,4 @@
-@@ -75,12 +75,3 @@
+@@ -77,12 +77,3 @@
        - name: Scan code for vulnerabilities with CodeQL
          uses: github/codeql-action/analyze@__HASH__ # __VERSION__
  
