@@ -834,6 +834,16 @@ TOKENS
   assert_equal "${use_test_actions}" "n"
 }
 
+@test "parse_args --audit enables the security audit" {
+  parse_args --audit
+  assert_equal "${use_audit}" "y"
+}
+
+@test "parse_args --no-audit disables the security audit" {
+  parse_args --no-audit
+  assert_equal "${use_audit}" "n"
+}
+
 @test "parse_args --schedule enables scheduled builds" {
   parse_args --schedule
   assert_equal "${use_schedule}" "y"
