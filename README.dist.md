@@ -22,6 +22,12 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yournamespace/yourproject)
 ![LICENSE](https://img.shields.io/github/license/yournamespace/yourproject)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
+[//]: # (#;< AUDIT)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/yournamespace/yourproject/badge)](https://scorecard.dev/viewer/?uri=github.com/yournamespace/yourproject)
+[//]: # (#;> AUDIT)
+<!-- To show the OpenSSF Best Practices badge, register the project at https://www.bestpractices.dev, replace PROJECT_ID with its ID and move the badge out of this comment.
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/PROJECT_ID/badge)](https://www.bestpractices.dev/projects/PROJECT_ID)
+-->
 
 </div>
 
@@ -141,6 +147,10 @@ docker run --rm yournamespace/yourdockerimage
 ## Contribute
 
 [`CONTRIBUTING.md`](CONTRIBUTING.md) lists the commands that install the dependencies and run the linters and tests.
+
+## Security
+
+To report a vulnerability privately, follow [`SECURITY.md`](SECURITY.md). It also lists the versions that get security fixes.
 
 ## Configure the GitHub repository
 

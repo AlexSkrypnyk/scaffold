@@ -1000,6 +1000,13 @@ process_contributing() {
 }
 
 ##
+# Replace Scaffold's own security policy with the distributable one.
+#
+process_security() {
+  mv -f SECURITY.dist.md "SECURITY.md" >/dev/null 2>&1 || true
+}
+
+##
 # Replace the self-update skill references with placeholder tokens.
 #
 # The initialised project must keep instructions that point at the upstream
@@ -1031,7 +1038,6 @@ process_internal() {
 
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
-  rm -f SECURITY.md || true
   rm -f install-key.asc || true
   rm -Rf ".scaffold" || true
 
@@ -1057,7 +1063,6 @@ process_internal() {
   remove_string_content "# Uncomment the lines below"
   uncomment_line ".gitattributes" "\/.editorconfig"
   uncomment_line ".gitattributes" "\/.gitattributes"
-  uncomment_line ".gitattributes" "\/.github"
   uncomment_line ".gitattributes" "\/.gitignore"
   uncomment_line ".gitattributes" "\/docs"
   uncomment_line ".gitattributes" "\/logo.png"
@@ -1068,7 +1073,6 @@ process_internal() {
   uncomment_line ".gitattributes" "\/rector.php"
   uncomment_line ".gitattributes" "\/.npmignore"
   uncomment_line ".gitattributes" "\/.npmrc"
-  uncomment_line ".gitattributes" "\/renovate.json"
 
   remove_tokens_with_content "META"
   remove_special_comments
@@ -3337,6 +3341,8 @@ process_project() {
   process_readme "${project}"
 
   process_contributing
+
+  process_security
 
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 

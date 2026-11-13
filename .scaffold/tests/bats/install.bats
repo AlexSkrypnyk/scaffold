@@ -1307,12 +1307,29 @@ SETTINGS
   assert_file_contains "${tmpdir}/CONTRIBUTING.md" "Contributing guide"
 }
 
+@test "process_security replaces Scaffold's security policy with the distributable one" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_security"
+  mkdir -p "${tmpdir}"
+  echo "Scaffold policy" >"${tmpdir}/SECURITY.md"
+  echo "Project policy" >"${tmpdir}/SECURITY.dist.md"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_security
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/SECURITY.dist.md"
+  assert_file_contains "${tmpdir}/SECURITY.md" "Project policy"
+  assert_file_not_contains "${tmpdir}/SECURITY.md" "Scaffold policy"
+}
+
 @test "process_project runs the full flow and promotes the dist docs" {
   local tmpdir="${BATS_TEST_TMPDIR}/process_project"
   mkdir -p "${tmpdir}"
   printf '# /.editorconfig   export-ignore\n# /docs            export-ignore\n' >"${tmpdir}/.gitattributes"
   echo "README dist content" >"${tmpdir}/README.dist.md"
   echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
+  echo "Scaffold policy" >"${tmpdir}/SECURITY.md"
+  echo "Security dist content" >"${tmpdir}/SECURITY.dist.md"
 
   namespace="AcmeApp"
   project="acme-app"
@@ -1331,6 +1348,8 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/README.dist.md"
   assert_file_exists "${tmpdir}/CONTRIBUTING.md"
   assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
+  assert_file_contains "${tmpdir}/SECURITY.md" "Security dist content"
+  assert_file_not_exists "${tmpdir}/SECURITY.dist.md"
 }
 
 @test "process_project keeps the audit workflow when the audit is selected" {
