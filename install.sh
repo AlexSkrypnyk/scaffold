@@ -713,6 +713,7 @@ remove_nodejs() {
   rm -f package.json || true
   rm -f package-lock.json || true
   rm -f yarn.lock || true
+  rm -f .npmrc || true
   rm -Rf node_modules || true
 
   rm -f nodejs-script || true

@@ -16,6 +16,7 @@
 #;> PHP
 #;< NODEJS
 # /.npmignore      export-ignore
+# /.npmrc          export-ignore
 #;> NODEJS
 #;< RENOVATE
 # /renovate.json   export-ignore
