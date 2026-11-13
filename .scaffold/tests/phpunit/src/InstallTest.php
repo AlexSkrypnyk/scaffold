@@ -190,6 +190,11 @@ final class InstallTest extends UnitTestCase {
           'use_test_actions' => self::$tuiYes,
         ],
     ];
+    yield 'no audit' => [
+        [
+          'use_audit' => self::$tuiNo,
+        ],
+    ];
     yield 'no schedule' => [
         [
           'use_schedule' => self::$tuiNo,
@@ -273,6 +278,10 @@ final class InstallTest extends UnitTestCase {
     yield 'test actions' => [
       array_merge($identity, ['--test-actions']),
       'test_actions',
+    ];
+    yield 'no audit' => [
+      array_merge($identity, ['--no-audit']),
+      'no_audit',
     ];
     yield 'no schedule' => [
       array_merge($identity, ['--no-schedule']),
@@ -857,6 +866,55 @@ final class InstallTest extends UnitTestCase {
   }
 
   /**
+   * The audit analyzes only the languages the generated project holds.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to install.sh.
+   * @param list<string> $present
+   *   Strings that must be present in the audit workflow.
+   * @param list<string> $absent
+   *   Strings that must be absent from the audit workflow.
+   */
+  #[DataProvider('dataProviderInstallAuditLanguages')]
+  public function testInstallAuditLanguages(array $arguments, array $present, array $absent): void {
+    self::$fixtures = NULL;
+
+    $arguments = array_merge(['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker'], $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
+    $this->assertProcessSuccessful();
+
+    $workflow = File::read(self::$sut . '/.github/workflows/audit.yml');
+    $this->assertStringNotContainsString('#;', $workflow);
+
+    foreach ($present as $needle) {
+      $this->assertStringContainsString($needle, $workflow);
+    }
+
+    foreach ($absent as $needle) {
+      $this->assertStringNotContainsString($needle, $workflow);
+    }
+  }
+
+  public static function dataProviderInstallAuditLanguages(): \Iterator {
+    $jobs = ['name: Audit', 'name: Security'];
+    yield 'all languages' => [[], [...$jobs, 'languages: actions,javascript-typescript', 'semgrep scan'], []];
+    yield 'nodejs without docs' => [['--no-php', '--no-docs'], [...$jobs, 'languages: actions,javascript-typescript'], ['semgrep']];
+    yield 'docs without nodejs' => [['--no-php', '--no-nodejs'], [...$jobs, 'languages: actions,javascript-typescript'], ['semgrep']];
+    yield 'php without nodejs or docs' => [['--no-nodejs', '--no-docs'], [...$jobs, "languages: actions\n", 'semgrep scan'], ['javascript-typescript']];
+    yield 'shell only' => [['--no-php', '--no-nodejs', '--no-docs'], [...$jobs, "languages: actions\n"], ['javascript-typescript', 'semgrep']];
+  }
+
+  public function testInstallWithoutAuditRemovesWorkflow(): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', ['--namespace=YodasHut', '--name=force-crystal', '--author=Luke Skywalker', '--no-audit']);
+    $this->assertProcessSuccessful();
+
+    $this->assertFileDoesNotExist(self::$sut . '/.github/workflows/audit.yml');
+    $this->assertStringNotContainsString('audit.yml', File::read(self::$sut . '/AGENTS.md'));
+  }
+
+  /**
    * The shared Claude settings ship and are trimmed to the selected features.
    *
    * @param list<string> $arguments
@@ -1260,6 +1318,7 @@ final class InstallTest extends UnitTestCase {
       'use_renovate' => self::TUI_DEFAULT,
       'use_docs' => self::TUI_DEFAULT,
       'use_test_actions' => self::TUI_DEFAULT,
+      'use_audit' => self::TUI_DEFAULT,
       'use_schedule' => self::TUI_DEFAULT,
       'use_windows' => self::TUI_DEFAULT,
       'use_ai' => self::TUI_DEFAULT,

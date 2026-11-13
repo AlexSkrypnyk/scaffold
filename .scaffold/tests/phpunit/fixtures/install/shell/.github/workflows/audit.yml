@@ -1,0 +1,13 @@
+@@ -75,12 +75,3 @@
+       - name: Scan code for vulnerabilities with CodeQL
+         uses: github/codeql-action/analyze@__HASH__ # __VERSION__
+ 
+-      # CodeQL has no PHP analyzer.
+-      - name: Scan PHP code for vulnerabilities with Semgrep
+-        run: docker run --rm -v "${GITHUB_WORKSPACE}:/src" --workdir /src semgrep/semgrep:__VERSION__ semgrep scan --config p/php --metrics=off --sarif --output semgrep.sarif
+-
+-      - name: Upload the Semgrep results to code scanning
+-        uses: github/codeql-action/upload-sarif@__HASH__ # __VERSION__
+-        with:
+-          sarif_file: semgrep.sarif
+-          category: semgrep

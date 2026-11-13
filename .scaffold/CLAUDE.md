@@ -80,6 +80,11 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `WINDOWS` - The `windows-latest` matrix entries and Windows-only steps in the
   PHP, Node.js and Shell test workflows, removed by `remove_windows()` unless
   `--windows` is passed (off by default)
+- `AUDIT` - Documentation of the `audit.yml` security audit workflow, removed
+  with the workflow by `remove_audit()`. When neither Node.js nor the docs
+  site is selected, `process_audit()` drops `javascript-typescript` from the
+  CodeQL `languages` line, because CodeQL fails on a language with no source
+  files
 - `DOCS` - Documentation-site content outside `docs/`, such as the docs section
   of `CONTRIBUTING.dist.md`, removed by `remove_docs()`
 - `AI` - AI agents configuration (`CLAUDE.md`, `AGENTS.md`, `.claude/`)
@@ -317,7 +322,7 @@ Each test scenario in `InstallTest.php` validates a specific configuration:
   a custom image name
 - Feature toggles: `no_release_drafter`, `no_pr_autoassign`, `no_funding`,
   `no_pr_template`, `no_renovate`, `no_docs`, `no_schedule`, `no_phar`,
-  `windows`
+  `windows`, `no_audit`
 - AI options: `no_ai`, `ai_arch_docs_plantuml`, `no_ai_arch_docs`, `no_docs_no_ai_arch_docs`
 
 #### Running Init Tests

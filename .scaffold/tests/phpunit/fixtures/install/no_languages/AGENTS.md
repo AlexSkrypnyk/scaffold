@@ -215,6 +215,6 @@
 -- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
 -
 -
- ## Documentation
+ ## Security audit
  
- If using the documentation site (Docusaurus):
+ `.github/workflows/audit.yml` runs OpenSSF Scorecard, CodeQL and, on PHP

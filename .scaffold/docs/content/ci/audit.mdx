@@ -1,0 +1,46 @@
+---
+title: Audit
+sidebar_position: 1.5
+---
+
+# Audit
+
+The `Audit` workflow scans your project for security problems and rates its security practices. This page is for maintainers of a project created from Scaffold. It lists what each job checks, when the workflow runs and where you read the results.
+
+`install.sh` adds the workflow to new projects by default. To leave it out, answer no to **Use security audit** or pass `--no-audit`. In an existing project, delete `.github/workflows/audit.yml`.
+
+## Jobs
+
+The workflow runs 2 jobs on `ubuntu-latest`:
+
+- `Audit` scores the repository's security practices with [OpenSSF Scorecard](https://scorecard.dev/). It checks practices such as branch protection, pinned dependencies and signed releases. Scorecard reads the files from the Git checkout, so the `export-ignore` paths in `.gitattributes`, such as `.github`, still count.
+- `Security` scans the code for vulnerabilities. It skips runs that a branch protection change starts.
+
+The following table lists the scans the `Security` job runs:
+
+| Scan | Checks | Runs for |
+|---|---|---|
+| [CodeQL](https://codeql.github.com/) for `actions` | The workflow files | Every project |
+| CodeQL for `javascript-typescript` | The JavaScript and TypeScript code | A project with Node.js or the documentation site |
+| [Semgrep](https://semgrep.dev/) with the `p/php` rules | The PHP code | A PHP project |
+
+CodeQL has no PHP analyzer, so Semgrep covers PHP code. Semgrep runs from the `semgrep/semgrep` image, pinned by version and digest.
+
+## When it runs
+
+The workflow runs on the following events:
+
+- A pull request that targets `main` or a branch that begins with `feature/`.
+- A push to `main`.
+- A weekly scheduled run on Mondays at 05:37 UTC, which keeps the Scorecard result current. `--no-schedule` leaves this run in place.
+- A change to the repository's branch protection rules.
+
+## Read the results
+
+Each job uploads its findings to code scanning. To see them, open your repository's **Security** tab and click **Code scanning**.
+
+On a public repository, the `Audit` job also publishes its result to the OpenSSF API, except on a pull request. After the first run on `main`, the result is at `https://scorecard.dev/viewer/?uri=github.com/OWNER/REPO`. Replace `OWNER` and `REPO` with your repository's owner and name. Until that run, the viewer reports that the repository isn't found.
+
+## Private repositories
+
+Code scanning is free on a public repository. On a private repository, the uploads need [GitHub Advanced Security](https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security). Without it, the jobs fail. Leave the workflow out of a private project that doesn't have Advanced Security.

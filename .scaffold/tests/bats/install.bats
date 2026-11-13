@@ -449,6 +449,75 @@ AGENTS
   assert_file_not_exists "${tmpdir}/zizmor.yml"
 }
 
+@test "remove_audit removes the workflow and the audit token blocks" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_audit"
+  mkdir -p "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/workflows/audit.yml"
+  cat >"${tmpdir}/AGENTS.md" <<'AGENTS'
+- `.github/workflows/test-php.yml` - PHP testing
+[//]: # (#;< AUDIT)
+- `.github/workflows/audit.yml` - Security audit
+[//]: # (#;> AUDIT)
+AGENTS
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_audit
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/.github/workflows/audit.yml"
+  assert_file_not_contains "${tmpdir}/AGENTS.md" "audit.yml"
+  assert_file_contains "${tmpdir}/AGENTS.md" "test-php.yml"
+}
+
+create_audit_workflow() {
+  mkdir -p "${1}/.github/workflows"
+  cat >"${1}/.github/workflows/audit.yml" <<'WORKFLOW'
+      - name: Initialize CodeQL
+        with:
+          languages: actions,javascript-typescript
+          build-mode: none
+WORKFLOW
+}
+
+@test "process_audit keeps JavaScript analysis with Node.js or docs" {
+  local combination
+  for combination in "y n" "n y" "y y"; do
+    local tmpdir="${BATS_TEST_TMPDIR}/process_audit_${combination// /_}"
+    create_audit_workflow "${tmpdir}"
+
+    pushd "${tmpdir}" >/dev/null || return 1
+    use_nodejs="${combination% *}" use_docs="${combination#* }" process_audit
+    popd >/dev/null || return 1
+
+    assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "languages: actions,javascript-typescript"
+  done
+}
+
+@test "process_audit removes JavaScript analysis without Node.js and docs" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_audit_none"
+  create_audit_workflow "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  use_nodejs="n" use_docs="n" process_audit
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/.github/workflows/audit.yml" "javascript-typescript"
+  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "languages: actions"
+  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "build-mode: none"
+}
+
+@test "process_audit is a no-op without the audit workflow" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_audit_absent"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  use_nodejs="n" use_docs="n" run process_audit
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_file_not_exists "${tmpdir}/.github/workflows/audit.yml"
+}
+
 @test "remove_renovate removes the config and the update workflow" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_renovate"
   mkdir -p "${tmpdir}/.github/workflows"
@@ -775,6 +844,16 @@ TOKENS
   assert_equal "${use_test_actions}" "n"
 }
 
+@test "parse_args --audit enables the security audit" {
+  parse_args --audit
+  assert_equal "${use_audit}" "y"
+}
+
+@test "parse_args --no-audit disables the security audit" {
+  parse_args --no-audit
+  assert_equal "${use_audit}" "n"
+}
+
 @test "parse_args --schedule enables scheduled builds" {
   parse_args --schedule
   assert_equal "${use_schedule}" "y"
@@ -951,6 +1030,20 @@ TOKENS
   run collect_noninteractive
   assert_success
   assert_output_contains "Use GitHub Actions linting       : y"
+}
+
+@test "collect_noninteractive keeps the security audit on by default" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use security audit               : y"
+}
+
+@test "collect_noninteractive disables the security audit on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-audit
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use security audit               : n"
 }
 
 @test "collect_noninteractive keeps scheduled builds on by default" {
@@ -1238,6 +1331,34 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/README.dist.md"
   assert_file_exists "${tmpdir}/CONTRIBUTING.md"
   assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
+}
+
+@test "process_project keeps the audit workflow when the audit is selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_audit"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  create_audit_workflow "${tmpdir}"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_audit="y"
+  use_nodejs="n"
+  use_docs="n"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_exists "${tmpdir}/.github/workflows/audit.yml"
+  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "languages: actions"
+  assert_file_not_contains "${tmpdir}/.github/workflows/audit.yml" "javascript-typescript"
 }
 
 @test "process_project applies a custom Docker image name only to Docker references" {
