@@ -61,8 +61,8 @@ final class RollDiceCommandTest extends TestCase {
     $this->applicationInitFromCommand(RollDiceCommand::class);
     $output = $this->applicationRun(['--sides' => '2', '--count' => '100']);
 
-    $this->assertMatchesRegularExpression('/^Rolled 100d2: [12](, [12]){99}$/m', $output);
-    $this->assertMatchesRegularExpression('/^Total: (1\d\d|200)$/m', $output);
+    $this->assertMatchesRegularExpression('/^Rolled 100d2: [12](, [12]){99}\r?$/m', $output);
+    $this->assertMatchesRegularExpression('/^Total: (1\d\d|200)\r?$/m', $output);
   }
 
 }
