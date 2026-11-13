@@ -11,7 +11,7 @@ sidebar_position: 5
 
 The `Draft release notes` workflow, `.github/workflows/draft-release-notes.yml`, runs Release Drafter on every push to the `main` branch and on every tag push. Each run updates the draft from `.github/release-drafter.yml`. The workflow authenticates with `GITHUB_TOKEN`, the token GitHub creates for every run, so it needs no secret. The workflow grants that token 2 permissions: `contents: write` to update the draft and `pull-requests: read` to list the merged pull requests. Runs queue one at a time, so 2 quick pushes update the same draft.
 
-How the draft becomes a release depends on your project's stack. A PHP project publishes the draft on the **Releases** page, as [PHP release](../php/release.mdx) describes. A Node.js project pushes a version tag instead, as [Node.js release](../nodejs/release.mdx) describes. The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows releases drafted this way.
+How the draft becomes a release depends on your project's stack. A project with Node.js pushes a version tag, even when it also has PHP, as [Node.js release](../nodejs/release.mdx) describes. A PHP project without Node.js publishes the draft on the **Releases** page, as [PHP release](../php/release.mdx) describes. The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows releases drafted this way.
 
 `install.sh` keeps Release Drafter by default. To leave it out of a new project, answer no to the `install.sh` prompt **Use GitHub release drafter**, or pass `--no-release-drafter`. To remove it from an existing project, delete `.github/workflows/draft-release-notes.yml` and `.github/release-drafter.yml`.
 

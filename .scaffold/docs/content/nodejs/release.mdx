@@ -29,11 +29,11 @@ To release on GitHub only, set `"private": true` in `package.json`. The workflow
 
 ## Release a version
 
-Release Drafter keeps a draft release with the notes for every pull request merged into `main`. The draft's version is Release Drafter's guess, and the tag you push replaces it.
+With [Release Drafter](../ci/release-drafter.mdx), a draft release holds the notes for every pull request merged into `main`. The draft's version is Release Drafter's guess, and the tag you push replaces it. Without a draft, the workflow creates a release with generated notes.
 
 To release a version:
 
-1. Open the draft release on your repository's **Releases** page. Edit its notes if they need it.
+1. Optional: Open the draft release on your repository's **Releases** page. Edit its notes if they need it.
 2. On an up-to-date `main` with no uncommitted changes, set the version:
 
    ```bash
@@ -74,7 +74,7 @@ The `Publish Node.js release` job has write access to the repository contents. I
 3. Renames the draft to the tag and fixes the version in its compare link. Without a draft, it creates a release with generated notes.
 4. Attaches `nodejs-script` and both files, then publishes the release.
 
-A release becomes the latest GitHub release only when no published release has a higher version. Release runs queue behind each other, so tags pushed together release 1 at a time. When you push 3 or more tags together, GitHub cancels every waiting run except the newest, so re-run each canceled release from the **Actions** tab.
+A release becomes the latest GitHub release only when no published release has a higher version. Push 1 version tag at a time. GitHub starts no workflow for a push that holds more than 3 tags. Release runs for different tags publish 1 at a time. When 2 or more runs wait behind a running release, GitHub cancels every waiting run except the newest, so re-run each canceled release from the **Actions** tab.
 
 ## Verify a release
 

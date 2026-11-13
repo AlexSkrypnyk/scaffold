@@ -135,6 +135,7 @@ jobs:
       # Authenticates through npm trusted publishing, so no npm token is stored.
       - name: Publish to npm
         env:
+          PRIVATE_REPOSITORY: ${{ github.event.repository.private }}
           TAG: ${{ github.ref_name }}
         run: |
           package="$(find .package -name '*.tgz' | head -n 1)"
@@ -168,7 +169,13 @@ jobs:
             dist_tag='maintenance'
           fi
 
-          npm publish "${package}" --provenance --access public --tag "${dist_tag}" --ignore-scripts
+          # npm supports provenance only for public source repositories.
+          provenance=(--provenance)
+          if [ "${PRIVATE_REPOSITORY}" = 'true' ]; then
+            provenance=()
+          fi
+
+          npm publish "${package}" "${provenance[@]}" --access public --tag "${dist_tag}" --ignore-scripts
 
       - name: Publish the release
         env:

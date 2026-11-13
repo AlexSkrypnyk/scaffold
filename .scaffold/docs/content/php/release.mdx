@@ -12,12 +12,12 @@ The `Release PHP` workflow attaches your PHP command app's PHAR, or your single-
 
 A project that also has Node.js releases with a version tag from `npm version`, as [Node.js release](../nodejs/release.mdx) describes, and the PHP assets go on the same release.
 
-Release Drafter keeps a draft release with the notes for every pull request merged into `main`. Publishing the draft creates its tag, and the tag starts the `Release PHP` workflow. See [Release Drafter](../ci/release-drafter.mdx) for how the draft gets its version.
+Publishing a release on the **Releases** page creates its tag, and the tag starts the `Release PHP` workflow. With [Release Drafter](../ci/release-drafter.mdx), a draft release already holds the notes for every pull request merged into `main`.
 
 To publish a release:
 
-1. On your repository's **Releases** page, click **Edit** on the draft release. Edit its notes if they need it.
-2. Click **Publish release**. GitHub creates the tag, such as `1.4.0`.
+1. On your repository's **Releases** page, click **Edit** on the draft release and edit its notes if they need it. Without a draft, click **Draft a new release** and enter a new version tag, such as `1.4.0`.
+2. Click **Publish release**. GitHub creates the tag.
 3. On the **Actions** tab, open the `Release PHP` run for the tag. Confirm that it passes.
 4. Open the release. Confirm that it lists the PHAR or the script, `REPO-php-TAG.sha256` and `REPO-php-TAG.intoto.jsonl`.
 
