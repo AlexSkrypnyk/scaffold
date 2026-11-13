@@ -1323,6 +1323,34 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
 }
 
+@test "process_project keeps the audit workflow when the audit is selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_audit"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  create_audit_workflow "${tmpdir}"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_audit="y"
+  use_nodejs="n"
+  use_docs="n"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_exists "${tmpdir}/.github/workflows/audit.yml"
+  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "- actions"
+  assert_file_not_contains "${tmpdir}/.github/workflows/audit.yml" "javascript-typescript"
+}
+
 @test "process_project applies a custom Docker image name only to Docker references" {
   local tmpdir="${BATS_TEST_TMPDIR}/process_project_docker"
   mkdir -p "${tmpdir}/.github/workflows"
