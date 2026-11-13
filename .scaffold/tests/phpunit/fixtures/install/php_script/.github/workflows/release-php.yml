@@ -1,6 +1,6 @@
-@@ -50,21 +50,9 @@
-           echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
-           echo "Release version: $version"
+@@ -49,22 +49,10 @@
+       - name: Install dependencies
+         run: composer install --no-scripts
  
 -      - name: Set PHAR version
 -        run: |
@@ -14,10 +14,11 @@
 -          ./dist/force-crystal.phar --version
 -          ./dist/force-crystal.phar list || exit 1
 -
-       - name: Create Release
-         uses: softprops/action-gh-release@__HASH__ # __VERSION__
-         with:
-           tag_name: ${{ env.RELEASE_VERSION }}
-           files: |
--            ./dist/force-crystal.phar
-+            force-crystal
+       - name: Collect release assets
+         run: |
+           mkdir -p .release
+-          cp ./dist/force-crystal.phar .release/
++          cp force-crystal .release/
+ 
+       - name: Generate checksums
+         working-directory: .release

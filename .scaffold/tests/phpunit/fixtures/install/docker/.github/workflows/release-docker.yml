@@ -13,12 +13,23 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write # Sign the image attestation.
+      attestations: write # Record the image attestation.
 
     steps:
       - name: Checkout code
         uses: actions/checkout@__HASH__ # __VERSION__
         with:
+          fetch-depth: 0
           persist-credentials: false
+
+      # The tag becomes the image tag.
+      - name: Check release tag
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          [[ "${GITHUB_REF_NAME}" =~ ^v?[0-9]+(\.[0-9]+){1,2}([-+][0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
+          git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}" || { echo "::error::Tag '${GITHUB_REF_NAME}' is not on '${DEFAULT_BRANCH}'."; exit 1; }
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@__HASH__ # __VERSION__
@@ -39,6 +50,7 @@ jobs:
           images: ${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@__HASH__ # __VERSION__
         with:
           context: .
@@ -46,3 +58,12 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          provenance: mode=max
+          sbom: true
+
+      - name: Attest Docker image
+        uses: actions/attest-build-provenance@__HASH__ # __VERSION__
+        with:
+          subject-name: index.docker.io/${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true

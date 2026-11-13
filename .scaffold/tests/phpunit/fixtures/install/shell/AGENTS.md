@@ -153,7 +153,7 @@
 -Key workflows:
 -
 -- `.github/workflows/test-php.yml` - PHP testing
--- `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
+-- `.github/workflows/release-php.yml` - Checks the tag, then attaches the asset, its checksum and its provenance attestation to the release
 -  - Builds the PHAR to attach
  
  

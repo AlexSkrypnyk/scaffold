@@ -213,7 +213,7 @@ GitHub Actions workflows test across:
 Key workflows:
 
 - `.github/workflows/test-php.yml` - PHP testing
-- `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
+- `.github/workflows/release-php.yml` - Checks the tag, then attaches the asset, its checksum and its provenance attestation to the release
   - Builds the PHAR to attach
 
 
@@ -221,7 +221,7 @@ Key workflows:
 
 
 - `.github/workflows/test-nodejs.yml` - NodeJS testing
-- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
+- `.github/workflows/release-nodejs.yml` - Checks the tag, then attaches the script, its checksum and its provenance attestation to the release
 
 
 ## Security audit
