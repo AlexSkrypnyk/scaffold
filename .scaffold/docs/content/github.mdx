@@ -7,7 +7,7 @@ import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
 
 # GitHub repository setup
 
-`install.sh` can create your project's GitHub repository and apply a fixed set of general settings, labels and a default branch ruleset to it. This page is for developers who publish a Scaffold project on GitHub. Follow it to set up the repository during an install, or later on a project that already exists.
+`install.sh` can create your project's GitHub repository and apply a fixed set of general settings, labels, immutable releases and a default branch ruleset to it. This page is for developers who publish a Scaffold project on GitHub. Follow it to set up the repository during an install, or later on a project that already exists.
 
 The GitHub step changes only git and the repository on GitHub. It runs after `Initialization complete.`, so the project files are ready even when a request fails.
 
@@ -29,7 +29,7 @@ A fine-grained token needs these repository permissions:
 | Permission | Needed for |
 |---|---|
 | Metadata: read | Reading the repository (always granted) |
-| Administration: write | General settings, the ruleset and creating the repository |
+| Administration: write | General settings, immutable releases, the ruleset and creating the repository |
 | Issues: write | Labels |
 | Checks: read | Reading the checks of a CI run |
 | Actions: read | Waiting for CI and matching each check to its workflow file |
@@ -82,7 +82,7 @@ curl -fsSL https://getscaffold.dev/install.sh | \
 3. It creates the repository with `gh repo create`, as `public` unless you pass `--github-visibility=private`.
 4. It adds an `origin` remote when there is none. An existing `origin` stays as it is.
 5. It pushes the current branch with the token, so your local git credentials don't matter.
-6. It applies the general settings, the labels and the ruleset.
+6. It applies the general settings, the labels, immutable releases and the ruleset.
 7. It waits for the first CI run and adds that run's checks to the ruleset. For details, see [Required status checks](#required-status-checks).
 8. It removes `install.sh`, unless you passed `--keep`.
 
@@ -163,6 +163,14 @@ General settings go to GitHub in 1 request:
 
 Names match without regard to case, as they do on GitHub. Other labels stay in place. To delete them, pass `--github-labels-prune`.
 
+### Immutable releases
+
+`install.sh` turns on **Enable release immutability** under **Settings > General > Releases**. After that, GitHub locks the tag and assets of every release you publish. Releases published earlier stay editable.
+
+`install.sh` leaves the setting alone when it's already on or the owner enforces it for every repository. After turning it on, `install.sh` reads it back, because GitHub can still report it as off. When it reads as off, `install.sh` turns it on 1 more time.
+
+A release workflow that changes a release after publishing it fails after this, such as one that uploads assets to a published release. To keep releases editable, pass `--no-github-immutable-releases`.
+
 ### Default branch ruleset
 
 The `default-branch` ruleset protects the repository's default branch:
@@ -231,6 +239,7 @@ These options control the GitHub step. Each one also works with the `github` com
 | `--github-merge=VALUE` | `squash,rebase` | Sets the allowed merge methods: `merge`, `squash` and `rebase`. |
 | `--github-labels`, `--no-github-labels` | On | Applies the labels. |
 | `--github-labels-prune`, `--no-github-labels-prune` | Off | Deletes labels that aren't in the list. |
+| `--github-immutable-releases`, `--no-github-immutable-releases` | On | Makes published releases immutable. |
 | `--github-ruleset`, `--no-github-ruleset` | On | Applies the default branch ruleset. |
 | `--github-required-checks`, `--no-github-required-checks` | On | Requires the checks of the latest CI run on an existing repository. |
 | `--github-wait-checks`, `--no-github-wait-checks` | On | Waits for the first CI run of a created repository and requires its checks. |

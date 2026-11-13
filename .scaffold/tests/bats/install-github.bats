@@ -49,6 +49,14 @@ gh() {
       echo "https://github.com/acme/app"
       ;;
     "api repos/acme/app/labels "*) printf '%s' "${GH_LABELS}" ;;
+    "api repos/acme/app/immutable-releases --jq "*)
+      count="$(grep -c "^gh api --method PUT repos/acme/app/immutable-releases " "${GH_WRITES}")"
+      if [ "${count}" -gt 0 ] && [ "${GH_IMMUTABLE_REREAD_FAIL}" = "1" ]; then
+        echo "gh: Server Error (HTTP 500)" >&2
+        return 1
+      fi
+      if [ "${count}" -gt "${GH_IMMUTABLE_IGNORED_PUTS}" ]; then echo "true false"; else echo "${GH_IMMUTABLE}"; fi
+      ;;
     "api repos/acme/app/rulesets --paginate "*)
       if [ -f "${GH_RULESET_CREATED}" ]; then echo "7"; else echo "${GH_RULESET_ID}"; fi
       ;;
@@ -147,6 +155,9 @@ github_setup() {
   GH_LOGIN="jane"
   GH_STATE="$(state_applied)"
   GH_LABELS="$(labels_applied)"
+  GH_IMMUTABLE="true false"
+  GH_IMMUTABLE_IGNORED_PUTS=0
+  GH_IMMUTABLE_REREAD_FAIL=0
   GH_RULESET_ID=""
   GH_RULESET_KEPT=""
   GH_FAIL_MATCH=""
@@ -757,6 +768,144 @@ gh label delete good first issue --repo acme/app --yes"
 }
 
 #-------------------------------------------------------------------------------
+# Immutable releases
+#-------------------------------------------------------------------------------
+
+@test "github_apply_immutable_releases leaves enabled releases unchanged" {
+  github_setup
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  Immutable releases: unchanged"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output 'gh api repos/acme/app/immutable-releases --jq "\(.enabled) \(.enforced_by_owner)"'
+}
+
+@test "github_apply_immutable_releases leaves releases the owner enforces unchanged" {
+  github_setup
+  GH_IMMUTABLE="false true"
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  Immutable releases: unchanged (enforced by the owner)"
+  assert_no_writes
+}
+
+@test "github_apply_immutable_releases enables releases and reads them back" {
+  github_setup
+  GH_IMMUTABLE="false false"
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  Immutable releases: enabled"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/immutable-releases --silent"
+
+  run grep -c "immutable-releases" "${GH_READS}"
+  assert_output "2"
+}
+
+@test "github_apply_immutable_releases writes once more when the first write did not take" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  GH_IMMUTABLE_IGNORED_PUTS=1
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  Immutable releases: enabled"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/immutable-releases --silent
+gh api --method PUT repos/acme/app/immutable-releases --silent"
+}
+
+@test "github_apply_immutable_releases fails when 2 writes do not take" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  GH_IMMUTABLE_IGNORED_PUTS=2
+
+  run github_apply_immutable_releases
+  assert_status 1
+  assert_output "  Immutable releases: failed (still disabled after 2 attempts)"
+
+  run grep -c "immutable-releases" "${GH_WRITES}"
+  assert_output "2"
+}
+
+@test "github_apply_immutable_releases skips on a 403 and names the permission" {
+  github_setup
+
+  GH_FAIL_MATCH="api repos/acme/app/immutable-releases *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+  run github_apply_immutable_releases
+  assert_status 2
+  assert_output "  Immutable releases: skipped (token lacks Administration: read)"
+  assert_no_writes
+
+  GH_IMMUTABLE="false false"
+  GH_FAIL_MATCH="api --method PUT *"
+  run github_apply_immutable_releases
+  assert_status 2
+  assert_output "  Immutable releases: skipped (token lacks Administration: write)"
+}
+
+@test "github_apply_immutable_releases reports a failure to read the setting" {
+  github_setup
+  GH_FAIL_MATCH="api repos/acme/app/immutable-releases *"
+  GH_FAIL_OUTPUT="gh: Server Error (HTTP 500)"
+
+  run github_apply_immutable_releases
+  assert_status 1
+  assert_output "  Immutable releases: failed (gh: Server Error (HTTP 500))"
+  assert_no_writes
+}
+
+@test "github_apply_immutable_releases reports a failure to read the setting back" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  GH_IMMUTABLE_REREAD_FAIL=1
+
+  run github_apply_immutable_releases
+  assert_status 1
+  assert_output "  Immutable releases: failed (gh: Server Error (HTTP 500))"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/immutable-releases --silent"
+}
+
+@test "github_apply_immutable_releases prints the call under --dry-run" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  dry_run=1
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  [dry-run] gh api --method PUT repos/acme/app/immutable-releases --silent
+  Immutable releases: would enable"
+  assert_no_writes
+
+  run grep -c "immutable-releases" "${GH_READS}"
+  assert_output "1"
+}
+
+@test "github_apply_immutable_releases reads nothing for a repository a dry run would create" {
+  github_setup
+  github_repo_exists="n"
+  dry_run=1
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  [dry-run] gh api --method PUT repos/acme/app/immutable-releases --silent
+  Immutable releases: would enable"
+
+  run cat "${GH_READS}"
+  assert_output ""
+}
+
+#-------------------------------------------------------------------------------
 # Ruleset
 #-------------------------------------------------------------------------------
 
@@ -881,12 +1030,14 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_setup
   GH_STATE="$(state_new)"
   GH_LABELS=""
+  GH_IMMUTABLE="false false"
 
   run configure_github
   assert_success
   assert_output_contains "Configuring GitHub repository acme/app"
   assert_output_contains "  General settings: updated"
   assert_output_contains "  Labels: 12 created, 0 updated, 0 unchanged"
+  assert_output_contains "  Immutable releases: enabled"
   assert_output_contains "  Ruleset: created default-branch"
   assert_output_contains "GitHub repository settings complete."
 }
@@ -896,11 +1047,13 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_STATE="$(state_new)"
   github_settings="n"
   github_labels="n"
+  github_immutable_releases="n"
 
   run configure_github
   assert_success
   assert_output_not_contains "  General settings:"
   assert_output_not_contains "  Labels:"
+  assert_output_not_contains "  Immutable releases:"
   assert_output_contains "  Ruleset: created default-branch"
 }
 
@@ -944,6 +1097,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_setup
   GH_STATE="$(state_new)"
   GH_LABELS=""
+  GH_IMMUTABLE="false false"
   dry_run=1
 
   run configure_github
@@ -951,6 +1105,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_output_contains "  Dry run: nothing is changed."
   assert_output_contains "  General settings: would update"
   assert_output_contains "  Labels: 12 to create, 0 to update, 0 unchanged"
+  assert_output_contains "  Immutable releases: would enable"
   assert_output_contains "  Ruleset: would create default-branch"
   assert_no_writes
 }
@@ -1008,14 +1163,16 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   interactive=0
   github_settings=""
   github_labels=""
+  github_immutable_releases=""
   github_ruleset=""
-  parse_args --no-github-settings --no-github-ruleset --github-labels-prune
+  parse_args --no-github-settings --no-github-immutable-releases --no-github-ruleset --github-labels-prune
   github_apply_defaults
 
   run github_main
   assert_success
   assert_output_not_contains "  General settings:"
   assert_output_contains "  Labels: 0 created, 0 updated, 12 unchanged, 0 deleted"
+  assert_output_not_contains "  Immutable releases:"
   assert_output_not_contains "  Ruleset:"
 }
 
@@ -1036,11 +1193,13 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_LABELS=""
   interactive=1
 
-  # Owner, repository, general settings, description, labels, prune, ruleset.
-  run github_main <<<"$(printf 'acme\napp\ny\nNew description\ny\nn\nn\n')"
+  # Owner, repository, general settings, description, labels, prune,
+  # immutable releases, ruleset.
+  run github_main <<<"$(printf 'acme\napp\ny\nNew description\ny\nn\nn\nn\n')"
   assert_success
   assert_output_contains "  General settings: updated"
   assert_output_contains "  Labels: 12 created, 0 updated, 0 unchanged"
+  assert_output_not_contains "  Immutable releases:"
   assert_output_not_contains "  Ruleset:"
   assert_file_contains "${GH_WRITES}" "-f description=New description"
 }
@@ -1049,8 +1208,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_setup
   interactive=1
 
-  # Owner, repository, general settings, description, labels, ruleset.
-  github_collect_interactive <<<"$(printf '\n\ny\n\nn\nn\n')"
+  # Owner, repository, general settings, description, labels, immutable
+  # releases, ruleset.
+  github_collect_interactive <<<"$(printf '\n\ny\n\nn\nn\nn\n')"
 
   assert_equal "${github_owner}" "acme"
   assert_equal "${github_repo}" "app"
@@ -1058,6 +1218,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_equal "${github_description}" "Acme app"
   assert_equal "${github_labels}" "n"
   assert_equal "${github_labels_prune}" "n"
+  assert_equal "${github_immutable_releases}" "n"
   assert_equal "${github_ruleset}" "n"
 }
 
@@ -1080,12 +1241,13 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_FAIL_OUTPUT="gh: Not Found (HTTP 404)"
 
   # Owner, repository, create, visibility, settings, description, labels,
-  # prune, ruleset, wait for CI.
-  github_collect_interactive <<<"$(printf 'acme\napp\ny\nprivate\ny\nAcme\ny\nn\ny\nn\n')"
+  # prune, immutable releases, ruleset, wait for CI.
+  github_collect_interactive <<<"$(printf 'acme\napp\ny\nprivate\ny\nAcme\ny\nn\ny\ny\nn\n')"
 
   assert_equal "${github_create}" "y"
   assert_equal "${github_visibility}" "private"
   assert_equal "${github_description}" "Acme"
+  assert_equal "${github_immutable_releases}" "y"
   assert_equal "${github_wait_checks}" "n"
   assert_equal "${github_required_checks}" "y"
 }
@@ -1094,8 +1256,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_setup
   github_create="y"
 
-  # Owner, repository, settings, description, labels, ruleset, required checks.
-  run github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\nn\n')"
+  # Owner, repository, settings, labels, immutable releases, ruleset, required
+  # checks.
+  run github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\ny\nn\n')"
   assert_success
   assert_output_contains "acme/app already exists, so only its settings are applied."
 }
@@ -1103,8 +1266,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
 @test "github_collect_interactive asks for the latest CI checks on an existing repository" {
   github_setup
 
-  # Owner, repository, settings, labels, ruleset, required checks.
-  github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\nn\n')"
+  # Owner, repository, settings, labels, immutable releases, ruleset, required
+  # checks.
+  github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\ny\nn\n')"
 
   assert_equal "${github_create}" "n"
   assert_equal "${github_required_checks}" "n"
@@ -1118,8 +1282,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_repo=""
   GH_LOGIN="acme"
 
-  # Configure, owner, repository, settings, description, labels, prune, ruleset.
-  collect_github_interactive <<<"$(printf 'y\n\n\ny\n\ny\ny\ny\n')"
+  # Configure, owner, repository, settings, description, labels, prune,
+  # immutable releases, ruleset.
+  collect_github_interactive <<<"$(printf 'y\n\n\ny\n\ny\ny\ny\ny\n')"
 
   assert_equal "${use_github}" "y"
   assert_equal "${github_owner}" "acme"
@@ -1157,6 +1322,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_settings=""
   github_labels=""
   github_labels_prune=""
+  github_immutable_releases=""
   github_ruleset=""
   GH_LOGIN="acme"
   parse_args --namespace=AcmeApp --name=app --author="Jane Doe" --github --no-github-labels
@@ -1167,6 +1333,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_output_contains "  Repository                     : acme/app"
   assert_output_contains "  General settings               : y"
   assert_output_contains "  Labels                         : n"
+  assert_output_contains "  Immutable releases             : y"
   assert_output_contains "  Default branch ruleset         : y"
 }
 
@@ -1185,7 +1352,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
 #-------------------------------------------------------------------------------
 
 @test "parse_args sets the GitHub options" {
-  parse_args --github --github-owner=acme --github-repo=app --no-github-settings --github-description="Acme app" --github-merge=merge,squash --no-github-labels --github-labels-prune --no-github-ruleset --dry-run
+  parse_args --github --github-owner=acme --github-repo=app --no-github-settings --github-description="Acme app" --github-merge=merge,squash --no-github-labels --github-labels-prune --no-github-immutable-releases --no-github-ruleset --dry-run
 
   assert_equal "${use_github}" "y"
   assert_equal "${github_owner}" "acme"
@@ -1195,18 +1362,20 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_equal "${github_merge}" "merge,squash"
   assert_equal "${github_labels}" "n"
   assert_equal "${github_labels_prune}" "y"
+  assert_equal "${github_immutable_releases}" "n"
   assert_equal "${github_ruleset}" "n"
   assert_equal "${dry_run}" "1"
   assert_equal "${interactive}" "0"
 }
 
 @test "parse_args sets the negated and positive GitHub toggles" {
-  parse_args --no-github --github-settings --github-labels --no-github-labels-prune --github-ruleset
+  parse_args --no-github --github-settings --github-labels --no-github-labels-prune --github-immutable-releases --github-ruleset
 
   assert_equal "${use_github}" "n"
   assert_equal "${github_settings}" "y"
   assert_equal "${github_labels}" "y"
   assert_equal "${github_labels_prune}" "n"
+  assert_equal "${github_immutable_releases}" "y"
   assert_equal "${github_ruleset}" "y"
 }
 
@@ -1388,10 +1557,11 @@ default_answers() {
   github_description="New description"
   github_labels="n"
   github_labels_prune="y"
+  github_immutable_releases="n"
   github_ruleset="n"
 
   run print_reproduce_command
-  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-owner=other --github-repo=repo --no-github-settings --github-description=New\ description --no-github-labels --github-labels-prune --no-github-ruleset'
+  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-owner=other --github-repo=repo --no-github-settings --github-description=New\ description --no-github-labels --github-labels-prune --no-github-immutable-releases --no-github-ruleset'
 }
 
 #-------------------------------------------------------------------------------
@@ -1890,8 +2060,8 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
   GH_LOGIN="acme"
 
   # Create, owner, repository, visibility, settings, description, labels,
-  # prune, ruleset, wait for CI.
-  collect_github_interactive <<<"$(printf 'y\n\n\n\ny\n\ny\nn\ny\ny\n')"
+  # prune, immutable releases, ruleset, wait for CI.
+  collect_github_interactive <<<"$(printf 'y\n\n\n\ny\n\ny\nn\ny\ny\ny\n')"
 
   assert_equal "${use_github}" "y"
   assert_equal "${github_create}" "y"
