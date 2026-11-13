@@ -105,6 +105,7 @@ jobs:
         with:
           name: release-php
           path: .release
+          include-hidden-files: true
           if-no-files-found: error
 
   publish:
