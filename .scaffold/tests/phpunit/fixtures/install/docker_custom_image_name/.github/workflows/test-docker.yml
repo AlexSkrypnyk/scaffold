@@ -11,20 +11,16 @@ on:
       - main
       - 'feature/**'
   workflow_dispatch:
-    inputs:
-      enable_terminal:
-        type: boolean
-        description: 'Enable terminal session.'
-        required: false
-        default: false
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   test-docker:
     name: Docker
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -54,18 +50,14 @@ jobs:
       - name: Test Docker image
         run: docker run --rm acme/api-image:test
 
-      - name: Setup upterm session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
-        timeout-minutes: 30
-        with:
-          limit-access-to-actor: true
-
   push-canary-to-registry:
     name: Docker canary
     needs: test-docker
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code

@@ -11,6 +11,8 @@ on:
       - main
       - 'feature/**'
 
+permissions: {}
+
 jobs:
   test-actions:
     name: Test Actions

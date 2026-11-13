@@ -1,4 +1,4 @@
-@@ -48,21 +48,9 @@
+@@ -50,21 +50,9 @@
            echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
            echo "Release version: $version"
  
