@@ -4,41 +4,107 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version'
-        required: true
-        type: string
 
 permissions: {}
 
 jobs:
-  release-nodejs:
-    name: Release Node.js
+  build:
+    name: Build Node.js release
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Create the release and upload its assets.
+      contents: read
+      id-token: write # Sign the attestation.
+      attestations: write # Record the attestation.
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          fetch-depth: 0
           persist-credentials: false
 
-      - name: Set release version
+      # The tag becomes part of asset names.
+      - name: Check release tag
         env:
-          INPUTS_VERSION: ${{ github.event.inputs.version }}
-          REF_NAME: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
         run: |
-          version="${INPUTS_VERSION:-${REF_NAME}}"
-          echo "RELEASE_VERSION=$version" >> "$GITHUB_ENV"
-          echo "Release version: $version"
+          [[ "${GITHUB_REF_NAME}" =~ ^v?[0-9]+(\.[0-9]+){1,2}([-+][0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
+          git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}" || { echo "::error::Tag '${GITHUB_REF_NAME}' is not on '${DEFAULT_BRANCH}'."; exit 1; }
+          echo "RELEASE_NAME=${REPOSITORY_NAME}-nodejs-${GITHUB_REF_NAME}" >> "${GITHUB_ENV}"
 
-      - name: Create Release
-        uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
+      - name: Collect release assets
+        run: |
+          mkdir -p .release
+          cp nodejs-script .release/
+
+      - name: Generate checksums
+        working-directory: .release
+        run: sha256sum -- * > "${RELEASE_NAME}.sha256"
+
+      - name: Attest release assets
+        id: attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          tag_name: ${{ env.RELEASE_VERSION }}
-          files: |
-            nodejs-script
+          subject-path: .release/*
+
+      # Scorecard reads provenance from release assets only.
+      - name: Add attestation bundle
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+        run: cp "${BUNDLE_PATH}" ".release/${RELEASE_NAME}.intoto.jsonl"
+
+      - name: Verify release assets
+        working-directory: .release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum --check "${RELEASE_NAME}.sha256"
+          for asset in *; do
+            case "${asset}" in *.intoto.jsonl) continue ;; esac
+            gh attestation verify "${asset}" --bundle "${RELEASE_NAME}.intoto.jsonl" --repo "${GITHUB_REPOSITORY}"
+          done
+
+      - name: Upload release assets as an artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: release-nodejs
+          path: .release
+          if-no-files-found: error
+
+  publish:
+    name: Publish Node.js release
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Create the release and upload its assets.
+
+    # The release workflows of 1 tag share its release, so they publish in turn.
+    concurrency:
+      group: release-${{ github.ref_name }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Download release assets
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: release-nodejs
+          path: .release
+
+      # Assets go on a draft before it is published, so the release can be
+      # immutable.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if ! is_draft="$(gh release view "${GITHUB_REF_NAME}" --json isDraft --jq .isDraft 2>/dev/null)"; then
+            gh release create "${GITHUB_REF_NAME}" --verify-tag --draft --title "${GITHUB_REF_NAME}" --generate-notes
+            is_draft="true"
+          fi
+          gh release upload "${GITHUB_REF_NAME}" .release/* --clobber
+          if [ "${is_draft}" = "true" ]; then
+            gh release edit "${GITHUB_REF_NAME}" --draft=false
+          fi

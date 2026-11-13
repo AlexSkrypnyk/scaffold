@@ -17,15 +17,8 @@ rules:
     # "composer.lock" hash, so the cache-poisoning surface is negligible.
     ignore:
       - release-php.yml
-      - release-nodejs.yml
       - release-docs.yml
       - scaffold-release-docs.yml
-  superfluous-actions:
-    # The release uses "softprops/action-gh-release" for richer release-asset
-    # handling than an equivalent "gh release" script step would provide.
-    ignore:
-      - release-php.yml
-      - release-nodejs.yml
   ref-version-mismatch:
     # Actions are pinned by commit SHA - the actual security control - while the
     # trailing version comment is managed by Renovate and may briefly lag the
