@@ -1,4 +1,4 @@
-@@ -85,28 +85,3 @@
+@@ -89,28 +89,3 @@
          uses: github/codeql-action/analyze@__HASH__ # __VERSION__
          with:
            category: /language:${{ matrix.language }}
