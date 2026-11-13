@@ -73,6 +73,7 @@ use_pr_template=""
 use_renovate=""
 use_docs=""
 use_test_actions=""
+use_audit=""
 use_schedule=""
 use_windows=""
 use_ai=""
@@ -885,6 +886,20 @@ remove_test_actions() {
   rm -f .github/workflows/test-actions.yml || true
   rm -f .github/.yamllint-for-gha.yml || true
   rm -f zizmor.yml || true
+}
+
+remove_audit() {
+  rm -f .github/workflows/audit.yml || true
+
+  remove_tokens_with_content "AUDIT"
+}
+
+process_audit() {
+  # CodeQL fails on a language with no source files, and only the Node.js
+  # script and the documentation site hold JavaScript.
+  if [ "${use_nodejs:-n}" != "y" ] && [ "${use_docs:-n}" != "y" ]; then
+    remove_tokens_with_content "AUDIT_JAVASCRIPT"
+  fi
 }
 
 remove_schedule() {
@@ -2416,6 +2431,8 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --renovate, --no-renovate      Renovate configuration.
   --docs, --no-docs              Documentation site.
   --test-actions, --no-test-actions  GitHub Actions linting (default: off).
+  --audit, --no-audit            Security audit with OpenSSF Scorecard, CodeQL
+                                 and Semgrep (default: on).
   --schedule, --no-schedule      Daily scheduled build (default: on).
   --windows, --no-windows        Run the test workflows on Windows too
                                  (default: off).
@@ -2544,6 +2561,8 @@ parse_args() {
       --no-docs) use_docs="n" ;;
       --test-actions) use_test_actions="y" ;;
       --no-test-actions) use_test_actions="n" ;;
+      --audit) use_audit="y" ;;
+      --no-audit) use_audit="n" ;;
       --schedule) use_schedule="y" ;;
       --no-schedule) use_schedule="n" ;;
       --windows) use_windows="y" ;;
@@ -2693,6 +2712,7 @@ apply_noninteractive_defaults() {
   : "${use_renovate:=y}"
   : "${use_docs:=y}"
   : "${use_test_actions:=n}"
+  : "${use_audit:=y}"
   : "${use_schedule:=y}"
   : "${use_windows:=n}"
   : "${use_ai:=y}"
@@ -2768,6 +2788,7 @@ print_summary() {
   echo "Use Renovate                     : ${use_renovate}"
   echo "Use Docs                         : ${use_docs}"
   echo "Use GitHub Actions linting       : ${use_test_actions}"
+  echo "Use security audit               : ${use_audit}"
   echo "Use scheduled builds             : ${use_schedule}"
   echo "Use Windows in CI                : ${use_windows}"
   echo "Use AI agents                    : ${use_ai}"
@@ -2846,6 +2867,7 @@ print_reproduce_command() {
   [ "${use_renovate}" = "y" ] || args+=("--no-renovate")
   [ "${use_docs}" = "y" ] || args+=("--no-docs")
   [ "${use_test_actions}" != "y" ] || args+=("--test-actions")
+  [ "${use_audit}" = "y" ] || args+=("--no-audit")
   [ "${use_schedule}" = "y" ] || args+=("--no-schedule")
   [ "${use_windows}" != "y" ] || args+=("--windows")
 
@@ -2952,6 +2974,7 @@ collect_interactive() {
   use_renovate="$(ask_yesno "Use Renovate")"
   use_docs="$(ask_yesno "Use docs")"
   use_test_actions="$(ask_yesno "Use GitHub Actions linting" "N")"
+  use_audit="$(ask_yesno "Use security audit")"
   use_schedule="$(ask_yesno "Use scheduled builds")"
   use_windows="$(ask_yesno "Use Windows in CI" "N")"
 
@@ -3215,6 +3238,13 @@ process_project() {
   process_ai_arch_docs
   [ "${use_docs}" != "y" ] && remove_docs
   [ "${use_test_actions}" != "y" ] && remove_test_actions
+
+  if [ "${use_audit}" = "y" ]; then
+    process_audit
+  else
+    remove_audit
+  fi
+
   [ "${use_schedule}" != "y" ] && remove_schedule
   [ "${use_windows}" != "y" ] && remove_windows
 
