@@ -606,13 +606,7 @@ remove_php() {
     sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
     sed "${sed_opts[@]}" 's/\["npm", "composer"\]/["npm"]/' renovate.json
     sed "${sed_opts[@]}" 's/\["composer"\]/[]/' renovate.json
-    local line
-    line=$(grep -n '"matchDepNames": \["php"\]' renovate.json | cut -d: -f1)
-    if [ -n "${line}" ]; then
-      local start=$((line - 1))
-      local end=$((line + 3))
-      sed "${sed_opts[@]}" "${start},${end}d" renovate.json
-    fi
+    remove_renovate_rules '"matchDepNames": \["php"\]'
   fi
 }
 
@@ -737,13 +731,7 @@ remove_nodejs() {
     sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
     sed "${sed_opts[@]}" 's/\["npm", "composer"\]/["composer"]/' renovate.json
     sed "${sed_opts[@]}" 's/\["npm"\]/[]/' renovate.json
-    local line
-    line=$(grep -n '"matchDepNames": \["node", "yarn"\]' renovate.json | cut -d: -f1)
-    if [ -n "${line}" ]; then
-      local start=$((line - 1))
-      local end=$((line + 3))
-      sed "${sed_opts[@]}" "${start},${end}d" renovate.json
-    fi
+    remove_renovate_rules '"matchDepNames": \["node", "yarn"\]'
   fi
 }
 
@@ -791,17 +779,39 @@ remove_renovate() {
 }
 
 remove_renovate_managers() {
-  if [ -f renovate.json ] && grep -q '"matchManagers": \[\]' renovate.json; then
-    local sed_opts
-    sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
-    local line
-    line=$(grep -n '"matchManagers": \[\]' renovate.json | cut -d: -f1)
-    if [ -n "${line}" ]; then
-      local start=$((line - 1))
-      local end=$((line + 3))
-      sed "${sed_opts[@]}" "${start},${end}d" renovate.json
-    fi
-  fi
+  remove_renovate_rules '"matchManagers": \[\]'
+}
+
+##
+# Remove every 'packageRules' entry holding a line that matches a pattern.
+#
+# Entries are kept whole and the commas between them are rewritten, so an
+# entry of any size can be removed from any position, including the last one.
+#
+# @param $1 Extended regular expression to match within an entry.
+#
+remove_renovate_rules() {
+  [ -f renovate.json ] || return 0
+
+  PATTERN="${1}" awk '
+    in_rule {
+      rule = rule "\n" $0
+      if ($0 ~ ENVIRON["PATTERN"]) { drop = 1 }
+      if ($0 ~ /^        [}],?$/) {
+        in_rule = 0
+        sub(/,$/, "", rule)
+        if (!drop) { rules[++count] = rule }
+      }
+      next
+    }
+    /^        [{]$/ { in_rule = 1; drop = 0; rule = $0; next }
+    /^    \]/ {
+      for (i = 1; i <= count; i++) { print rules[i] (i < count ? "," : "") }
+      count = 0
+    }
+    { print }
+  ' renovate.json >renovate.json.tmp
+  mv renovate.json.tmp renovate.json
 }
 
 ##

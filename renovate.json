@@ -5,6 +5,8 @@
     "dependencyDashboard": true,
     "pinDigests": true,
     "branchPrefix": "deps/",
+    "minimumReleaseAge": "7 days",
+    "internalChecksFilter": "strict",
     "packageRules": [
         {
             "matchDepNames": ["php"],
@@ -25,6 +27,22 @@
             "matchPackageNames": ["*"],
             "groupName": "all dependencies",
             "groupSlug": "all"
+        },
+        {
+            "matchManagers": ["composer"],
+            "matchFileNames": ["composer.json"],
+            "matchDepTypes": ["require"],
+            "groupName": "runtime dependencies",
+            "groupSlug": "runtime",
+            "automerge": false
+        },
+        {
+            "matchManagers": ["npm"],
+            "matchFileNames": ["package.json"],
+            "matchDepTypes": ["dependencies"],
+            "groupName": "runtime dependencies",
+            "groupSlug": "runtime",
+            "automerge": false
         }
     ]
 }
