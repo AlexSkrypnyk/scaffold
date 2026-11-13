@@ -144,8 +144,16 @@ jobs:
 
           if ! gh release view "${TAG}" > /dev/null 2>&1; then
             # Release Drafter names its draft after the version it guesses,
-            # which can differ from the pushed tag.
-            draft="$(gh release list --json tagName,isDraft --jq '[.[] | select(.isDraft) | .tagName][0] // empty')"
+            # which can differ from the pushed tag. A draft whose tag exists
+            # already belongs to another release.
+            draft=''
+            for candidate in $(gh release list --json tagName,isDraft --jq '.[] | select(.isDraft) | .tagName'); do
+              if ! gh api "repos/${GH_REPO}/git/ref/tags/${candidate}" > /dev/null 2>&1; then
+                draft="${candidate}"
+                break
+              fi
+            done
+
             if [ -n "${draft}" ]; then
               gh release edit "${draft}" --tag "${TAG}" --title "${TAG}"
               notes="$(gh release view "${TAG}" --json body --jq .body)"

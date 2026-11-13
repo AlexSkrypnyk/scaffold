@@ -10,6 +10,8 @@ The `Release PHP` workflow attaches your PHP command app's PHAR, or your single-
 
 ## Publish a release
 
+A project that also has Node.js releases with a version tag from `npm version`, as [Node.js release](../nodejs/release.mdx) describes, and the PHP assets go on the same release.
+
 Release Drafter keeps a draft release with the notes for every pull request merged into `main`. Publishing the draft creates its tag, and the tag starts the `Release PHP` workflow. See [Release Drafter](../ci/release-drafter.mdx) for how the draft gets its version.
 
 To publish a release:

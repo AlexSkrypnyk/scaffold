@@ -72,7 +72,7 @@ The `Publish Node.js release` job has write access to the repository contents. I
 3. Renames the draft to the tag and fixes the version in its compare link. Without a draft, it creates a release with generated notes.
 4. Attaches `nodejs-script` and both files, then publishes the release.
 
-A release becomes the latest GitHub release only when no published release has a higher version. Release runs queue behind each other, so tags pushed together release 1 at a time.
+A release becomes the latest GitHub release only when no published release has a higher version. Release runs queue behind each other, so tags pushed together release 1 at a time. When you push 3 or more tags together, GitHub cancels every waiting run except the newest, so re-run each canceled release from the **Actions** tab.
 
 ## Verify a release
 
