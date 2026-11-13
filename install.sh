@@ -793,6 +793,8 @@ remove_renovate_managers() {
 remove_renovate_rules() {
   [ -f renovate.json ] || return 0
 
+  # The awk program is not bash, so kcov cannot trace its lines.
+  # LCOV_EXCL_START
   PATTERN="${1}" awk '
     in_rule {
       rule = rule "\n" $0
@@ -811,6 +813,7 @@ remove_renovate_rules() {
     }
     { print }
   ' renovate.json >renovate.json.tmp
+  # LCOV_EXCL_STOP
   mv renovate.json.tmp renovate.json
 }
 
