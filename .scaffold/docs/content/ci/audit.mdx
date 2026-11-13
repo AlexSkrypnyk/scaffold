@@ -13,7 +13,7 @@ The `Audit` workflow scans your project for security problems and rates its secu
 
 The workflow runs 2 jobs on `ubuntu-latest`:
 
-- `Audit` scores the repository's security practices with [OpenSSF Scorecard](https://scorecard.dev/). It checks practices such as branch protection, pinned dependencies and signed releases. Scorecard reads the files from the Git checkout, so the `export-ignore` paths in `.gitattributes`, such as `.github`, still count. It skips pull requests, because most Scorecard checks rate repository settings and history, which a pull request doesn't change.
+- `Audit` scores the repository's security practices with [OpenSSF Scorecard](https://scorecard.dev/). It checks practices such as branch protection, pinned dependencies and signed releases. Scorecard reads the files from the Git checkout, so the `export-ignore` paths in `.gitattributes`, such as `.github`, still count. It skips pull requests, because most Scorecard checks rate repository settings and history, which a pull request doesn't change. To check pinned actions and workflow permissions on a pull request, turn on [GitHub Actions linting](test.mdx#test-actions).
 - `Security` scans the code for vulnerabilities. It skips runs that a branch protection change starts.
 
 The following table lists the scans the `Security` job runs:
