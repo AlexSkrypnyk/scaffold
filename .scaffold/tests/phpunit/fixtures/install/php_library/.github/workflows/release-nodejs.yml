@@ -1,4 +1,4 @@
-@@ -177,18 +177,6 @@
+@@ -184,18 +184,6 @@
              gh run watch "${run}" > /dev/null || true
            done
  
