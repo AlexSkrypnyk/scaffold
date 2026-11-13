@@ -1,16 +1,17 @@
-@@ -11,217 +11,35 @@
+@@ -11,220 +11,38 @@
  testing, code quality tools, and CI/CD workflows.
  
  
 -## PHP Application Architecture
-+## Docker
++- `.github/workflows/audit.yml` - OpenSSF Scorecard, CodeQL and, for PHP, Semgrep, with results in the repository's **Security** tab
  
-+### Building
  
 -### Symfony Console Application
--
++## Docker
+ 
 -Multi-command CLI application structure:
--
++### Building
+ 
 -- **Location:** `src/Command/` directory
 -- **Entry point:** `bin/force-crystal`
 -- **Use for:** Complex applications with multiple commands, shared logic, OOP
@@ -228,6 +229,9 @@
 -
 -- `.github/workflows/test-nodejs.yml` - NodeJS testing
 -- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
+-
+-
+-- `.github/workflows/audit.yml` - OpenSSF Scorecard, CodeQL and, for PHP, Semgrep, with results in the repository's **Security** tab
 +Override the published image name (release and canary) by setting the `DOCKER_IMAGE` repository or organization variable; it defaults to `yodashut/force-crystal`.
  
  

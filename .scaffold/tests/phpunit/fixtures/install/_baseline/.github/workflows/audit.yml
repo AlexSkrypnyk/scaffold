@@ -1,0 +1,112 @@
+name: Audit
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - 'feature/**'
+  schedule:
+    - cron: '17 5 * * 1'
+  branch_protection_rule:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  scorecard:
+    name: OpenSSF Scorecard
+    # Scorecard publishes results only from the default branch.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write # Upload the SARIF report to code scanning.
+      id-token: write # Publish the results to the OpenSSF API.
+      actions: read # Required by the SARIF upload on private repositories.
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@__HASH__ # __VERSION__
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard analysis
+        uses: ossf/scorecard-action@__HASH__ # __VERSION__
+        with:
+          results_file: scorecard.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload Scorecard report as an artifact
+        uses: actions/upload-artifact@__HASH__ # __VERSION__
+        with:
+          name: scorecard-report
+          path: scorecard.sarif
+          retention-days: 5
+
+      - name: Upload Scorecard report to code scanning
+        uses: github/codeql-action/upload-sarif@__HASH__ # __VERSION__
+        with:
+          sarif_file: scorecard.sarif
+
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write # Upload the analysis to code scanning.
+      actions: read # Required by the SARIF upload on private repositories.
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - actions
+          - javascript-typescript
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@__HASH__ # __VERSION__
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@__HASH__ # __VERSION__
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - name: Analyze with CodeQL
+        uses: github/codeql-action/analyze@__HASH__ # __VERSION__
+        with:
+          category: /language:${{ matrix.language }}
+
+  semgrep:
+    name: Semgrep (PHP)
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write # Upload the SARIF report to code scanning.
+      actions: read # Required by the SARIF upload on private repositories.
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@__HASH__ # __VERSION__
+        with:
+          persist-credentials: false
+
+      # CodeQL has no PHP analyzer, so Semgrep's PHP rules cover the PHP code.
+      - name: Scan with Semgrep
+        run: docker run --rm -v "${GITHUB_WORKSPACE}:/src" --workdir /src semgrep/semgrep:__VERSION__ semgrep scan --config p/php --metrics=off --sarif --output semgrep.sarif
+
+      - name: Upload Semgrep report to code scanning
+        uses: github/codeql-action/upload-sarif@__HASH__ # __VERSION__
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep

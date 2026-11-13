@@ -1,0 +1,29 @@
+@@ -85,28 +85,3 @@
+         uses: github/codeql-action/analyze@__HASH__ # __VERSION__
+         with:
+           category: /language:${{ matrix.language }}
+-
+-  semgrep:
+-    name: Semgrep (PHP)
+-    runs-on: ubuntu-latest
+-
+-    permissions:
+-      contents: read
+-      security-events: write # Upload the SARIF report to code scanning.
+-      actions: read # Required by the SARIF upload on private repositories.
+-
+-    steps:
+-      - name: Checkout code
+-        uses: actions/checkout@__HASH__ # __VERSION__
+-        with:
+-          persist-credentials: false
+-
+-      # CodeQL has no PHP analyzer, so Semgrep's PHP rules cover the PHP code.
+-      - name: Scan with Semgrep
+-        run: docker run --rm -v "${GITHUB_WORKSPACE}:/src" --workdir /src semgrep/semgrep:__VERSION__ semgrep scan --config p/php --metrics=off --sarif --output semgrep.sarif
+-
+-      - name: Upload Semgrep report to code scanning
+-        uses: github/codeql-action/upload-sarif@__HASH__ # __VERSION__
+-        with:
+-          sarif_file: semgrep.sarif
+-          category: semgrep
