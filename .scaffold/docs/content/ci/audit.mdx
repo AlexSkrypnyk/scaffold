@@ -1,0 +1,43 @@
+---
+title: Audit
+sidebar_position: 1.5
+---
+
+# Audit
+
+The `Audit` workflow scans your project for security problems and rates its security practices. This page is for maintainers of a project created from Scaffold. It lists what each job checks, when the workflow runs and where you read the results.
+
+`install.sh` adds the workflow to new projects by default. To leave it out, answer no to **Use security audit** or pass `--no-audit`. In an existing project, delete `.github/workflows/audit.yml`.
+
+## Jobs
+
+The workflow runs these jobs on `ubuntu-latest`:
+
+| Job | Checks | Runs for |
+|---|---|---|
+| `OpenSSF Scorecard` | Scores the repository's security practices, such as branch protection, pinned dependencies and signed releases, with [OpenSSF Scorecard](https://scorecard.dev/) | Every project, except on pull requests |
+| `CodeQL (actions)` | Analyzes the workflow files with [CodeQL](https://codeql.github.com/) | Every project |
+| `CodeQL (javascript-typescript)` | Analyzes the JavaScript and TypeScript code with CodeQL | A project with Node.js or the documentation site |
+| `Semgrep (PHP)` | Scans the PHP code with the [Semgrep](https://semgrep.dev/) `p/php` rules | A PHP project |
+
+CodeQL has no PHP analyzer, so the Semgrep job covers PHP code. Semgrep runs from the `semgrep/semgrep` image, pinned by version and digest.
+
+## When it runs
+
+The workflow runs on the following events:
+
+- A pull request that targets `main` or a branch that begins with `feature/`.
+- A push to `main`.
+- A weekly scheduled run on Mondays at 05:17 UTC, which keeps the Scorecard result current. `--no-schedule` leaves this run in place.
+- A change to the repository's branch protection rules.
+- A manual run from the **Actions** tab.
+
+## Read the results
+
+Each job uploads its findings to code scanning. To see them, open your repository's **Security** tab and click **Code scanning**.
+
+The Scorecard job also publishes its result to the OpenSSF API. After the first run on `main`, the result is at `https://scorecard.dev/viewer/?uri=github.com/OWNER/REPO`. Replace `OWNER` and `REPO` with your repository's owner and name. Until that run, the viewer reports that the repository isn't found.
+
+## Private repositories
+
+Code scanning is free on a public repository. On a private repository, the uploads need [GitHub Advanced Security](https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security). Without it, the jobs fail. Leave the workflow out of a private project that doesn't have Advanced Security.

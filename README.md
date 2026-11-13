@@ -52,6 +52,7 @@ The template holds every feature, and `install.sh` removes the ones you don't se
   - [PR auto-assign](.github/workflows/assign-author.yml)
   - [On-demand Renovate run](.github/workflows/update-dependencies.yml) that you start from the **Actions** tab
   - [GitHub Actions linting](.github/workflows/test-actions.yml) with yamllint, actionlint and zizmor, off by default
+  - [Security audit](.github/workflows/audit.yml) with OpenSSF Scorecard, CodeQL and, for PHP, Semgrep
 - **Documentation**
   - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md) and a [generated logo](logo.png)
   - A [documentation site](docs) built with [Docusaurus](https://docusaurus.io/)
