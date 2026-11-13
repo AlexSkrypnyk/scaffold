@@ -1,4 +1,4 @@
-@@ -31,9 +31,14 @@
+@@ -27,9 +27,14 @@
        matrix:
          os:
            - ubuntu-latest
@@ -13,7 +13,7 @@
        - name: Checkout code
          uses: actions/checkout@__HASH__ # __VERSION__
          with:
-@@ -43,6 +48,11 @@
+@@ -39,6 +44,11 @@
          uses: actions/setup-node@__HASH__ # __VERSION__
          with:
            node-version: ${{ matrix.node }}
@@ -24,4 +24,4 @@
 +        run: npm config set script-shell "C:\Program Files\Git\bin\bash.exe"
  
        - name: Install dependencies
-         run: npm install
+         run: npm install --ignore-scripts
