@@ -72,7 +72,9 @@ jobs:
           provenance: mode=max
           sbom: true
 
+      # Private repositories get attestations only on GitHub Enterprise Cloud.
       - name: Attest Docker image
+        if: ${{ !github.event.repository.private }}
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-name: index.docker.io/${{ env.IMAGE_NAME }}

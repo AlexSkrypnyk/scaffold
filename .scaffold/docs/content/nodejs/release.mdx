@@ -65,6 +65,8 @@ The `Build Node.js release` job has read-only access to the repository contents.
 4. Signs a build provenance attestation for the package, the script and the checksum file, and saves the attestation bundle as `REPO-nodejs-TAG.intoto.jsonl`.
 5. Checks the checksum and the attestation.
 
+On a private repository, the job skips the attestation and the bundle, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud.
+
 The `Publish Node.js release` job has write access to the repository contents. It runs these steps:
 
 1. Publishes the package to npm with provenance. It skips npm when the version is already there, so a rerun doesn't fail.

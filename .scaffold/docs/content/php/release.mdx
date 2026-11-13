@@ -35,6 +35,8 @@ The `Build PHP release` job has read-only access to the repository contents. It 
 4. Signs a build provenance attestation for the asset and the checksum file, and saves the attestation bundle as `REPO-php-TAG.intoto.jsonl`.
 5. Checks the checksum and the attestation.
 
+On a private repository, the job skips the attestation and the bundle, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud.
+
 The `Publish PHP release` job has write access to the repository contents. It attaches the asset and both files to the release for the tag, replacing any asset of the same name. A tag you push with `git push` has no release yet. For such a tag, the job moves the draft to the tag and leaves it as a draft for you to publish.
 
 ## Verify a release
