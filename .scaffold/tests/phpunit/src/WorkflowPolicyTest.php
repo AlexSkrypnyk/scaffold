@@ -51,6 +51,28 @@ final class WorkflowPolicyTest extends UnitTestCase {
   }
 
   /**
+   * @param list<string> $expected
+   *   The expected violation messages.
+   */
+  #[DataProvider('dataProviderRunViolations')]
+  public function testRunViolations(string $run, array $expected): void {
+    $this->assertSame($expected, self::runViolations('step', $run));
+  }
+
+  public static function dataProviderRunViolations(): \Iterator {
+    yield 'npm with flag' => ['npm ci --ignore-scripts', []];
+    yield 'npm without flag' => ['npm ci', ['step runs "npm ci" without "--ignore-scripts".']];
+    yield 'npm with prefix' => ['npm --prefix=tests/bats ci', ['step runs "npm --prefix=tests/bats ci" without "--ignore-scripts".']];
+    yield 'composer with flag' => ['composer install --no-scripts', []];
+    yield 'composer without flag' => ['composer update', ['step runs "composer update" without "--no-scripts".']];
+    yield 'unrelated command' => ['composer build', []];
+    yield 'chained commands checked separately' => ['composer install --no-scripts && composer update', ['step runs "composer update" without "--no-scripts".']];
+    yield 'commands on separate lines' => ["npm ci --ignore-scripts\nnpm install", ['step runs "npm install" without "--ignore-scripts".']];
+    yield 'flag on a continued line' => ["composer install \\\n  --no-scripts", []];
+    yield 'expression operators ignored' => ["composer install \${{ matrix.php == '8.5' && '--ignore-platform-reqs' || '' }} --no-scripts", []];
+  }
+
+  /**
    * @param array<mixed> $workflow
    *   The parsed workflow.
    *
@@ -136,19 +158,37 @@ final class WorkflowPolicyTest extends UnitTestCase {
   protected static function runViolations(string $location, string $run): array {
     $violations = [];
 
-    foreach (preg_split('/\R/', $run) ?: [] as $line) {
-      $words = preg_split('/\s+/', trim($line)) ?: [];
+    foreach (self::shellCommands($run) as $command) {
+      $words = preg_split('/\s+/', $command) ?: [];
 
       if (in_array('npm', $words, TRUE) && array_intersect($words, ['install', 'i', 'ci', 'add']) !== [] && !in_array('--ignore-scripts', $words, TRUE)) {
-        $violations[] = sprintf('%s runs "%s" without "--ignore-scripts".', $location, trim($line));
+        $violations[] = sprintf('%s runs "%s" without "--ignore-scripts".', $location, $command);
       }
 
       if (in_array('composer', $words, TRUE) && array_intersect($words, ['install', 'update', 'require']) !== [] && !in_array('--no-scripts', $words, TRUE)) {
-        $violations[] = sprintf('%s runs "%s" without "--no-scripts".', $location, trim($line));
+        $violations[] = sprintf('%s runs "%s" without "--no-scripts".', $location, $command);
       }
     }
 
     return $violations;
+  }
+
+  /**
+   * Splits a "run" script into its separate shell commands.
+   *
+   * Expressions are blanked first, as their "&&" and "||" are not shell
+   * operators, and continued lines are joined into 1 command.
+   *
+   * @return list<string>
+   *   The trimmed, non-empty commands.
+   */
+  protected static function shellCommands(string $run): array {
+    $script = (string) preg_replace('/\$\{\{.*?\}\}/s', 'EXPRESSION', $run);
+    $script = (string) preg_replace('/\\\\\R/', ' ', $script);
+
+    $commands = preg_split('/&&|\|\||[;|]|\R/', $script) ?: [];
+
+    return array_values(array_filter(array_map(trim(...), $commands), static fn(string $command): bool => $command !== ''));
   }
 
 }
