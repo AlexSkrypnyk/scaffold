@@ -1,10 +1,10 @@
-@@ -162,18 +162,6 @@
+@@ -177,18 +177,6 @@
              gh run watch "${run}" > /dev/null || true
            done
  
 -          # The PHP release of the same tag attaches its assets to the draft
 -          # first, and the release needs them.
--          php_run="$(gh run list --workflow release-php.yml --commit "${GITHUB_SHA}" --event push --json databaseId --jq '.[0].databaseId // empty')"
+-          php_run="$(gh run list --workflow release-php.yml --branch "${TAG}" --commit "${GITHUB_SHA}" --event push --json databaseId --jq '.[0].databaseId // empty')"
 -          if [ -z "${php_run}" ]; then
 -            echo "::error::No 'Release PHP' run found for '${TAG}'."
 -            exit 1

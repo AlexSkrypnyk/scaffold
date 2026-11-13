@@ -71,24 +71,31 @@ jobs:
         working-directory: .release
         run: sha256sum -- * > "${RELEASE_NAME}.sha256"
 
+      - name: Verify checksums
+        working-directory: .release
+        run: sha256sum --check "${RELEASE_NAME}.sha256"
+
+      # Private repositories get attestations only on GitHub Enterprise Cloud.
       - name: Attest release assets
         id: attest
+        if: ${{ !github.event.repository.private }}
         uses: actions/attest-build-provenance@__HASH__ # __VERSION__
         with:
           subject-path: .release/*
 
       # Scorecard reads provenance from release assets only.
       - name: Add attestation bundle
+        if: ${{ !github.event.repository.private }}
         env:
           BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
         run: cp "${BUNDLE_PATH}" ".release/${RELEASE_NAME}.intoto.jsonl"
 
-      - name: Verify release assets
+      - name: Verify attestation
+        if: ${{ !github.event.repository.private }}
         working-directory: .release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sha256sum --check "${RELEASE_NAME}.sha256"
           for asset in *; do
             case "${asset}" in *.intoto.jsonl) continue ;; esac
             gh attestation verify "${asset}" --bundle "${RELEASE_NAME}.intoto.jsonl" --repo "${GITHUB_REPOSITORY}"

@@ -58,8 +58,14 @@ jobs:
         working-directory: .release
         run: sha256sum -- * > "${RELEASE_NAME}.sha256"
 
+      - name: Verify checksums
+        working-directory: .release
+        run: sha256sum --check "${RELEASE_NAME}.sha256"
+
+      # Private repositories get attestations only on GitHub Enterprise Cloud.
       - name: Attest release assets
         id: attest
+        if: ${{ !github.event.repository.private }}
         uses: actions/attest-build-provenance@__HASH__ # __VERSION__
         with:
           subject-path: |
@@ -68,16 +74,17 @@ jobs:
 
       # Scorecard reads provenance from release assets only.
       - name: Add attestation bundle
+        if: ${{ !github.event.repository.private }}
         env:
           BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
         run: cp "${BUNDLE_PATH}" ".release/${RELEASE_NAME}.intoto.jsonl"
 
-      - name: Verify release assets
+      - name: Verify attestation
+        if: ${{ !github.event.repository.private }}
         working-directory: .release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          sha256sum --check "${RELEASE_NAME}.sha256"
           for asset in *; do
             case "${asset}" in *.intoto.jsonl) continue ;; esac
             gh attestation verify "${asset}" --bundle "${RELEASE_NAME}.intoto.jsonl" --repo "${GITHUB_REPOSITORY}"
@@ -142,7 +149,15 @@ jobs:
 
           # An older version must not take "latest" from a newer one on npm.
           dist_tag='latest'
-          current="$(npm view "${name}" dist-tags.latest 2>/dev/null || true)"
+          # Only a package npm doesn't know yet has no "latest" to keep.
+          if ! current="$(npm view "${name}" dist-tags.latest 2> "${RUNNER_TEMP}/npm-view.log")"; then
+            if ! grep -q 'E404' "${RUNNER_TEMP}/npm-view.log"; then
+              cat "${RUNNER_TEMP}/npm-view.log"
+              echo "::error::Could not read the 'latest' dist-tag of ${name} from npm."
+              exit 1
+            fi
+            current=''
+          fi
           if [[ "${TAG}" == *-* ]]; then
             dist_tag='next'
           elif [ -n "${current}" ] && [ "$(printf '%s\n%s\n' "${current}" "${TAG}" | sort -V | tail -n 1)" != "${TAG}" ]; then
@@ -164,7 +179,7 @@ jobs:
 
           # The PHP release of the same tag attaches its assets to the draft
           # first, and the release needs them.
-          php_run="$(gh run list --workflow release-php.yml --commit "${GITHUB_SHA}" --event push --json databaseId --jq '.[0].databaseId // empty')"
+          php_run="$(gh run list --workflow release-php.yml --branch "${TAG}" --commit "${GITHUB_SHA}" --event push --json databaseId --jq '.[0].databaseId // empty')"
           if [ -z "${php_run}" ]; then
             echo "::error::No 'Release PHP' run found for '${TAG}'."
             exit 1
@@ -212,8 +227,9 @@ jobs:
               echo '::error::Could not list the published releases.'
               exit 1
             fi
-            # Older releases can carry a 'v' prefix, which sorts after digits.
-            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sed 's/^v//' | sort -V | tail -n 1)"
+            # Older releases can carry a 'v' prefix, which sorts after digits,
+            # or a tag that isn't a version at all.
+            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
             if [ "${highest}" = "${TAG}" ]; then
               latest='true'
             fi
