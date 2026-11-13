@@ -61,6 +61,7 @@ final class UpdateAssetsTest extends TestCase {
       'reply "Use Renovate"',
       'reply "Use docs"',
       'reply "Use GitHub Actions linting"',
+      'reply "Use security audit"',
       'reply "Use scheduled builds"',
       'reply "Use Windows in CI"',
       'reply "Use AI agents"',
