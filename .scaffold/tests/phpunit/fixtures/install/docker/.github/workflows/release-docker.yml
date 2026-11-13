@@ -3,7 +3,8 @@ name: Release Docker
 on:
   push:
     tags:
-      - '*'
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
 
 permissions: {}
 
@@ -13,12 +14,23 @@ jobs:
 
     permissions:
       contents: read
+      id-token: write # Sign the image attestation.
+      attestations: write # Record the image attestation.
 
     steps:
       - name: Checkout code
         uses: actions/checkout@__HASH__ # __VERSION__
         with:
+          fetch-depth: 0
           persist-credentials: false
+
+      # The tag becomes the image tag.
+      - name: Check release tag
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          [[ "${GITHUB_REF_NAME}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag '${GITHUB_REF_NAME}' is not a version."; exit 1; }
+          git merge-base --is-ancestor "${GITHUB_SHA}" "origin/${DEFAULT_BRANCH}" || { echo "::error::Tag '${GITHUB_REF_NAME}' is not on '${DEFAULT_BRANCH}'."; exit 1; }
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@__HASH__ # __VERSION__
@@ -32,13 +44,24 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
+      # The attestation adds the registry itself, so the name drops any
+      # Docker Hub prefix.
+      - name: Set image name
+        env:
+          DOCKER_IMAGE: ${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
+        run: |
+          image="${DOCKER_IMAGE#index.docker.io/}"
+          image="${image#docker.io/}"
+          echo "IMAGE_NAME=${image}" >> "${GITHUB_ENV}"
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@__HASH__ # __VERSION__
         with:
-          images: ${{ vars.DOCKER_IMAGE || 'yodashut/force-crystal' }}
+          images: ${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@__HASH__ # __VERSION__
         with:
           context: .
@@ -46,3 +69,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
+          provenance: mode=max
+          sbom: true
+
+      # Private repositories get attestations only on GitHub Enterprise Cloud.
+      - name: Attest Docker image
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-build-provenance@__HASH__ # __VERSION__
+        with:
+          subject-name: index.docker.io/${{ env.IMAGE_NAME }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true

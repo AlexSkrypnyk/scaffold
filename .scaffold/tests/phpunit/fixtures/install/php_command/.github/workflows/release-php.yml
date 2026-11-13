@@ -1,4 +1,4 @@
-@@ -59,8 +59,8 @@
+@@ -59,13 +59,13 @@
  
        - name: Test PHAR
          run: |
@@ -7,11 +7,11 @@
 +          ./dist/star-forge.phar --version
 +          ./dist/star-forge.phar list || exit 1
  
-       - name: Create Release
-         uses: softprops/action-gh-release@__HASH__ # __VERSION__
-@@ -67,4 +67,4 @@
-         with:
-           tag_name: ${{ env.RELEASE_VERSION }}
-           files: |
--            ./dist/force-crystal.phar
-+            ./dist/star-forge.phar
+       - name: Collect release assets
+         run: |
+           mkdir -p .release
+-          cp ./dist/force-crystal.phar .release/
++          cp ./dist/star-forge.phar .release/
+ 
+       - name: Generate checksums
+         working-directory: .release

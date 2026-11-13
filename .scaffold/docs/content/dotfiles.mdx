@@ -52,3 +52,5 @@ In the generated project, `git archive` leaves out the following paths:
 `.npmrc` holds npm settings for the project. On a Node.js project, it sets `ignore-scripts=true`, so npm skips the install scripts of your dependencies. A compromised package then can't run code when you install it.
 
 The setting also skips the `pre` and `post` scripts around `npm run`, such as a `pretest` script before `npm test`. To run one of those scripts, call it by name, such as `npm run pretest`.
+
+2 more settings shape the tag and the commit that `npm version` creates for a [release](./nodejs/release.mdx). `tag-version-prefix=""` makes the tag the bare version, such as `1.2.3`. `message="Released %s."` sets the commit message.

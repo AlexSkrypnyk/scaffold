@@ -29,7 +29,7 @@
  ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
  
  </div>
-@@ -33,19 +33,19 @@
+@@ -33,25 +33,25 @@
  Install the PHP package with Composer:
  
  ```bash
@@ -37,8 +37,15 @@
 +composer require jeditemple/star-forge
  ```
  
--Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
-+Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/jeditemple/star-forge/releases/latest) and make it executable:
+ Install the Node.js package with npm:
+ 
+ ```bash
+-npm install --global @yodashut/force-crystal
++npm install --global @jeditemple/star-forge
+ ```
+ 
+-Or download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yodashut/force-crystal/releases/latest) and make it executable:
++Or download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/jeditemple/star-forge/releases/latest) and make it executable:
  
  ```bash
  chmod +x nodejs-script
@@ -53,7 +60,7 @@
  ```
  
  ## Usage
-@@ -53,7 +53,7 @@
+@@ -59,7 +59,7 @@
  Run the PHP command that Composer installs:
  
  ```bash
@@ -62,7 +69,7 @@
  ```
  
  The command takes the following arguments and options:
-@@ -73,7 +73,7 @@
+@@ -79,7 +79,7 @@
  Run the shell script:
  
  ```bash

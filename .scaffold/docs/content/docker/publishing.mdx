@@ -14,9 +14,21 @@ The following table lists the image tags each workflow pushes:
 | Tag | Workflow | When |
 |---|---|---|
 | `canary` | [`test-docker.yml`](./testing.mdx) | On a push to `main`, after the workflow's tests pass |
-| The Git tag's name and `latest` | [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) | On a push of a Git tag whose name has no `/` |
+| The Git tag's name and `latest` | [`release-docker.yml`](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/release-docker.yml) | On a push of a Git tag that passes the [release checks](../ci/release.mdx#release-checks) |
 
 The `canary` tag points to the last image that the `Docker canary` job pushed from `main`, so you can try changes between tagged releases. The workflows never publish an image from a pull request, including one from a fork. To change the image tags for a release, edit the `docker/metadata-action` step in `release-docker.yml`.
+
+## Provenance and SBOM
+
+`release-docker.yml` builds each release image with a build provenance record in `mode=max` and a software bill of materials (SBOM), a list of the packages in the image. Both are stored with the image on Docker Hub. The workflow then signs an attestation for the pushed image digest and pushes it to Docker Hub too. On a private repository, it skips the attestation, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud.
+
+To verify a release image with [GitHub CLI](https://cli.github.com/), run the following command:
+
+```bash
+gh attestation verify oci://index.docker.io/IMAGE:TAG --repo OWNER/REPO
+```
+
+Replace `IMAGE` with the image name, `TAG` with the release tag and `OWNER/REPO` with the repository.
 
 ## Set up Docker Hub credentials
 

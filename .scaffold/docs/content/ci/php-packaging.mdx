@@ -23,9 +23,9 @@ The following table lists the workflows that build the PHAR:
 | Workflow and job | When it runs | What it does |
 |---|---|---|
 | `Test PHP`, `Build PHAR` job | Every `Test PHP` run, including on pull requests | Builds the PHAR, then runs it with `--version` and with no arguments. A PHAR that fails to build or run fails the job. |
-| `Release PHP` | A tag push, or a manual run with a version | Builds and runs the PHAR with the same checks, then attaches it to the GitHub release for the version. The `softprops/action-gh-release` action creates the release if it doesn't exist. |
+| `Release PHP` | A version tag push | Builds and runs the PHAR with the same checks, then attaches it to the GitHub release for the tag. |
 
-For the tags that trigger `Release PHP`, see [Release](release.mdx#trigger-conditions). The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows a released PHAR under **Assets**.
+To release the PHAR, see [PHP release](../php/release.mdx). The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows a released PHAR under **Assets**.
 
 ## PHAR version
 
@@ -39,8 +39,7 @@ The following table lists the version each build gets:
 
 | Build | Version |
 |---|---|
-| `Release PHP` on a tag push | The tag name as is, such as `1.2.3` |
-| `Release PHP` started by hand | The required **Release version** input |
+| `Release PHP` | The tag name as is, such as `1.2.3` |
 | `composer build` on your machine | `development` |
 
 To print the version of your build, run the following command in the `dist` directory:

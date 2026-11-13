@@ -1,0 +1,61 @@
+---
+title: Release
+sidebar_position: 7
+cspell: ignore intoto
+---
+
+# Release
+
+The `Release PHP` workflow attaches your PHP command app's PHAR, or your single-file script, to each GitHub release. This page is for maintainers of a PHP project created from Scaffold. It covers publishing a release, what the workflow attaches and how anyone can verify a downloaded asset. A PHP class library has no asset, so it has no release workflow.
+
+## Publish a release
+
+A project that also has Node.js releases with a version tag from `npm version`, as [Node.js release](../nodejs/release.mdx) describes, and the PHP assets go on the same release.
+
+Publishing a release on the **Releases** page creates its tag, and the tag starts the `Release PHP` workflow. With [Release Drafter](../ci/release-drafter.mdx), a draft release already holds the notes for every pull request merged into `main`.
+
+To publish a release:
+
+1. On your repository's **Releases** page, click **Edit** on the draft release and edit its notes if they need it. Without a draft, click **Draft a new release** and enter a new version tag, such as `1.4.0`.
+2. Click **Publish release**. GitHub creates the tag.
+3. On the **Actions** tab, open the `Release PHP` run for the tag. Confirm that it passes.
+4. Open the release. Confirm that it lists the PHAR or the script, `REPO-php-TAG.sha256` and `REPO-php-TAG.intoto.jsonl`.
+
+The workflow attaches the assets after you publish, so leave immutable releases off. An immutable release accepts no assets after it's published.
+
+## What the workflow does
+
+The workflow runs 2 jobs. It starts only on a version tag on the default branch, as the [release checks](../ci/release.mdx#release-checks) describe.
+
+The `Build PHP release` job has read-only access to the repository contents. It runs on PHP 8.4 and runs these steps:
+
+1. On a command app, writes the tag name into `box.json` as the version, builds the PHAR with [Box](https://github.com/box-project/box) and runs the PHAR to check that it starts. See [PHP packaging](../ci/php-packaging.mdx).
+2. Collects the release asset: the PHAR on a command app, or the script file on a single-file script.
+3. Writes the asset's SHA-256 checksum to `REPO-php-TAG.sha256`, where `REPO` is the repository name and `TAG` is the tag name.
+4. Signs a build provenance attestation for the asset and the checksum file, and saves the attestation bundle as `REPO-php-TAG.intoto.jsonl`.
+5. Checks the checksum and the attestation.
+
+On a private repository, the job skips the attestation and the bundle, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud.
+
+The `Publish PHP release` job has write access to the repository contents. It attaches the asset and both files to the release for the tag, replacing any asset of the same name. A tag you push with `git push` has no release yet. For such a tag, the job moves the draft to the tag and leaves it as a draft for you to publish.
+
+## Verify a release
+
+Anyone who downloads the PHAR or the script can confirm that your repository's release workflow built it. To verify a downloaded asset:
+
+1. From the release page, download the asset and `REPO-php-TAG.sha256`.
+2. Check the checksum:
+
+   ```bash
+   sha256sum --check --ignore-missing REPO-php-TAG.sha256
+   ```
+
+   On macOS, run `shasum -a 256 --check --ignore-missing REPO-php-TAG.sha256` instead.
+
+3. Check the attestation with [GitHub CLI](https://cli.github.com/):
+
+   ```bash
+   gh attestation verify ASSET --repo OWNER/REPO
+   ```
+
+Replace `OWNER/REPO` with the repository, `TAG` with the release's tag and `ASSET` with the downloaded filename. To check the attestation without reading it from GitHub, download `REPO-php-TAG.intoto.jsonl` too and add `--bundle REPO-php-TAG.intoto.jsonl` to the `gh attestation verify` command.

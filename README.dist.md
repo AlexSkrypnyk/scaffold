@@ -47,7 +47,13 @@ composer require yournamespace/yourproject
 
 [//]: # (#;> PHP)
 [//]: # (#;< NODEJS)
-Download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yournamespace/yourproject/releases/latest) and make it executable:
+Install the Node.js package with npm:
+
+```bash
+npm install --global @yournamespace/yourproject
+```
+
+Or download the Node.js script, `nodejs-script`, from the [latest release](https://github.com/yournamespace/yourproject/releases/latest) and make it executable:
 
 ```bash
 chmod +x nodejs-script

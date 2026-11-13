@@ -6,23 +6,30 @@ cspell: ignore RELEASEDRAFTER
 
 # Release
 
-A project created from Scaffold carries workflows that draft release notes and publish the project's assets. This page is for maintainers of that project. It lists each release workflow, when it runs and what it publishes.
+A project created from Scaffold carries workflows that draft release notes and publish the project's assets. This page is for maintainers of that project. It lists each release workflow and the checks they share, and links to the page that explains how to release each stack.
 
-## Trigger conditions
+## Release workflows
 
-Every release workflow runs on `ubuntu-latest` and starts on each pushed tag whose name has no `/`. The tag can come from `git push`, or from a release you publish in the GitHub interface.
+The following table lists each release workflow, the event that starts it and the page that covers it:
 
-The following table lists every event that starts each workflow, and when `install.sh` adds the workflow to a new project:
+| Workflow | File | Starts on | Added when | Page |
+|---|---|---|---|---|
+| Draft release notes | `draft-release-notes.yml` | A push to `main` or a tag | Release Drafter is selected (on by default) | [Release Drafter](release-drafter.mdx) |
+| Release PHP | `release-php.yml` | A version tag | The project is a PHP command app with a PHAR, or a single-file PHP script | [PHP release](../php/release.mdx) |
+| Release Node.js | `release-nodejs.yml` | A version tag | Node.js is selected | [Node.js release](../nodejs/release.mdx) |
+| Release Docker | `release-docker.yml` | A version tag | Docker is selected (off by default) | [Publishing](../docker/publishing.mdx) |
+| Release docs | `release-docs.yml` | A tag or a manual run | The documentation site is selected | [Documentation](../documentation.mdx) |
 
-| Workflow | File | Events | Added when |
-|---|---|---|---|
-| Draft release notes | `draft-release-notes.yml` | A push to `main` or a tag | Release Drafter is selected (on by default) |
-| Release PHP | `release-php.yml` | A tag or a manual run | The project is a PHP command app with a PHAR, or a single-file PHP script. A class library has no asset to attach. |
-| Release Node.js | `release-nodejs.yml` | A tag or a manual run | Node.js is selected |
-| Release Docker | `release-docker.yml` | A tag | Docker is selected (off by default) |
-| Release docs | `release-docs.yml` | A tag or a manual run | The documentation site is selected |
+A PHP class library has no asset to attach, so it has no release workflow.
 
-To start Release PHP, Release Node.js or Release docs by hand, open the **Actions** tab and enter a **Release version**. Release PHP and Release Node.js create the GitHub release and its tag under that version. The Docker and documentation releases have their own pages: [Publishing](../docker/publishing.mdx) and [Documentation](../documentation.mdx).
+## Release checks
+
+A version tag is 3 numbers with an optional suffix, such as `1.4.0`, `26.5.1` or `1.4.0-rc.1`. Release PHP, Release Node.js and Release Docker start only on a version tag, and they check the tag before they build anything:
+
+- The tag name is a version.
+- The tagged commit is on the default branch.
+
+A tag that fails either check stops the workflow, so nothing gets published from it.
 
 [//]: # (#;< RELEASEDRAFTER)
 
@@ -31,23 +38,3 @@ To start Release PHP, Release Node.js or Release docs by hand, open the **Action
 The `Draft release notes` workflow runs the [`release-drafter/release-drafter`](https://github.com/release-drafter/release-drafter) action, and its token has write access to contents and pull requests. See [Release Drafter](release-drafter.mdx).
 
 [//]: # (#;> RELEASEDRAFTER)
-
-[//]: # (#;< PHP)
-
-## Release PHP
-
-The `Release PHP` workflow runs on PHP 8.4, and its token has write access to the repository contents. After it installs the Composer dependencies, it runs these steps:
-
-1. Sets the release version to the **Release version** input of a manual run, or to the tag name.
-2. On a command app, writes the version into `box.json`, builds the PHAR with [Box](https://github.com/box-project/box) and runs the PHAR to check that it starts. See [PHP packaging](php-packaging.mdx).
-3. Creates or updates the GitHub release for the version. It attaches the PHAR on a command app, or the script file on a single-file script.
-
-[//]: # (#;> PHP)
-
-[//]: # (#;< NODEJS)
-
-## Release Node.js
-
-The `Release Node.js` workflow's token has write access to the repository contents. It sets the release version from the **Release version** input of a manual run, or from the tag name. Then it creates or updates the GitHub release for the version and attaches `nodejs-script`.
-
-[//]: # (#;> NODEJS)

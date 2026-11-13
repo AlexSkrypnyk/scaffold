@@ -289,7 +289,7 @@ Key workflows:
 
 - `.github/workflows/test-php.yml` - PHP testing
 [//]: # (#;< PHP_RELEASE)
-- `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
+- `.github/workflows/release-php.yml` - Runs on the tag that publishing the draft release creates: checks it, then attaches the asset, its checksum and its provenance attestation to the release
 [//]: # (#;< PHP_PHAR)
   - Builds the PHAR to attach
 [//]: # (#;> PHP_PHAR)
@@ -304,7 +304,7 @@ Key workflows:
 [//]: # (#;< NODEJS)
 
 - `.github/workflows/test-nodejs.yml` - NodeJS testing
-- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
+- `.github/workflows/release-nodejs.yml` - Runs on the tag that `npm version` creates: checks it matches `package.json`, publishes to npm with provenance, then attaches the script, its checksum and its provenance attestation to the release and publishes it
 
 [//]: # (#;> NODEJS)
 [//]: # (#;< AUDIT)
@@ -340,7 +340,7 @@ docker run --rm -i hadolint/hadolint < Dockerfile
 ### CI/CD
 
 - `.github/workflows/test-docker.yml` - Build and lint the Docker image, and push a `canary`-tagged image on merge to `main`
-- `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag
+- `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag, with provenance, an SBOM and an attestation
 
 Docker Hub credentials are stored as repository secrets:
 - `DOCKER_USER` - Docker Hub username
