@@ -15,7 +15,7 @@ The workflow runs these jobs on `ubuntu-latest`:
 
 | Job | Checks | Runs for |
 |---|---|---|
-| `OpenSSF Scorecard` | Scores the repository's security practices, such as branch protection, pinned dependencies and signed releases, with [OpenSSF Scorecard](https://scorecard.dev/) | Every project, except on pull requests |
+| `OpenSSF Scorecard` | Scores the repository's security practices, such as branch protection, pinned dependencies and signed releases, with [OpenSSF Scorecard](https://scorecard.dev/) | Every project, on the default branch only |
 | `CodeQL (actions)` | Analyzes the workflow files with [CodeQL](https://codeql.github.com/) | Every project |
 | `CodeQL (javascript-typescript)` | Analyzes the JavaScript and TypeScript code with CodeQL | A project with Node.js or the documentation site |
 | `Semgrep (PHP)` | Scans the PHP code with the [Semgrep](https://semgrep.dev/) `p/php` rules | A PHP project |
@@ -36,7 +36,7 @@ The workflow runs on the following events:
 
 Each job uploads its findings to code scanning. To see them, open your repository's **Security** tab and click **Code scanning**.
 
-The Scorecard job also publishes its result to the OpenSSF API. After the first run on `main`, the result is at `https://scorecard.dev/viewer/?uri=github.com/OWNER/REPO`. Replace `OWNER` and `REPO` with your repository's owner and name. Until that run, the viewer reports that the repository isn't found.
+On a public repository, the Scorecard job also publishes its result to the OpenSSF API. After the first run on `main`, the result is at `https://scorecard.dev/viewer/?uri=github.com/OWNER/REPO`. Replace `OWNER` and `REPO` with your repository's owner and name. Until that run, the viewer reports that the repository isn't found.
 
 ## Private repositories
 
