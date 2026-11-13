@@ -81,10 +81,10 @@ Content blocks can be conditionally included/excluded using special tokens:
   PHP, Node.js and Shell test workflows, removed by `remove_windows()` unless
   `--windows` is passed (off by default)
 - `AUDIT` - Documentation of the `audit.yml` security audit workflow, removed
-  with the workflow by `remove_audit()`
-- `AUDIT_JAVASCRIPT` - The CodeQL `javascript-typescript` matrix entry in
-  `audit.yml`. `process_audit()` removes it when neither Node.js nor the docs
-  site is selected, because CodeQL fails on a language with no source files
+  with the workflow by `remove_audit()`. When neither Node.js nor the docs
+  site is selected, `process_audit()` drops `javascript-typescript` from the
+  CodeQL `languages` line, because CodeQL fails on a language with no source
+  files
 - `DOCS` - Documentation-site content outside `docs/`, such as the docs section
   of `CONTRIBUTING.dist.md`, removed by `remove_docs()`
 - `AI` - AI agents configuration (`CLAUDE.md`, `AGENTS.md`, `.claude/`)

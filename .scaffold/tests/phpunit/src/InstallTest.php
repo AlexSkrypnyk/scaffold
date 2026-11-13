@@ -896,11 +896,12 @@ final class InstallTest extends UnitTestCase {
   }
 
   public static function dataProviderInstallAuditLanguages(): \Iterator {
-    yield 'all languages' => [[], ['- actions', '- javascript-typescript', 'semgrep:'], []];
-    yield 'nodejs without docs' => [['--no-php', '--no-docs'], ['- actions', '- javascript-typescript'], ['semgrep:']];
-    yield 'docs without nodejs' => [['--no-php', '--no-nodejs'], ['- actions', '- javascript-typescript'], ['semgrep:']];
-    yield 'php without nodejs or docs' => [['--no-nodejs', '--no-docs'], ['- actions', 'semgrep:'], ['- javascript-typescript']];
-    yield 'shell only' => [['--no-php', '--no-nodejs', '--no-docs'], ['- actions'], ['- javascript-typescript', 'semgrep:']];
+    $jobs = ['name: Audit', 'name: Security'];
+    yield 'all languages' => [[], [...$jobs, 'languages: actions,javascript-typescript', 'semgrep scan'], []];
+    yield 'nodejs without docs' => [['--no-php', '--no-docs'], [...$jobs, 'languages: actions,javascript-typescript'], ['semgrep']];
+    yield 'docs without nodejs' => [['--no-php', '--no-nodejs'], [...$jobs, 'languages: actions,javascript-typescript'], ['semgrep']];
+    yield 'php without nodejs or docs' => [['--no-nodejs', '--no-docs'], [...$jobs, "languages: actions\n", 'semgrep scan'], ['javascript-typescript']];
+    yield 'shell only' => [['--no-php', '--no-nodejs', '--no-docs'], [...$jobs, "languages: actions\n"], ['javascript-typescript', 'semgrep']];
   }
 
   public function testInstallWithoutAuditRemovesWorkflow(): void {

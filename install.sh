@@ -895,10 +895,14 @@ remove_audit() {
 }
 
 process_audit() {
+  [ -f .github/workflows/audit.yml ] || return 0
+
   # CodeQL fails on a language with no source files, and only the Node.js
   # script and the documentation site hold JavaScript.
   if [ "${use_nodejs:-n}" != "y" ] && [ "${use_docs:-n}" != "y" ]; then
-    remove_tokens_with_content "AUDIT_JAVASCRIPT"
+    local sed_opts
+    sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+    sed "${sed_opts[@]}" 's/languages: actions,javascript-typescript$/languages: actions/' .github/workflows/audit.yml
   fi
 }
 

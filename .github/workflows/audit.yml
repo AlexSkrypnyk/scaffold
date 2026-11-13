@@ -1,6 +1,8 @@
 name: Audit
 
 on:
+  schedule:
+    - cron: '37 5 * * 1'
   push:
     branches:
       - main
@@ -8,28 +10,23 @@ on:
     branches:
       - main
       - 'feature/**'
-  schedule:
-    - cron: '17 5 * * 1'
   branch_protection_rule:
-  workflow_dispatch:
 
 permissions: {}
 
 jobs:
-  scorecard:
-    name: OpenSSF Scorecard
-    # Scorecard analyzes only the default branch.
-    if: github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || github.ref_name == github.event.repository.default_branch)
+  audit:
+    name: Audit
     runs-on: ubuntu-latest
 
     permissions:
+      actions: read
+      checks: read # Read check runs for the SAST check on private repositories.
       contents: read
-      security-events: write # Upload the SARIF report to code scanning.
-      id-token: write # Publish the results to the OpenSSF API.
-      actions: read # Required by the SARIF upload on private repositories.
+      id-token: write # Sign the results published to the Scorecard API.
       issues: read # Read issues for the checks on private repositories.
       pull-requests: read # Read pull requests for the checks on private repositories.
-      checks: read # Read check runs for the SAST check on private repositories.
+      security-events: write # Upload the results to code scanning.
 
     steps:
       - name: Checkout code
@@ -37,43 +34,31 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run Scorecard analysis
+      - name: Audit security practices with OpenSSF Scorecard
         uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
         with:
-          results_file: scorecard.sarif
+          results_file: results.sarif
           results_format: sarif
-          # Publishing records the repository in a public transparency log.
-          publish_results: ${{ github.event.repository.private != true }}
+          # The archive omits 'export-ignore' paths such as '.github'.
+          file_mode: git
+          # The Scorecard API accepts results from the default branch only, and
+          # publishing records the repository in a public transparency log.
+          publish_results: ${{ github.event_name != 'pull_request' && github.event.repository.private != true }}
 
-      - name: Upload Scorecard report as an artifact
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
-        with:
-          name: scorecard-report
-          path: scorecard.sarif
-          retention-days: 5
-
-      - name: Upload Scorecard report to code scanning
+      - name: Upload the audit results to code scanning
         uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
-          sarif_file: scorecard.sarif
+          sarif_file: results.sarif
 
-  codeql:
-    name: CodeQL (${{ matrix.language }})
+  security:
+    name: Security
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'branch_protection_rule' }}
 
     permissions:
+      actions: read
       contents: read
-      security-events: write # Upload the analysis to code scanning.
-      actions: read # Required by the SARIF upload on private repositories.
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language:
-          - actions
-          # yamllint disable-line #;< AUDIT_JAVASCRIPT
-          - javascript-typescript
-          # yamllint disable-line #;> AUDIT_JAVASCRIPT
+      security-events: write # Upload the results to code scanning.
 
     steps:
       - name: Checkout code
@@ -84,37 +69,20 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
-          languages: ${{ matrix.language }}
+          languages: actions,javascript-typescript
           build-mode: none
 
-      - name: Analyze with CodeQL
+      - name: Scan code for vulnerabilities with CodeQL
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
-        with:
-          category: /language:${{ matrix.language }}
-  # yamllint disable-line #;< PHP
 
-  semgrep:
-    name: Semgrep (PHP)
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      security-events: write # Upload the SARIF report to code scanning.
-      actions: read # Required by the SARIF upload on private repositories.
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          persist-credentials: false
-
-      # CodeQL has no PHP analyzer, so Semgrep's PHP rules cover the PHP code.
-      - name: Scan with Semgrep
+      # yamllint disable-line #;< PHP
+      # CodeQL has no PHP analyzer.
+      - name: Scan PHP code for vulnerabilities with Semgrep
         run: docker run --rm -v "${GITHUB_WORKSPACE}:/src" --workdir /src semgrep/semgrep:1.185.0@sha256:67518c174185a2043fdbed16c70631b79209499b3671178e7194379b48295a0d semgrep scan --config p/php --metrics=off --sarif --output semgrep.sarif
 
-      - name: Upload Semgrep report to code scanning
+      - name: Upload the Semgrep results to code scanning
         uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           sarif_file: semgrep.sarif
           category: semgrep
-  # yamllint disable-line #;> PHP
+      # yamllint disable-line #;> PHP

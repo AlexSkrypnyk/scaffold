@@ -472,11 +472,10 @@ AGENTS
 create_audit_workflow() {
   mkdir -p "${1}/.github/workflows"
   cat >"${1}/.github/workflows/audit.yml" <<'WORKFLOW'
-        language:
-          - actions
-          # yamllint disable-line #;< AUDIT_JAVASCRIPT
-          - javascript-typescript
-          # yamllint disable-line #;> AUDIT_JAVASCRIPT
+      - name: Initialize CodeQL
+        with:
+          languages: actions,javascript-typescript
+          build-mode: none
 WORKFLOW
 }
 
@@ -490,8 +489,7 @@ WORKFLOW
     use_nodejs="${combination% *}" use_docs="${combination#* }" process_audit
     popd >/dev/null || return 1
 
-    assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "- javascript-typescript"
-    assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "- actions"
+    assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "languages: actions,javascript-typescript"
   done
 }
 
@@ -504,8 +502,20 @@ WORKFLOW
   popd >/dev/null || return 1
 
   assert_file_not_contains "${tmpdir}/.github/workflows/audit.yml" "javascript-typescript"
-  assert_file_not_contains "${tmpdir}/.github/workflows/audit.yml" "AUDIT_JAVASCRIPT"
-  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "- actions"
+  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "languages: actions"
+  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "build-mode: none"
+}
+
+@test "process_audit is a no-op without the audit workflow" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_audit_absent"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  use_nodejs="n" use_docs="n" run process_audit
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_file_not_exists "${tmpdir}/.github/workflows/audit.yml"
 }
 
 @test "remove_renovate removes the config and the update workflow" {
@@ -1347,7 +1357,7 @@ SETTINGS
   popd >/dev/null || return 1
 
   assert_file_exists "${tmpdir}/.github/workflows/audit.yml"
-  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "- actions"
+  assert_file_contains "${tmpdir}/.github/workflows/audit.yml" "languages: actions"
   assert_file_not_contains "${tmpdir}/.github/workflows/audit.yml" "javascript-typescript"
 }
 
