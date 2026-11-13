@@ -504,14 +504,17 @@ WORKFLOW
       - name: Keep LF line endings on Windows
         if: runner.os == 'Windows'
         run: git config --global core.autocrlf false
-      # yamllint disable-line #;> WINDOWS
 
+      # yamllint disable-line #;> WINDOWS
       - name: Checkout code
 WORKFLOW
 
   pushd "${tmpdir}" >/dev/null || return 1
   remove_windows
   popd >/dev/null || return 1
+
+  run grep -A1 '^    steps:$' "${tmpdir}/.github/workflows/test-php.yml"
+  assert_output_contains "      - name: Checkout code"
 
   assert_file_not_contains "${tmpdir}/.github/workflows/test-php.yml" "windows-latest"
   assert_file_not_contains "${tmpdir}/.github/workflows/test-php.yml" "autocrlf"

@@ -41,8 +41,8 @@ jobs:
       - name: Keep LF line endings on Windows
         if: runner.os == 'Windows'
         run: git config --global core.autocrlf false
-      # yamllint disable-line #;> WINDOWS
 
+      # yamllint disable-line #;> WINDOWS
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:

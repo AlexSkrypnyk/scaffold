@@ -43,8 +43,8 @@ jobs:
       - name: Keep LF line endings on Windows
         if: runner.os == 'Windows'
         run: git config --global core.autocrlf false
-      # yamllint disable-line #;> WINDOWS
 
+      # yamllint disable-line #;> WINDOWS
       - name: Install current Bash on macOS
         if: startsWith(matrix.os, 'macos-')
         run: brew install bash
