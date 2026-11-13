@@ -309,7 +309,11 @@ Key workflows:
 [//]: # (#;> NODEJS)
 [//]: # (#;< AUDIT)
 
-- `.github/workflows/audit.yml` - OpenSSF Scorecard, CodeQL and, for PHP, Semgrep, with results in the repository's **Security** tab
+## Security audit
+
+`.github/workflows/audit.yml` runs OpenSSF Scorecard, CodeQL and, on PHP
+projects, Semgrep. The results appear under **Security > Code scanning** in the
+GitHub repository.
 
 [//]: # (#;> AUDIT)
 [//]: # (#;< DOCKER)
