@@ -25,7 +25,7 @@ The following table lists the workflows that build the PHAR:
 | `Test PHP`, `Build PHAR` job | Every `Test PHP` run, including on pull requests | Builds the PHAR, then runs it with `--version` and with no arguments. A PHAR that fails to build or run fails the job. |
 | `Release PHP` | A tag push, or a manual run with a version | Builds and runs the PHAR with the same checks, then attaches it to the GitHub release for the version. The `softprops/action-gh-release` action creates the release if it doesn't exist. |
 
-For the tags that trigger `Release PHP`, see [Release](release.mdx#trigger-conditions). The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows a released PHAR under **Assets**.
+To release the PHAR, see [PHP release](../php/release.mdx). The Scaffold repository's [Releases](https://github.com/AlexSkrypnyk/scaffold/releases) page shows a released PHAR under **Assets**.
 
 ## PHAR version
 

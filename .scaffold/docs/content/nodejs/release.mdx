@@ -1,0 +1,96 @@
+---
+title: Release
+sidebar_position: 5
+cspell: ignore intoto
+---
+
+# Release
+
+The `Release Node.js` workflow publishes your package to npm and finishes the GitHub release, starting from a version tag you create on your machine. This page is for maintainers of a Node.js project created from Scaffold. It covers the one-time npm setup, releasing a version, what the workflow does and how anyone can verify a downloaded script.
+
+Release only by pushing a version tag. Never click **Publish release** on the draft release: a published release makes the workflow stop, so the release never gets its assets.
+
+## Before you begin
+
+The workflow publishes to npm through [trusted publishing](https://docs.npmjs.com/trusted-publishers), so your repository stores no npm token. npm trusts the workflow from settings on the package's page, so the package has to exist on npm first.
+
+To set up npm publishing:
+
+1. Check that `repository` in `package.json` points to your GitHub repository. npm compares it with the repository that runs the workflow.
+2. From your machine, publish the first version:
+
+   ```bash
+   npm publish --access public
+   ```
+
+3. On [npmjs.com](https://www.npmjs.com/), open the package's **Settings** and add a trusted publisher for **GitHub Actions**. Enter your repository's owner and name, and `release-nodejs.yml` as the workflow filename.
+
+To release on GitHub only, set `"private": true` in `package.json`. The workflow then skips npm and still finishes the GitHub release.
+
+## Release a version
+
+Release Drafter keeps a draft release with the notes for every pull request merged into `main`. The draft's version is Release Drafter's guess, and the tag you push replaces it.
+
+To release a version:
+
+1. Open the draft release on your repository's **Releases** page. Edit its notes if they need it.
+2. On an up-to-date `main` with no uncommitted changes, set the version:
+
+   ```bash
+   npm version 1.2.3
+   ```
+
+   `npm version` sets the version in `package.json`, commits the change as `Released 1.2.3.` and tags the commit `1.2.3`. The project's `.npmrc` makes the tag the bare version, with no `v`.
+
+3. Push the commit and the tag:
+
+   ```bash
+   git push origin main --follow-tags
+   ```
+
+4. On the **Actions** tab, open the `Release Node.js` run for the tag. Confirm that it passes.
+5. Confirm that the release is published with `nodejs-script`, `REPO-nodejs-TAG.sha256` and `REPO-nodejs-TAG.intoto.jsonl`. Confirm that npm lists the version.
+
+A version with a suffix, such as `1.2.3-rc.1`, goes to npm under the `next` dist-tag and becomes a GitHub pre-release.
+
+## What the workflow does
+
+The workflow runs 2 jobs. It starts only on a version tag on the default branch, as the [release checks](../ci/release.mdx#release-checks) describe.
+
+The `Build Node.js release` job has read-only access to the repository contents. It runs these steps:
+
+1. Checks that the tag equals the version in `package.json`.
+2. Packs the npm package with `npm pack`. The `files` list in `package.json` limits the package to `nodejs-script`.
+3. Writes the SHA-256 checksum of `nodejs-script` to `REPO-nodejs-TAG.sha256`, where `REPO` is the repository name and `TAG` is the tag name.
+4. Signs a build provenance attestation for the package, the script and the checksum file, and saves the attestation bundle as `REPO-nodejs-TAG.intoto.jsonl`.
+5. Checks the checksum and the attestation.
+
+The `Publish Node.js release` job has write access to the repository contents. It runs these steps:
+
+1. Publishes the package to npm with provenance. It skips npm when the version is already there, so a rerun doesn't fail.
+2. Waits for any running `Draft release notes` run, because that run sets the draft's tag back to its own guess.
+3. Renames the draft to the tag and fixes the version in its compare link. Without a draft, it creates a release with generated notes.
+4. Attaches `nodejs-script` and both files, then publishes the release.
+
+A release becomes the latest GitHub release only when no published release has a higher version. Release runs queue behind each other, so tags pushed together release 1 at a time.
+
+## Verify a release
+
+Anyone who downloads `nodejs-script` can confirm that your repository's release workflow built it. To verify the script:
+
+1. From the release page, download `nodejs-script` and `REPO-nodejs-TAG.sha256`.
+2. Check the checksum:
+
+   ```bash
+   sha256sum --check REPO-nodejs-TAG.sha256
+   ```
+
+   On macOS, run `shasum -a 256 --check REPO-nodejs-TAG.sha256` instead.
+
+3. Check the attestation with [GitHub CLI](https://cli.github.com/):
+
+   ```bash
+   gh attestation verify nodejs-script --repo OWNER/REPO
+   ```
+
+Replace `OWNER/REPO` with the repository and `TAG` with the release's tag. To check the attestation without reading it from GitHub, download `REPO-nodejs-TAG.intoto.jsonl` too and add `--bundle REPO-nodejs-TAG.intoto.jsonl` to the `gh attestation verify` command. For the npm package, run `npm audit signatures` in a project that installs it.

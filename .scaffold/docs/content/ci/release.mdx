@@ -1,45 +1,35 @@
 ---
 title: Release
 sidebar_position: 2
-cspell: ignore RELEASEDRAFTER intoto
+cspell: ignore RELEASEDRAFTER
 ---
 
 # Release
 
-A project created from Scaffold carries workflows that draft release notes and publish the project's assets. This page is for maintainers of that project. It lists each release workflow, when it runs and what it publishes.
+A project created from Scaffold carries workflows that draft release notes and publish the project's assets. This page is for maintainers of that project. It lists each release workflow and the checks they share, and links to the page that explains how to release each stack.
 
-## Trigger conditions
+## Release workflows
 
-Every release workflow runs on `ubuntu-latest` and starts on each pushed tag whose name has no `/`. The tag can come from `git push`, or from a release you publish in the GitHub interface.
+The following table lists each release workflow, the event that starts it and the page that covers it:
 
-The following table lists every event that starts each workflow, and when `install.sh` adds the workflow to a new project:
+| Workflow | File | Starts on | Added when | Page |
+|---|---|---|---|---|
+| Draft release notes | `draft-release-notes.yml` | A push to `main` or a tag | Release Drafter is selected (on by default) | [Release Drafter](release-drafter.mdx) |
+| Release PHP | `release-php.yml` | A version tag | The project is a PHP command app with a PHAR, or a single-file PHP script | [PHP release](../php/release.mdx) |
+| Release Node.js | `release-nodejs.yml` | A version tag | Node.js is selected | [Node.js release](../nodejs/release.mdx) |
+| Release Docker | `release-docker.yml` | A version tag | Docker is selected (off by default) | [Publishing](../docker/publishing.mdx) |
+| Release docs | `release-docs.yml` | A tag or a manual run | The documentation site is selected | [Documentation](../documentation.mdx) |
 
-| Workflow | File | Events | Added when |
-|---|---|---|---|
-| Draft release notes | `draft-release-notes.yml` | A push to `main` or a tag | Release Drafter is selected (on by default) |
-| Release PHP | `release-php.yml` | A tag | The project is a PHP command app with a PHAR, or a single-file PHP script. A class library has no asset to attach. |
-| Release Node.js | `release-nodejs.yml` | A tag | Node.js is selected |
-| Release Docker | `release-docker.yml` | A tag | Docker is selected (off by default) |
-| Release docs | `release-docs.yml` | A tag or a manual run | The documentation site is selected |
-
-To start Release docs by hand, open the **Actions** tab and enter a **Release version**. The Docker and documentation releases have their own pages: [Publishing](../docker/publishing.mdx) and [Documentation](../documentation.mdx).
+A PHP class library has no asset to attach, so it has no release workflow.
 
 ## Release checks
 
-Release PHP, Release Node.js and Release Docker check the tag before they build anything:
+A version tag is 3 numbers with an optional suffix, such as `1.4.0`, `26.5.1` or `1.4.0-rc.1`. Release PHP, Release Node.js and Release Docker start only on a version tag, and they check the tag before they build anything:
 
-- The tag name is a version, such as `1.4.0`, `v1.4.0`, `26.5.1` or `1.4.0-rc1`.
+- The tag name is a version.
 - The tagged commit is on the default branch.
 
 A tag that fails either check stops the workflow, so nothing gets published from it.
-
-## Release publication
-
-Release PHP and Release Node.js each run 2 jobs. The build job has read-only access to the repository contents. It builds the assets, writes their SHA-256 checksums and signs a build provenance attestation for them. The publish job has write access to the repository contents, and it attaches the assets to the GitHub release for the tag.
-
-The publish job finds the release for the tag, including a draft that Release Drafter prepared. Without one, it creates a draft with generated notes. It uploads every asset, replacing any asset of the same name, then publishes the release if it's still a draft. The publish jobs of 1 tag run one at a time, so 2 workflows never create the same release.
-
-Immutable releases accept uploads only before a release is published. To use them, push the tag with `git push` in a project with 1 release workflow. A release you publish in the GitHub interface is already published when the workflows start.
 
 [//]: # (#;< RELEASEDRAFTER)
 
@@ -48,48 +38,3 @@ Immutable releases accept uploads only before a release is published. To use the
 The `Draft release notes` workflow runs the [`release-drafter/release-drafter`](https://github.com/release-drafter/release-drafter) action, and its token has write access to contents and pull requests. See [Release Drafter](release-drafter.mdx).
 
 [//]: # (#;> RELEASEDRAFTER)
-
-[//]: # (#;< PHP)
-
-## Release PHP
-
-The `Build PHP release` job runs on PHP 8.4. After it checks the tag and installs the Composer dependencies, it runs these steps:
-
-1. On a command app, writes the tag name into `box.json` as the version, builds the PHAR with [Box](https://github.com/box-project/box) and runs the PHAR to check that it starts. See [PHP packaging](php-packaging.mdx).
-2. Collects the release asset: the PHAR on a command app, or the script file on a single-file script.
-3. Writes the asset's checksum to `REPO-php-TAG.sha256`, where `REPO` is the repository name and `TAG` is the tag name.
-4. Attests the asset and the checksum file, and saves the attestation bundle as `REPO-php-TAG.intoto.jsonl`.
-5. Checks the checksum and the attestation.
-
-The `Publish PHP release` job attaches the asset and both files to the release.
-
-[//]: # (#;> PHP)
-
-[//]: # (#;< NODEJS)
-
-## Release Node.js
-
-The `Build Node.js release` job checks the tag and collects `nodejs-script`. It writes the checksum to `REPO-nodejs-TAG.sha256` and the attestation bundle to `REPO-nodejs-TAG.intoto.jsonl`, then checks both. The `Publish Node.js release` job attaches `nodejs-script` and both files to the release.
-
-[//]: # (#;> NODEJS)
-
-## Verify a release
-
-Anyone who downloads a release asset can confirm that your repository's release workflow built it. To verify an asset:
-
-1. From the release page, download the asset and the `.sha256` file of the workflow that built it.
-2. Check the checksum:
-
-   ```bash
-   sha256sum --check --ignore-missing REPO-php-TAG.sha256
-   ```
-
-   On macOS, run `shasum -a 256 --check --ignore-missing REPO-php-TAG.sha256` instead.
-
-3. Check the attestation with [GitHub CLI](https://cli.github.com/):
-
-   ```bash
-   gh attestation verify ASSET --repo OWNER/REPO
-   ```
-
-Replace `OWNER/REPO` with the repository, `TAG` with the release's tag and `ASSET` with the downloaded filename. For a Node.js asset, use the `REPO-nodejs-TAG.sha256` file. To check the attestation without reading it from GitHub, download the `.intoto.jsonl` file too and add `--bundle REPO-php-TAG.intoto.jsonl` to the `gh attestation verify` command.
