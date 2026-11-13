@@ -245,6 +245,12 @@ Use `git status` and `git diff` to review everything. Pay attention to:
   only until it has classes of its own.
 - **README.md**: re-apply any structural changes from the template while keeping
   the project's own content.
+- **Workflows and jobs**: mark new workflow files as intent-to-add with
+  `git add -N .github/workflows`, because `git diff` skips untracked files. Then
+  list what changed under `.github/workflows` with
+  `git diff --stat <default_branch> -- .github/workflows`, and read the diff for
+  added, removed or renamed workflow files and for changed job ids, job `name:`
+  values or matrix entries. Note each one - Step 12 depends on it.
 
 ## Step 9: Commit
 
@@ -286,6 +292,50 @@ separate commit.
 Push the branch and open a pull request summarising the update (use the
 `/open-pr` skill if available).
 
+If Step 8 found workflow or job changes and the default branch has a ruleset
+with required status checks, the PR can show old checks as "Expected - Waiting
+for status to be reported". Those checks no longer exist and will never report.
+Say so in the PR description: a repository admin can merge past them, because
+the Scaffold ruleset lets admins bypass it.
+
+## Step 12: Suggest refreshing the branch ruleset
+
+Skip this step when Step 8 found no added, removed or renamed workflows and no
+changed job ids, job names or matrix entries.
+
+Otherwise the default-branch ruleset still requires the old check names. A
+renamed or removed job leaves a required check that never reports, so every
+pull request waits on it, and a new job is not required until the ruleset is
+refreshed.
+
+Do not run the refresh yourself - it changes repository settings. Tell the user
+which workflows and jobs changed, and suggest they run the following once the
+update PR has merged and CI has finished on the default branch, because the
+required checks are read from the latest CI run there. It needs GitHub CLI and
+a token with Administration write and Checks read access in
+`SCAFFOLD_GITHUB_TOKEN`; preview with `--dry-run` first:
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --no-github-settings --no-github-labels --dry-run
+```
+
+```bash
+curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github --no-github-settings --no-github-labels
+```
+
+Run them from the project root, so the repository is read from the `origin`
+remote. The command replaces the required status checks of the
+`default-branch` ruleset with those of the latest CI run, and keeps the
+ruleset's other rules and other bypass actors. It leaves the project files and
+the repository settings untouched.
+
+It also resets the parts of the ruleset Scaffold owns: enforcement becomes
+`active`, the target becomes the default branch only, the deletion and
+non-fast-forward rules are restored, and the admin role's bypass becomes
+`always`. When the user has customised any of those - a disabled ruleset, extra
+branch conditions, or an admin bypass limited to pull requests - suggest editing
+the required checks by hand under **Settings > Rules > Rulesets** instead.
+
 ## Important notes
 
 - Always confirm the version and the assembled `install.sh` command with the user
@@ -298,6 +348,8 @@ Push the branch and open a pull request summarising the update (use the
   project's own `LICENSE` from git if it kept one.
 - After the update, verify workflow branch references match the project's
   default branch.
+- When workflows or jobs were added, removed or renamed, suggest refreshing the
+  default-branch ruleset's required checks after the merge (Step 12).
 - Prefer the project's wrapper commands (`composer ...`, `npm ...`) over calling
   the underlying tools directly.
 
