@@ -1299,6 +1299,7 @@ default_answers() {
   use_docs="y"
   use_test_actions="n"
   use_schedule="y"
+  use_windows="n"
   use_ai="y"
   use_ai_arch_docs="mermaid"
   remove_self="y"
@@ -1325,10 +1326,11 @@ default_answers() {
   use_docs="n"
   use_test_actions="y"
   use_schedule="n"
+  use_windows="y"
   use_ai_arch_docs="plantuml"
   remove_self="n"
   run print_reproduce_command
-  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --php-command-name=acme --no-phar --no-nodejs --shell-command-name=acme-sh --docker --no-release-drafter --no-pr-autoassign --no-funding --no-pr-template --no-renovate --no-docs --test-actions --no-schedule --ai-arch-docs=plantuml --keep'
+  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --php-command-name=acme --no-phar --no-nodejs --shell-command-name=acme-sh --docker --no-release-drafter --no-pr-autoassign --no-funding --no-pr-template --no-renovate --no-docs --test-actions --no-schedule --windows --ai-arch-docs=plantuml --keep'
 }
 
 @test "print_reproduce_command covers the PHP modes, Docker image and AI options" {

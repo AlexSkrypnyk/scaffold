@@ -488,6 +488,38 @@ WORKFLOW
   assert_file_contains "${tmpdir}/.github/workflows/test-php.yml" "push:"
 }
 
+@test "remove_windows removes the Windows matrix entry and steps" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_windows"
+  mkdir -p "${tmpdir}/.github/workflows"
+  cat >"${tmpdir}/.github/workflows/test-php.yml" <<'WORKFLOW'
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          # yamllint disable-line #;< WINDOWS
+          - windows-latest
+          # yamllint disable-line #;> WINDOWS
+    steps:
+      # yamllint disable-line #;< WINDOWS
+      - name: Keep LF line endings on Windows
+        if: runner.os == 'Windows'
+        run: git config --global core.autocrlf false
+      # yamllint disable-line #;> WINDOWS
+
+      - name: Checkout code
+WORKFLOW
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_windows
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/.github/workflows/test-php.yml" "windows-latest"
+  assert_file_not_contains "${tmpdir}/.github/workflows/test-php.yml" "autocrlf"
+  assert_file_not_contains "${tmpdir}/.github/workflows/test-php.yml" "WINDOWS"
+  assert_file_contains "${tmpdir}/.github/workflows/test-php.yml" "- ubuntu-latest"
+  assert_file_contains "${tmpdir}/.github/workflows/test-php.yml" "- name: Checkout code"
+}
+
 @test "remove_ai removes the AI agent files and strips the AI token block" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_ai"
   mkdir -p "${tmpdir}/.claude"
@@ -750,6 +782,16 @@ TOKENS
   assert_equal "${use_schedule}" "n"
 }
 
+@test "parse_args --windows enables Windows in CI" {
+  parse_args --windows
+  assert_equal "${use_windows}" "y"
+}
+
+@test "parse_args --no-windows disables Windows in CI" {
+  parse_args --no-windows
+  assert_equal "${use_windows}" "n"
+}
+
 @test "parse_args --ai enables AI agents" {
   parse_args --ai
   assert_equal "${use_ai}" "y"
@@ -920,6 +962,20 @@ TOKENS
   run collect_noninteractive
   assert_success
   assert_output_contains "Use scheduled builds             : n"
+}
+
+@test "collect_noninteractive keeps Windows in CI off by default" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use Windows in CI                : n"
+}
+
+@test "collect_noninteractive enables Windows in CI on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --windows
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use Windows in CI                : y"
 }
 
 @test "collect_noninteractive keeps AI agents on by default" {

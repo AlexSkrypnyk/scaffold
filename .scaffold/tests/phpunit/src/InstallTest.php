@@ -195,6 +195,11 @@ final class InstallTest extends UnitTestCase {
           'use_schedule' => self::$tuiNo,
         ],
     ];
+    yield 'windows' => [
+        [
+          'use_windows' => self::$tuiYes,
+        ],
+    ];
     yield 'no ai' => [
         [
           'use_ai' => self::$tuiNo,
@@ -272,6 +277,10 @@ final class InstallTest extends UnitTestCase {
     yield 'no schedule' => [
       array_merge($identity, ['--no-schedule']),
       'no_schedule',
+    ];
+    yield 'windows' => [
+      array_merge($identity, ['--windows']),
+      'windows',
     ];
     yield 'no ai' => [
       array_merge($identity, ['--no-ai']),
@@ -1192,6 +1201,7 @@ final class InstallTest extends UnitTestCase {
       'use_docs' => self::TUI_DEFAULT,
       'use_test_actions' => self::TUI_DEFAULT,
       'use_schedule' => self::TUI_DEFAULT,
+      'use_windows' => self::TUI_DEFAULT,
       'use_ai' => self::TUI_DEFAULT,
       'use_ai_arch_docs' => self::TUI_DEFAULT,
       'remove_self' => self::TUI_DEFAULT,

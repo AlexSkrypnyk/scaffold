@@ -74,6 +74,7 @@ use_renovate=""
 use_docs=""
 use_test_actions=""
 use_schedule=""
+use_windows=""
 use_ai=""
 use_ai_arch_docs=""
 remove_self=""
@@ -875,6 +876,10 @@ remove_test_actions() {
 
 remove_schedule() {
   remove_tokens_with_content "SCHEDULE"
+}
+
+remove_windows() {
+  remove_tokens_with_content "WINDOWS"
 }
 
 #-------------------------------------------------------------------------------
@@ -2399,6 +2404,8 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --docs, --no-docs              Documentation site.
   --test-actions, --no-test-actions  GitHub Actions linting (default: off).
   --schedule, --no-schedule      Daily scheduled build (default: on).
+  --windows, --no-windows        Run the test workflows on Windows too
+                                 (default: off).
   --ai, --no-ai                  AI agents configuration (default: on).
   --ai-arch-docs[=VALUE]         AI architecture docs: mermaid, plantuml or
                                  none (default: mermaid).
@@ -2526,6 +2533,8 @@ parse_args() {
       --no-test-actions) use_test_actions="n" ;;
       --schedule) use_schedule="y" ;;
       --no-schedule) use_schedule="n" ;;
+      --windows) use_windows="y" ;;
+      --no-windows) use_windows="n" ;;
 
       --ai) use_ai="y" ;;
       --no-ai) use_ai="n" ;;
@@ -2672,6 +2681,7 @@ apply_noninteractive_defaults() {
   : "${use_docs:=y}"
   : "${use_test_actions:=n}"
   : "${use_schedule:=y}"
+  : "${use_windows:=n}"
   : "${use_ai:=y}"
   : "${remove_self:=y}"
   : "${use_github:=n}"
@@ -2746,6 +2756,7 @@ print_summary() {
   echo "Use Docs                         : ${use_docs}"
   echo "Use GitHub Actions linting       : ${use_test_actions}"
   echo "Use scheduled builds             : ${use_schedule}"
+  echo "Use Windows in CI                : ${use_windows}"
   echo "Use AI agents                    : ${use_ai}"
   echo "AI architecture docs             : ${use_ai_arch_docs:-none}"
   echo "Remove this script               : ${remove_self}"
@@ -2823,6 +2834,7 @@ print_reproduce_command() {
   [ "${use_docs}" = "y" ] || args+=("--no-docs")
   [ "${use_test_actions}" != "y" ] || args+=("--test-actions")
   [ "${use_schedule}" = "y" ] || args+=("--no-schedule")
+  [ "${use_windows}" != "y" ] || args+=("--windows")
 
   if [ "${use_ai}" != "y" ]; then
     args+=("--no-ai")
@@ -2928,6 +2940,7 @@ collect_interactive() {
   use_docs="$(ask_yesno "Use docs")"
   use_test_actions="$(ask_yesno "Use GitHub Actions linting" "N")"
   use_schedule="$(ask_yesno "Use scheduled builds")"
+  use_windows="$(ask_yesno "Use Windows in CI" "N")"
 
   use_ai="$(ask_yesno "Use AI agents")"
   if [ "${use_ai}" = "y" ]; then
@@ -3190,6 +3203,7 @@ process_project() {
   [ "${use_docs}" != "y" ] && remove_docs
   [ "${use_test_actions}" != "y" ] && remove_test_actions
   [ "${use_schedule}" != "y" ] && remove_schedule
+  [ "${use_windows}" != "y" ] && remove_windows
 
   process_claude_settings
 
