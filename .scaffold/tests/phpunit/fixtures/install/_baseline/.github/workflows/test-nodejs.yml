@@ -30,7 +30,6 @@ jobs:
         node: [20, 22, 24]
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@__HASH__ # __VERSION__
         with:
@@ -40,7 +39,6 @@ jobs:
         uses: actions/setup-node@__HASH__ # __VERSION__
         with:
           node-version: ${{ matrix.node }}
-
 
       - name: Install dependencies
         run: npm install --ignore-scripts

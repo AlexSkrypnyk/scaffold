@@ -34,7 +34,6 @@ jobs:
       contents: read
 
     steps:
-
       - name: Install current Bash on macOS
         if: startsWith(matrix.os, 'macos-')
         run: brew install bash

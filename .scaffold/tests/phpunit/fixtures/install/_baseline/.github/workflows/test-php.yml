@@ -32,7 +32,6 @@ jobs:
         deps: ['normal', 'lowest']
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@__HASH__ # __VERSION__
         with:
