@@ -140,9 +140,13 @@ jobs:
             exit 0
           fi
 
+          # An older version must not take "latest" from a newer one on npm.
           dist_tag='latest'
+          current="$(npm view "${name}" dist-tags.latest 2>/dev/null || true)"
           if [[ "${TAG}" == *-* ]]; then
             dist_tag='next'
+          elif [ -n "${current}" ] && [ "$(printf '%s\n%s\n' "${current}" "${TAG}" | sort -V | tail -n 1)" != "${TAG}" ]; then
+            dist_tag='maintenance'
           fi
 
           npm publish "${package}" --provenance --access public --tag "${dist_tag}" --ignore-scripts
@@ -153,16 +157,22 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
-          workflows=(draft-release-notes.yml)
-          # The PHP release of the same tag attaches its assets first.
-          workflows+=(release-php.yml)
-
           # A running Release Drafter sets its draft's tag back to its own guess.
-          for workflow in "${workflows[@]}"; do
-            for run in $(gh run list --workflow "${workflow}" --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' 2>/dev/null || true); do
-              gh run watch "${run}" > /dev/null || true
-            done
+          for run in $(gh run list --workflow draft-release-notes.yml --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' 2>/dev/null || true); do
+            gh run watch "${run}" > /dev/null || true
           done
+
+          # The PHP release of the same tag attaches its assets to the draft
+          # first, and the release needs them.
+          php_run="$(gh run list --workflow release-php.yml --commit "${GITHUB_SHA}" --event push --json databaseId --jq '.[0].databaseId // empty')"
+          if [ -z "${php_run}" ]; then
+            echo "::error::No 'Release PHP' run found for '${TAG}'."
+            exit 1
+          fi
+          if ! gh run watch "${php_run}" --exit-status > /dev/null; then
+            echo "::error::The 'Release PHP' run for '${TAG}' failed, so the release is not published."
+            exit 1
+          fi
 
           state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' || echo 'none')"
 
@@ -172,10 +182,16 @@ jobs:
           fi
 
           # Release Drafter names its draft after the version it guesses, which
-          # can differ from the pushed tag.
+          # can differ from the pushed tag. A draft whose tag exists already
+          # belongs to another release.
           draft=''
           if [ "${state}" = 'none' ]; then
-            draft="$(gh release list --json tagName,isDraft --jq '[.[] | select(.isDraft) | .tagName][0] // empty')"
+            for candidate in $(gh release list --json tagName,isDraft --jq '.[] | select(.isDraft) | .tagName'); do
+              if ! gh api "repos/${GH_REPO}/git/ref/tags/${candidate}" > /dev/null 2>&1; then
+                draft="${candidate}"
+                break
+              fi
+            done
           fi
 
           if [ -n "${draft}" ]; then
@@ -196,7 +212,8 @@ jobs:
               echo '::error::Could not list the published releases.'
               exit 1
             fi
-            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sort -V | tail -n 1)"
+            # Older releases can carry a 'v' prefix, which sorts after digits.
+            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sed 's/^v//' | sort -V | tail -n 1)"
             if [ "${highest}" = "${TAG}" ]; then
               latest='true'
             fi

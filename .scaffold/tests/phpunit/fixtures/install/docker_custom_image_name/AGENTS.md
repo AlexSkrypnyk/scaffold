@@ -82,7 +82,7 @@
  
 -## NodeJS Application Architecture
 +- `.github/workflows/test-docker.yml` - Build and lint the Docker image, and push a `canary`-tagged image on merge to `main`
-+- `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag
++- `.github/workflows/release-docker.yml` - Build and push multi-arch image to Docker Hub on tag, with provenance, an SBOM and an attestation
  
 -### Standalone Single-File Script
 +Docker Hub credentials are stored as repository secrets:
@@ -223,7 +223,7 @@
 -Key workflows:
 -
 -- `.github/workflows/test-php.yml` - PHP testing
--- `.github/workflows/release-php.yml` - Creates the release on a tag and attaches the asset
+-- `.github/workflows/release-php.yml` - Runs on the tag that publishing the draft release creates: checks it, then attaches the asset, its checksum and its provenance attestation to the release
 -  - Builds the PHAR to attach
 -
 -
@@ -231,7 +231,7 @@
 -
 -
 -- `.github/workflows/test-nodejs.yml` - NodeJS testing
--- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
+-- `.github/workflows/release-nodejs.yml` - Runs on the tag that `npm version` creates: checks it matches `package.json`, publishes to npm with provenance, then attaches the script, its checksum and its provenance attestation to the release and publishes it
 -
 -
 -## Security audit
