@@ -1,11 +1,14 @@
-@@ -135,42 +135,3 @@
-         timeout-minutes: 30
-         with:
-           limit-access-to-actor: true
+@@ -121,38 +121,3 @@
+           fail_ci_if_error: true
+         env:
+           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 -
 -  build-php:
 -    name: Build PHAR
 -    runs-on: ubuntu-latest
+-
+-    permissions:
+-      contents: read
 -
 -    steps:
 -      - name: Checkout code
@@ -25,7 +28,7 @@
 -          php-version: 8.4
 -
 -      - name: Install dependencies
--        run: composer install
+-        run: composer install --no-scripts
 -
 -      - name: Build PHAR
 -        run: composer build
@@ -34,10 +37,3 @@
 -        run: |
 -          ./dist/force-crystal.phar --version
 -          ./dist/force-crystal.phar list || exit 1
--
--      - name: Setup upterm session
--        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
--        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
--        timeout-minutes: 30
--        with:
--          limit-access-to-actor: true

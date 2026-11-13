@@ -11,10 +11,7 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
 concurrency:
   group: pages
@@ -24,6 +21,11 @@ jobs:
   release-docs:
     name: Release documentation
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write # Deploy the site to GitHub Pages.
+      id-token: write # Verify the deployment's origin to GitHub Pages.
 
     environment:
       name: github-pages
@@ -44,7 +46,7 @@ jobs:
         uses: actions/setup-node@__HASH__ # __VERSION__
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci --ignore-scripts
         working-directory: '${{ github.workspace }}/docs'
 
       - name: Set release version

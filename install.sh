@@ -713,6 +713,7 @@ remove_nodejs() {
   rm -f package.json || true
   rm -f package-lock.json || true
   rm -f yarn.lock || true
+  rm -f .npmrc || true
   rm -Rf node_modules || true
 
   rm -f nodejs-script || true
@@ -1028,6 +1029,7 @@ process_internal() {
   uncomment_line ".gitattributes" "\/phpunit.xml"
   uncomment_line ".gitattributes" "\/rector.php"
   uncomment_line ".gitattributes" "\/.npmignore"
+  uncomment_line ".gitattributes" "\/.npmrc"
   uncomment_line ".gitattributes" "\/renovate.json"
 
   remove_tokens_with_content "META"

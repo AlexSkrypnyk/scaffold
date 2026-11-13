@@ -6,13 +6,15 @@ on:
       - opened
       - reopened
 
-permissions:
-  pull-requests: write
+permissions: {}
 
 jobs:
   assign-author:
     name: Assign author
     runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write # Assign the author to the pull request.
 
     steps:
       - name: Assign author

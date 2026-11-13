@@ -1,4 +1,4 @@
-@@ -57,8 +57,8 @@
+@@ -59,8 +59,8 @@
  
        - name: Test PHAR
          run: |
@@ -9,7 +9,7 @@
  
        - name: Create Release
          uses: softprops/action-gh-release@__HASH__ # __VERSION__
-@@ -65,4 +65,4 @@
+@@ -67,4 +67,4 @@
          with:
            tag_name: ${{ env.RELEASE_VERSION }}
            files: |

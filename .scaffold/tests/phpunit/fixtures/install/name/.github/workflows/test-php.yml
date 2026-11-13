@@ -1,4 +1,4 @@
-@@ -165,8 +165,8 @@
+@@ -154,5 +154,5 @@
  
        - name: Test PHAR
          run: |
@@ -6,6 +6,3 @@
 -          ./dist/force-crystal.phar list || exit 1
 +          ./dist/star-forge.phar --version
 +          ./dist/star-forge.phar list || exit 1
- 
-       - name: Setup upterm session
-         if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}

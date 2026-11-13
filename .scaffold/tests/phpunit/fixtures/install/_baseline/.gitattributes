@@ -12,4 +12,5 @@
 /phpunit.xml     export-ignore
 /rector.php      export-ignore
 /.npmignore      export-ignore
+/.npmrc          export-ignore
 /renovate.json   export-ignore

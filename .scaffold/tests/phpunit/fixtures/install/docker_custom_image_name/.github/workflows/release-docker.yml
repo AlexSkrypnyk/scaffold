@@ -5,12 +5,14 @@ on:
     tags:
       - '*'
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   push-release-to-registry:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code

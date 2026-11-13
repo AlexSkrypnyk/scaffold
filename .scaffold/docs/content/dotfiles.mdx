@@ -5,7 +5,7 @@ sidebar_position: 6
 
 # Dotfiles
 
-Scaffold adds `.editorconfig`, `.gitignore` and `.gitattributes` to every generated project. They set editor formatting, the files Git ignores and the contents of distribution archives. This page is for developers about to change them.
+Scaffold adds `.editorconfig`, `.gitignore` and `.gitattributes` to every generated project, and `.npmrc` to a Node.js project. They set editor formatting, the files Git ignores, the contents of distribution archives and how npm installs dependencies. This page is for developers about to change them.
 
 ## `.editorconfig`
 
@@ -44,5 +44,11 @@ In the generated project, `git archive` leaves out the following paths:
 - `.editorconfig`, `.gitattributes`, `.gitignore`, `.github` and `logo.png`
 - `docs`, when the project has a `docs` directory
 - On a PHP project, `tests`, `phpcs.xml`, `phpstan.neon`, `phpunit.xml` and `rector.php`
-- On a Node.js project, `.npmignore`
+- On a Node.js project, `.npmignore` and `.npmrc`
 - When you select Renovate, `renovate.json`
+
+## `.npmrc`
+
+`.npmrc` holds npm settings for the project. On a Node.js project, it sets `ignore-scripts=true`, so npm skips the install scripts of your dependencies. A compromised package then can't run code when you install it.
+
+The setting also skips the `pre` and `post` scripts around `npm run`, such as a `pretest` script before `npm test`. To run one of those scripts, call it by name, such as `npm run pretest`.

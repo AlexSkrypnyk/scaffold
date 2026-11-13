@@ -453,6 +453,13 @@ GitHub Actions workflows test the **scaffold template itself**:
 SARIF to the Security tab). Accepted zizmor findings are documented per-rule in
 the repository-root `zizmor.yml`.
 
+`.scaffold/tests/phpunit/src/WorkflowPolicyTest.php` parses every workflow of
+the template and of a generated project with every workflow selected. It fails
+when a workflow lacks top-level `permissions: {}`, a job declares no
+`permissions`, an action isn't pinned to a commit SHA, `actions/checkout`
+lacks `persist-credentials: false`, an npm install lacks `--ignore-scripts`
+or a Composer install or update lacks `--no-scripts`.
+
 Unlike the other `scaffold-*` maintenance workflows, this one is a **selectable
 consumer feature**: `install.sh` offers "Use GitHub Actions linting" (off by
 default; `--test-actions` / `--no-test-actions` non-interactively). When not
