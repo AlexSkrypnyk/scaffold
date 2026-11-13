@@ -13,7 +13,7 @@ The `Audit` workflow scans your project for security problems and rates its secu
 
 The workflow runs 2 jobs on `ubuntu-latest`:
 
-- `Audit` scores the repository's security practices with [OpenSSF Scorecard](https://scorecard.dev/). It checks practices such as branch protection, pinned dependencies and signed releases. Scorecard reads the files from the Git checkout, so the `export-ignore` paths in `.gitattributes`, such as `.github`, still count.
+- `Audit` scores the repository's security practices with [OpenSSF Scorecard](https://scorecard.dev/). It checks practices such as branch protection, pinned dependencies and signed releases. Scorecard reads the files from the Git checkout, so the `export-ignore` paths in `.gitattributes`, such as `.github`, still count. It skips pull requests, because most Scorecard checks rate repository settings and history, which a pull request doesn't change.
 - `Security` scans the code for vulnerabilities. It skips runs that a branch protection change starts.
 
 The following table lists the scans the `Security` job runs:
@@ -39,7 +39,7 @@ The workflow runs on the following events:
 
 Each job uploads its findings to code scanning. To see them, open your repository's **Security** tab and click **Code scanning**.
 
-On a public repository, the `Audit` job also publishes its result to the OpenSSF API, except on a pull request. After the first run on `main`, the result is at `https://scorecard.dev/viewer/?uri=github.com/OWNER/REPO`. Replace `OWNER` and `REPO` with your repository's owner and name. Until that run, the viewer reports that the repository isn't found.
+On a public repository, the `Audit` job also publishes its result to the OpenSSF API. After the first run on `main`, the result is at `https://scorecard.dev/viewer/?uri=github.com/OWNER/REPO`. Replace `OWNER` and `REPO` with your repository's owner and name. Until that run, the viewer reports that the repository isn't found.
 
 ## Private repositories
 
