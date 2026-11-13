@@ -718,6 +718,66 @@ final class InstallTest extends UnitTestCase {
   }
 
   /**
+   * Runtime dependencies of the selected stacks get their own manual group.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to install.sh.
+   * @param list<string> $expected
+   *   Managers expected to have a runtime dependencies rule.
+   */
+  #[DataProvider('dataProviderInstallRenovateRuntimeRules')]
+  public function testInstallRenovateRuntimeRules(array $arguments, array $expected): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
+
+    $this->assertProcessSuccessful();
+
+    $config = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'renovate.json'), TRUE, 512, JSON_THROW_ON_ERROR);
+    $this->assertIsArray($config);
+    $this->assertSame('7 days', $config['minimumReleaseAge'] ?? NULL);
+    $this->assertSame('strict', $config['internalChecksFilter'] ?? NULL);
+    $this->assertIsArray($config['packageRules']);
+
+    $rules = [
+      'composer' => ['matchManagers' => ['composer'], 'matchFileNames' => ['composer.json'], 'matchDepTypes' => ['require']],
+      'npm' => ['matchManagers' => ['npm'], 'matchFileNames' => ['package.json'], 'matchDepTypes' => ['dependencies']],
+    ];
+
+    $catch_all = array_search(['matchPackageNames' => ['*'], 'groupName' => 'all dependencies', 'groupSlug' => 'all'], $config['packageRules'], TRUE);
+    $this->assertIsInt($catch_all);
+
+    $actual = [];
+    foreach ($rules as $manager => $rule) {
+      $rule += ['groupName' => 'runtime dependencies', 'groupSlug' => 'runtime', 'automerge' => FALSE];
+      $position = array_search($rule, $config['packageRules'], TRUE);
+
+      if ($position === FALSE) {
+        continue;
+      }
+
+      // A later rule overrides the group set by an earlier one.
+      $this->assertGreaterThan($catch_all, $position);
+      $actual[] = $manager;
+    }
+
+    $this->assertSame($expected, $actual);
+
+    foreach ($config['packageRules'] as $rule) {
+      $this->assertIsArray($rule);
+      $this->assertNotSame([], $rule['matchManagers'] ?? NULL, 'A rule with no managers must be removed.');
+    }
+  }
+
+  public static function dataProviderInstallRenovateRuntimeRules(): \Iterator {
+    yield 'php and nodejs' => [[], ['composer', 'npm']];
+    yield 'php only' => [['--no-nodejs'], ['composer']];
+    yield 'php library' => [['--no-php-command', '--no-php-script', '--no-nodejs'], ['composer']];
+    yield 'nodejs only' => [['--no-php'], ['npm']];
+    yield 'no languages' => [['--no-php', '--no-nodejs'], []];
+  }
+
+  /**
    * The class library initialises cleanly when Renovate is deselected.
    */
   public function testInstallPhpLibraryWithoutRenovate(): void {

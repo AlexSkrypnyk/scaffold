@@ -1,5 +1,5 @@
-@@ -7,17 +7,12 @@
-     "branchPrefix": "deps/",
+@@ -9,17 +9,12 @@
+     "internalChecksFilter": "strict",
      "packageRules": [
          {
 -            "matchDepNames": ["php"],
@@ -17,3 +17,18 @@
              "matchUpdateTypes": ["major"],
              "enabled": false
          },
+@@ -27,14 +22,6 @@
+             "matchPackageNames": ["*"],
+             "groupName": "all dependencies",
+             "groupSlug": "all"
+-        },
+-        {
+-            "matchManagers": ["composer"],
+-            "matchFileNames": ["composer.json"],
+-            "matchDepTypes": ["require"],
+-            "groupName": "runtime dependencies",
+-            "groupSlug": "runtime",
+-            "automerge": false
+         },
+         {
+             "matchManagers": ["npm"],

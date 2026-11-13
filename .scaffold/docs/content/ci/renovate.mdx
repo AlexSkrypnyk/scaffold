@@ -21,17 +21,23 @@ The following table lists the top-level settings in `renovate.json`:
 | `dependencyDashboard` | `true` | If true, Renovate opens the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/), a GitHub issue that lists pending updates, updates scheduled for later and failed updates. |
 | `pinDigests` | `true` | If true, Renovate pins Docker images and GitHub Actions to exact digests, so their versions are reproducible. |
 | `branchPrefix` | `deps/` | Renovate starts every branch name with `deps/`. |
+| `minimumReleaseAge` | `7 days` | Renovate offers a version 7 days after its release, so a broken or compromised release can be withdrawn before it reaches your project. |
+| `internalChecksFilter` | `strict` | Renovate opens no pull request for a version younger than `minimumReleaseAge`. If an older version has passed the wait, Renovate offers that version. |
 
 ## Update rules
 
 Renovate applies the rules in `packageRules`. A catch-all rule puts every package in the `all dependencies` group, with the slug `all`, so Renovate batches the updates into 1 pull request on the `deps/all` branch. Major updates for GitHub Actions and Docker go into a second pull request, on `deps/major-all`.
 
-The following table lists the updates each package manager gets:
+Runtime dependencies are the packages in the `require` section of the root `composer.json` and the `dependencies` section of the root `package.json`. Their code ships to your users, so Renovate leaves their updates for you to review. 2 runtime rules after the catch-all rule move them into the `runtime dependencies` group on the `deps/runtime` branch and turn off its automerge. Renovate merges a group's pull request on its own only when every update in the group has automerge on, so the separate group keeps `deps/all` merging on its own.
 
-| Manager | Major updates | Minor and patch updates |
+The following table lists the updates each group of dependencies gets:
+
+| Dependencies | Major updates | Minor and patch updates |
 |---|---|---|
-| npm | No pull request | Merged automatically |
-| Composer | No pull request | Merged automatically |
+| npm runtime dependencies | No pull request | Pull request for you to merge |
+| Other npm dependencies | No pull request | Merged automatically |
+| Composer runtime dependencies | No pull request | Pull request for you to merge |
+| Other Composer dependencies | No pull request | Merged automatically |
 | GitHub Actions | Merged automatically | Merged automatically |
 | Docker | Merged automatically | Merged automatically |
 
@@ -68,9 +74,9 @@ The rule matches only the root `composer.json`, so a nested `composer.json`, suc
 | Stacks selected | Changes to `renovate.json` |
 |---|---|
 | PHP and Node.js | None |
-| PHP only | Removes the `node`/`yarn` rule and `"npm"` from the rule that blocks major updates |
-| Node.js only | Removes the `php` rule and `"composer"` from the rule that blocks major updates |
-| Neither PHP nor Node.js | Removes the language rules and the rule that blocks major updates |
+| PHP only | Removes the `node`/`yarn` rule, the npm runtime rule and `"npm"` from the rule that blocks major updates |
+| Node.js only | Removes the `php` rule, the Composer runtime rule and `"composer"` from the rule that blocks major updates |
+| Neither PHP nor Node.js | Removes the language rules, the runtime rules and the rule that blocks major updates |
 | PHP class library | Adds the [class library rule](#class-library-rule) |
 
 To leave Renovate out of a new project, answer no to the `install.sh` prompt **Use Renovate** or pass `--no-renovate`. `install.sh` then deletes `renovate.json` and the `update-dependencies.yml` workflow.
