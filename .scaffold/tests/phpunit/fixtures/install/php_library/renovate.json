@@ -1,5 +1,5 @@
-@@ -7,6 +7,12 @@
-     "branchPrefix": "deps/",
+@@ -9,6 +9,12 @@
+     "internalChecksFilter": "strict",
      "packageRules": [
          {
 +            "matchManagers": ["composer"],
