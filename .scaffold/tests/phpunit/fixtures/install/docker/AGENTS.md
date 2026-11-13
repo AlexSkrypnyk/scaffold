@@ -1,22 +1,25 @@
-@@ -11,220 +11,38 @@
+@@ -11,224 +11,42 @@
  testing, code quality tools, and CI/CD workflows.
  
  
 -## PHP Application Architecture
-+- `.github/workflows/audit.yml` - OpenSSF Scorecard, CodeQL and, for PHP, Semgrep, with results in the repository's **Security** tab
++## Security audit
  
++`.github/workflows/audit.yml` runs OpenSSF Scorecard, CodeQL and, on PHP
++projects, Semgrep. The results appear under **Security > Code scanning** in the
++GitHub repository.
  
 -### Symfony Console Application
-+## Docker
  
 -Multi-command CLI application structure:
-+### Building
++## Docker
  
 -- **Location:** `src/Command/` directory
 -- **Entry point:** `bin/force-crystal`
 -- **Use for:** Complex applications with multiple commands, shared logic, OOP
 -  architecture
--
++### Building
+ 
 -### Adding New Commands
 -
 -To add a Symfony Console command:
@@ -231,7 +234,11 @@
 -- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
 -
 -
--- `.github/workflows/audit.yml` - OpenSSF Scorecard, CodeQL and, for PHP, Semgrep, with results in the repository's **Security** tab
+-## Security audit
+-
+-`.github/workflows/audit.yml` runs OpenSSF Scorecard, CodeQL and, on PHP
+-projects, Semgrep. The results appear under **Security > Code scanning** in the
+-GitHub repository.
 +Override the published image name (release and canary) by setting the `DOCKER_IMAGE` repository or organization variable; it defaults to `yodashut/force-crystal`.
  
  

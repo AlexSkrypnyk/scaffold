@@ -215,6 +215,6 @@
 -- `.github/workflows/release-nodejs.yml` - Script release to GitHub Releases
 -
 -
- - `.github/workflows/audit.yml` - OpenSSF Scorecard, CodeQL and, for PHP, Semgrep, with results in the repository's **Security** tab
+ ## Security audit
  
- 
+ `.github/workflows/audit.yml` runs OpenSSF Scorecard, CodeQL and, on PHP
