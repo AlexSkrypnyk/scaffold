@@ -32,6 +32,12 @@ case "$*" in
   "api repos/${slug}/labels "*)
     printf 'bug\td73a4a\tSomething is not working\n'
     ;;
+  "api repos/${slug}/immutable-releases --jq "*)
+    if [ -f "${state}/immutable" ]; then echo "true false"; else echo "false false"; fi
+    ;;
+  "api --method PUT repos/${slug}/immutable-releases "*)
+    touch "${state}/immutable"
+    ;;
   "api repos/${slug}/rulesets --paginate "*)
     [ ! -f "${state}/ruleset" ] || echo "1"
     ;;

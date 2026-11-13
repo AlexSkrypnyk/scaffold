@@ -90,6 +90,7 @@ github_description=""
 github_merge=""
 github_labels=""
 github_labels_prune=""
+github_immutable_releases=""
 github_ruleset=""
 github_required_checks=""
 github_create=""
@@ -1310,6 +1311,7 @@ github_apply_defaults() {
   : "${github_settings:=y}"
   : "${github_labels:=y}"
   : "${github_labels_prune:=n}"
+  : "${github_immutable_releases:=y}"
   : "${github_ruleset:=y}"
   : "${github_merge:=squash,rebase}"
   : "${github_required_checks:=y}"
@@ -1605,6 +1607,69 @@ github_apply_labels() {
   fi
 
   echo "  Labels: ${summary}"
+}
+
+##
+# Read whether releases of the repository are immutable.
+#
+# Prints "ENABLED ENFORCED_BY_OWNER", e.g. "true false".
+#
+github_immutable_releases_status() {
+  gh_run api "repos/${github_owner}/${github_repo}/immutable-releases" --jq '"\(.enabled) \(.enforced_by_owner)"' 2>&1
+}
+
+##
+# Make releases published from now on immutable, so their tag and assets
+# cannot change.
+#
+# GitHub can still read the setting as off right after a successful write, so
+# it is read back and written once more when it did not take.
+#
+github_apply_immutable_releases() {
+  local slug="${github_owner}/${github_repo}"
+  local output=""
+
+  # A dry run that would create the repository has no setting to read.
+  if [ "${github_repo_exists}" != "n" ]; then
+    if ! output="$(github_immutable_releases_status)"; then
+      github_section_error "Immutable releases" "Administration: read" "${output}"
+      return $?
+    fi
+
+    if [ "${output#* }" = "true" ]; then
+      echo "  Immutable releases: unchanged (enforced by the owner)"
+      return 0
+    fi
+
+    if [ "${output%% *}" = "true" ]; then
+      echo "  Immutable releases: unchanged"
+      return 0
+    fi
+  fi
+
+  local attempt
+
+  for attempt in 1 2; do
+    github_call "Immutable releases" "Administration: write" api --method PUT "repos/${slug}/immutable-releases" --silent || return $?
+
+    if [ "${dry_run}" = "1" ]; then
+      echo "  Immutable releases: would enable"
+      return 0
+    fi
+
+    if ! output="$(github_immutable_releases_status)"; then
+      github_section_error "Immutable releases" "Administration: read" "${output}"
+      return $?
+    fi
+
+    if [ "${output%% *}" = "true" ]; then
+      echo "  Immutable releases: enabled"
+      return 0
+    fi
+  done
+
+  echo "  Immutable releases: failed (still disabled after ${attempt} attempts)" >&2
+  return 1
 }
 
 ##
@@ -2245,6 +2310,10 @@ configure_github() {
     github_run_section github_apply_labels || failed=1
   fi
 
+  if [ "${github_immutable_releases}" = "y" ]; then
+    github_run_section github_apply_immutable_releases || failed=1
+  fi
+
   if [ "${github_ruleset}" = "y" ] && [ "${github_created}" = "1" ]; then
     github_run_section github_apply_new_ruleset || failed=1
   elif [ "${github_ruleset}" = "y" ]; then
@@ -2302,6 +2371,8 @@ github_collect_interactive() {
   if [ "${github_labels}" = "y" ]; then
     github_labels_prune="$(ask_yesno "    Delete labels not in the list" "N")"
   fi
+
+  github_immutable_releases="$(ask_yesno "  Make published releases immutable")"
 
   github_ruleset="$(ask_yesno "  Protect the default branch with a ruleset")"
 
@@ -2466,6 +2537,9 @@ GitHub repository (needs GitHub CLI and SCAFFOLD_GITHUB_TOKEN):
                                  Labels (default: on).
   --github-labels-prune, --no-github-labels-prune
                                  Delete labels not in the list (default: off).
+  --github-immutable-releases, --no-github-immutable-releases
+                                 Make published releases immutable
+                                 (default: on).
   --github-ruleset, --no-github-ruleset
                                  Default branch ruleset (default: on).
   --github-required-checks, --no-github-required-checks
@@ -2609,6 +2683,8 @@ parse_args() {
       --no-github-labels) github_labels="n" ;;
       --github-labels-prune) github_labels_prune="y" ;;
       --no-github-labels-prune) github_labels_prune="n" ;;
+      --github-immutable-releases) github_immutable_releases="y" ;;
+      --no-github-immutable-releases) github_immutable_releases="n" ;;
       --github-ruleset) github_ruleset="y" ;;
       --no-github-ruleset) github_ruleset="n" ;;
       --github-required-checks) github_required_checks="y" ;;
@@ -2809,6 +2885,7 @@ print_summary() {
     echo "  General settings               : ${github_settings}"
     echo "  Labels                         : ${github_labels}"
     echo "    Delete labels not in list    : ${github_labels_prune}"
+    echo "  Immutable releases             : ${github_immutable_releases}"
     echo "  Default branch ruleset         : ${github_ruleset}"
     if [ "${github_ruleset}" = "y" ] && [ "${github_create}" = "y" ]; then
       echo "    Wait for CI, require checks  : ${github_wait_checks}"
@@ -2893,6 +2970,7 @@ print_reproduce_command() {
     [ -z "${github_description}" ] || [ "${github_description}" = "$(github_state description)" ] || args+=("--github-description=${github_description}")
     [ "${github_labels}" = "y" ] || args+=("--no-github-labels")
     [ "${github_labels_prune}" != "y" ] || args+=("--github-labels-prune")
+    [ "${github_immutable_releases}" = "y" ] || args+=("--no-github-immutable-releases")
     [ "${github_ruleset}" = "y" ] || args+=("--no-github-ruleset")
     [ "${github_ruleset}" != "y" ] || [ "${github_create}" != "y" ] || [ "${github_wait_checks}" = "y" ] || args+=("--no-github-wait-checks")
     [ "${github_ruleset}" != "y" ] || [ "${github_create}" = "y" ] || [ "${github_required_checks}" = "y" ] || args+=("--no-github-required-checks")

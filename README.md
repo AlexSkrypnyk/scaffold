@@ -161,7 +161,7 @@ With [GitHub CLI](https://cli.github.com) installed and a token in `SCAFFOLD_GIT
 
 ![An interactive install.sh run that creates the GitHub repository](.scaffold/assets/install-github.svg)
 
-In a clone, the same prompt applies the settings, labels and ruleset to the existing repository. To set up the repository of an existing project later, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github`. The [GitHub repository setup](https://getscaffold.dev/github) page lists the token permissions and every option.
+In a clone, the same prompt applies the settings, labels, immutable releases and ruleset to the existing repository. To set up the repository of an existing project later, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github`. The [GitHub repository setup](https://getscaffold.dev/github) page lists the token permissions and every option.
 
 ## Update a generated project
 
