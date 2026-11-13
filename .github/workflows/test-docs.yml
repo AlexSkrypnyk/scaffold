@@ -13,6 +13,8 @@ on:
       - 'main'
       - 'feature/**'
 
+permissions: {}
+
 jobs:
   test-docs:
     name: Test documentation
@@ -33,7 +35,7 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci --ignore-scripts
         working-directory: '${{ github.workspace }}/docs'
 
       - name: Build documentation site

@@ -11,10 +11,7 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
 # A separate group from 'release-docs.yml', which runs on the same tags, so its
 # skipped run does not cancel this one.
@@ -26,6 +23,11 @@ jobs:
   release-docs:
     name: Release Scaffold documentation
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write # Deploy the site to GitHub Pages.
+      id-token: write # Verify the deployment's origin to GitHub Pages.
 
     environment:
       name: github-pages
@@ -46,7 +48,7 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci --ignore-scripts
         working-directory: '${{ github.workspace }}/.scaffold/docs'
 
       - name: Set release version

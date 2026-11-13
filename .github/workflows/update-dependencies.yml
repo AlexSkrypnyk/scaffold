@@ -18,8 +18,7 @@ on:
         required: false
         default: false
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}
@@ -29,6 +28,9 @@ jobs:
   update-dependencies:
     name: Update dependencies
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Check requirements

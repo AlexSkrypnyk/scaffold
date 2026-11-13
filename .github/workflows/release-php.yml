@@ -11,13 +11,15 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   release-php:
     name: Release PHP
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Create the release and upload its assets.
 
     steps:
       - name: Checkout code
@@ -37,7 +39,7 @@ jobs:
           php-version: 8.4
 
       - name: Install dependencies
-        run: composer install
+        run: composer install --no-scripts
 
       - name: Set release version
         env:

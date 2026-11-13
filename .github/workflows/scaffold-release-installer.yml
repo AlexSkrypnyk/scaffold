@@ -17,8 +17,7 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: scaffold-release-installer-${{ github.event.release.tag_name || inputs.version }}
