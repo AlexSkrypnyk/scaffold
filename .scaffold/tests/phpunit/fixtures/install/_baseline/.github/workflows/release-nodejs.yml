@@ -11,13 +11,15 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   release-nodejs:
     name: Release Node.js
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Create the release and upload its assets.
 
     steps:
       - name: Checkout code

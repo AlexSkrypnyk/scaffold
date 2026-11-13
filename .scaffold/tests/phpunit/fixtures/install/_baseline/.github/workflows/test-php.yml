@@ -11,15 +11,8 @@ on:
       - main
       - 'feature/**'
   workflow_dispatch:
-    inputs:
-      enable_terminal:
-        type: boolean
-        description: 'Enable terminal session.'
-        required: false
-        default: false
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   test-php:
@@ -58,9 +51,9 @@ jobs:
       - name: Install dependencies
         run: |
           if [[ "${{ matrix.deps }}" == "lowest" ]]; then
-            composer update --prefer-lowest --prefer-stable ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+            composer update --no-scripts --prefer-lowest --prefer-stable ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
           else
-            composer install ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+            composer install --no-scripts ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
           fi
 
       - name: Validate composer.json
@@ -129,16 +122,12 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Setup upterm session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
-        timeout-minutes: 30
-        with:
-          limit-access-to-actor: true
-
   build-php:
     name: Build PHAR
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -158,7 +147,7 @@ jobs:
           php-version: 8.4
 
       - name: Install dependencies
-        run: composer install
+        run: composer install --no-scripts
 
       - name: Build PHAR
         run: composer build
@@ -167,10 +156,3 @@ jobs:
         run: |
           ./dist/force-crystal.phar --version
           ./dist/force-crystal.phar list || exit 1
-
-      - name: Setup upterm session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
-        timeout-minutes: 30
-        with:
-          limit-access-to-actor: true

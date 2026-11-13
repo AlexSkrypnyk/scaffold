@@ -11,12 +11,8 @@ on:
       - main
       - 'feature/**'
   workflow_dispatch:
-    inputs:
-      enable_terminal:
-        type: boolean
-        description: 'Enable terminal session.'
-        required: false
-        default: false
+
+permissions: {}
 
 jobs:
   test-nodejs:
@@ -43,7 +39,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Install dependencies
-        run: npm install
+        run: npm install --ignore-scripts
 
       - name: Check coding standards
         if: matrix.node == 24
@@ -83,10 +79,3 @@ jobs:
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Setup upterm session
-        if: ${{ !cancelled() && github.event.inputs.enable_terminal == 'true' }}
-        uses: owenthereal/action-upterm@__HASH__ # __VERSION__
-        timeout-minutes: 30
-        with:
-          limit-access-to-actor: true
