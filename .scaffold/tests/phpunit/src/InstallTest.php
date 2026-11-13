@@ -883,7 +883,7 @@ final class InstallTest extends UnitTestCase {
     $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
     $this->assertProcessSuccessful();
 
-    $workflow = (string) file_get_contents(self::$sut . '/.github/workflows/audit.yml');
+    $workflow = File::read(self::$sut . '/.github/workflows/audit.yml');
     $this->assertStringNotContainsString('#;', $workflow);
 
     foreach ($present as $needle) {
@@ -911,7 +911,7 @@ final class InstallTest extends UnitTestCase {
     $this->assertProcessSuccessful();
 
     $this->assertFileDoesNotExist(self::$sut . '/.github/workflows/audit.yml');
-    $this->assertStringNotContainsString('audit.yml', (string) file_get_contents(self::$sut . '/AGENTS.md'));
+    $this->assertStringNotContainsString('audit.yml', File::read(self::$sut . '/AGENTS.md'));
   }
 
   /**
