@@ -1,4 +1,4 @@
-@@ -28,8 +28,6 @@
+@@ -23,8 +23,6 @@
  return RectorConfig::configure()
    ->withPaths([
      __DIR__ . '/**',

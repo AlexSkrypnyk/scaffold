@@ -1,4 +1,4 @@
-@@ -29,7 +29,7 @@
+@@ -24,7 +24,7 @@
    ->withPaths([
      __DIR__ . '/**',
      // Extensionless entry points, which the file extensions below don't match.
