@@ -605,6 +605,10 @@ In `.github/workflows/`:
 This matches `.editorconfig` setting `insert_final_newline = true` and prevents
 issues when files are concatenated or processed by install.sh.
 
+## Updating dependencies
+
+When asked to "update dependencies" (or the deps, packages, actions or Docker image), read `.scaffold/skills/update-scaffold-dependencies/SKILL.md` and follow it. It moves every dependency of the template to its latest version, majors included, keeps the PHP and Node.js support floor, regenerates the fixtures and opens a PR. Renovate covers minor and patch updates between runs.
+
 ## Maintenance Commands
 
 ```bash
