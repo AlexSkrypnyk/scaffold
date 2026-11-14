@@ -91,8 +91,9 @@ jobs:
           { echo "COVERAGE_CONTENT<<EOF"; cat .logs/coverage.txt; echo "EOF"; } >> "$GITHUB_ENV"
         shell: bash
 
+      # Fork and Dependabot pull requests get a read-only token.
       - name: Post coverage summary as PR comment
-        if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
         uses: marocchino/sticky-pull-request-comment@__HASH__ # __VERSION__
         with:
           header: coverage-shell
