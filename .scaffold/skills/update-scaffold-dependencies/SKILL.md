@@ -172,10 +172,10 @@ composer test
 composer update
 ```
 
-Commit `composer.json` only:
+Stage `composer.json` and every file you fixed for a major, such as `src/`, `tests/` or `phpunit.xml`, by path:
 
 ```bash
-git add composer.json
+git add composer.json src tests
 ```
 
 ```bash
@@ -216,10 +216,10 @@ npm update --ignore-scripts --prefix tests/bats
 ./tests/bats/node_modules/.bin/bats tests/bats
 ```
 
-Repeat npm-check-updates and `npm update` for `.scaffold/tests/bats`. `npm update` also moves transitive packages in each lock to the newest versions their ranges allow. Commit:
+Repeat npm-check-updates and `npm update` for `.scaffold/tests/bats`. `npm update` also moves transitive packages in each lock to the newest versions their ranges allow. Stage the manifests, the locks and every file you fixed for a major, such as `eslint.config.js`, `nodejs-script` or `tests/nodejs/`:
 
 ```bash
-git add package.json tests/bats/package.json tests/bats/package-lock.json .scaffold/tests/bats/package.json .scaffold/tests/bats/package-lock.json
+git add package.json eslint.config.js nodejs-script tests/nodejs tests/bats/package.json tests/bats/package-lock.json .scaffold/tests/bats/package.json .scaffold/tests/bats/package-lock.json
 ```
 
 ```bash
@@ -261,7 +261,7 @@ npm test --prefix .scaffold/docs
 Repeat the 3 commands for `docs`. CI builds only `docs/` on pull requests, so the local build is the only check `.scaffold/docs` gets before a release. `npm test` also runs cspell, so a cspell major can flag new words; add them to the site's `cspell.json` rather than rewording. Commit both sites together:
 
 ```bash
-git add docs/package.json docs/package-lock.json .scaffold/docs/package.json .scaffold/docs/package-lock.json
+git add docs/package.json docs/package-lock.json docs/cspell.json .scaffold/docs/package.json .scaffold/docs/package-lock.json .scaffold/docs/cspell.json
 ```
 
 ```bash
