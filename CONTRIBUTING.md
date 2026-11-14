@@ -10,7 +10,7 @@ Make sure you have the following:
 
 - PHP 8.3 or later with the `pcov` extension
 - Composer 2.10.3 or later
-- Node.js 20.20.1 or later, with npm
+- Node.js with npm: 20.20.1 or a later 20.x, 22.13.0 or a later 22.x or any release from 24
 
 ## Local development
 
