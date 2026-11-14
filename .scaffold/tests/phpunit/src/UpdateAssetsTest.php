@@ -102,10 +102,10 @@ final class UpdateAssetsTest extends TestCase {
   public function testBuildGithubExpectScript(): void {
     $script = buildGithubExpectScript('/work/ws', ['SCAFFOLD_GITHUB_TOKEN' => 'recording-token']);
 
-    $this->assertStringContainsString("cd \"/work/ws\"\n", $script);
-    $this->assertStringContainsString("set env(SCAFFOLD_GITHUB_TOKEN) {recording-token}\nspawn bash --norc --noprofile", $script);
+    $this->assertStringContainsString("cd \"/work/ws\"\n", (string) $script);
+    $this->assertStringContainsString("set env(SCAFFOLD_GITHUB_TOKEN) {recording-token}\nspawn bash --norc --noprofile", (string) $script);
     $this->assertSame(1, substr_count($script, 'send_user'), 'Only the answer proc writes the step marker.');
-    $this->assertStringNotContainsString('Namespace', $script);
+    $this->assertStringNotContainsString('Namespace', (string) $script);
 
     $session = implode("\n", [
       'expect "\$ " { answer "./install.sh github" }',
@@ -122,7 +122,7 @@ final class UpdateAssetsTest extends TestCase {
       'expect "\$ " { answer "exit" }',
       'expect eof',
     ]);
-    $this->assertStringContainsString($session, $script, 'Every prompt of the github command is answered in order.');
+    $this->assertStringContainsString($session, (string) $script, 'Every prompt of the github command is answered in order.');
   }
 
   public function testSanitizeCastCleansHeaderAndPaths(): void {
