@@ -1297,6 +1297,43 @@ final class InstallTest extends UnitTestCase {
     ];
   }
 
+  /**
+   * The entrypoint BATS test ships only with both Docker and shell support.
+   *
+   * The Docker fixture scenarios decline every language, so they never hold
+   * the shell test directory.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to install.sh.
+   */
+  #[DataProvider('dataProviderInstallEntrypointTest')]
+  public function testInstallEntrypointTest(array $arguments, bool $expected): void {
+    self::$fixtures = NULL;
+
+    $arguments = array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments);
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', $arguments);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains('Initialization complete.');
+
+    $test = self::$sut . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'bats' . DIRECTORY_SEPARATOR . 'entrypoint.bats';
+
+    if (!$expected) {
+      $this->assertFileDoesNotExist($test);
+
+      return;
+    }
+
+    $this->assertFileExists(self::$sut . DIRECTORY_SEPARATOR . 'entrypoint.sh');
+    $this->assertStringContainsString('"acme-app is running"', (string) file_get_contents($test));
+  }
+
+  public static function dataProviderInstallEntrypointTest(): \Iterator {
+    yield 'docker and shell' => [['--docker', '--shell'], TRUE];
+    yield 'docker without shell' => [['--docker', '--no-shell'], FALSE];
+    yield 'shell without docker' => [['--no-docker', '--shell'], FALSE];
+  }
+
   protected static function defaultAnswers(): array {
     return [
       'namespace' => 'YodasHut',
