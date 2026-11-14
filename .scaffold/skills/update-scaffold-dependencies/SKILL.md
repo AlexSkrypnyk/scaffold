@@ -98,7 +98,7 @@ composer normalize --working-dir=.scaffold/tests/phpunit
 composer lint --working-dir=.scaffold/tests/phpunit
 ```
 
-This suite's helpers (`alexskrypnyk/file`, `alexskrypnyk/phpunit-helpers`, `alexskrypnyk/snapshot`) are 0.x-to-1.x jumps, so expect renamed methods in `.scaffold/tests/phpunit/src/`. Read each package's changelog and fix the call sites. Commit once the linters pass:
+A new major of this suite's helpers (`alexskrypnyk/file`, `alexskrypnyk/phpunit-helpers`, `alexskrypnyk/snapshot`) can move or rename methods that `.scaffold/tests/phpunit/src/` calls. PHPStan reports them as unknown classes or methods; read each package's README and fix the call sites. A Rector release can also drop rules or sets that `rector.php` names, and Rector then prints the replacement. Commit once the linters pass:
 
 ```bash
 git add .scaffold/tests/phpunit
@@ -378,10 +378,10 @@ git commit -m "Updated the svg-term recorder dependency."
 
 ## Step 9: Docs prose
 
-A major bump can make prose wrong: `AGENTS.md` says "Tests should use PHPUnit 11 features", for example. For each package that changed major, search the docs for its name and old major, outside `node_modules`, `vendor` and the fixtures:
+A major bump can make prose wrong: `AGENTS.md` says "Tests should use PHPUnit 12 features", for example. For each package that changed major, search the docs for its name and old major, outside `node_modules`, `vendor` and the fixtures:
 
 ```bash
-grep -rn --include=*.md --include=*.mdx -e "PHPUnit 11" . --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=fixtures
+grep -rn --include=*.md --include=*.mdx -e "PHPUnit 12" . --exclude-dir=node_modules --exclude-dir=vendor --exclude-dir=fixtures
 ```
 
 Update what you find, then stage the files you changed by path and commit:
