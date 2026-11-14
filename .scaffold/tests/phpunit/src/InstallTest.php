@@ -823,7 +823,7 @@ final class InstallTest extends UnitTestCase {
   }
 
   /**
-   * Lock file maintenance merges on its own, with each manager enforcing age.
+   * Lock file maintenance merges on its own, with Composer enforcing age.
    *
    * @param list<string> $arguments
    *   Command-line arguments passed to install.sh.
@@ -839,7 +839,10 @@ final class InstallTest extends UnitTestCase {
     $config = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'renovate.json'), TRUE, 512, JSON_THROW_ON_ERROR);
     $this->assertIsArray($config);
     $this->assertSame(['enabled' => TRUE, 'automerge' => TRUE], $config['lockFileMaintenance'] ?? NULL);
-    $this->assertTrue($config['minimumReleaseAgePackageManagerSync'] ?? NULL);
+    // The hosted Renovate app rejects the object form of 'dependencyDashboard'
+    // and 'minimumReleaseAgePackageManagerSync', and then stops opening PRs.
+    $this->assertTrue($config['dependencyDashboard'] ?? NULL);
+    $this->assertArrayNotHasKey('minimumReleaseAgePackageManagerSync', $config);
     $this->assertSame('7 days', $config['minimumReleaseAge'] ?? NULL);
     $this->assertIsArray($config['packageRules']);
 
