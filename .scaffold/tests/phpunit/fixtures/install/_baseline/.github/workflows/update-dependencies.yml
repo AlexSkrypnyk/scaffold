@@ -55,8 +55,8 @@ jobs:
           RENOVATE_GIT_AUTHOR: ${{ vars.RENOVATE_GIT_AUTHOR || 'renovate[bot] <29139614+renovate[bot]@users.noreply.github.com>' }}
           RENOVATE_IGNORE_PR_AUTHOR: 'true'
           # Lift the schedule and rate limits, and leave the Renovate app's
-          # Dependency Dashboard issue to the app.
-          RENOVATE_FORCE: '{"schedule": [], "prHourlyLimit": 0, "prConcurrentLimit": 0, "branchConcurrentLimit": 0, "dependencyDashboard": {"enabled": false}}'
-          RENOVATE_DEPENDENCY_DASHBOARD_TITLE: 'Dependency Dashboard (Update dependencies workflow)'
+          # Dependency Dashboard issue to the app. A run with the dashboard
+          # disabled closes the issue that has its title, so the title differs.
+          RENOVATE_FORCE: '{"schedule": [], "prHourlyLimit": 0, "prConcurrentLimit": 0, "branchConcurrentLimit": 0, "dependencyDashboard": {"enabled": false, "title": "Dependency Dashboard (Update dependencies workflow)"}}'
           RENOVATE_DRY_RUN: ${{ inputs.dry_run && 'full' || '' }}
           LOG_LEVEL: ${{ inputs.debug && 'debug' || 'info' }}
