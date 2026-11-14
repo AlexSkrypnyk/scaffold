@@ -7,3 +7,12 @@
  
  [*.js]
  indent_size = 2
+@@ -22,8 +20,6 @@
+ [*.{yml,yaml}]
+ indent_size = 2
+ 
+-[*.{sh,bash,bats}]
+-indent_size = 2
+ 
+ [*.xml]
+ indent_size = 4

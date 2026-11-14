@@ -1,5 +1,5 @@
-@@ -9,17 +9,12 @@
-     "internalChecksFilter": "strict",
+@@ -14,45 +14,9 @@
+     },
      "packageRules": [
          {
 -            "matchDepNames": ["php"],
@@ -7,17 +7,21 @@
 -            "enabled": false
 -        },
 -        {
-             "matchDepNames": ["node", "yarn"],
-             "matchManagers": ["npm"],
-             "enabled": false
-         },
-         {
+-            "matchDepNames": ["node", "yarn"],
+-            "matchManagers": ["npm"],
+-            "enabled": false
+-        },
+-        {
 -            "matchManagers": ["npm", "composer"],
-+            "matchManagers": ["npm"],
-             "matchUpdateTypes": ["major"],
-             "enabled": false
-         },
-@@ -27,14 +22,6 @@
+-            "matchUpdateTypes": ["major"],
+-            "enabled": false
+-        },
+-        {
+-            "matchManagers": ["composer"],
+-            "matchUpdateTypes": ["lockFileMaintenance"],
+-            "minimumReleaseAge": null
+-        },
+-        {
              "matchPackageNames": ["*"],
              "groupName": "all dependencies",
              "groupSlug": "all"
@@ -29,6 +33,14 @@
 -            "groupName": "runtime dependencies",
 -            "groupSlug": "runtime",
 -            "automerge": false
-         },
-         {
-             "matchManagers": ["npm"],
+-        },
+-        {
+-            "matchManagers": ["npm"],
+-            "matchFileNames": ["package.json"],
+-            "matchDepTypes": ["dependencies"],
+-            "groupName": "runtime dependencies",
+-            "groupSlug": "runtime",
+-            "automerge": false
+         }
+     ]
+ }

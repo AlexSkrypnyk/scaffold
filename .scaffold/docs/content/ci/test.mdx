@@ -30,7 +30,7 @@ To remove Windows from an existing project, delete the `windows-latest` matrix e
 
 ## Test PHP
 
-The `Test PHP` workflow runs 6 jobs on `ubuntu-latest`: PHP 8.3, 8.4 and 8.5, each with 2 dependency sets. `Deps normal` installs the latest versions `composer.json` allows, and `Deps lowest` installs the lowest allowed versions. Composer installs with `--no-scripts`, and on PHP 8.5 also with `--ignore-platform-reqs`. With [Windows](#windows) on, the same 6 jobs also run on `windows-latest`.
+The `Test PHP` workflow runs 6 jobs on `ubuntu-latest`: PHP 8.3, 8.4 and 8.5, each with 2 dependency sets. `Deps normal` installs the versions in `composer.lock`, and `Deps lowest` installs the lowest versions `composer.json` allows. A class library has no `composer.lock`, so its `Deps normal` jobs install the latest allowed versions. Composer installs with `--no-scripts`, and on PHP 8.5 also with `--ignore-platform-reqs`. With [Windows](#windows) on, the same 6 jobs also run on `windows-latest`.
 
 The following table lists which jobs run each check:
 
@@ -51,7 +51,7 @@ In a command app with a PHAR, a separate `Build PHAR` job runs on PHP 8.4. It bu
 
 ## Test Node.js
 
-The `Test Node.js` workflow runs 3 jobs on `ubuntu-latest`: Node.js 20, 22 and 24. Each job installs dependencies with `npm install --ignore-scripts`. With [Windows](#windows) on, the same 3 jobs also run on `windows-latest`.
+The `Test Node.js` workflow runs 3 jobs on `ubuntu-latest`: Node.js 20, 22 and 24. Each job installs the dependencies in `package-lock.json` with `npm ci --ignore-scripts`. A Node.js library has no `package-lock.json`, so its jobs install the latest allowed versions with `npm install --ignore-scripts`. With [Windows](#windows) on, the same 3 jobs also run on `windows-latest`.
 
 The following table lists which jobs run each check:
 

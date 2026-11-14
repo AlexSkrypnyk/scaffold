@@ -1,4 +1,4 @@
-@@ -5,35 +5,6 @@
+@@ -5,53 +5,6 @@
  This document is generated and maintained by an AI agent via the `update-architecture-docs` skill in `.claude/skills/update-architecture-docs/SKILL.md`. The content is derived from the source code. If this documentation and the code disagree, the code wins.
  
  
@@ -31,6 +31,24 @@
 -PHP code is verified by PHPUnit tests in `tests/phpunit/` (unit tests with mocks in `Unit/`, integration tests against the real file system in `Functional/`) and by a three-layer quality stack: PHP_CodeSniffer, PHPStan, and Rector, wired as `composer lint` and `composer test`.
 -
 -
+-
+-## NodeJS script
+-
+-The NodeJS stack is a self-contained single-file CLI script, `nodejs-script`, with no runtime dependencies. It mirrors the testable-script pattern: business logic in `main()`, help in `printHelp()`, and output through a `verbose()` function that records messages into an internal buffer, with `SCRIPT_QUIET=1` suppressing output and `SCRIPT_RUN_SKIP=1` skipping execution for tests.
+-
+-```mermaid
+-%% Traced from: nodejs-script.
+-flowchart TB
+-    start([./nodejs-script argument]) --> help{help flag passed}
+-    help -- yes --> printhelp[printHelp writes usage through the verbose buffer]
+-    help -- no --> argc{exactly one argument}
+-    argc -- no --> err[error asking for the first argument]
+-    argc -- yes --> logic[main business logic]
+-    logic --> out[verbose messages, silenced by SCRIPT_QUIET]
+-```
+-
+-The script is verified by the built-in Node test runner (`npm run test` over `tests/nodejs/`, with c8 coverage) and linted by ESLint and Prettier via `npm run lint`.
+-
  
- ## NodeJS script
  
+ ## Shell script

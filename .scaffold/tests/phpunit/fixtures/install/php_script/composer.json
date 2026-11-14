@@ -19,7 +19,7 @@
              "dealerdirect/phpcodesniffer-composer-installer": true,
              "ergebnis/composer-normalize": true
          },
-@@ -71,11 +69,6 @@
+@@ -77,11 +75,6 @@
          "sort-packages": true
      },
      "scripts": {
@@ -31,7 +31,7 @@
          "lint": [
              "phpcs",
              "phpstan",
-@@ -85,7 +78,7 @@
+@@ -91,7 +84,7 @@
              "rector",
              "phpcbf"
          ],

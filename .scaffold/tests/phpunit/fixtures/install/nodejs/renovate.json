@@ -1,5 +1,5 @@
-@@ -9,17 +9,12 @@
-     "internalChecksFilter": "strict",
+@@ -14,37 +14,19 @@
+     },
      "packageRules": [
          {
 -            "matchDepNames": ["php"],
@@ -17,7 +17,12 @@
              "matchUpdateTypes": ["major"],
              "enabled": false
          },
-@@ -27,14 +22,6 @@
+         {
+-            "matchManagers": ["composer"],
+-            "matchUpdateTypes": ["lockFileMaintenance"],
+-            "minimumReleaseAge": null
+-        },
+-        {
              "matchPackageNames": ["*"],
              "groupName": "all dependencies",
              "groupSlug": "all"

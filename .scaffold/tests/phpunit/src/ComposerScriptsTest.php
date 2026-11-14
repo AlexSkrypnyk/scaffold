@@ -8,7 +8,7 @@ final class ComposerScriptsTest extends UnitTestCase {
 
   public function testComposerLint(): void {
     $this->assertDirectoryDoesNotExist(self::$sut . '/vendor');
-    $this->assertFileDoesNotExist(self::$sut . '/composer.lock');
+    $this->assertFileExists(self::$sut . '/composer.lock');
 
     $this->processRun('composer', ['install']);
     $this->assertProcessSuccessful();
@@ -26,7 +26,7 @@ final class ComposerScriptsTest extends UnitTestCase {
 
   public function testComposerTestNoCoverage(): void {
     $this->assertDirectoryDoesNotExist(self::$sut . '/vendor');
-    $this->assertFileDoesNotExist(self::$sut . '/composer.lock');
+    $this->assertFileExists(self::$sut . '/composer.lock');
 
     $this->processRun('php', ['-i']);
     $this->assertProcessSuccessful();
@@ -46,7 +46,7 @@ final class ComposerScriptsTest extends UnitTestCase {
 
   public function testComposerTestCoverage(): void {
     $this->assertDirectoryDoesNotExist(self::$sut . '/vendor');
-    $this->assertFileDoesNotExist(self::$sut . '/composer.lock');
+    $this->assertFileExists(self::$sut . '/composer.lock');
 
     $this->processRun('php', ['-i']);
     $this->assertProcessSuccessful();

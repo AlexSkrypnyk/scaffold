@@ -1,4 +1,4 @@
-@@ -1,16 +1,6 @@
+@@ -1,17 +1,6 @@
  {
    "permissions": {
      "allow": [
@@ -12,6 +12,7 @@
 -      "Bash(./vendor/bin/phpstan:*)",
 -      "Bash(./vendor/bin/rector:*)",
 -      "Bash(./vendor/bin/phpunit:*)",
-       "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
+-      "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
        "Bash(npm install)",
        "Bash(npm run lint)",
+       "Bash(npm run lint-fix)",

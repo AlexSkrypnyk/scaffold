@@ -82,6 +82,7 @@ checkout for the full list).
 | `--no-php-command --no-php-script` | `composer.json` has no `bin` section - a class-only library |
 | `--phar` / `--no-phar`      | `box.json` exists                                           |
 | `--nodejs` / `--no-nodejs`  | `package.json` exists                                       |
+| `--nodejs-library`          | `.gitignore` lists `/package-lock.json` - a NodeJS library  |
 | `--shell` / `--no-shell`    | a `*.sh` command file and `tests/bats/` exist               |
 | `--docker` / `--no-docker`  | `Dockerfile` exists                                         |
 | `--release-drafter`         | `.github/workflows/draft-release-notes.yml` exists          |
@@ -229,6 +230,31 @@ the project's dependencies and the template's refreshed infrastructure
 `require` / `autoload` entries, and take the template's updated dev-dependencies
 and scripts. Review the diff with `git diff HEAD -- composer.json` and reconcile
 by hand.
+
+The lock files follow the merged manifests. Restore each lock the project
+tracked before the update with its own command, so a missing one doesn't stop
+the other. Skip a command that errors:
+
+```bash
+git checkout HEAD -- composer.lock
+```
+
+```bash
+git checkout HEAD -- package-lock.json
+```
+
+After the manifests are merged, refresh each lock the project commits:
+
+```bash
+composer update --no-install --no-scripts
+```
+
+```bash
+npm install --package-lock-only --ignore-scripts
+```
+
+A class library commits no `composer.lock`, so it has none to restore or
+refresh.
 
 ## Step 8: Review changes
 

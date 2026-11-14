@@ -1,4 +1,4 @@
-@@ -5,10 +5,5 @@
+@@ -5,10 +5,3 @@
  /.gitignore      export-ignore
  /docs            export-ignore
  /logo.png        export-ignore
@@ -7,5 +7,5 @@
 -/phpstan.neon    export-ignore
 -/phpunit.xml     export-ignore
 -/rector.php      export-ignore
- /.npmignore      export-ignore
- /.npmrc          export-ignore
+-/.npmignore      export-ignore
+-/.npmrc          export-ignore

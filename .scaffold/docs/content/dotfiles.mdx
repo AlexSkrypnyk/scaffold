@@ -27,9 +27,13 @@ In the generated project, Git ignores the following paths:
 
 - `/.logs`, which holds code coverage reports and test logs
 - `/.artifacts/`, which holds temporary output from AI agents and developers
-- On a PHP project, `/vendor`, `/composer.lock` and `/.phpunit.cache`, plus `/dist` and `/vendor-bin` when the project builds a PHAR
-- On a Node.js project, `/node_modules`, `/package-lock.json` and `/yarn.lock`
+- On a PHP project, `/vendor` and `/.phpunit.cache`, plus `/dist` and `/vendor-bin` when the project builds a PHAR
+- On a PHP class library, `/composer.lock`
+- On a Node.js project, `/node_modules` and `/yarn.lock`
+- On a Node.js library, `/package-lock.json`
 - When you select AI agents, `/.claude/settings.local.json` and `/.claude/skills/update-consumer-scaffold/`, both described in [AI integration](./ai-integration.mdx)
+
+A CLI command app, a PHP script and a Node.js app commit their lock files, so CI and every developer install the same dependency versions. A PHP class library leaves `composer.lock` out, and a Node.js library leaves `package-lock.json` out, because the projects that install a library resolve its versions.
 
 When you select AI agents, the file also holds `!/.claude/`. That line lets you commit `.claude/settings.json` even when a global `.gitignore` ignores `.claude`.
 

@@ -6,7 +6,9 @@
 /dist
 #;> PHP_PHAR
 /.phpunit.cache
-/composer.lock
+#;< PHP_LIBRARY
+# /composer.lock
+#;> PHP_LIBRARY
 /vendor
 #;< PHP_PHAR
 /vendor-bin
@@ -14,9 +16,11 @@
 #;> PHP
 #;< NODEJS
 /node_modules
-/package-lock.json
 /yarn.lock
 #;> NODEJS
+#;< NODEJS_LIBRARY
+# /package-lock.json
+#;> NODEJS_LIBRARY
 
 # Code coverage and test logs.
 /.logs

@@ -1,0 +1,29 @@
+@@ -19,12 +19,7 @@
+             "enabled": false
+         },
+         {
+-            "matchDepNames": ["node", "yarn"],
+-            "matchManagers": ["npm"],
+-            "enabled": false
+-        },
+-        {
+-            "matchManagers": ["npm", "composer"],
++            "matchManagers": ["composer"],
+             "matchUpdateTypes": ["major"],
+             "enabled": false
+         },
+@@ -42,14 +37,6 @@
+             "matchManagers": ["composer"],
+             "matchFileNames": ["composer.json"],
+             "matchDepTypes": ["require"],
+-            "groupName": "runtime dependencies",
+-            "groupSlug": "runtime",
+-            "automerge": false
+-        },
+-        {
+-            "matchManagers": ["npm"],
+-            "matchFileNames": ["package.json"],
+-            "matchDepTypes": ["dependencies"],
+             "groupName": "runtime dependencies",
+             "groupSlug": "runtime",
+             "automerge": false

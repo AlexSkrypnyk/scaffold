@@ -19,7 +19,7 @@ To fix the PHP_CodeSniffer and Rector issues that the linters report, run `compo
 Install the dependencies, then run the linters and the tests:
 
 ```bash
-npm install
+npm ci
 npm run lint
 npm run test
 ```

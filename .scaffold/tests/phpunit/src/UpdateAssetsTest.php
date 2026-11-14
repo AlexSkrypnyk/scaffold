@@ -52,6 +52,7 @@ final class UpdateAssetsTest extends TestCase {
       'reply "CLI command name"',
       'reply "Build PHAR"',
       'reply "Use NodeJS"',
+      'reply "Is it a library"',
       'reply "Use Shell"',
       'reply "Shell command name"',
       'reply "Use Docker"',

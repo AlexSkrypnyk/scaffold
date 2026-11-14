@@ -76,6 +76,9 @@ Content blocks can be conditionally included/excluded using special tokens:
   class library, and a command app built without a PHAR
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features
+- `NODEJS_LIBRARY` - The commented `/package-lock.json` rule in `.gitignore`,
+  uncommented for a NodeJS library (`--nodejs-library`) and removed for an
+  application
 - `SCHEDULE` - Daily scheduled "is it buildable?" trigger in the test workflows
 - `WINDOWS` - The `windows-latest` matrix entries and Windows-only steps in the
   PHP, Node.js and Shell test workflows, removed by `remove_windows()` unless
@@ -125,8 +128,8 @@ Five helpers sweep the project for a needle and edit whatever they find:
 `remove_special_comments()`. All five get their file list from `sweep_files()`.
 (`uncomment_line()` is not one of them - it edits the single file named in its
 argument.) `sweep_files()` searches the project root recursively, skipping
-`.git`, `.idea`, `.claude`, `vendor` and `node_modules`, then searches the
-template-owned `.claude` paths explicitly:
+`.git`, `.idea`, `.claude`, `vendor`, `node_modules` and every `composer.lock`,
+then searches the template-owned `.claude` paths explicitly:
 
 - `.claude/settings.json`
 - `.claude/skills/update-architecture-docs`
@@ -170,11 +173,71 @@ one:
   - Ships the tooling with no entry point: `process_php_library()` drops the
     `bin` section from `composer.json`
   - Disables Renovate updates to `require` in the root `composer.json`
-    (`disable_renovate_require_updates()`), since those constraints are the
+    (`disable_renovate_runtime_updates()`), since those constraints are the
     package's public contract and there is no committed lock to refresh
+  - Commits no `composer.lock`: `remove_composer_lock()` deletes it,
+    uncomments `/composer.lock` in the `PHP_LIBRARY` block of `.gitignore`
+    and drops the `config.platform` pin from `composer.json`
   - Keeps one placeholder class and its unit test, because PHPCS and PHPStan
     both error out when pointed at a project holding no PHP file
   - The other two modes drop that pair in `remove_php_library()`
+
+### Lock files
+
+The template commits the root `composer.lock` and `package-lock.json`, so the
+command app, the script and the Node.js script ship with pinned dependencies
+and `test-nodejs.yml` installs with `npm ci`.
+
+The **Is it a library** prompt follows **Use NodeJS** (`--nodejs-library`,
+off by default). For a Node.js library, `process_nodejs_library()` deletes
+`package-lock.json`, uncomments `/package-lock.json` in the `NODEJS_LIBRARY`
+block of `.gitignore`, switches `test-nodejs.yml` to `npm install`, because
+`npm ci` refuses to run without a lock, and disables Renovate updates to the
+root `dependencies`. An application drops the block in
+`remove_nodejs_library()`. The script and its tests are the same in both.
+
+`install.sh` renames the package and, without a PHAR, drops
+`bamarni/composer-bin-plugin`, so the shipped `composer.lock` is stale after
+init. `process_composer_lock()` runs last and refreshes it with
+`COMPOSER_DISABLE_NETWORK=1 composer update php --no-install`: a partial update
+of the `php` platform package keeps every locked version, prunes packages that
+are no longer required and writes a fresh content hash offline. When Composer
+is missing or the update fails, it deletes the lock and prints a warning, and
+CI resolves the dependencies until the developer commits one.
+`composer update --lock` is not used because it needs the network.
+
+`config.platform.php` pins resolution to PHP 8.3, the lowest supported version,
+so a lock refreshed on a newer PHP still installs on the 8.3 CI jobs.
+
+`renovate.json` enables `lockFileMaintenance` with automerge, so Renovate
+regenerates every lock file weekly. Lock file maintenance has no release
+timestamps, so each package manager enforces the 7-day age itself:
+`minimumReleaseAgePackageManagerSync` makes Renovate pass `--before` to npm,
+and `config.policy.cooldown.period` in the root and maintenance-suite
+`composer.json` makes Composer skip young releases. Renovate does not integrate
+with the Composer cooldown, so a `packageRules` entry sets `minimumReleaseAge`
+to `null` for Composer lock file maintenance, or the branch would stay pending.
+The cooldown needs Composer 2.11, hence `"composer": ">=2.11.0"`, and it also
+holds back releases younger than 7 days during a manual `composer update`.
+
+Keep every constraint floor at a release outside the cooldown. A floor that
+only a younger release satisfies fails every resolving run, such as the
+`Deps lowest` jobs, a class library's CI and lock file maintenance, until the
+release ages. `composer update` and `composer bump` under the cooldown pick
+such floors on their own, so never raise a floor by hand or with
+`--no-cooldown`.
+
+After a dependency change in the root manifests, regenerate the lock files with
+`composer update --no-install --no-scripts` and
+`npm install --package-lock-only --ignore-scripts`, then run
+`npm audit --package-lock-only`. The root `package.json` overrides `glob` and
+`minimatch` under `test-exclude`, which `c8` pulls in, because the
+`test-exclude` release still pins vulnerable ranges. Drop the override once
+`npm audit` passes without it.
+
+The install tests copy the whole repository, `.artifacts/` included, into every
+test sandbox. Keep large scratch output out of `.artifacts/` while running
+them, or each install run slows past the `update-snapshots` timeout.
 
 `php-script` and `bin/php-command` have no `.php` extension, so `phpcs.xml`,
 `phpstan.neon` and `rector.php` list them by name inside `PHP_SCRIPT` and
@@ -486,7 +549,9 @@ the template and of a generated project with every workflow selected. It fails
 when a workflow lacks top-level `permissions: {}`, a job declares no
 `permissions`, an action isn't pinned to a commit SHA, `actions/checkout`
 lacks `persist-credentials: false`, an npm install lacks `--ignore-scripts`
-or a Composer install or update lacks `--no-scripts`.
+or, in a project that commits `package-lock.json`, uses anything but `npm ci`
+outside a global tool install, or a Composer install or update lacks
+`--no-scripts`.
 
 Unlike the other `scaffold-*` maintenance workflows, this one is a **selectable
 consumer feature**: `install.sh` offers "Use GitHub Actions linting" (off by

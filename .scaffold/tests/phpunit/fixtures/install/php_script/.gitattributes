@@ -1,0 +1,6 @@
+@@ -10,5 +10,3 @@
+ /phpstan.neon    export-ignore
+ /phpunit.xml     export-ignore
+ /rector.php      export-ignore
+-/.npmignore      export-ignore
+-/.npmrc          export-ignore

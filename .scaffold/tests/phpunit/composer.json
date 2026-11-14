@@ -23,10 +23,10 @@
         "alexskrypnyk/snapshot": "^1.6.0",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2.1",
         "drupal/coder": "^9.0.1",
-        "ergebnis/composer-normalize": "^2.57.0",
+        "ergebnis/composer-normalize": "^2.56.0",
         "laravel/serializable-closure": "^2.2.0",
         "phpstan/phpstan": "^2.3.5",
-        "phpunit/phpunit": "^12.5.44",
+        "phpunit/phpunit": "^12.5.43",
         "rector/rector": "^2.8.4",
         "symfony/filesystem": "^7.4.23",
         "symfony/finder": "^7.4.23",
@@ -46,6 +46,14 @@
         },
         "bump-after-update": true,
         "discard-changes": true,
+        "policy": {
+            "cooldown": {
+                "ignore": {
+                    "alexskrypnyk/*": "Released by the Scaffold maintainer, who adopts them as they ship"
+                },
+                "period": "7 days"
+            }
+        },
         "sort-packages": true
     },
     "scripts": {

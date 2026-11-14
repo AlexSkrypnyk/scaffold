@@ -6,7 +6,7 @@
          "composer": "__VERSION__",
          "dealerdirect/phpcodesniffer-composer-installer": "__VERSION__",
          "drevops/phpcs-standard": "__VERSION__",
-@@ -49,12 +48,8 @@
+@@ -49,19 +48,12 @@
              "tests/phpunit"
          ]
      },
@@ -19,7 +19,14 @@
              "dealerdirect/phpcodesniffer-composer-installer": true,
              "ergebnis/composer-normalize": true
          },
-@@ -71,11 +66,6 @@
+         "discard-changes": true,
+-        "platform": {
+-            "php": "__VERSION__"
+-        },
+         "policy": {
+             "advisories": {
+                 "block": false,
+@@ -77,11 +69,6 @@
          "sort-packages": true
      },
      "scripts": {
@@ -31,7 +38,7 @@
          "lint": [
              "phpcs",
              "phpstan",
-@@ -85,7 +75,7 @@
+@@ -91,7 +78,7 @@
              "rector",
              "phpcbf"
          ],

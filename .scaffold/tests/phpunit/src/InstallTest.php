@@ -75,16 +75,23 @@ final class InstallTest extends UnitTestCase {
         'use_php_command' => self::$tuiYes,
         'php_command_name' => 'star-forge',
         'use_nodejs' => self::$tuiNo,
+        'use_nodejs_library' => self::TUI_SKIP,
         'use_shell' => self::$tuiNo,
+        'shell_command_name' => self::TUI_SKIP,
       ],
     ];
     yield 'php script' => [
       [
         'use_php' => self::$tuiYes,
         'use_php_command' => self::$tuiNo,
+        'php_command_name' => self::TUI_SKIP,
+        'use_php_command_build' => self::TUI_SKIP,
         'use_php_script' => self::$tuiYes,
+        'php_script_name' => self::TUI_DEFAULT,
         'use_nodejs' => self::$tuiNo,
+        'use_nodejs_library' => self::TUI_SKIP,
         'use_shell' => self::$tuiNo,
+        'shell_command_name' => self::TUI_SKIP,
       ],
     ];
     yield 'php library' => [
@@ -106,14 +113,27 @@ final class InstallTest extends UnitTestCase {
     yield 'nodejs' => [
       [
         'use_php' => self::$tuiNo,
+        'use_php_command' => self::TUI_SKIP,
+        'php_command_name' => self::TUI_SKIP,
+        'use_php_command_build' => self::TUI_SKIP,
         'use_nodejs' => self::$tuiYes,
         'use_shell' => self::$tuiNo,
+        'shell_command_name' => self::TUI_SKIP,
+      ],
+    ];
+    yield 'nodejs library' => [
+      [
+        'use_nodejs_library' => self::$tuiYes,
       ],
     ];
     yield 'shell' => [
       [
         'use_php' => self::$tuiNo,
+        'use_php_command' => self::TUI_SKIP,
+        'php_command_name' => self::TUI_SKIP,
+        'use_php_command_build' => self::TUI_SKIP,
         'use_nodejs' => self::$tuiNo,
+        'use_nodejs_library' => self::TUI_SKIP,
         'use_shell' => self::$tuiYes,
       ],
     ];
@@ -125,7 +145,9 @@ final class InstallTest extends UnitTestCase {
         'use_php_command_build' => self::TUI_SKIP,
         'use_php_script' => self::TUI_SKIP,
         'use_nodejs' => self::$tuiNo,
+        'use_nodejs_library' => self::TUI_SKIP,
         'use_shell' => self::$tuiNo,
+        'shell_command_name' => self::TUI_SKIP,
       ],
     ];
     yield 'docker' => [
@@ -136,7 +158,9 @@ final class InstallTest extends UnitTestCase {
         'use_php_command_build' => self::TUI_SKIP,
         'use_php_script' => self::TUI_SKIP,
         'use_nodejs' => self::$tuiNo,
+        'use_nodejs_library' => self::TUI_SKIP,
         'use_shell' => self::$tuiNo,
+        'shell_command_name' => self::TUI_SKIP,
         'use_docker' => self::$tuiYes,
         'docker_image_name' => self::TUI_DEFAULT,
       ],
@@ -149,7 +173,9 @@ final class InstallTest extends UnitTestCase {
         'use_php_command_build' => self::TUI_SKIP,
         'use_php_script' => self::TUI_SKIP,
         'use_nodejs' => self::$tuiNo,
+        'use_nodejs_library' => self::TUI_SKIP,
         'use_shell' => self::$tuiNo,
+        'shell_command_name' => self::TUI_SKIP,
         'use_docker' => self::$tuiYes,
         'docker_image_name' => 'acme/api-image',
       ],
@@ -691,13 +717,13 @@ final class InstallTest extends UnitTestCase {
   }
 
   /**
-   * Only the class library stops Renovate from bumping 'require' constraints.
+   * Only a library stops Renovate from bumping its runtime constraints.
    *
    * @param list<string> $arguments
    *   Command-line arguments passed to install.sh.
    */
   #[DataProvider('dataProviderInstallRenovateRequireRule')]
-  public function testInstallRenovateRequireRule(array $arguments, bool $expected): void {
+  public function testInstallRenovateRequireRule(array $arguments, bool $expected, bool $npm_expected = FALSE): void {
     self::$fixtures = NULL;
 
     $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
@@ -715,6 +741,14 @@ final class InstallTest extends UnitTestCase {
       'enabled' => FALSE,
     ];
     $this->assertSame($expected, in_array($rule, $config['packageRules'], TRUE));
+
+    $npm_rule = [
+      'matchManagers' => ['npm'],
+      'matchFileNames' => ['package.json'],
+      'matchDepTypes' => ['dependencies'],
+      'enabled' => FALSE,
+    ];
+    $this->assertSame($npm_expected, in_array($npm_rule, $config['packageRules'], TRUE));
   }
 
   public static function dataProviderInstallRenovateRequireRule(): \Iterator {
@@ -723,6 +757,9 @@ final class InstallTest extends UnitTestCase {
     yield 'php command' => [['--php-command', '--no-php-script'], FALSE];
     yield 'php command without phar' => [['--php-command', '--no-phar'], FALSE];
     yield 'php script' => [['--no-php-command', '--php-script'], FALSE];
+    yield 'nodejs library' => [['--php-command', '--nodejs-library'], FALSE, TRUE];
+    yield 'nodejs library without php' => [['--no-php', '--nodejs-library'], FALSE, TRUE];
+    yield 'php and nodejs libraries' => [['--no-php-command', '--no-php-script', '--nodejs-library'], TRUE, TRUE];
   }
 
   /**
@@ -786,6 +823,39 @@ final class InstallTest extends UnitTestCase {
   }
 
   /**
+   * Lock file maintenance merges on its own, with each manager enforcing age.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to install.sh.
+   */
+  #[DataProvider('dataProviderInstallRenovateLockFileMaintenance')]
+  public function testInstallRenovateLockFileMaintenance(array $arguments, bool $composer_rule): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
+
+    $this->assertProcessSuccessful();
+
+    $config = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'renovate.json'), TRUE, 512, JSON_THROW_ON_ERROR);
+    $this->assertIsArray($config);
+    $this->assertSame(['enabled' => TRUE, 'automerge' => TRUE], $config['lockFileMaintenance'] ?? NULL);
+    $this->assertTrue($config['minimumReleaseAgePackageManagerSync'] ?? NULL);
+    $this->assertSame('7 days', $config['minimumReleaseAge'] ?? NULL);
+    $this->assertIsArray($config['packageRules']);
+
+    $rule = ['matchManagers' => ['composer'], 'matchUpdateTypes' => ['lockFileMaintenance'], 'minimumReleaseAge' => NULL];
+    $this->assertSame($composer_rule, in_array($rule, $config['packageRules'], TRUE));
+  }
+
+  public static function dataProviderInstallRenovateLockFileMaintenance(): \Iterator {
+    yield 'php and nodejs' => [[], TRUE];
+    yield 'php library' => [['--no-php-command', '--no-php-script'], TRUE];
+    yield 'nodejs only' => [['--no-php'], FALSE];
+    yield 'nodejs library' => [['--no-php', '--nodejs-library'], FALSE];
+    yield 'no languages' => [['--no-php', '--no-nodejs'], FALSE];
+  }
+
+  /**
    * The class library initialises cleanly when Renovate is deselected.
    */
   public function testInstallPhpLibraryWithoutRenovate(): void {
@@ -838,6 +908,105 @@ final class InstallTest extends UnitTestCase {
     yield 'php command without phar' => [['--php-command', '--no-phar'], FALSE];
     yield 'php script' => [['--no-php-command', '--php-script'], FALSE];
     yield 'php library' => [['--no-php-command', '--no-php-script'], FALSE];
+  }
+
+  /**
+   * Only an application commits its lock files, and they stay valid.
+   *
+   * @param list<string> $arguments
+   *   Command-line arguments passed to install.sh.
+   */
+  #[DataProvider('dataProviderInstallLockFiles')]
+  public function testInstallLockFiles(array $arguments, bool $composer_lock, bool $package_lock, bool $library, bool $nodejs_library = FALSE): void {
+    self::$fixtures = NULL;
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputNotContains('Composer could not refresh composer.lock');
+
+    $this->assertSame($composer_lock, file_exists(self::$sut . DIRECTORY_SEPARATOR . 'composer.lock'));
+    $this->assertSame($package_lock, file_exists(self::$sut . DIRECTORY_SEPARATOR . 'package-lock.json'));
+
+    $gitignore = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . '.gitignore');
+    $this->assertSame($library, preg_match('#^/composer\.lock$#m', $gitignore) === 1);
+    $this->assertSame($nodejs_library, preg_match('#^/package-lock\.json$#m', $gitignore) === 1);
+    $this->assertStringNotContainsString('# /composer.lock', $gitignore);
+    $this->assertStringNotContainsString('# /package-lock.json', $gitignore);
+
+    $workflow = self::$sut . DIRECTORY_SEPARATOR . '.github/workflows/test-nodejs.yml';
+
+    if (file_exists($workflow)) {
+      $install = $nodejs_library ? 'run: npm install --ignore-scripts' : 'run: npm ci --ignore-scripts';
+      $this->assertStringContainsString($install, (string) file_get_contents($workflow));
+    }
+
+    $composer = [];
+
+    if (file_exists(self::$sut . DIRECTORY_SEPARATOR . 'composer.json')) {
+      $composer = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'composer.json'), TRUE, 512, JSON_THROW_ON_ERROR);
+      $this->assertIsArray($composer);
+      $this->assertIsArray($composer['config']);
+      $this->assertIsArray($composer['require-dev']);
+      $this->assertSame($library ? NULL : ['php' => '8.3'], $composer['config']['platform'] ?? NULL);
+      $this->assertIsArray($composer['config']['policy']);
+      $this->assertSame(['period' => '7 days'], $composer['config']['policy']['cooldown'] ?? NULL);
+      $this->assertSame('>=2.11.0', $composer['require-dev']['composer'] ?? NULL);
+      // Neighbouring keys survive the line-based removal.
+      $this->assertArrayHasKey('discard-changes', $composer['config']);
+      $this->assertArrayHasKey('policy', $composer['config']);
+    }
+
+    if ($composer_lock) {
+      $lock = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'composer.lock');
+      // Third-party author names match the replacement needles.
+      $this->assertStringContainsString('"name": "Alex Skrypnyk"', $lock);
+      $require_dev = is_array($composer['require-dev'] ?? NULL) ? $composer['require-dev'] : [];
+      $this->assertSame(array_key_exists('bamarni/composer-bin-plugin', $require_dev), str_contains($lock, '"name": "bamarni/composer-bin-plugin"'));
+
+      $this->processRun('composer', ['validate', '--no-check-publish', '--no-check-all', '--no-interaction']);
+      $this->assertProcessSuccessful();
+    }
+
+    if ($package_lock) {
+      $lock = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'package-lock.json');
+      $this->assertStringContainsString('"name": "@acmeapp/acme-app"', $lock);
+      $this->assertStringNotContainsString('yourproject', $lock);
+    }
+  }
+
+  public static function dataProviderInstallLockFiles(): \Iterator {
+    yield 'php command' => [['--php-command', '--no-php-script'], TRUE, TRUE, FALSE];
+    yield 'php command without phar' => [['--php-command', '--no-phar'], TRUE, TRUE, FALSE];
+    yield 'php script' => [['--no-php-command', '--php-script'], TRUE, TRUE, FALSE];
+    yield 'php library' => [['--no-php-command', '--no-php-script'], FALSE, TRUE, TRUE];
+    yield 'php library without nodejs' => [['--no-php-command', '--no-php-script', '--no-nodejs'], FALSE, FALSE, TRUE];
+    yield 'nodejs only' => [['--no-php'], FALSE, TRUE, FALSE];
+    yield 'nodejs library' => [['--no-php', '--nodejs-library'], FALSE, FALSE, FALSE, TRUE];
+    yield 'php and nodejs libraries' => [['--no-php-command', '--no-php-script', '--nodejs-library'], FALSE, FALSE, TRUE, TRUE];
+    yield 'php command with nodejs library' => [['--php-command', '--nodejs-library'], TRUE, FALSE, FALSE, TRUE];
+    yield 'nodejs library flag without nodejs' => [['--no-php', '--no-nodejs', '--nodejs-library'], FALSE, FALSE, FALSE];
+    yield 'no languages' => [['--no-php', '--no-nodejs'], FALSE, FALSE, FALSE];
+  }
+
+  /**
+   * A lock file that Composer cannot refresh is removed instead of left stale.
+   */
+  public function testInstallRemovesComposerLockComposerCannotRefresh(): void {
+    self::$fixtures = NULL;
+
+    $bin = self::$tmp . DIRECTORY_SEPARATOR . 'bin';
+    File::dump($bin . DIRECTORY_SEPARATOR . 'composer', "#!/usr/bin/env bash\nexit 1\n");
+    chmod($bin . DIRECTORY_SEPARATOR . 'composer', 0755);
+
+    $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', ['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], [], ['PATH' => $bin . PATH_SEPARATOR . getenv('PATH')]);
+
+    $this->assertProcessSuccessful();
+    $this->assertProcessOutputContains("Warning: Composer could not refresh composer.lock, so it was removed. Run 'composer update' and commit composer.lock.");
+    $this->assertFileDoesNotExist(self::$sut . DIRECTORY_SEPARATOR . 'composer.lock');
+
+    $gitignore = (string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . '.gitignore');
+    $this->assertDoesNotMatchRegularExpression('#^/composer\.lock$#m', $gitignore);
   }
 
   /**
@@ -1342,9 +1511,13 @@ final class InstallTest extends UnitTestCase {
       'use_php_command' => self::TUI_DEFAULT,
       'php_command_name' => self::TUI_DEFAULT,
       'use_php_command_build' => self::TUI_DEFAULT,
-      'use_php_script' => self::TUI_DEFAULT,
+      // Asked only after the command app is declined.
+      'use_php_script' => self::TUI_SKIP,
+      'php_script_name' => self::TUI_SKIP,
       'use_nodejs' => self::TUI_DEFAULT,
+      'use_nodejs_library' => self::TUI_DEFAULT,
       'use_shell' => self::TUI_DEFAULT,
+      'shell_command_name' => self::TUI_DEFAULT,
       'use_docker' => self::TUI_DEFAULT,
       'docker_image_name' => self::TUI_SKIP,
       'use_release_drafter' => self::TUI_DEFAULT,
