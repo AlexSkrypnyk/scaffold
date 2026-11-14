@@ -104,6 +104,8 @@ curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github
 
 The command needs [GitHub CLI](https://cli.github.com) and a GitHub token in `SCAFFOLD_GITHUB_TOKEN`. The [GitHub repository setup](https://getscaffold.dev/github) page lists the permissions the token needs.
 
+After the repository is configured, follow [Harden your project](https://getscaffold.dev/harden) for the security steps that only the project's owner can take, such as earning the OpenSSF Best Practices badge.
+
 ## Update from the template
 
 To pull the latest infrastructure from the Scaffold template into this project, ask Claude Code to "update scaffold". Claude Code follows the instructions in [`AGENTS.md`](AGENTS.md).
