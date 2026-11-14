@@ -485,7 +485,7 @@ stripped on init because that workflow is template-only.
 - `.github/workflows/release-docs.yml` - Deploy documentation
 - `.github/workflows/draft-release-notes.yml` - Auto-generate release notes
 - `.github/workflows/scaffold-release-installer.yml` - Attach the signed and
-  attested installer to a published release
+  attested installer to the draft release of a pushed tag, then publish it
 - `.github/workflows/scaffold-release-docs.yml` - Deploy getscaffold.dev on a tag
 
 `install.sh` removes every `.github/workflows/scaffold-*.yml` from a generated
@@ -495,16 +495,19 @@ project, so a workflow for the template alone takes the `scaffold-` prefix.
 
 getscaffold.dev/install.sh and /init.sh serve the `install.sh` attached to the latest release, so a release build of the docs site holds no `install.sh` or `init.sh`. `.scaffold/docs/scripts/copy-installer.js` removes both when `RELEASE_VERSION` is set, and `scaffold-release-docs.yml` fails when either is in the build. Every other build copies the repository-root `install.sh` to both paths, so the Netlify development site (`scaffold-docs.netlify.app`, the `main` branch) and local builds serve the `dev` installer.
 
-`scaffold-release-installer.yml` runs when a release is published:
+`scaffold-release-installer.yml` runs when a version tag is pushed:
 
-1. Reads `install.sh` from the tag, or `init.sh` for older tags, and stamps `SCAFFOLD_VERSION="dev"` with the tag.
+1. Checks that the tag is a version on `main`, then stamps `SCAFFOLD_VERSION="dev"` in `install.sh` with the tag.
 2. Pipes the stamped installer into `bash` in an empty directory, so it bootstraps and initializes the tag's template.
 3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, and `GPG_PASSPHRASE` when the key has one. Both are secrets of the `release` environment.
 4. Checks the signature against `install-key.asc` and its pinned fingerprint with `.scaffold/installer/verify-release.sh`.
-5. Attests `install.sh` and `SHA256SUMS`, uploads the 3 files with `--clobber`, and verifies the uploaded copies.
-6. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer.
+5. Attests `install.sh` and `SHA256SUMS`, and saves the attestation bundle as `scaffold-installer-TAG.intoto.jsonl`.
+6. Waits for the tag's `Release PHP` run, which attaches its assets to the draft release. Then it uploads the 4 installer files to the draft, publishes the release and verifies the uploaded copies.
+7. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer.
 
-Run it from the **Actions** tab with a version to attach the installer to an existing release, such as one published before this workflow existed. The workflow rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
+Steps 1-5 run in the `build` job, which reads the repository only. Steps 6-7 run in the `publish` job, which writes the release.
+
+Publish a release only by pushing its tag. The workflow fails on a release that is already published, because an immutable release takes no new assets. It also rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
 
 `install-key.asc` in the repository root is the public half of the `Scaffold Release Signing` key, fingerprint `86F0 77A2 E806 67D7 CF4A 3320 EDEA F2FC D434 756C`. It expires on 2028-11-08. `process_internal()` removes it from generated projects.
 
@@ -607,10 +610,10 @@ composer build
 
 1. Update version references if needed
 2. Run full test suite: `composer test && composer lint`
-3. Merge to `main` branch
-4. Create GitHub release (triggers PHAR build)
-5. Release drafter automatically generates notes from PR labels
-6. Documentation auto-deploys to GitHub Pages
+3. Merge to `main`. Release Drafter keeps a draft release with notes from the PR labels.
+4. Push a version tag from `main`, such as `git tag 1.2.3` and then `git push origin 1.2.3`.
+5. `Release PHP` attaches the PHAR and the PHP script to the draft. `Release Scaffold installer` then attaches the installer files and publishes the release.
+6. `Release Scaffold docs` deploys getscaffold.dev to GitHub Pages from the tag.
 
 ## Key Differences from User Projects
 
