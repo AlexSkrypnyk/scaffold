@@ -58,6 +58,12 @@ On any other branch, stay on it: the maintainer chose it.
 
 ## Step 2: Init test suite (Composer)
 
+Install the suite from its lock, because `composer outdated` reports only installed packages:
+
+```bash
+composer install --working-dir=.scaffold/tests/phpunit
+```
+
 List what's outdated. `latest-status: update-possible` marks a new major:
 
 ```bash
