@@ -1,4 +1,4 @@
-@@ -26,7 +26,6 @@
+@@ -30,7 +30,6 @@
  - Your first feature as a list item
  - Your second feature as a list item
  - Your third feature as a list item

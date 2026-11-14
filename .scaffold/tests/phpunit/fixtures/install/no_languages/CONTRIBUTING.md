@@ -42,3 +42,13 @@
  ## Documentation site
  
  Install the documentation site's dependencies, build the site, then run its Jest tests and spell check:
+@@ -61,9 +24,6 @@
+ 
+ The checks come from these workflows:
+ 
+-- `Test PHP`
+-- `Test Node.js`
+-- `Test shell`
+ - `Test Docs`
+ - `Audit`, which scans the code with CodeQL
+ 

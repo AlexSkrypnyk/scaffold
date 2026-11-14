@@ -73,3 +73,33 @@ npm --prefix docs test
 [`docs/README.md`](docs/README.md) shows how to preview the site locally.
 
 [//]: # (#;> DOCS)
+## Submit a change
+
+Follow these rules for every pull request:
+
+- Open the pull request against `main`.
+- Add tests with every feature and every bug fix. A test for a bug fix fails without the fix.
+- Make every check on the pull request pass. The `main` branch ruleset blocks the merge until they do.
+
+The checks come from these workflows:
+
+[//]: # (#;< PHP)
+- `Test PHP`
+[//]: # (#;> PHP)
+[//]: # (#;< NODEJS)
+- `Test Node.js`
+[//]: # (#;> NODEJS)
+[//]: # (#;< SHELL)
+- `Test shell`
+[//]: # (#;> SHELL)
+[//]: # (#;< DOCKER)
+- `Test Docker`
+[//]: # (#;> DOCKER)
+[//]: # (#;< DOCS)
+- `Test Docs`
+[//]: # (#;> DOCS)
+[//]: # (#;< AUDIT)
+- `Audit`, which scans the code with CodeQL
+[//]: # (#;> AUDIT)
+
+To report a security issue, follow [`SECURITY.md`](SECURITY.md) instead of opening a pull request.

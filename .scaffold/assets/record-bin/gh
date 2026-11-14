@@ -16,34 +16,54 @@ case "$*" in
   "api user --jq .login")
     echo "${SCAFFOLD_RECORD_LOGIN}"
     ;;
+  "api repos/${slug} --jq "*security_and_analysis*)
+    echo "disabled disabled"
+    ;;
   "api repos/${slug} --jq "*)
     if [ ! -f "${state}/created" ]; then
       echo "gh: Not Found (HTTP 404)" >&2
       exit 1
     fi
-    printf '%s\n' "default_branch=main" "description=" "allow_merge_commit=true" "allow_squash_merge=true" "allow_rebase_merge=true" "squash_merge_commit_title=COMMIT_OR_PR_TITLE" "squash_merge_commit_message=COMMIT_MESSAGES" "allow_auto_merge=false" "allow_update_branch=false" "delete_branch_on_merge=false" "has_issues=true" "has_wiki=true" "has_projects=true" "has_discussions=false"
+    printf '%s\n' "default_branch=main" "description=" "allow_merge_commit=true" "allow_squash_merge=true" "allow_rebase_merge=true" "squash_merge_commit_title=COMMIT_OR_PR_TITLE" "squash_merge_commit_message=COMMIT_MESSAGES" "allow_auto_merge=false" "allow_update_branch=false" "delete_branch_on_merge=false" "has_issues=true" "has_wiki=true" "has_projects=true" "has_discussions=false" "private=false"
     ;;
   "repo create ${slug} "*)
     touch "${state}/created"
     echo "https://github.com/${slug}"
     ;;
   "api --method PATCH repos/${slug} "*) ;;
-  "label create "*" --repo ${slug} "*) ;;
+  "label create "*" --repo ${slug} "* | "label delete "*" --repo ${slug} "*) ;;
   "api repos/${slug}/labels "*)
     printf 'bug\td73a4a\tSomething is not working\n'
     ;;
+  "api repos/${slug}/vulnerability-alerts")
+    echo "gh: Not Found (HTTP 404)" >&2
+    exit 1
+    ;;
+  "api repos/${slug}/private-vulnerability-reporting --jq "*)
+    echo "false"
+    ;;
+  "api repos/${slug}/actions/permissions/workflow --jq "*)
+    echo "write"
+    ;;
+  "api --method PUT repos/${slug}/vulnerability-alerts "* | "api --method PUT repos/${slug}/private-vulnerability-reporting "* | "api --method PUT repos/${slug}/actions/permissions/workflow "*) ;;
   "api repos/${slug}/immutable-releases --jq "*)
     if [ -f "${state}/immutable" ]; then echo "true false"; else echo "false false"; fi
     ;;
   "api --method PUT repos/${slug}/immutable-releases "*)
     touch "${state}/immutable"
     ;;
+  "api repos/${slug}/rulesets --paginate "*'"tags"'*)
+    [ ! -f "${state}/tag-ruleset" ] || echo "2"
+    ;;
   "api repos/${slug}/rulesets --paginate "*)
     [ ! -f "${state}/ruleset" ] || echo "1"
     ;;
   "api --method POST repos/${slug}/rulesets "*)
-    cat >/dev/null
-    touch "${state}/ruleset"
+    if [[ "$(cat)" == *'"target": "tag"'* ]]; then
+      touch "${state}/tag-ruleset"
+    else
+      touch "${state}/ruleset"
+    fi
     ;;
   "api --method PUT "*)
     cat >/dev/null

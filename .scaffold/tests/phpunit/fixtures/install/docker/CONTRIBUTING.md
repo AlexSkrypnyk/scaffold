@@ -1,4 +1,4 @@
-@@ -2,42 +2,17 @@
+@@ -2,43 +2,18 @@
  
  Thank you for considering a contribution to this project. Follow this guide to install the dependencies and run the same linters and tests that CI runs on your pull request. Run the section for each stack your change touches, from the repository root.
  
@@ -18,7 +18,8 @@
  ```
  
 -To fix the PHP_CodeSniffer and Rector issues that the linters report, run `composer lint-fix`. To write a coverage report to `.logs/`, enable the PCOV or Xdebug extension and run `composer test-coverage`. Xdebug also needs `XDEBUG_MODE=coverage`.
--
++The container prints `force-crystal is running`.
+ 
 -## Node.js
 -
 -Install the dependencies, then run the linters and the tests:
@@ -43,7 +44,18 @@
 -```
 -
 -To apply the formatting that shfmt reports, run the shfmt command with `-w` in place of `-d`.
-+The container prints `force-crystal is running`.
- 
+-
  ## Documentation site
+ 
+ Install the documentation site's dependencies, build the site, then run its Jest tests and spell check:
+@@ -61,9 +36,7 @@
+ 
+ The checks come from these workflows:
+ 
+-- `Test PHP`
+-- `Test Node.js`
+-- `Test shell`
++- `Test Docker`
+ - `Test Docs`
+ - `Audit`, which scans the code with CodeQL
  

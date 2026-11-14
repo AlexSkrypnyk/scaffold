@@ -54,7 +54,7 @@ The template holds every feature, and `install.sh` removes the ones you don't se
   - [GitHub Actions linting](.github/workflows/test-actions.yml) with yamllint, actionlint and zizmor, off by default
   - [Security audit](.github/workflows/audit.yml) with OpenSSF Scorecard, CodeQL and, for PHP, Semgrep
 - **Documentation**
-  - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md) and a [generated logo](logo.png)
+  - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md), a [security policy](SECURITY.dist.md) and a [generated logo](logo.png)
   - A [documentation site](docs) built with [Docusaurus](https://docusaurus.io/)
   - Spell check with [CSpell](https://cspell.org/)
   - An [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component, and the [terminal recorder](.scaffold/assets/update-assets.php) that renders Scaffold's `install.sh` walkthrough as an animated SVG
@@ -161,7 +161,11 @@ With [GitHub CLI](https://cli.github.com) installed and a token in `SCAFFOLD_GIT
 
 ![An interactive install.sh run that creates the GitHub repository](.scaffold/assets/install-github.svg)
 
-In a clone, the same prompt applies the settings, labels, immutable releases and ruleset to the existing repository. To set up the repository of an existing project later, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github`. The [GitHub repository setup](https://getscaffold.dev/github) page lists the token permissions and every option.
+In a clone, the same prompt applies the settings, labels, security settings, immutable releases and ruleset to the existing repository. To set up the repository of an existing project later, run `curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github` in the project's root directory:
+
+![An interactive install.sh github run that configures an existing repository](.scaffold/assets/github.svg)
+
+The [GitHub repository setup](https://getscaffold.dev/github) page lists the token permissions and every option.
 
 ## Update a generated project
 

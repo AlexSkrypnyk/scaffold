@@ -41,11 +41,14 @@ To ignore temporary files your operating system creates, use a [global `.gitigno
 
 In the generated project, `git archive` leaves out the following paths:
 
-- `.editorconfig`, `.gitattributes`, `.gitignore`, `.github` and `logo.png`
+- `.editorconfig`, `.gitattributes`, `.gitignore` and `logo.png`
 - `docs`, when the project has a `docs` directory
 - On a PHP project, `tests`, `phpcs.xml`, `phpstan.neon`, `phpunit.xml` and `rector.php`
 - On a Node.js project, `.npmignore` and `.npmrc`
-- When you select Renovate, `renovate.json`
+
+The archive keeps `.github` and `renovate.json`, because an [OpenSSF Scorecard](./ci/audit.mdx) run in its default archive mode reads the repository through it. Without them, that run finds no workflows and no dependency update tool. The shipped `Audit` job sets `file_mode: git`, so it reads the Git checkout instead. The 2 paths add a few kilobytes to a Composer `--prefer-dist` download.
+
+In archive mode, Scorecard also looks in the archive for fuzz tests. When you add property-based or fuzz tests to `tests`, delete the `/tests` line so the archive keeps them.
 
 ## `.npmrc`
 

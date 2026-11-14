@@ -6,7 +6,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -48,18 +47,12 @@
+@@ -52,18 +51,12 @@
  chmod +x nodejs-script
  ```
  
@@ -26,7 +26,7 @@
  ```
  
  The command takes the following arguments and options:
-@@ -74,12 +67,6 @@
+@@ -78,12 +71,6 @@
  
  ```bash
  ./nodejs-script value/of/argument

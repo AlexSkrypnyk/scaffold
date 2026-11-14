@@ -5,9 +5,10 @@
  * @file
  * Generate the animated SVG and asciicast recordings of install.sh.
  *
- * Records 2 interactive `./install.sh` sessions against throwaway copies of
- * the current git tree: `install` declines to create a GitHub repository, and
- * `install-github` creates one. Each recording produces 2 artefacts:
+ * Records 3 interactive `./install.sh` sessions against throwaway copies of
+ * the current git tree: `install` declines to create a GitHub repository,
+ * `install-github` creates one, and `github` runs the `github` command in an
+ * existing project. Each recording produces 2 artefacts:
  *
  * - `.scaffold/assets/<name>.svg` - an animated SVG embedded in the README
  *   (GitHub renders animated SVG but cannot run JavaScript).
@@ -64,20 +65,20 @@ define('RECORD_AUTHOR', 'Alex');
 // GitHub login the stand-in 'gh' reports, shown as the default owner.
 define('RECORD_LOGIN', 'my-org');
 
-// Recordings to generate: file name => whether the session creates a GitHub
-// repository.
+// Recordings to generate: file name => session. 'decline' and 'create' run an
+// install that declines or creates the GitHub repository; 'configure' runs the
+// 'github' command in a project whose repository exists.
 define('RECORDINGS', [
-  'install' => FALSE,
-  'install-github' => TRUE,
+  'install' => 'decline',
+  'install-github' => 'create',
+  'github' => 'configure',
 ]);
 
+// Remote of the existing project in the 'configure' session.
+define('RECORD_REMOTE', 'https://github.com/' . RECORD_LOGIN . '/' . RECORD_PROJECT . '.git');
+
 /**
- * Build the expect script that drives install.sh's interactive prompts.
- *
- * Types the three identity answers and accepts the default for every remaining
- * prompt, mirroring a "keep everything" run. With $create_repo, the session
- * also answers "y" to creating a GitHub repository; without it, the session
- * declines.
+ * Build an expect script that runs 1 session in a recorded shell.
  *
  * Each answer is sent in 1 write after STEP_MARKER, so the session reaches the
  * terminal identically on every run. Expect writes out all output it has read
@@ -86,42 +87,22 @@ define('RECORDINGS', [
  * a prompt that arrived in 2 reads.
  *
  * @param string $workspace_dir
- *   Directory holding the disposable copy of install.sh.
- * @param string $namespace
- *   Value typed at the "Namespace" prompt.
- * @param string $project
- *   Value typed at the "Project" prompt.
- * @param string $author
- *   Value typed at the "Author" prompt.
+ *   Directory the recorded shell starts in.
  * @param array<string, string> $env
  *   Environment variables set in the recorded shell.
- * @param bool $create_repo
- *   Whether to accept the "Create a GitHub repository" prompt.
+ * @param string $session
+ *   Expect lines that type the command and answer its prompts.
  *
  * @return string
  *   The expect script contents.
  */
-function buildInitExpectScript(string $workspace_dir, string $namespace, string $project, string $author, array $env = [], bool $create_repo = FALSE): string {
+function buildExpectScript(string $workspace_dir, array $env, string $session): string {
   $marker = STEP_MARKER;
 
   $env_lines = '';
   foreach ($env as $name => $value) {
     $env_lines .= sprintf("set env(%s) {%s}\n", $name, $value);
   }
-
-  $github = $create_repo ? implode("\n", [
-    'reply "Create a GitHub repository" "y"',
-    'reply "GitHub owner"',
-    'reply "GitHub repository"',
-    'reply "Visibility"',
-    'reply "Apply general settings"',
-    'reply "Description"',
-    'reply "Apply labels"',
-    'reply "Delete labels not in the list"',
-    'reply "Make published releases immutable"',
-    'reply "Protect the default branch with a ruleset"',
-    'reply "Wait for the first CI run and require its checks"',
-  ]) : 'reply "Create a GitHub repository"';
 
   return <<<EXPECT
 #!/usr/bin/env expect
@@ -143,6 +124,54 @@ cd "{$workspace_dir}"
 set env(PS1) {\$ }
 {$env_lines}spawn bash --norc --noprofile
 
+{$session}
+expect "\\$ " { answer "exit" }
+expect eof
+
+EXPECT;
+}
+
+/**
+ * Build the expect script that drives install.sh's interactive prompts.
+ *
+ * Types the three identity answers and accepts the default for every remaining
+ * prompt, mirroring a "keep everything" run. With $create_repo, the session
+ * also answers "y" to creating a GitHub repository; without it, the session
+ * declines.
+ *
+ * @param string $workspace_dir
+ *   Directory holding the disposable copy of install.sh.
+ * @param string $namespace
+ *   Value typed at the "Namespace" prompt.
+ * @param string $project
+ *   Value typed at the "Project" prompt.
+ * @param string $author
+ *   Value typed at the "Author" prompt.
+ * @param array<string, string> $env
+ *   Environment variables set in the recorded shell.
+ * @param bool $create_repo
+ *   Whether to accept the "Create a GitHub repository" prompt.
+ *
+ * @return string
+ *   The expect script contents.
+ */
+function buildInitExpectScript(string $workspace_dir, string $namespace, string $project, string $author, array $env = [], bool $create_repo = FALSE): string {
+  $github = $create_repo ? implode("\n", [
+    'reply "Create a GitHub repository" "y"',
+    'reply "GitHub owner"',
+    'reply "GitHub repository"',
+    'reply "Visibility"',
+    'reply "Apply general settings"',
+    'reply "Description"',
+    'reply "Apply labels"',
+    'reply "Delete labels not in the list"',
+    'reply "Apply security settings"',
+    'reply "Make published releases immutable"',
+    'reply "Protect the default branch with a ruleset"',
+    'reply "Wait for the first CI run and require its checks"',
+  ]) : 'reply "Create a GitHub repository"';
+
+  $session = <<<EXPECT
 expect "\\$ " { answer "./install.sh" }
 reply "Namespace (PascalCase)" "{$namespace}"
 reply "Project" "{$project}"
@@ -170,10 +199,41 @@ reply "AI architecture docs"
 reply "Remove this script"
 {$github}
 reply "Proceed with project init"
-expect "\\$ " { answer "exit" }
-expect eof
-
 EXPECT;
+
+  return buildExpectScript($workspace_dir, $env, $session);
+}
+
+/**
+ * Build the expect script that drives the 'github' command's prompts.
+ *
+ * Accepts the default for every prompt, so the owner and the repository come
+ * from the 'origin' remote and every section is applied.
+ *
+ * @param string $workspace_dir
+ *   Directory holding the existing project.
+ * @param array<string, string> $env
+ *   Environment variables set in the recorded shell.
+ *
+ * @return string
+ *   The expect script contents.
+ */
+function buildGithubExpectScript(string $workspace_dir, array $env = []): string {
+  $session = implode("\n", [
+    'expect "\\$ " { answer "./install.sh github" }',
+    'reply "GitHub owner"',
+    'reply "GitHub repository"',
+    'reply "Apply general settings"',
+    'reply "Description"',
+    'reply "Apply labels"',
+    'reply "Delete labels not in the list"',
+    'reply "Apply security settings"',
+    'reply "Make published releases immutable"',
+    'reply "Protect the default branch with a ruleset"',
+    'reply "Require checks from the latest CI run"',
+  ]);
+
+  return buildExpectScript($workspace_dir, $env, $session);
 }
 
 /**
@@ -338,8 +398,8 @@ function main(): void {
     mkdir($tmp_dir, 0755, TRUE);
   }
 
-  foreach (RECORDINGS as $name => $create_repo) {
-    recordInstall($name, $create_repo, $project_dir, $assets_dir, $tmp_dir);
+  foreach (RECORDINGS as $name => $session) {
+    recordInstall($name, $session, $project_dir, $assets_dir, $tmp_dir);
   }
 
   verbose('Done.');
@@ -350,8 +410,8 @@ function main(): void {
  *
  * @param string $name
  *   File name of the cast and the SVG, without the extension.
- * @param bool $create_repo
- *   Whether the session creates a GitHub repository.
+ * @param string $session
+ *   Session to record: 'decline', 'create' or 'configure'.
  * @param string $project_dir
  *   Path to the repository root.
  * @param string $assets_dir
@@ -359,12 +419,16 @@ function main(): void {
  * @param string $tmp_dir
  *   Path to the temporary directory.
  */
-function recordInstall(string $name, bool $create_repo, string $project_dir, string $assets_dir, string $tmp_dir): void {
+function recordInstall(string $name, string $session, string $project_dir, string $assets_dir, string $tmp_dir): void {
   $workspace_dir = createWorkspace($project_dir, $tmp_dir);
   verbose('Workspace: ' . $workspace_dir);
 
   $state_dir = $workspace_dir . '-state';
   mkdir($state_dir, 0755, TRUE);
+
+  if ($session === 'configure') {
+    prepareExistingProject($workspace_dir, $state_dir);
+  }
 
   // A fixed git identity keeps the recorded session independent of the
   // maintainer's git config.
@@ -390,7 +454,8 @@ function recordInstall(string $name, bool $create_repo, string $project_dir, str
   $svg_input = $tmp_dir . '/' . $name . '-svg.cast';
 
   try {
-    file_put_contents($expect_script, buildInitExpectScript($workspace_dir, RECORD_NAMESPACE, RECORD_PROJECT, RECORD_AUTHOR, $env, $create_repo));
+    $script = $session === 'configure' ? buildGithubExpectScript($workspace_dir, $env) : buildInitExpectScript($workspace_dir, RECORD_NAMESPACE, RECORD_PROJECT, RECORD_AUTHOR, $env, $session === 'create');
+    file_put_contents($expect_script, $script);
     chmod($expect_script, 0755);
 
     verbose('Recording ' . $name . '...');
@@ -496,6 +561,33 @@ function createWorkspace(string $project_dir, string $tmp_dir): string {
   }
 
   return $workspace_dir;
+}
+
+/**
+ * Turn a workspace into a project whose GitHub repository already exists.
+ *
+ * The 'origin' remote supplies the owner and the repository, and the state
+ * files make the stand-in 'gh' report the repository and its default branch
+ * ruleset as existing.
+ *
+ * @param string $workspace_dir
+ *   Path to the workspace.
+ * @param string $state_dir
+ *   Directory holding the stand-in's state.
+ */
+function prepareExistingProject(string $workspace_dir, string $state_dir): void {
+  foreach (['init -q -b main', 'remote add origin ' . escapeshellarg(RECORD_REMOTE)] as $args) {
+    $output = [];
+    $status = 0;
+    exec(sprintf('git -C %s %s 2>&1', escapeshellarg($workspace_dir), $args), $output, $status);
+
+    if ($status !== 0) {
+      throw new \RuntimeException('Failed to prepare the existing project: ' . implode("\n", $output));
+    }
+  }
+
+  touch($state_dir . '/created');
+  touch($state_dir . '/ruleset');
 }
 
 /**

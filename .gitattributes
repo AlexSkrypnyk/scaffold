@@ -3,7 +3,6 @@
 # Uncomment the lines below in your project (or use install.sh script).
 # /.editorconfig   export-ignore
 # /.gitattributes  export-ignore
-# /.github         export-ignore
 # /.gitignore      export-ignore
 # /docs            export-ignore
 # /logo.png        export-ignore
@@ -18,6 +17,3 @@
 # /.npmignore      export-ignore
 # /.npmrc          export-ignore
 #;> NODEJS
-#;< RENOVATE
-# /renovate.json   export-ignore
-#;> RENOVATE

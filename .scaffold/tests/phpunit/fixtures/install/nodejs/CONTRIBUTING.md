@@ -17,3 +17,11 @@
  ## Node.js
  
  Install the dependencies, then run the linters and the tests:
+@@ -61,7 +49,6 @@
+ 
+ The checks come from these workflows:
+ 
+-- `Test PHP`
+ - `Test Node.js`
+ - `Test shell`
+ - `Test Docs`

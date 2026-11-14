@@ -6,7 +6,7 @@
  [![Test Node.js](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-nodejs.yml)
  [![Test Shell](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml)
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
-@@ -30,12 +29,6 @@
+@@ -34,12 +33,6 @@
  
  ## Installation
  
@@ -19,7 +19,7 @@
  Install the Node.js package with npm:
  
  ```bash
-@@ -55,20 +48,6 @@
+@@ -59,20 +52,6 @@
  ```
  
  ## Usage

@@ -90,12 +90,39 @@ final class UpdateAssetsTest extends TestCase {
       'reply "Description"',
       'reply "Apply labels"',
       'reply "Delete labels not in the list"',
+      'reply "Apply security settings"',
       'reply "Make published releases immutable"',
       'reply "Protect the default branch with a ruleset"',
       'reply "Wait for the first CI run and require its checks"',
       'reply "Proceed with project init"',
     ]);
     $this->assertStringContainsString($session, (string) $script, 'The creation prompts are answered in order.');
+  }
+
+  public function testBuildGithubExpectScript(): void {
+    $script = buildGithubExpectScript('/work/ws', ['SCAFFOLD_GITHUB_TOKEN' => 'recording-token']);
+
+    $this->assertStringContainsString("cd \"/work/ws\"\n", (string) $script);
+    $this->assertStringContainsString("set env(SCAFFOLD_GITHUB_TOKEN) {recording-token}\nspawn bash --norc --noprofile", (string) $script);
+    $this->assertSame(1, substr_count($script, 'send_user'), 'Only the answer proc writes the step marker.');
+    $this->assertStringNotContainsString('Namespace', (string) $script);
+
+    $session = implode("\n", [
+      'expect "\$ " { answer "./install.sh github" }',
+      'reply "GitHub owner"',
+      'reply "GitHub repository"',
+      'reply "Apply general settings"',
+      'reply "Description"',
+      'reply "Apply labels"',
+      'reply "Delete labels not in the list"',
+      'reply "Apply security settings"',
+      'reply "Make published releases immutable"',
+      'reply "Protect the default branch with a ruleset"',
+      'reply "Require checks from the latest CI run"',
+      'expect "\$ " { answer "exit" }',
+      'expect eof',
+    ]);
+    $this->assertStringContainsString($session, (string) $script, 'Every prompt of the github command is answered in order.');
   }
 
   public function testSanitizeCastCleansHeaderAndPaths(): void {
