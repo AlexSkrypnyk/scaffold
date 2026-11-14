@@ -1,0 +1,104 @@
+---
+title: Harden your project
+sidebar_position: 10
+cspell: ignore bestpractices
+---
+
+# Harden your project
+
+A project created from Scaffold ships with a security policy, a security audit workflow and attested releases. The rest of a full OpenSSF score needs the project's owner. This page is for the owner of a public Scaffold project on GitHub. Follow it after the first push to `main` to check the Scorecard result, decide on required reviews, earn the OpenSSF Best Practices badge and cut an attested release.
+
+## Before you begin
+
+Make sure you have the following:
+
+- A public GitHub repository, configured with the `github` command of `install.sh`. [GitHub repository setup](github.mdx) describes the command.
+- The `Audit` workflow in `.github/workflows/audit.yml`, which [Audit](ci/audit.mdx) describes.
+
+## Check the Scorecard result
+
+[OpenSSF Scorecard](https://scorecard.dev/) scores the repository's security practices with a list of checks, each from 0 to 10. The `Audit` job publishes the result after each run on `main`.
+
+To read the result, open `https://scorecard.dev/viewer/?uri=github.com/OWNER/REPO`. Replace `OWNER` and `REPO` with your repository's owner and name. Until the `Audit` workflow has run once on `main`, the viewer reports that the repository isn't found.
+
+Most checks score the files and settings that Scaffold and `install.sh github` set up. Code-Review, Branch-Protection and Signed-Releases need you, as the next sections describe.
+
+## Decide on required reviews
+
+Scorecard's Code-Review and Branch-Protection checks want a second person to approve each change:
+
+- Code-Review scores the last 30 or so commits. Each change merged without an approval lowers the score.
+- Branch-Protection scores the default branch's protection in tiers. Each tier counts only after every lower tier is met in full. The `default-branch` ruleset blocks force pushes and deleting the branch, which meets the first tier. The second tier needs at least 1 required approval, so the ruleset's required checks count only after you require one.
+
+A maintainer can't approve their own pull request. Pick the option that fits your project:
+
+- With 1 maintainer, keep the ruleset as it is and accept the lower Code-Review and Branch-Protection scores.
+- With 2 or more maintainers, require an approval on every pull request.
+
+To require an approval on every pull request:
+
+1. On your repository, open **Settings > Rules > Rulesets** and click `default-branch`.
+2. Turn on **Require a pull request before merging** and set **Required approvals** to 1.
+3. Click **Save changes**.
+
+A later run of `install.sh github` keeps this rule, because it changes only the rules it manages. The admin repository role still bypasses the ruleset, so an administrator can merge without an approval.
+
+## Earn the OpenSSF Best Practices badge
+
+The [OpenSSF Best Practices badge](https://www.bestpractices.dev) shows that a project meets a list of open source practices, called criteria. You answer each criterion on the badge's site, and most answers link to a file in the repository as evidence. The project earns the passing badge after it meets every passing criterion that applies to it.
+
+To earn the badge:
+
+1. Sign in at [bestpractices.dev](https://www.bestpractices.dev) with your GitHub account.
+2. Add the project with your repository's URL.
+3. Answer every passing criterion. Use the following 2 tables for the files to link and for the criteria only you can answer.
+4. In `README.md`, find the commented-out OpenSSF Best Practices badge. Replace `PROJECT_ID` in it with the number in the project's bestpractices.dev URL.
+5. Move the badge out of the comment and delete the comment. Confirm that the badge on your repository's page reads **passing**.
+
+### Criteria the template covers
+
+A project created from Scaffold already holds the evidence for the following criteria. Link the file in each criterion's answer:
+
+| Criteria | Evidence to link |
+|---|---|
+| `interact`, `contribution` | `README.md` and `CONTRIBUTING.md` |
+| `contribution_requirements`, `test_policy`, `tests_documented_added` | The "Submit a change" section of `CONTRIBUTING.md` |
+| `floss_license`, `floss_license_osi`, `license_location` | `LICENSE`, which holds the GPL-3.0 license |
+| `sites_https`, `discussion`, `repo_public`, `repo_track`, `repo_interim`, `repo_distributed`, `report_process`, `report_tracker`, `report_archive` | The GitHub repository and its issues |
+| `version_unique`, `version_semver`, `version_tags` | The **Releases** page. The release workflows start only on a version tag, as [Release](ci/release.mdx#release-checks) describes. |
+| `release_notes` | The **Releases** page. When it's selected, [Release Drafter](ci/release-drafter.mdx) drafts the notes. |
+| `vulnerability_report_process`, `vulnerability_report_private` | `SECURITY.md` |
+| `build`, `build_common_tools`, `build_floss_tools`, `test`, `test_invocation`, `warnings`, `warnings_strict` | The commands for each stack in `CONTRIBUTING.md` |
+| `test_continuous_integration` | The `test-*.yml` workflows in `.github/workflows` |
+| `static_analysis`, `static_analysis_common_vulnerabilities`, `static_analysis_often` | `.github/workflows/audit.yml`, which scans every pull request and push to `main` with CodeQL, and PHP code with Semgrep |
+| `no_leaked_credentials` | The secret scanning and push protection that `install.sh github` turns on |
+| `delivery_mitm`, `delivery_unsigned` | The GitHub release assets, which download over HTTPS |
+
+Change the evidence for a criterion when you change the file it points to, such as a new license.
+
+### Criteria only you can answer
+
+The following criteria depend on the project's own code, history or people:
+
+| Criteria | What to answer |
+|---|---|
+| `description_good`, `documentation_basics`, `documentation_interface` | Replace the placeholder features and usage in `README.md` with your project's, then link `README.md` |
+| `maintained`, `report_responses`, `enhancement_responses` | Your response times to issues and pull requests |
+| `vulnerability_report_response` | Your response time to vulnerability reports in the last 6 months. `SECURITY.md` promises a reply within 14 days. |
+| `release_notes_vulns` | Whether each release's notes name the vulnerabilities it fixes |
+| `tests_are_added`, `warnings_fixed`, `static_analysis_fixed`, `dynamic_analysis_fixed` | Whether your recent changes added tests and fixed what the linters and scans found |
+| `vulnerabilities_fixed_60_days`, `vulnerabilities_critical_fixed` | Your time to fix known vulnerabilities. [Renovate](ci/renovate.mdx) raises the dependency updates. |
+| `know_secure_design`, `know_common_errors` | Whether a developer on the project knows secure design and the common errors for its kind of software |
+| `crypto_published`, `crypto_call`, `crypto_floss`, `crypto_keylength`, `crypto_working`, `crypto_weaknesses`, `crypto_pfs`, `crypto_password_storage`, `crypto_random` | Any cryptography the project adds. Answer N/A when it adds none. |
+| `dynamic_analysis`, `dynamic_analysis_unsafe`, `dynamic_analysis_enable_assertions` | Any dynamic analysis you run, such as fuzzing |
+
+## Cut an attested release
+
+Scorecard's Signed-Releases check looks for a provenance file in the assets of the project's recent releases. It scores 10 when each of those releases has an `.intoto.jsonl` file.
+
+The Release PHP and Release Node.js workflows attach `REPO-STACK-TAG.intoto.jsonl` to each release, where `STACK` is `php` or `nodejs`. To give the check a release to score, publish a release after the first push to `main`:
+
+- For a PHP command app with a PHAR, or a single-file PHP script, follow [PHP release](php/release.mdx).
+- For a Node.js project, follow [Node.js release](nodejs/release.mdx).
+
+A PHP class library and a project with only Docker attach no assets to their releases, so Signed-Releases has nothing to score. The `Audit` workflow's next run scores the new release, and the weekly run keeps the result current.
