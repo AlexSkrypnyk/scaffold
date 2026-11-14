@@ -43,6 +43,23 @@
     "jest": "__VERSION__",
     "jest-environment-jsdom": "__VERSION__"
   },
+  "overrides": {
+    "@ai-sdk/provider-utils": {
+      "undici": "__VERSION__"
+    },
+    "@docusaurus/core": {
+      "tinypool": "__VERSION__"
+    },
+    "copy-webpack-plugin": {
+      "serialize-javascript": "__VERSION__"
+    },
+    "css-minimizer-webpack-plugin": {
+      "serialize-javascript": "__VERSION__"
+    },
+    "sockjs": {
+      "uuid": "__VERSION__"
+    }
+  },
   "browserslist": {
     "production": [
       ">0.5%",
