@@ -1,0 +1,41 @@
+@@ -18,12 +18,7 @@
+             "enabled": false
+         },
+         {
+-            "matchDepNames": ["node", "yarn"],
+-            "matchManagers": ["npm"],
+-            "enabled": false
+-        },
+-        {
+-            "matchManagers": ["npm", "composer"],
++            "matchManagers": ["composer"],
+             "matchUpdateTypes": ["major"],
+             "enabled": false
+         },
+@@ -33,11 +28,6 @@
+             "minimumReleaseAge": null
+         },
+         {
+-            "matchManagers": ["npm"],
+-            "matchUpdateTypes": ["lockFileMaintenance"],
+-            "enabled": false
+-        },
+-        {
+             "matchPackageNames": ["*"],
+             "groupName": "all dependencies",
+             "groupSlug": "all"
+@@ -46,14 +36,6 @@
+             "matchManagers": ["composer"],
+             "matchFileNames": ["composer.json"],
+             "matchDepTypes": ["require"],
+-            "groupName": "runtime dependencies",
+-            "groupSlug": "runtime",
+-            "automerge": false
+-        },
+-        {
+-            "matchManagers": ["npm"],
+-            "matchFileNames": ["package.json"],
+-            "matchDepTypes": ["dependencies"],
+             "groupName": "runtime dependencies",
+             "groupSlug": "runtime",
+             "automerge": false
