@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace AlexSkrypnyk\Scaffold\Tests;
 
 use AlexSkrypnyk\File\File;
-use AlexSkrypnyk\Snapshot\Replacer\Replacer;
 use Laravel\SerializableClosure\SerializableClosure;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\Finder\Finder;
@@ -46,7 +45,7 @@ final class InstallTest extends UnitTestCase {
     $this->assertProcessOutputContainsOrNot($expected);
 
     $baseline = File::dir(self::$fixtures . '/../' . self::BASELINE_DIR);
-    Replacer::versions()->replaceInDir(self::$sut);
+    File::getReplacer()->addVersionReplacements()->replaceInDir(self::$sut);
 
     if (!is_string(self::$fixtures)) {
       throw new \RuntimeException('Fixtures directory is not set.');
@@ -61,171 +60,171 @@ final class InstallTest extends UnitTestCase {
 
   public static function dataProviderInstall(): \Iterator {
     yield self::BASELINE_DATASET => [
-        [],
+      [],
     ];
     yield 'name' => [
-        [
-          'namespace' => 'JediTemple',
-          'project' => 'star-forge',
-          'author' => 'Obi-Wan Kenobi',
-        ],
+      [
+        'namespace' => 'JediTemple',
+        'project' => 'star-forge',
+        'author' => 'Obi-Wan Kenobi',
+      ],
     ];
     yield 'php command' => [
-        [
-          'use_php' => self::$tuiYes,
-          'use_php_command' => self::$tuiYes,
-          'php_command_name' => 'star-forge',
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-        ],
+      [
+        'use_php' => self::$tuiYes,
+        'use_php_command' => self::$tuiYes,
+        'php_command_name' => 'star-forge',
+        'use_nodejs' => self::$tuiNo,
+        'use_shell' => self::$tuiNo,
+      ],
     ];
     yield 'php script' => [
-        [
-          'use_php' => self::$tuiYes,
-          'use_php_command' => self::$tuiNo,
-          'use_php_script' => self::$tuiYes,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-        ],
+      [
+        'use_php' => self::$tuiYes,
+        'use_php_command' => self::$tuiNo,
+        'use_php_script' => self::$tuiYes,
+        'use_nodejs' => self::$tuiNo,
+        'use_shell' => self::$tuiNo,
+      ],
     ];
     yield 'php library' => [
-        [
-          'use_php' => self::$tuiYes,
-          'use_php_command' => self::$tuiNo,
+      [
+        'use_php' => self::$tuiYes,
+        'use_php_command' => self::$tuiNo,
           // Declining the command app skips its name and PHAR prompts, and
           // declining the script skips its name prompt.
-          'php_command_name' => self::TUI_SKIP,
-          'use_php_command_build' => self::TUI_SKIP,
-          'use_php_script' => self::$tuiNo,
-        ],
+        'php_command_name' => self::TUI_SKIP,
+        'use_php_command_build' => self::TUI_SKIP,
+        'use_php_script' => self::$tuiNo,
+      ],
     ];
     yield 'no phar' => [
-        [
-          'use_php_command_build' => self::$tuiNo,
-        ],
+      [
+        'use_php_command_build' => self::$tuiNo,
+      ],
     ];
     yield 'nodejs' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_nodejs' => self::$tuiYes,
-          'use_shell' => self::$tuiNo,
-        ],
+      [
+        'use_php' => self::$tuiNo,
+        'use_nodejs' => self::$tuiYes,
+        'use_shell' => self::$tuiNo,
+      ],
     ];
     yield 'shell' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiYes,
-        ],
+      [
+        'use_php' => self::$tuiNo,
+        'use_nodejs' => self::$tuiNo,
+        'use_shell' => self::$tuiYes,
+      ],
     ];
     yield 'no languages' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_php_command' => self::TUI_SKIP,
-          'php_command_name' => self::TUI_SKIP,
-          'use_php_command_build' => self::TUI_SKIP,
-          'use_php_script' => self::TUI_SKIP,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-        ],
+      [
+        'use_php' => self::$tuiNo,
+        'use_php_command' => self::TUI_SKIP,
+        'php_command_name' => self::TUI_SKIP,
+        'use_php_command_build' => self::TUI_SKIP,
+        'use_php_script' => self::TUI_SKIP,
+        'use_nodejs' => self::$tuiNo,
+        'use_shell' => self::$tuiNo,
+      ],
     ];
     yield 'docker' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_php_command' => self::TUI_SKIP,
-          'php_command_name' => self::TUI_SKIP,
-          'use_php_command_build' => self::TUI_SKIP,
-          'use_php_script' => self::TUI_SKIP,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-          'use_docker' => self::$tuiYes,
-          'docker_image_name' => self::TUI_DEFAULT,
-        ],
+      [
+        'use_php' => self::$tuiNo,
+        'use_php_command' => self::TUI_SKIP,
+        'php_command_name' => self::TUI_SKIP,
+        'use_php_command_build' => self::TUI_SKIP,
+        'use_php_script' => self::TUI_SKIP,
+        'use_nodejs' => self::$tuiNo,
+        'use_shell' => self::$tuiNo,
+        'use_docker' => self::$tuiYes,
+        'docker_image_name' => self::TUI_DEFAULT,
+      ],
     ];
     yield 'docker custom image name' => [
-        [
-          'use_php' => self::$tuiNo,
-          'use_php_command' => self::TUI_SKIP,
-          'php_command_name' => self::TUI_SKIP,
-          'use_php_command_build' => self::TUI_SKIP,
-          'use_php_script' => self::TUI_SKIP,
-          'use_nodejs' => self::$tuiNo,
-          'use_shell' => self::$tuiNo,
-          'use_docker' => self::$tuiYes,
-          'docker_image_name' => 'acme/api-image',
-        ],
+      [
+        'use_php' => self::$tuiNo,
+        'use_php_command' => self::TUI_SKIP,
+        'php_command_name' => self::TUI_SKIP,
+        'use_php_command_build' => self::TUI_SKIP,
+        'use_php_script' => self::TUI_SKIP,
+        'use_nodejs' => self::$tuiNo,
+        'use_shell' => self::$tuiNo,
+        'use_docker' => self::$tuiYes,
+        'docker_image_name' => 'acme/api-image',
+      ],
     ];
     yield 'no release drafter' => [
-        [
-          'use_release_drafter' => self::$tuiNo,
-        ],
+      [
+        'use_release_drafter' => self::$tuiNo,
+      ],
     ];
     yield 'no pr autoassign' => [
-        [
-          'use_pr_autoassign' => self::$tuiNo,
-        ],
+      [
+        'use_pr_autoassign' => self::$tuiNo,
+      ],
     ];
     yield 'no funding' => [
-        [
-          'use_funding' => self::$tuiNo,
-        ],
+      [
+        'use_funding' => self::$tuiNo,
+      ],
     ];
     yield 'no pr template' => [
-        [
-          'use_pr_template' => self::$tuiNo,
-        ],
+      [
+        'use_pr_template' => self::$tuiNo,
+      ],
     ];
     yield 'no renovate' => [
-        [
-          'use_renovate' => self::$tuiNo,
-        ],
+      [
+        'use_renovate' => self::$tuiNo,
+      ],
     ];
     yield 'no docs' => [
-        [
-          'use_docs' => self::$tuiNo,
-        ],
+      [
+        'use_docs' => self::$tuiNo,
+      ],
     ];
     yield 'test actions' => [
-        [
-          'use_test_actions' => self::$tuiYes,
-        ],
+      [
+        'use_test_actions' => self::$tuiYes,
+      ],
     ];
     yield 'no audit' => [
-        [
-          'use_audit' => self::$tuiNo,
-        ],
+      [
+        'use_audit' => self::$tuiNo,
+      ],
     ];
     yield 'no schedule' => [
-        [
-          'use_schedule' => self::$tuiNo,
-        ],
+      [
+        'use_schedule' => self::$tuiNo,
+      ],
     ];
     yield 'windows' => [
-        [
-          'use_windows' => self::$tuiYes,
-        ],
+      [
+        'use_windows' => self::$tuiYes,
+      ],
     ];
     yield 'no ai' => [
-        [
-          'use_ai' => self::$tuiNo,
-          'use_ai_arch_docs' => self::TUI_SKIP,
-        ],
+      [
+        'use_ai' => self::$tuiNo,
+        'use_ai_arch_docs' => self::TUI_SKIP,
+      ],
     ];
     yield 'ai arch docs plantuml' => [
-        [
-          'use_ai_arch_docs' => 'plantuml',
-        ],
+      [
+        'use_ai_arch_docs' => 'plantuml',
+      ],
     ];
     yield 'no ai arch docs' => [
-        [
-          'use_ai_arch_docs' => 'none',
-        ],
+      [
+        'use_ai_arch_docs' => 'none',
+      ],
     ];
     yield 'no docs no ai arch docs' => [
-        [
-          'use_docs' => self::$tuiNo,
-          'use_ai_arch_docs' => 'none',
-        ],
+      [
+        'use_docs' => self::$tuiNo,
+        'use_ai_arch_docs' => 'none',
+      ],
     ];
   }
 
@@ -247,7 +246,7 @@ final class InstallTest extends UnitTestCase {
       'Proceed with project init',
     ]);
 
-    Replacer::versions()->replaceInDir(self::$sut);
+    File::getReplacer()->addVersionReplacements()->replaceInDir(self::$sut);
 
     $fixtures_install = self::$root . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'install';
     $baseline = File::dir($fixtures_install . DIRECTORY_SEPARATOR . self::BASELINE_DIR);
