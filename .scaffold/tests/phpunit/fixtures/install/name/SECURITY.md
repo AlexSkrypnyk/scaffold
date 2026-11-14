@@ -1,10 +1,8 @@
-@@ -10,8 +10,8 @@
- 
+@@ -11,7 +11,7 @@
  Report a vulnerability privately, so it stays hidden until a fix is out. Use either channel:
  
--- On the repository's **Security** tab, click **Report a vulnerability**. The form opens at https://github.com/yodashut/force-crystal/security/advisories/new.
+ - On the repository's **Security** tab, click **Report a vulnerability**.
 -- Email force-crystal@yodashut.com.
-+- On the repository's **Security** tab, click **Report a vulnerability**. The form opens at https://github.com/jeditemple/star-forge/security/advisories/new.
 +- Email star-forge@jeditemple.com.
  
  Keep the details out of public issues, pull requests and discussions.
@@ -32,7 +30,7 @@
 +   gh attestation verify ASSET --repo jeditemple/star-forge
     ```
  
- Replace `TAG` with the release's tag and `ASSET` with the downloaded filename.
+ Replace `TAG` with the release's tag and `ASSET` with the downloaded filename. A release of a private repository carries no attestation, so skip step 3 for it.
 @@ -53,19 +53,19 @@
  
  Each release carries a SHA-256 checksum file and a build provenance attestation for `nodejs-script`. To verify a downloaded script:
@@ -56,4 +54,4 @@
 +   gh attestation verify nodejs-script --repo jeditemple/star-forge
     ```
  
- Replace `TAG` with the release's tag. To check the npm package, run `npm audit signatures` in a project that installs it.
+ Replace `TAG` with the release's tag. A release of a private repository carries no attestation, so skip step 3 for it. To check the npm package, run `npm audit signatures` in a project that installs it.

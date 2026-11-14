@@ -6,12 +6,12 @@
 +## Verify a Docker image
  
 -Each release carries a SHA-256 checksum file and a build provenance attestation for the PHP asset, which shows that this repository's release workflow built it. To verify a downloaded asset:
-+Each published image carries a build provenance attestation. Check it with [GitHub CLI](https://cli.github.com/):
++Each image published from a public repository carries a build provenance attestation. Check it with [GitHub CLI](https://cli.github.com/):
  
 -1. From the release page, download the asset and `force-crystal-php-TAG.sha256`.
 -2. Check the checksum:
 +```bash
-+gh attestation verify oci://index.docker.io/yodashut/force-crystal:TAG --repo yodashut/force-crystal
++gh attestation verify oci://yodashut/force-crystal:TAG --repo yodashut/force-crystal
 +```
  
 -   ```bash
@@ -26,7 +26,7 @@
 -   gh attestation verify ASSET --repo yodashut/force-crystal
 -   ```
 -
--Replace `TAG` with the release's tag and `ASSET` with the downloaded filename.
+-Replace `TAG` with the release's tag and `ASSET` with the downloaded filename. A release of a private repository carries no attestation, so skip step 3 for it.
 -
 -## Verify a Node.js release
 -
@@ -47,6 +47,6 @@
 -   gh attestation verify nodejs-script --repo yodashut/force-crystal
 -   ```
 -
--Replace `TAG` with the release's tag. To check the npm package, run `npm audit signatures` in a project that installs it.
-+Replace `TAG` with the image tag.
+-Replace `TAG` with the release's tag. A release of a private repository carries no attestation, so skip step 3 for it. To check the npm package, run `npm audit signatures` in a project that installs it.
++Replace `TAG` with the image tag. A name without a registry resolves to Docker Hub.
  

@@ -10,7 +10,7 @@ Security fixes go into the latest release only. Before you report an issue, conf
 
 Report a vulnerability privately, so it stays hidden until a fix is out. Use either channel:
 
-- On the repository's **Security** tab, click **Report a vulnerability**. The form opens at https://github.com/yodashut/force-crystal/security/advisories/new.
+- On the repository's **Security** tab, click **Report a vulnerability**.
 - Email force-crystal@yodashut.com.
 
 Keep the details out of public issues, pull requests and discussions.
@@ -47,7 +47,7 @@ Each release carries a SHA-256 checksum file and a build provenance attestation 
    gh attestation verify ASSET --repo yodashut/force-crystal
    ```
 
-Replace `TAG` with the release's tag and `ASSET` with the downloaded filename.
+Replace `TAG` with the release's tag and `ASSET` with the downloaded filename. A release of a private repository carries no attestation, so skip step 3 for it.
 
 ## Verify a Node.js release
 
@@ -68,5 +68,5 @@ Each release carries a SHA-256 checksum file and a build provenance attestation 
    gh attestation verify nodejs-script --repo yodashut/force-crystal
    ```
 
-Replace `TAG` with the release's tag. To check the npm package, run `npm audit signatures` in a project that installs it.
+Replace `TAG` with the release's tag. A release of a private repository carries no attestation, so skip step 3 for it. To check the npm package, run `npm audit signatures` in a project that installs it.
 

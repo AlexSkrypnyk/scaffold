@@ -21,7 +21,7 @@
 -   gh attestation verify ASSET --repo yodashut/force-crystal
 -   ```
 -
--Replace `TAG` with the release's tag and `ASSET` with the downloaded filename.
+-Replace `TAG` with the release's tag and `ASSET` with the downloaded filename. A release of a private repository carries no attestation, so skip step 3 for it.
 -
  ## Verify a Node.js release
  
