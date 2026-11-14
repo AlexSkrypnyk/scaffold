@@ -25,7 +25,7 @@
 -Install the dependencies, then run the linters and the tests:
 -
 -```bash
--npm install
+-npm ci
 -npm run lint
 -npm run test
 -```

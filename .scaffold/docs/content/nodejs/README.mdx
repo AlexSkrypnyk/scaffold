@@ -9,6 +9,8 @@ NodeJS support adds `nodejs-script`, a single-file command-line interface (CLI) 
 
 NodeJS support is on by default. To leave it out, run `install.sh` with `--no-nodejs` or answer `n` to its **Use NodeJS** prompt.
 
+To build a package that other projects install, run `install.sh` with `--nodejs-library` or answer `y` to the **Is it a library** prompt that follows **Use NodeJS**. The script and its tests stay the same. A library commits no `package-lock.json`, so CI installs the latest versions your ranges allow, and Renovate leaves your `dependencies` ranges alone.
+
 Pick the page for your task:
 
 - [NodeJS CLI script](./nodejs-script.mdx): adapt the script

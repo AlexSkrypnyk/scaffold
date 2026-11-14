@@ -17,7 +17,7 @@ The following table lists the metadata, dependency and autoloading sections:
 | Project information | `name`, `description`, `license`, `type`, `homepage` | The package metadata. |
 | Author and support | `authors`, `support` | The maintainer's details and the URLs for issues and source code. |
 | Dependencies | `require` | PHP `>=8.3` and `symfony/console`. Every PHP mode keeps both. |
-| Development dependencies | `require-dev` | The development tools, such as [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), [Rector](https://getrector.org/) and [PHPUnit](https://phpunit.de/). The `composer` entry sets the minimum Composer version. See [Dependency policy](#dependency-policy-composer-210). |
+| Development dependencies | `require-dev` | The development tools, such as [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer), [PHPStan](https://phpstan.org/), [Rector](https://getrector.org/) and [PHPUnit](https://phpunit.de/). The `composer` entry sets the minimum Composer version. See [Dependency policy](#dependency-policy-composer-211). |
 | Autoloading | `autoload` | PSR-4 autoloading of the `YourNamespace\App\` namespace from `src`. |
 | Development autoloading | `autoload-dev` | PSR-4 autoloading of the `YourNamespace\App\Tests\` namespace from `tests/phpunit`, plus a classmap of that directory. |
 | Executables | `bin` | The entry point that Composer links into `vendor/bin` in projects that install the package: `bin/php-command` for a CLI command app or `php-script` for a CLI script. A library has no `bin` section. |
@@ -37,6 +37,12 @@ The following table lists the Composer scripts. Run a script by its name, for ex
 | `build` | Builds a PHAR file with Box. Only a CLI command app has this script, and `install.sh` keeps it unless you pass `--no-phar`. See [PHP packaging](../ci/php-packaging.mdx). |
 | `reset` | Deletes `vendor` and `composer.lock`. In a project that builds a PHAR, it also deletes `vendor-bin`. |
 
+## Lock file
+
+A CLI command app and a PHP script commit `composer.lock`, so CI and every developer install the same versions. `install.sh` refreshes the lock file for your package name without network access. When Composer isn't on your `PATH`, `install.sh` removes `composer.lock` and prints a warning. In that case, run `composer update` and commit the new `composer.lock`.
+
+A class library commits no `composer.lock`. The projects that install the library resolve its versions.
+
 ## Configuration
 
 The following table lists the settings in the `config` section, apart from `policy`:
@@ -45,21 +51,23 @@ The following table lists the settings in the `config` section, apart from `poli
 |---------|-------|--------|
 | `allow-plugins` | 3 plugins | Lets `dealerdirect/phpcodesniffer-composer-installer`, `ergebnis/composer-normalize` and `bamarni/composer-bin-plugin` run. In a project that doesn't build a PHAR, `install.sh` removes `bamarni/composer-bin-plugin` from this list and from `require-dev`. |
 | `discard-changes` | `true` | In a non-interactive update, Composer discards local changes to installed dependencies. |
+| `platform.php` | `"8.3"` | Composer resolves dependencies for PHP 8.3, so `composer.lock` installs on every PHP version the project supports. `install.sh` removes this setting from a class library. |
 | `sort-packages` | `true` | `composer require` keeps the packages in `composer.json` sorted by name. |
 
 The `ergebnis/composer-normalize` plugin adds the `composer normalize` command, which sorts and formats `composer.json`. The `Test PHP` workflow runs `composer normalize --dry-run` and fails on a file that needs normalizing. After you edit `composer.json` by hand, run `composer normalize`.
 
-### Dependency policy (Composer 2.10+)
+### Dependency policy (Composer 2.11+)
 
-The [`policy`](https://getcomposer.org/doc/06-config.md#policy) setting controls how Composer treats packages with security advisories and abandoned packages. The following table lists the values the template ships:
+The [`policy`](https://getcomposer.org/doc/06-config.md#policy) setting controls how Composer treats packages with security advisories, abandoned packages and new releases. The following table lists the values the template ships:
 
 | Setting | Value | Effect |
 |---------|-------|--------|
 | `advisories.block` | `false` | Composer installs packages that have known advisories. Set it to `true` to block them. |
 | `advisories.audit` | `"fail"` | `composer audit` fails when an installed package has a known advisory. |
 | `abandoned.audit` | `"report"` | `composer audit` lists abandoned packages and still passes. |
+| `cooldown.period` | `"7 days"` | `composer update` and `composer require` skip versions released less than 7 days ago, including the dependencies of your dependencies. `composer install` from `composer.lock` installs the locked versions, however new. |
 
-Composer supports `policy` from version 2.10. To stop an older Composer from installing the project, `require-dev` declares `"composer": ">=2.10.3"`. Composer reads `require-dev` only in the root project, so projects that install your package keep their own Composer version. `composer install --no-dev` skips this version check.
+Composer supports `policy` from version 2.10 and its `cooldown` from version 2.11. To stop an older Composer from installing the project, `require-dev` declares `"composer": ">=2.11.0"`. Composer reads `require-dev` only in the root project, so projects that install your package keep their own Composer version. `composer install --no-dev` skips this version check.
 
 To make Composer ignore an advisory after you review it, add its ID and your reason to `ignore-id` in `config.policy.advisories`:
 

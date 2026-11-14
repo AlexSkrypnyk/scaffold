@@ -1,5 +1,5 @@
-@@ -9,40 +9,9 @@
-     "internalChecksFilter": "strict",
+@@ -16,45 +16,9 @@
+     },
      "packageRules": [
          {
 -            "matchDepNames": ["php"],
@@ -15,6 +15,11 @@
 -            "matchManagers": ["npm", "composer"],
 -            "matchUpdateTypes": ["major"],
 -            "enabled": false
+-        },
+-        {
+-            "matchManagers": ["composer"],
+-            "matchUpdateTypes": ["lockFileMaintenance"],
+-            "minimumReleaseAge": null
 -        },
 -        {
              "matchPackageNames": ["*"],

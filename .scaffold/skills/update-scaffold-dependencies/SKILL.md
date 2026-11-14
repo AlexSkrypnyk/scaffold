@@ -30,8 +30,8 @@ The docs sites are private and never installed by users, so their `engines.node`
 | Area | Files | How |
 |---|---|---|
 | Init test suite | `.scaffold/tests/phpunit/composer.json` and `composer.lock` | Composer, Step 2 |
-| Root Composer | `composer.json` (its lock is git-ignored) | Composer, Step 3 |
-| Root npm | `package.json` (its lock is git-ignored) | npm, Step 4 |
+| Root Composer | `composer.json` and `composer.lock` | Composer, Step 3 |
+| Root npm | `package.json` and `package-lock.json` | npm, Step 4 |
 | BATS helpers | `tests/bats/` and `.scaffold/tests/bats/` `package.json` and `package-lock.json` | npm, Step 4 |
 | Docs sites | `.scaffold/docs/` (getscaffold.dev) and `docs/` (the consumer starter), `package.json` and `package-lock.json` | npm, Step 5 |
 | Docker | `Dockerfile` base image tag and digest | Step 6 |
@@ -42,7 +42,7 @@ The docs sites are private and never installed by users, so their `engines.node`
 
 `humbug/box` has no pin: `composer build` installs its latest version into `vendor-bin/` on every build.
 
-Run the steps in order. The order matters in 2 places. First, the init suite copies the working tree into its sandbox and asserts no `composer.lock` exists there, so its tests run with no root `composer.lock`, `vendor/` or `node_modules/`. Second, every source change must be committed before Step 11, because `update-snapshots` commits the fixtures it writes.
+Run the steps in order, because every source change must be committed before Step 11: `update-snapshots` commits the fixtures it writes. The root lock files ship to generated applications, so commit each one with its manifest.
 
 ## Step 1: Branch
 
@@ -110,7 +110,7 @@ git commit -m "Updated init test suite dependencies."
 
 ## Step 3: Root Composer
 
-The root has no committed lock, so install first to have something to compare against:
+Install from the committed lock first, so `composer outdated` has something to compare against:
 
 ```bash
 composer install
@@ -172,10 +172,10 @@ composer test
 composer update
 ```
 
-Stage `composer.json` and every file you fixed for a major, such as `src/`, `tests/` or `phpunit.xml`, by path:
+Stage `composer.json`, `composer.lock` and every file you fixed for a major, such as `src/`, `tests/` or `phpunit.xml`, by path:
 
 ```bash
-git add composer.json src tests
+git add composer.json composer.lock src tests
 ```
 
 ```bash
@@ -216,10 +216,10 @@ npm update --ignore-scripts --prefix tests/bats
 ./tests/bats/node_modules/.bin/bats tests/bats
 ```
 
-Repeat npm-check-updates and `npm update` for `.scaffold/tests/bats`. `npm update` also moves transitive packages in each lock to the newest versions their ranges allow. Stage the manifests, the locks and every file you fixed for a major, such as `eslint.config.js`, `nodejs-script` or `tests/nodejs/`:
+Repeat npm-check-updates and `npm update` for `.scaffold/tests/bats`. `npm update` also moves transitive packages in each lock to the newest versions their ranges allow. Check the root `overrides` block as "Lock files" in `.scaffold/CLAUDE.md` describes. Stage the manifests, the locks and every file you fixed for a major, such as `eslint.config.js`, `nodejs-script` or `tests/nodejs/`:
 
 ```bash
-git add package.json eslint.config.js nodejs-script tests/nodejs tests/bats/package.json tests/bats/package-lock.json .scaffold/tests/bats/package.json .scaffold/tests/bats/package-lock.json
+git add package.json package-lock.json eslint.config.js nodejs-script tests/nodejs tests/bats/package.json tests/bats/package-lock.json .scaffold/tests/bats/package.json .scaffold/tests/bats/package-lock.json
 ```
 
 ```bash
@@ -449,7 +449,6 @@ Hold it back when the fix means rewriting test infrastructure or touching most f
 | Raising `php`, `node` or a CI matrix | Drops users on supported runtimes; the floor is policy |
 | Skipping `composer why-not php <floor>` | A package that needs a newer PHP passes locally and fails CI's lowest PHP leg |
 | Skipping `composer bump` | CI's `lowest` leg tests the old constraint floors |
-| Running the init suite with a root `composer.lock` present | The suite fails on "composer.lock does not exist" |
 | Running `update-snapshots` with uncommitted sources | Its own commit lands ahead of the sources that produced the fixtures |
 | Editing fixtures by hand | The baseline and the scenario patches disagree; always regenerate |
 | Updating `docs/` and `.scaffold/docs/` separately | The 2 sites drift apart |

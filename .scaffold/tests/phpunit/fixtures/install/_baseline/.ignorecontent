@@ -1,7 +1,7 @@
 .artifacts/
 *.jpg
 *.png
-composer.lock
+^composer.lock
 ^*/composer.lock
 ^*/package-lock.json
 ^*/yarn.lock

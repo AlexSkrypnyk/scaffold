@@ -1,12 +1,13 @@
-@@ -1,11 +1,9 @@
+@@ -1,12 +1,8 @@
  # To ignore OS temporary files use global .gitignore
  # https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files#configuring-ignored-files-for-all-repositories-on-your-computer
  
 -/dist
  /.phpunit.cache
- /composer.lock
  /vendor
 -/vendor-bin
- /node_modules
- /package-lock.json
- /yarn.lock
+-/node_modules
+-/yarn.lock
+ 
+ # Code coverage and test logs.
+ /.logs

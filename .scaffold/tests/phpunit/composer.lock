@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c55dad1eece9b81ff03c49dd1bfc2ce5",
+    "content-hash": "131f7b6e2b7b475ed4c93c24a7dee644",
     "packages": [
         {
             "name": "alexskrypnyk/file",

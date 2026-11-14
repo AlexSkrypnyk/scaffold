@@ -57,7 +57,7 @@ create_renovate_json() {
     "extends": ["config:recommended"],
     "automerge": true,
     "rangeStrategy": "bump",
-    "dependencyDashboard": true,
+    "dependencyDashboard": {"enabled": true},
     "pinDigests": true,
     "branchPrefix": "deps/",
     "packageRules": [
@@ -221,13 +221,13 @@ ZIZMOR
   assert_file_contains "${tmpdir}/renovate.json" '"matchManagers": ["npm"]'
 }
 
-@test "disable_renovate_require_updates inserts the rule as the first package rule" {
+@test "disable_renovate_runtime_updates inserts the rule as the first package rule" {
   local tmpdir="${BATS_TEST_TMPDIR}/require_rule"
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
   pushd "${tmpdir}" >/dev/null || return 1
-  disable_renovate_require_updates
+  disable_renovate_runtime_updates "composer" "composer.json" "require"
   popd >/dev/null || return 1
 
   run sed -n '8,15p' "${tmpdir}/renovate.json"
@@ -243,13 +243,41 @@ ZIZMOR
   assert_file_not_exists "${tmpdir}/renovate.json.tmp"
 }
 
-@test "disable_renovate_require_updates keeps the rule through remove_nodejs and remove_renovate_managers" {
+@test "disable_renovate_runtime_updates stacks a second manager's rule above the first" {
+  local tmpdir="${BATS_TEST_TMPDIR}/require_rule_npm"
+  mkdir -p "${tmpdir}"
+  create_renovate_json "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  disable_renovate_runtime_updates "composer" "composer.json" "require"
+  disable_renovate_runtime_updates "npm" "package.json" "dependencies"
+  popd >/dev/null || return 1
+
+  run sed -n '8,21p' "${tmpdir}/renovate.json"
+  assert_output '    "packageRules": [
+        {
+            "matchManagers": ["npm"],
+            "matchFileNames": ["package.json"],
+            "matchDepTypes": ["dependencies"],
+            "enabled": false
+        },
+        {
+            "matchManagers": ["composer"],
+            "matchFileNames": ["composer.json"],
+            "matchDepTypes": ["require"],
+            "enabled": false
+        },
+        {'
+  assert_file_not_exists "${tmpdir}/renovate.json.tmp"
+}
+
+@test "disable_renovate_runtime_updates keeps the rule through remove_nodejs and remove_renovate_managers" {
   local tmpdir="${BATS_TEST_TMPDIR}/require_rule_no_nodejs"
   mkdir -p "${tmpdir}"
   create_renovate_json "${tmpdir}"
 
   pushd "${tmpdir}" >/dev/null || return 1
-  disable_renovate_require_updates
+  disable_renovate_runtime_updates "composer" "composer.json" "require"
   remove_nodejs
   remove_renovate_managers
   popd >/dev/null || return 1
@@ -259,12 +287,12 @@ ZIZMOR
   assert_file_not_contains "${tmpdir}/renovate.json" '"npm"'
 }
 
-@test "disable_renovate_require_updates is a no-op without a renovate.json" {
+@test "disable_renovate_runtime_updates is a no-op without a renovate.json" {
   local tmpdir="${BATS_TEST_TMPDIR}/require_rule_absent"
   mkdir -p "${tmpdir}"
 
   pushd "${tmpdir}" >/dev/null || return 1
-  disable_renovate_require_updates
+  disable_renovate_runtime_updates "composer" "composer.json" "require"
   popd >/dev/null || return 1
 
   assert_file_not_exists "${tmpdir}/renovate.json"
@@ -312,6 +340,277 @@ COMPOSER
   popd >/dev/null || return 1
 
   assert_file_not_exists "${tmpdir}/composer.json"
+}
+
+create_locked_project() {
+  cat >"${1}/composer.json" <<'COMPOSER'
+{
+    "name": "yournamespace/yourproject",
+    "config": {
+        "discard-changes": true,
+        "platform": {
+            "php": "8.3"
+        },
+        "sort-packages": true
+    }
+}
+COMPOSER
+  printf '/.phpunit.cache\n# /composer.lock\n/vendor\n' >"${1}/.gitignore"
+  echo '{}' >"${1}/composer.lock"
+}
+
+##
+# Put a 'composer' stand-in first on PATH that records its arguments.
+#
+# @param $1 Project directory.
+# @param $2 Exit code of the stand-in.
+#
+mock_composer() {
+  mkdir -p "${1}/bin"
+  # The stand-in expands its own variables when it runs.
+  # shellcheck disable=SC2016
+  printf '#!/usr/bin/env bash\necho "COMPOSER_DISABLE_NETWORK=${COMPOSER_DISABLE_NETWORK:-} $*" >"%s/composer.args"\nexit %s\n' "${1}" "${2}" >"${1}/bin/composer"
+  chmod +x "${1}/bin/composer"
+  PATH="${1}/bin:${PATH}"
+}
+
+@test "remove_composer_lock removes the lock, ignores it and drops the platform pin" {
+  local tmpdir="${BATS_TEST_TMPDIR}/composer_lock_library"
+  mkdir -p "${tmpdir}"
+  create_locked_project "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_lock
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/composer.lock"
+  assert_file_contains "${tmpdir}/.gitignore" '/composer.lock'
+  assert_file_not_contains "${tmpdir}/.gitignore" '# /composer.lock'
+  assert_file_not_contains "${tmpdir}/composer.json" '"platform"'
+  assert_file_not_contains "${tmpdir}/composer.json" '"php": "8.3"'
+  assert_file_contains "${tmpdir}/composer.json" '"discard-changes": true,'
+  assert_file_contains "${tmpdir}/composer.json" '"sort-packages": true'
+}
+
+@test "remove_composer_lock removes the lock without a .gitignore" {
+  local tmpdir="${BATS_TEST_TMPDIR}/composer_lock_no_gitignore"
+  mkdir -p "${tmpdir}"
+  create_locked_project "${tmpdir}"
+  rm "${tmpdir}/.gitignore"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_lock
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/composer.lock"
+  assert_file_not_exists "${tmpdir}/.gitignore"
+  assert_file_not_contains "${tmpdir}/composer.json" '"platform"'
+}
+
+@test "remove_composer_lock ignores the lock without a composer.json" {
+  local tmpdir="${BATS_TEST_TMPDIR}/composer_lock_no_composer"
+  mkdir -p "${tmpdir}"
+  create_locked_project "${tmpdir}"
+  rm "${tmpdir}/composer.json"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_lock
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/composer.lock"
+  assert_file_not_exists "${tmpdir}/composer.json"
+  assert_file_not_contains "${tmpdir}/.gitignore" '# /composer.lock'
+}
+
+@test "process_composer_lock refreshes the lock offline without installing" {
+  local tmpdir="${BATS_TEST_TMPDIR}/composer_lock_refresh"
+  mkdir -p "${tmpdir}"
+  create_locked_project "${tmpdir}"
+  mock_composer "${tmpdir}" 0
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run process_composer_lock
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_output_not_contains "Warning"
+  assert_file_exists "${tmpdir}/composer.lock"
+  assert_file_contains "${tmpdir}/composer.args" 'COMPOSER_DISABLE_NETWORK=1 update php --no-install --no-scripts --no-plugins --no-audit --no-progress --ignore-platform-reqs --quiet'
+}
+
+@test "process_composer_lock removes the lock that Composer fails to refresh" {
+  local tmpdir="${BATS_TEST_TMPDIR}/composer_lock_failed"
+  mkdir -p "${tmpdir}"
+  create_locked_project "${tmpdir}"
+  mock_composer "${tmpdir}" 1
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run process_composer_lock
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_output_contains "Warning: Composer could not refresh composer.lock, so it was removed. Run 'composer update' and commit composer.lock."
+  assert_file_not_exists "${tmpdir}/composer.lock"
+}
+
+@test "process_composer_lock removes the lock when Composer is not installed" {
+  local tmpdir="${BATS_TEST_TMPDIR}/composer_lock_no_composer_binary"
+  mkdir -p "${tmpdir}"
+  create_locked_project "${tmpdir}"
+  has_command() { [ "${1}" != "composer" ]; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run process_composer_lock
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_output_contains "Warning: Composer could not refresh composer.lock, so it was removed."
+  assert_file_not_exists "${tmpdir}/composer.lock"
+}
+
+@test "remove_composer_cooldown_exemption drops the exemption and keeps the period" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cooldown_period_first"
+  mkdir -p "${tmpdir}"
+  cat >"${tmpdir}/composer.json" <<'COMPOSER'
+{
+    "config": {
+        "policy": {
+            "cooldown": {
+                "period": "7 days",
+                "ignore": {
+                    "alexskrypnyk/*": "Released by the Scaffold maintainer"
+                }
+            }
+        },
+        "sort-packages": true
+    }
+}
+COMPOSER
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_cooldown_exemption
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/composer.json" '"ignore"'
+  assert_file_not_contains "${tmpdir}/composer.json" 'alexskrypnyk'
+  assert_file_contains "${tmpdir}/composer.json" '                "period": "7 days"'
+  assert_file_not_contains "${tmpdir}/composer.json" '"period": "7 days",'
+  assert_file_contains "${tmpdir}/composer.json" '"sort-packages": true'
+}
+
+@test "remove_composer_cooldown_exemption handles the exemption before the period" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cooldown_ignore_first"
+  mkdir -p "${tmpdir}"
+  cat >"${tmpdir}/composer.json" <<'COMPOSER'
+{
+    "config": {
+        "policy": {
+            "cooldown": {
+                "ignore": {
+                    "alexskrypnyk/*": "Released by the Scaffold maintainer"
+                },
+                "period": "7 days"
+            }
+        }
+    }
+}
+COMPOSER
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_cooldown_exemption
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/composer.json" '"ignore"'
+  assert_file_contains "${tmpdir}/composer.json" '                "period": "7 days"'
+  assert_file_contains "${tmpdir}/composer.json" '            }'
+}
+
+@test "remove_composer_cooldown_exemption is a no-op without a composer.json" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cooldown_no_composer"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_cooldown_exemption
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/composer.json"
+}
+
+create_nodejs_project() {
+  mkdir -p "${1}/.github/workflows"
+  printf '/node_modules\n#;< NODEJS_LIBRARY\n# /package-lock.json\n#;> NODEJS_LIBRARY\n/.logs\n' >"${1}/.gitignore"
+  printf '      - name: Install dependencies\n        run: npm ci --ignore-scripts\n' >"${1}/.github/workflows/test-nodejs.yml"
+  printf 'npm ci\nnpm run lint\n\nnpm ci --prefix tests/bats\n' >"${1}/CONTRIBUTING.dist.md"
+  echo '{}' >"${1}/package-lock.json"
+  create_renovate_json "${1}"
+}
+
+@test "process_nodejs_library removes the lock, ignores it and installs without it" {
+  local tmpdir="${BATS_TEST_TMPDIR}/nodejs_library"
+  mkdir -p "${tmpdir}"
+  create_nodejs_project "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_nodejs_library
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/package-lock.json"
+  assert_file_contains "${tmpdir}/.gitignore" '/package-lock.json'
+  assert_file_not_contains "${tmpdir}/.gitignore" '# /package-lock.json'
+  assert_file_contains "${tmpdir}/.github/workflows/test-nodejs.yml" 'run: npm install --ignore-scripts'
+  assert_file_not_contains "${tmpdir}/.github/workflows/test-nodejs.yml" 'npm ci'
+  assert_file_contains "${tmpdir}/CONTRIBUTING.dist.md" 'npm install'
+  assert_file_contains "${tmpdir}/CONTRIBUTING.dist.md" 'npm ci --prefix tests/bats'
+  assert_file_contains "${tmpdir}/renovate.json" '"matchDepTypes": ["dependencies"],'
+
+  run grep -x 'npm ci' "${tmpdir}/CONTRIBUTING.dist.md"
+  assert_failure
+}
+
+@test "process_nodejs_library is a no-op on files that are absent" {
+  local tmpdir="${BATS_TEST_TMPDIR}/nodejs_library_empty"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_nodejs_library
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/.gitignore"
+  assert_file_not_exists "${tmpdir}/.github/workflows/test-nodejs.yml"
+  assert_file_not_exists "${tmpdir}/renovate.json"
+}
+
+@test "remove_nodejs_library keeps the lock and removes the library blocks" {
+  local tmpdir="${BATS_TEST_TMPDIR}/nodejs_application"
+  mkdir -p "${tmpdir}"
+  create_nodejs_project "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_nodejs_library
+  popd >/dev/null || return 1
+
+  assert_file_exists "${tmpdir}/package-lock.json"
+  assert_file_not_contains "${tmpdir}/.gitignore" 'package-lock.json'
+  assert_file_not_contains "${tmpdir}/.gitignore" 'NODEJS_LIBRARY'
+  assert_file_contains "${tmpdir}/.gitignore" '/node_modules'
+  assert_file_contains "${tmpdir}/.gitignore" '/.logs'
+  assert_file_contains "${tmpdir}/.github/workflows/test-nodejs.yml" 'run: npm ci --ignore-scripts'
+}
+
+@test "process_composer_lock is a no-op without a lock" {
+  local tmpdir="${BATS_TEST_TMPDIR}/composer_lock_absent"
+  mkdir -p "${tmpdir}"
+  create_locked_project "${tmpdir}"
+  rm "${tmpdir}/composer.lock"
+  mock_composer "${tmpdir}" 1
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run process_composer_lock
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_output_not_contains "Warning"
+  assert_file_not_exists "${tmpdir}/composer.args"
 }
 
 create_phar_composer_json() {
@@ -834,6 +1133,16 @@ TOKENS
   assert_equal "${use_php_script}" "y"
 }
 
+@test "parse_args --nodejs-library selects the NodeJS library" {
+  parse_args --nodejs-library
+  assert_equal "${use_nodejs_library}" "y"
+}
+
+@test "parse_args --no-nodejs-library declines the NodeJS library" {
+  parse_args --no-nodejs-library
+  assert_equal "${use_nodejs_library}" "n"
+}
+
 @test "parse_args --no-php-command declines the command sub-mode" {
   parse_args --no-php-command
   assert_equal "${use_php_command}" "n"
@@ -995,6 +1304,28 @@ TOKENS
   assert_output_contains "Summary"
   assert_output_contains "AcmeApp"
   assert_output_contains "acme-app"
+}
+
+@test "collect_noninteractive keeps the NodeJS project an application by default" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe"
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "  Is it a library                : n"
+}
+
+@test "collect_noninteractive selects the NodeJS library on request" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --nodejs-library
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "  Is it a library                : y"
+}
+
+@test "collect_noninteractive drops the NodeJS library without NodeJS" {
+  parse_args --namespace=AcmeApp --name=acme-app --author="Jane Doe" --no-nodejs --nodejs-library
+  run collect_noninteractive
+  assert_success
+  assert_output_contains "Use NodeJS                       : n"
+  assert_output_contains "  Is it a library                : n"
 }
 
 @test "collect_noninteractive honors the script sub-mode" {
@@ -1581,6 +1912,24 @@ create_release_project() {
   assert_output_contains "Use CLI command app            : n"
   assert_output_contains "Use simple script              : n"
   assert_output_not_contains "CLI script name"
+}
+
+@test "collect_interactive asks whether the NodeJS project is a library" {
+  run collect_interactive <<<"$(printf 'AcmeApp\nacme-app\nJane Doe\nn\ny\ny\nn\n')"
+
+  assert_success
+  assert_output_contains "Use NodeJS                       : y"
+  assert_output_contains "  Is it a library                : y"
+  assert_output_contains "Use Shell                        : n"
+}
+
+@test "collect_interactive skips the NodeJS library question without NodeJS" {
+  run collect_interactive <<<"$(printf 'AcmeApp\nacme-app\nJane Doe\nn\nn\nn\n')"
+
+  assert_success
+  assert_output_contains "Use NodeJS                       : n"
+  assert_output_contains "  Is it a library                : n"
+  assert_output_contains "Use Shell                        : n"
 }
 
 @test "template_present detects the .scaffold directory" {

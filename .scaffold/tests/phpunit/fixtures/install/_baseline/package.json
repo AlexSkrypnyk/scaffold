@@ -40,6 +40,12 @@
         "globals": "__VERSION__",
         "prettier": "__VERSION__"
     },
+    "overrides": {
+        "test-exclude": {
+            "glob": "__VERSION__",
+            "minimatch": "__VERSION__"
+        }
+    },
     "prettier": {
         "singleQuote": true,
         "overrides": [

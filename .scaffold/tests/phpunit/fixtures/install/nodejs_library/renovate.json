@@ -1,0 +1,13 @@
+@@ -16,6 +16,12 @@
+     },
+     "packageRules": [
+         {
++            "matchManagers": ["npm"],
++            "matchFileNames": ["package.json"],
++            "matchDepTypes": ["dependencies"],
++            "enabled": false
++        },
++        {
+             "matchDepNames": ["php"],
+             "matchManagers": ["composer"],
+             "enabled": false

@@ -3,11 +3,9 @@
 
 /dist
 /.phpunit.cache
-/composer.lock
 /vendor
 /vendor-bin
 /node_modules
-/package-lock.json
 /yarn.lock
 
 # Code coverage and test logs.

@@ -1,5 +1,5 @@
-@@ -9,6 +9,12 @@
-     "internalChecksFilter": "strict",
+@@ -16,6 +16,12 @@
+     },
      "packageRules": [
          {
 +            "matchManagers": ["composer"],

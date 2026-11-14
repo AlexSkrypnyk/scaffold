@@ -24,4 +24,4 @@
 +        run: npm config set script-shell "C:\Program Files\Git\bin\bash.exe"
  
        - name: Install dependencies
-         run: npm install --ignore-scripts
+         run: npm ci --ignore-scripts

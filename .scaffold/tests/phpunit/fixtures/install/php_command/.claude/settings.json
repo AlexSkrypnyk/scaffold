@@ -1,8 +1,13 @@
-@@ -11,7 +11,6 @@
+@@ -11,12 +11,7 @@
        "Bash(./vendor/bin/phpstan:*)",
        "Bash(./vendor/bin/rector:*)",
        "Bash(./vendor/bin/phpunit:*)",
 -      "Bash(./tests/bats/node_modules/bats/bin/bats:*)",
        "Bash(npm install)",
-       "Bash(npm run lint)",
-       "Bash(npm run lint-fix)",
+-      "Bash(npm run lint)",
+-      "Bash(npm run lint-fix)",
+-      "Bash(npm run test)",
+-      "Bash(npm run test-coverage)",
+       "Bash(npm start)",
+       "Bash(npm run build)",
+       "Bash(npm run spellcheck)"

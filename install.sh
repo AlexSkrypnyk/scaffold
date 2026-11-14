@@ -62,6 +62,7 @@ use_php_command_build=""
 use_php_script=""
 php_script_name=""
 use_nodejs=""
+use_nodejs_library=""
 use_shell=""
 shell_command_name=""
 use_docker=""
@@ -265,7 +266,9 @@ sweep_files() {
     return 0
   fi
 
-  grep -rIl --null --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir=".claude" --exclude-dir="vendor" --exclude-dir="node_modules" "${needle}" "$(pwd)" || true
+  # 'composer.lock' holds third-party author names that match the needles,
+  # and process_composer_lock() rewrites its hash instead.
+  grep -rIl --null --exclude-dir=".git" --exclude-dir=".idea" --exclude-dir=".claude" --exclude-dir="vendor" --exclude-dir="node_modules" --exclude="composer.lock" "${needle}" "$(pwd)" || true
   grep -rIl --null "${needle}" "$(pwd)/.claude/settings.json" "$(pwd)/.claude/skills/update-architecture-docs" 2>/dev/null || true
 }
 
@@ -716,6 +719,26 @@ remove_php_entrypoint() {
   sed "${sed_opts[@]}" -e '/^ *"bin": \[$/,/^ *\],$/d' composer.json
 }
 
+##
+# Remove the lock file and the platform pin that keeps it installable.
+#
+# A library resolves its dependencies fresh on every PHP version it supports,
+# so it commits no lock file and pins no platform.
+#
+remove_composer_lock() {
+  rm -f composer.lock || true
+
+  if [ -f .gitignore ]; then
+    uncomment_line ".gitignore" "\/composer.lock"
+  fi
+
+  [ -f composer.json ] || return 0
+
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+  sed "${sed_opts[@]}" -e '/^ *"platform": {$/,/^ *},$/d' composer.json
+}
+
 remove_nodejs() {
   rm -f package.json || true
   rm -f package-lock.json || true
@@ -831,24 +854,21 @@ remove_renovate_rules() {
 }
 
 ##
-# Stop Renovate from raising the floor of the 'require' constraints.
+# Stop Renovate from raising the floor of a library's runtime constraints.
 #
-# A library's 'require' block is the support window its consumers inherit,
-# and with no committed lock file a bump changes nothing the project resolves.
+# A library's runtime constraints are the support window its consumers
+# inherit, and with no committed lock file a bump changes nothing the project
+# resolves.
 #
-disable_renovate_require_updates() {
+# @param $1 Renovate manager, such as 'composer' or 'npm'.
+# @param $2 Manifest file name.
+# @param $3 Dependency type that holds the runtime constraints.
+#
+disable_renovate_runtime_updates() {
   [ -f renovate.json ] || return 0
 
   local rule
-  # 'read -d' exits non-zero at the end of the heredoc.
-  IFS= read -r -d '' rule <<'RULE' || true
-        {
-            "matchManagers": ["composer"],
-            "matchFileNames": ["composer.json"],
-            "matchDepTypes": ["require"],
-            "enabled": false
-        },
-RULE
+  printf -v rule '        {\n            "matchManagers": ["%s"],\n            "matchFileNames": ["%s"],\n            "matchDepTypes": ["%s"],\n            "enabled": false\n        },\n' "${1}" "${2}" "${3}"
 
   # BSD 'sed a\' strips leading whitespace from the appended text, and awk
   # rejects a newline in a '-v' value, so the rule travels through ENVIRON.
@@ -939,7 +959,73 @@ process_php_library() {
   remove_php_script
   remove_php_entrypoint
   remove_php_release
-  disable_renovate_require_updates
+  remove_composer_lock
+  disable_renovate_runtime_updates "composer" "composer.json" "require"
+}
+
+##
+# Reduce the NodeJS stack to a library that commits no lock file.
+#
+# Without a lock file 'npm ci' refuses to run, so CI installs with
+# 'npm install' and resolves the latest versions the ranges allow.
+#
+process_nodejs_library() {
+  rm -f package-lock.json || true
+
+  if [ -f .gitignore ]; then
+    uncomment_line ".gitignore" "\/package-lock.json"
+  fi
+
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+
+  if [ -f .github/workflows/test-nodejs.yml ]; then
+    sed "${sed_opts[@]}" 's/run: npm ci --ignore-scripts$/run: npm install --ignore-scripts/' .github/workflows/test-nodejs.yml
+  fi
+
+  if [ -f CONTRIBUTING.dist.md ]; then
+    sed "${sed_opts[@]}" 's/^npm ci$/npm install/' CONTRIBUTING.dist.md
+  fi
+
+  disable_renovate_runtime_updates "npm" "package.json" "dependencies"
+}
+
+##
+# Remove the notes that apply only to a NodeJS library.
+#
+remove_nodejs_library() {
+  remove_tokens_with_content "NODEJS_LIBRARY"
+}
+
+##
+# Remove the template's cooldown exemption for its maintainer's packages.
+#
+remove_composer_cooldown_exemption() {
+  [ -f composer.json ] || return 0
+
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+  # The exemption is the only "ignore" object in the template's
+  # 'composer.json', and "period" is the last key of "cooldown" without it.
+  sed "${sed_opts[@]}" -e '/^ *"ignore": {$/,/^ *},\{0,1\}$/d' -e 's/^\( *"period": "[^"]*"\),$/\1/' composer.json
+}
+
+##
+# Refresh the lock file hash after the changes to 'composer.json'.
+#
+# Updating only the 'php' platform package keeps every locked version, drops
+# packages that are no longer required and needs no network. Without Composer
+# the stale lock file is removed, so CI resolves the dependencies instead.
+#
+process_composer_lock() {
+  [ -f composer.lock ] || return 0
+
+  if has_command composer && COMPOSER_DISABLE_NETWORK=1 composer update php --no-install --no-scripts --no-plugins --no-audit --no-progress --ignore-platform-reqs --quiet >/dev/null 2>&1; then
+    return 0
+  fi
+
+  rm -f composer.lock
+  echo "Warning: Composer could not refresh composer.lock, so it was removed. Run 'composer update' and commit composer.lock."
 }
 
 ##
@@ -2751,6 +2837,9 @@ Features (enabled by default unless noted; use --no-<name> to disable):
   --php-script-name=VALUE        Script file name (default: project name).
   --phar, --no-phar              Build a PHAR (default: on).
   --nodejs, --no-nodejs          NodeJS support.
+  --nodejs-library, --no-nodejs-library
+                                 Treat the NodeJS project as a library that
+                                 commits no package-lock.json (default: off).
   --shell, --no-shell            Shell script support.
   --shell-command-name=VALUE     Shell script name (default: project name).
   --docker, --no-docker          Docker support (default: off).
@@ -2875,6 +2964,8 @@ parse_args() {
 
       --nodejs) use_nodejs="y" ;;
       --no-nodejs) use_nodejs="n" ;;
+      --nodejs-library) use_nodejs_library="y" ;;
+      --no-nodejs-library) use_nodejs_library="n" ;;
 
       --shell) use_shell="y" ;;
       --no-shell) use_shell="n" ;;
@@ -3099,6 +3190,12 @@ apply_noninteractive_defaults() {
     php_script_name="<unset>"
   fi
 
+  if [ "${use_nodejs}" = "y" ]; then
+    : "${use_nodejs_library:=n}"
+  else
+    use_nodejs_library="n"
+  fi
+
   [ "${use_shell}" = "y" ] && : "${shell_command_name:=${project}}"
   [ "${use_docker}" = "y" ] && : "${docker_image_name:=$(to_lowercase "${namespace}")/${project}}"
 
@@ -3125,6 +3222,7 @@ print_summary() {
   echo "  Use simple script              : ${use_php_script}"
   [ "${use_php_script}" = "y" ] && echo "    Simple script name           : ${php_script_name}"
   echo "Use NodeJS                       : ${use_nodejs}"
+  echo "  Is it a library                : ${use_nodejs_library}"
   echo "Use Shell                        : ${use_shell}"
   echo "Use Docker                       : ${use_docker}"
   [ "${use_docker}" = "y" ] && echo "  Docker image name              : ${docker_image_name}"
@@ -3193,7 +3291,11 @@ print_reproduce_command() {
     fi
   fi
 
-  [ "${use_nodejs}" = "y" ] || args+=("--no-nodejs")
+  if [ "${use_nodejs}" != "y" ]; then
+    args+=("--no-nodejs")
+  elif [ "${use_nodejs_library}" = "y" ]; then
+    args+=("--nodejs-library")
+  fi
 
   if [ "${use_shell}" != "y" ]; then
     args+=("--no-shell")
@@ -3307,6 +3409,10 @@ collect_interactive() {
   fi
 
   use_nodejs="$(ask_yesno "Use NodeJS")"
+  use_nodejs_library="n"
+  if [ "${use_nodejs}" = "y" ]; then
+    use_nodejs_library="$(ask_yesno "  Is it a library" "N")"
+  fi
 
   use_shell="$(ask_yesno "Use Shell")"
   if [ "${use_shell}" = "y" ]; then
@@ -3564,7 +3670,13 @@ process_project() {
     remove_php
   fi
 
-  [ "${use_nodejs}" != "y" ] && remove_nodejs
+  if [ "${use_nodejs}" != "y" ]; then
+    remove_nodejs
+  elif [ "${use_nodejs_library:-n}" = "y" ]; then
+    process_nodejs_library
+  else
+    remove_nodejs_library
+  fi
 
   if [ "${use_shell}" = "y" ]; then
     replace_string_content "shell-command.sh" "${shell_command_name}.sh"
@@ -3609,7 +3721,11 @@ process_project() {
 
   process_security
 
+  remove_composer_cooldown_exemption
+
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
+
+  process_composer_lock
 
   echo
   echo "Initialization complete."

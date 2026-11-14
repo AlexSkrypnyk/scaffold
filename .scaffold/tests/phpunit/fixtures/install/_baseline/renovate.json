@@ -2,11 +2,18 @@
     "extends": ["config:recommended"],
     "automerge": true,
     "rangeStrategy": "bump",
-    "dependencyDashboard": true,
+    "dependencyDashboard": {
+        "enabled": true
+    },
     "pinDigests": true,
     "branchPrefix": "deps/",
     "minimumReleaseAge": "7 days",
+    "minimumReleaseAgePackageManagerSync": true,
     "internalChecksFilter": "strict",
+    "lockFileMaintenance": {
+        "enabled": true,
+        "automerge": true
+    },
     "packageRules": [
         {
             "matchDepNames": ["php"],
@@ -22,6 +29,11 @@
             "matchManagers": ["npm", "composer"],
             "matchUpdateTypes": ["major"],
             "enabled": false
+        },
+        {
+            "matchManagers": ["composer"],
+            "matchUpdateTypes": ["lockFileMaintenance"],
+            "minimumReleaseAge": null
         },
         {
             "matchPackageNames": ["*"],

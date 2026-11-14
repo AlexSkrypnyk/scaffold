@@ -60,7 +60,7 @@ jobs:
 
       # yamllint disable-line #;> WINDOWS
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Check coding standards
         if: matrix.node == 24 && matrix.os == 'ubuntu-latest'

@@ -69,10 +69,18 @@
  ## NodeJS Application Architecture
  
  ### Standalone Single-File Script
-@@ -133,67 +69,6 @@
+@@ -125,99 +61,6 @@
+ # Run tests with coverage (reports in .logs/)
+ npm run test-coverage
  ```
- 
- 
+-
+-
+-```bash
+-# Shell script tests
+-./tests/bats/node_modules/bats/bin/bats tests/bats/
+-```
+-
+-
 -### Building
 -
 -
@@ -134,13 +142,13 @@
 -- Data providers: `#[DataProvider('providerMethodName')]`
 -
 -
- ### Shell Script Testing with BATS
- 
- Shell script tests use BATS:
-@@ -201,20 +76,6 @@
- - Tests in `tests/bats/` with `.bats` extension
- - Helper functions in `tests/bats/_helper.bash`
- - Coverage exclusions: `# LCOV_EXCL_START` / `# LCOV_EXCL_END`
+-### Shell Script Testing with BATS
+-
+-Shell script tests use BATS:
+-
+-- Tests in `tests/bats/` with `.bats` extension
+-- Helper functions in `tests/bats/_helper.bash`
+-- Coverage exclusions: `# LCOV_EXCL_START` / `# LCOV_EXCL_END`
 -
 -
 -## CI/CD
@@ -155,6 +163,9 @@
 -- `.github/workflows/test-php.yml` - PHP testing
 -- `.github/workflows/release-php.yml` - Runs on the tag that publishing the draft release creates: checks it, then attaches the asset, its checksum and its provenance attestation to the release
 -  - Builds the PHAR to attach
+-
+-
+-- `.github/workflows/test-shell.yml` - Shell script testing
  
  
- - `.github/workflows/test-shell.yml` - Shell script testing
+ - `.github/workflows/test-nodejs.yml` - NodeJS testing
