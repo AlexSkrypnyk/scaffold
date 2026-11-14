@@ -162,6 +162,9 @@ GITHUB_TAG_RULESET_NAME="tags"
 # Release workflow that attaches its assets after the release is published.
 GITHUB_POST_PUBLISH_WORKFLOW=".github/workflows/release-php.yml"
 
+# Release workflow that publishes the release once every asset is attached.
+GITHUB_PUBLISH_WORKFLOW=".github/workflows/release-nodejs.yml"
+
 # Ref (tag, branch, or commit) to bootstrap the template from when the script is
 # run without the template present. Empty means "use the release of
 # SCAFFOLD_VERSION", or the default branch for "dev".
@@ -1836,13 +1839,14 @@ github_immutable_releases_status() {
 # GitHub can still read the setting as off right after a successful write, so
 # it is read back and written once more when it did not take. A published
 # immutable release takes no assets, so a project whose release workflow
-# attaches them after publishing is skipped.
+# attaches them after publishing is skipped. With both workflows, the
+# publishing one waits for the other's assets.
 #
 github_apply_immutable_releases() {
   local slug="${github_owner}/${github_repo}"
   local output=""
 
-  if [ -f "${GITHUB_POST_PUBLISH_WORKFLOW}" ]; then
+  if [ -f "${GITHUB_POST_PUBLISH_WORKFLOW}" ] && [ ! -f "${GITHUB_PUBLISH_WORKFLOW}" ]; then
     echo "  Immutable releases: skipped (${GITHUB_POST_PUBLISH_WORKFLOW##*/} attaches assets after the release is published)"
     return 0
   fi
@@ -2798,7 +2802,8 @@ GitHub repository (needs GitHub CLI and SCAFFOLD_GITHUB_TOKEN):
   --github-immutable-releases, --no-github-immutable-releases
                                  Make published releases immutable
                                  (default: on). Skipped when release-php.yml
-                                 attaches assets after publishing.
+                                 attaches assets after publishing and no
+                                 release-nodejs.yml publishes the release.
   --github-ruleset, --no-github-ruleset
                                  Default branch ruleset (default: on).
   --github-required-checks, --no-github-required-checks

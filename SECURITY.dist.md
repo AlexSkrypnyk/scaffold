@@ -10,7 +10,7 @@ Security fixes go into the latest release only. Before you report an issue, conf
 
 Report a vulnerability privately, so it stays hidden until a fix is out. Use either channel:
 
-- On the repository's **Security** tab, click **Report a vulnerability**. The form opens at https://github.com/yournamespace/yourproject/security/advisories/new.
+- On the repository's **Security** tab, click **Report a vulnerability**.
 - Email yourproject@yournamespace.com.
 
 Keep the details out of public issues, pull requests and discussions.
@@ -48,7 +48,7 @@ Each release carries a SHA-256 checksum file and a build provenance attestation 
    gh attestation verify ASSET --repo yournamespace/yourproject
    ```
 
-Replace `TAG` with the release's tag and `ASSET` with the downloaded filename.
+Replace `TAG` with the release's tag and `ASSET` with the downloaded filename. A release of a private repository carries no attestation, so skip step 3 for it.
 
 [//]: # (#;> PHP_RELEASE)
 [//]: # (#;< NODEJS)
@@ -71,18 +71,18 @@ Each release carries a SHA-256 checksum file and a build provenance attestation 
    gh attestation verify nodejs-script --repo yournamespace/yourproject
    ```
 
-Replace `TAG` with the release's tag. To check the npm package, run `npm audit signatures` in a project that installs it.
+Replace `TAG` with the release's tag. A release of a private repository carries no attestation, so skip step 3 for it. To check the npm package, run `npm audit signatures` in a project that installs it.
 
 [//]: # (#;> NODEJS)
 [//]: # (#;< DOCKER)
 ## Verify a Docker image
 
-Each published image carries a build provenance attestation. Check it with [GitHub CLI](https://cli.github.com/):
+Each image published from a public repository carries a build provenance attestation. Check it with [GitHub CLI](https://cli.github.com/):
 
 ```bash
-gh attestation verify oci://index.docker.io/yournamespace/yourdockerimage:TAG --repo yournamespace/yourproject
+gh attestation verify oci://yournamespace/yourdockerimage:TAG --repo yournamespace/yourproject
 ```
 
-Replace `TAG` with the image tag.
+Replace `TAG` with the image tag. A name without a registry resolves to Docker Hub.
 
 [//]: # (#;> DOCKER)

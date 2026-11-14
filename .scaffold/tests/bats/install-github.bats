@@ -200,8 +200,9 @@ github_setup() {
   rm -f "${GH_CREATED}" "${GH_RULESET_CREATED}" "${GH_TAG_RULESET_CREATED}" "${GH_RUN_LIST_COUNT}"
   mkdir -p "${GH_WORKFLOWS}"
 
-  # The tests run in the template, which ships the PHP release workflow.
+  # The tests run in the template, which ships both release workflows.
   GITHUB_POST_PUBLISH_WORKFLOW="${BATS_TEST_TMPDIR}/release-php.yml"
+  GITHUB_PUBLISH_WORKFLOW="${BATS_TEST_TMPDIR}/release-nodejs.yml"
 
   # Commits need an identity, and the developer's own git config stays out.
   export GIT_CONFIG_GLOBAL="${BATS_TEST_TMPDIR}/gitconfig"
@@ -946,6 +947,16 @@ gh api --method PUT repos/acme/app/immutable-releases --silent"
 
   run cat "${GH_READS}"
   assert_output ""
+}
+
+@test "github_apply_immutable_releases enables releases when the Node.js release workflow publishes them" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  touch "${GITHUB_POST_PUBLISH_WORKFLOW}" "${GITHUB_PUBLISH_WORKFLOW}"
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  Immutable releases: enabled"
 }
 
 #-------------------------------------------------------------------------------

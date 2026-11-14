@@ -187,7 +187,7 @@ To skip the security settings, pass `--no-github-security`.
 
 `install.sh` leaves the setting alone when it's already on or the owner enforces it for every repository. After turning it on, `install.sh` reads it back, because GitHub can still report it as off. When it reads as off, `install.sh` turns it on 1 more time.
 
-A release workflow that changes a release after publishing it fails after this, such as one that uploads assets to a published release. `install.sh` skips the setting when the project has `.github/workflows/release-php.yml`, because that workflow attaches its assets after you publish. To keep releases editable on any other project, pass `--no-github-immutable-releases`.
+A release workflow that changes a release after publishing it fails after this, such as one that uploads assets to a published release. `install.sh` skips the setting when the project has `.github/workflows/release-php.yml` and no `.github/workflows/release-nodejs.yml`, because the PHP workflow then attaches its assets after you publish. With both workflows, the Node.js workflow publishes the release after every asset is attached. To keep releases editable on any other project, pass `--no-github-immutable-releases`.
 
 ### Default branch ruleset
 
