@@ -21,6 +21,7 @@ jobs:
 
     permissions:
       contents: read
+      pull-requests: write # Post the coverage summary as a PR comment.
 
     strategy:
       fail-fast: false
@@ -62,8 +63,24 @@ jobs:
             echo "FAIL: coverage too low"
             exit 1
           fi
+          npx c8 report --reporter=text > .logs/coverage.txt
+          { echo "COVERAGE_CONTENT<<EOF"; sed '/./,$!d' .logs/coverage.txt; echo "EOF"; } >> "$GITHUB_ENV"
         env:
           CI_CODE_COVERAGE_THRESHOLD: ${{ vars.CI_CODE_COVERAGE_THRESHOLD || '80' }}
+
+      - name: Post coverage summary as PR comment
+        if: matrix.node == 24 && matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@__HASH__ # __VERSION__
+        with:
+          header: coverage-nodejs
+          message: |
+            **Node.js code coverage**
+
+            ```
+            ${{ env.COVERAGE_CONTENT }}
+            ```
+          # Post a new comment every time to keep the coverage history.
+          hide_and_recreate: true
 
       - name: Upload coverage report as an artifact
         uses: actions/upload-artifact@__HASH__ # __VERSION__
