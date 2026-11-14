@@ -507,7 +507,7 @@ getscaffold.dev/install.sh and /init.sh serve the `install.sh` attached to the l
 
 Steps 1-5 run in the `build` job, which reads the repository only. Steps 6-7 run in the `publish` job, which writes the release.
 
-Publish a release only by pushing its tag. A release published with the **Publish release** button gets the installer only while releases are mutable; on an immutable release the workflow fails. A re-run on a published release that already holds the same `install.sh` succeeds without uploading. The workflow also rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
+Publish a release only by pushing its tag. A release published with the **Publish release** button gets the installer only while releases are mutable. On an immutable release, `Release PHP` and this workflow both fail, and the fix is a new version with a tag push. A re-run on a published release that already holds the same `install.sh` succeeds without uploading. The workflow also rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
 
 Push 1 version tag at a time. The `publish` jobs share the `scaffold-release` concurrency group, which keeps 1 run waiting and cancels the one it replaces. Re-run a canceled `Publish Scaffold release` job.
 
@@ -615,7 +615,7 @@ composer build
 3. Merge to `main`. Release Drafter keeps a draft release with notes from the PR labels.
 4. Push a version tag from `main`, such as `git tag 1.2.3` and then `git push origin 1.2.3`.
 5. `Release PHP` attaches the PHAR and the PHP script to the draft. `Release Scaffold installer` then attaches the installer files and publishes the release.
-6. `Release Scaffold docs` deploys getscaffold.dev to GitHub Pages from the tag, while the release is still a draft.
+6. `Release Scaffold docs` deploys getscaffold.dev to GitHub Pages from the tag, in parallel with the release workflows.
 
 ## Key Differences from User Projects
 
