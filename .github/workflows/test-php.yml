@@ -98,9 +98,8 @@ jobs:
         env:
           CI_CODE_COVERAGE_THRESHOLD: ${{ vars.CI_CODE_COVERAGE_THRESHOLD || '80' }}
 
-      # Fork and Dependabot pull requests get a read-only token.
       - name: Post coverage summary as PR comment
-        if: matrix.php-versions == '8.4' && matrix.deps == 'normal' && matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+        if: matrix.php-versions == '8.4' && matrix.deps == 'normal' && matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3
         with:
           header: coverage-php
