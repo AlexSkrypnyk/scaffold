@@ -65,7 +65,7 @@ The [`policy`](https://getcomposer.org/doc/06-config.md#policy) setting controls
 | `advisories.block` | `false` | Composer installs packages that have known advisories. Set it to `true` to block them. |
 | `advisories.audit` | `"fail"` | `composer audit` fails when an installed package has a known advisory. |
 | `abandoned.audit` | `"report"` | `composer audit` lists abandoned packages and still passes. |
-| `cooldown.period` | `"7 days"` | `composer update` and `composer require` skip versions released less than 7 days ago, including the dependencies of your dependencies. To bypass it for 1 run, pass `--no-cooldown`. |
+| `cooldown.period` | `"7 days"` | `composer update` and `composer require` skip versions released less than 7 days ago, including the dependencies of your dependencies. `composer install` from `composer.lock` installs the locked versions, however new. |
 
 Composer supports `policy` from version 2.10 and its `cooldown` from version 2.11. To stop an older Composer from installing the project, `require-dev` declares `"composer": ">=2.11.0"`. Composer reads `require-dev` only in the root project, so projects that install your package keep their own Composer version. `composer install --no-dev` skips this version check.
 

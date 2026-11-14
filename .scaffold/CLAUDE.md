@@ -220,12 +220,12 @@ to `null` for Composer lock file maintenance, or the branch would stay pending.
 The cooldown needs Composer 2.11, hence `"composer": ">=2.11.0"`, and it also
 holds back releases younger than 7 days during a manual `composer update`.
 
-Keep every constraint floor at a release outside the cooldown. A floor that
-only a younger release satisfies fails every resolving run, such as the
-`Deps lowest` jobs, a class library's CI and lock file maintenance, until the
-release ages. `composer update` and `composer bump` under the cooldown pick
-such floors on their own, so never raise a floor by hand or with
-`--no-cooldown`.
+Keep every third-party constraint floor at a release outside the cooldown. A
+floor that only a younger release satisfies fails every resolving run, such as
+the `Deps lowest` jobs, a class library's CI and lock file maintenance, until
+the release ages. `composer update` and `composer bump` under the cooldown pick
+such floors on their own, so never raise a floor by hand or bypass the
+cooldown. `composer install` from a lock file is not affected.
 
 The root and maintenance-suite `composer.json` exempt `alexskrypnyk/*` from the
 cooldown, so the template adopts its maintainer's packages as they ship.
