@@ -73,6 +73,6 @@
     ]
   },
   "engines": {
-    "node": "__VERSION__"
+    "node": "__VERSION__ || __VERSION__ || >=24"
   }
 }

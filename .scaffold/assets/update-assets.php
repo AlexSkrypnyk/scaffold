@@ -77,6 +77,10 @@ define('RECORDINGS', [
 // Remote of the existing project in the 'configure' session.
 define('RECORD_REMOTE', 'https://github.com/' . RECORD_LOGIN . '/' . RECORD_PROJECT . '.git');
 
+// svg-term 2.x requires '@emotion/core' and '@emotion/styled' at runtime but
+// does not declare them, so it fails to load from a plain install.
+define('SVG_TERM_VERSION', '1.3.1');
+
 /**
  * Build an expect script that runs 1 session in a recorded shell.
  *
@@ -511,16 +515,37 @@ function checkDependencies(): void {
  *   Directory containing svg-term-render.js and the on-demand node_modules.
  */
 function installSvgTerm(string $assets_dir): void {
-  if (is_dir($assets_dir . '/node_modules/svg-term')) {
+  if (svgTermInstalledVersion($assets_dir) === SVG_TERM_VERSION) {
     return;
   }
 
-  verbose('Installing svg-term...');
-  shell_exec(sprintf('npm install --prefix %s svg-term@1.3.1 2>&1', escapeshellarg($assets_dir)));
+  verbose('Installing svg-term ' . SVG_TERM_VERSION . '...');
+  shell_exec(sprintf('npm install --prefix %s %s 2>&1', escapeshellarg($assets_dir), escapeshellarg('svg-term@' . SVG_TERM_VERSION)));
 
-  if (!is_dir($assets_dir . '/node_modules/svg-term')) {
-    throw new \RuntimeException('Failed to install svg-term.');
+  if (svgTermInstalledVersion($assets_dir) !== SVG_TERM_VERSION) {
+    throw new \RuntimeException('Failed to install svg-term ' . SVG_TERM_VERSION . '.');
   }
+}
+
+/**
+ * Read the version of the svg-term package installed in a directory.
+ *
+ * @param string $assets_dir
+ *   Directory holding the on-demand node_modules.
+ *
+ * @return string|null
+ *   The installed version, or NULL when svg-term is absent or unreadable.
+ */
+function svgTermInstalledVersion(string $assets_dir): ?string {
+  $manifest = $assets_dir . '/node_modules/svg-term/package.json';
+
+  if (!is_file($manifest)) {
+    return NULL;
+  }
+
+  $package = json_decode((string) file_get_contents($manifest), TRUE);
+
+  return is_array($package) && is_string($package['version'] ?? NULL) ? $package['version'] : NULL;
 }
 
 /**
@@ -635,9 +660,11 @@ function renderSvg(string $cast_file, string $svg_file, string $assets_dir): voi
   );
 
   $output = [];
-  exec($cmd, $output);
+  $status = 0;
+  exec($cmd, $output, $status);
 
-  if (!is_file($svg_file) || filesize($svg_file) === 0) {
+  // A failed render leaves the previously committed SVG in place.
+  if ($status !== 0 || !is_file($svg_file) || filesize($svg_file) === 0) {
     throw new \RuntimeException('Failed to render SVG: ' . implode("\n", $output));
   }
 }

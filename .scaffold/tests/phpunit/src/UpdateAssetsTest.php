@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AlexSkrypnyk\Scaffold\Tests;
 
+use AlexSkrypnyk\File\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -289,6 +290,35 @@ final class UpdateAssetsTest extends TestCase {
 
     $this->assertEqualsWithDelta(8, $last[0], PHP_FLOAT_EPSILON);
     $this->assertSame('o', $last[1]);
+  }
+
+  #[DataProvider('dataProviderSvgTermInstalledVersion')]
+  public function testSvgTermInstalledVersion(?string $manifest, ?string $expected): void {
+    $assets_dir = File::tmpdir();
+
+    if ($manifest !== NULL) {
+      File::dump($assets_dir . '/node_modules/svg-term/package.json', $manifest);
+    }
+
+    try {
+      $this->assertSame($expected, svgTermInstalledVersion($assets_dir));
+    }
+    finally {
+      File::rmdir($assets_dir);
+    }
+  }
+
+  public static function dataProviderSvgTermInstalledVersion(): \Iterator {
+    yield 'not installed' => [NULL, NULL];
+    yield 'installed' => ['{"name":"svg-term","version":"1.3.1"}', '1.3.1'];
+    yield 'other version' => ['{"name":"svg-term","version":"2.0.3"}', '2.0.3'];
+    yield 'no version' => ['{"name":"svg-term"}', NULL];
+    yield 'non-string version' => ['{"version":2}', NULL];
+    yield 'invalid manifest' => ['not json', NULL];
+  }
+
+  public function testSvgTermVersionIsPinned(): void {
+    $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', SVG_TERM_VERSION);
   }
 
   /**
