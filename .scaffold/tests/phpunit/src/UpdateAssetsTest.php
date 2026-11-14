@@ -90,6 +90,7 @@ final class UpdateAssetsTest extends TestCase {
       'reply "Description"',
       'reply "Apply labels"',
       'reply "Delete labels not in the list"',
+      'reply "Apply security settings"',
       'reply "Make published releases immutable"',
       'reply "Protect the default branch with a ruleset"',
       'reply "Wait for the first CI run and require its checks"',

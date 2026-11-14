@@ -154,7 +154,7 @@ To report a vulnerability privately, follow [`SECURITY.md`](SECURITY.md). It als
 
 ## Configure the GitHub repository
 
-To apply the Scaffold repository settings, labels and default branch ruleset to this project's GitHub repository, run the following command in the project's root directory:
+To apply the Scaffold repository settings, labels, security settings and rulesets to this project's GitHub repository, run the following command in the project's root directory:
 
 ```bash
 curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github

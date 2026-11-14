@@ -90,6 +90,7 @@ github_description=""
 github_merge=""
 github_labels=""
 github_labels_prune=""
+github_security=""
 github_immutable_releases=""
 github_ruleset=""
 github_required_checks=""
@@ -154,6 +155,12 @@ GITHUB_LABELS=(
 
 # Ruleset that protects the default branch.
 GITHUB_RULESET_NAME="default-branch"
+
+# Ruleset that limits who can create, move and delete tags.
+GITHUB_TAG_RULESET_NAME="tags"
+
+# Release workflow that attaches its assets after the release is published.
+GITHUB_POST_PUBLISH_WORKFLOW=".github/workflows/release-php.yml"
 
 # Ref (tag, branch, or commit) to bootstrap the template from when the script is
 # run without the template present. Empty means "use the release of
@@ -1315,6 +1322,7 @@ github_apply_defaults() {
   : "${github_settings:=y}"
   : "${github_labels:=y}"
   : "${github_labels_prune:=n}"
+  : "${github_security:=y}"
   : "${github_immutable_releases:=y}"
   : "${github_ruleset:=y}"
   : "${github_merge:=squash,rebase}"
@@ -1344,7 +1352,7 @@ github_load_repo() {
     return 1
   fi
 
-  local keys='"default_branch", "description", "allow_merge_commit", "allow_squash_merge", "allow_rebase_merge", "squash_merge_commit_title", "squash_merge_commit_message", "allow_auto_merge", "allow_update_branch", "delete_branch_on_merge", "has_issues", "has_wiki", "has_projects", "has_discussions"'
+  local keys='"default_branch", "description", "allow_merge_commit", "allow_squash_merge", "allow_rebase_merge", "squash_merge_commit_title", "squash_merge_commit_message", "allow_auto_merge", "allow_update_branch", "delete_branch_on_merge", "has_issues", "has_wiki", "has_projects", "has_discussions", "private"'
   local output
 
   if output="$(gh_run api "repos/${github_owner}/${github_repo}" --jq ". as \$repo | [${keys}][] | \"\\(.)=\\(\$repo[.] | if . == null then \"\" else . end)\"" 2>&1)"; then
@@ -1442,14 +1450,14 @@ github_call() {
 # @param $1 string Section label
 # @param $2 string Outcome of a dry run, e.g. "would update"
 # @param $3 string Outcome of a real run, e.g. "updated"
-# @param $4 string Details
+# @param $4 string Details (optional)
 #
 github_report() {
   local outcome="${3}"
 
   [ "${dry_run}" != "1" ] || outcome="${2}"
 
-  echo "  ${1}: ${outcome} ${4}"
+  echo "  ${1}: ${outcome}${4:+ ${4}}"
 }
 
 ##
@@ -1614,6 +1622,205 @@ github_apply_labels() {
 }
 
 ##
+# Check whether the repository is private.
+#
+# A repository that a dry run would create has no state, so --github-visibility
+# decides.
+#
+github_is_private() {
+  if [ "${github_repo_exists}" = "n" ]; then
+    [ "${github_visibility}" = "private" ]
+    return
+  fi
+
+  [ "$(github_state private)" = "true" ]
+}
+
+##
+# Turn on secret scanning and push protection.
+#
+# GitHub offers both free only on public repositories, so a private one is
+# skipped. The statuses read as empty without administration access, and the
+# write then reports the missing permission.
+#
+github_apply_secret_scanning() {
+  local label="Secret scanning"
+  local slug="${github_owner}/${github_repo}"
+  local output=""
+
+  if github_is_private; then
+    echo "  ${label}: skipped (needs a public repository)"
+    return 0
+  fi
+
+  # A dry run that would create the repository has no statuses to read.
+  if [ "${github_repo_exists}" != "n" ] && ! output="$(gh_run api "repos/${slug}" --jq '"\(.security_and_analysis.secret_scanning.status // "") \(.security_and_analysis.secret_scanning_push_protection.status // "")"' 2>&1)"; then
+    github_section_error "${label}" "Administration: read" "${output}"
+    return $?
+  fi
+
+  local statuses=("${output%% *}" "${output#* }")
+  local features=(secret_scanning secret_scanning_push_protection)
+  local changed=()
+  local body=""
+  local i
+
+  for i in 0 1; do
+    [ "${statuses[i]}" != "enabled" ] || continue
+
+    changed+=("${features[i]}")
+    body="${body:+${body}, }\"${features[i]}\": {\"status\": \"enabled\"}"
+  done
+
+  if [ "${#changed[@]}" -eq 0 ]; then
+    echo "  ${label}: unchanged"
+    return 0
+  fi
+
+  github_call "${label}" "Administration: write" api --method PATCH "repos/${slug}" --silent --input - <<<"{\"security_and_analysis\": {${body}}}" || return $?
+  github_report "${label}" "would enable" "enabled" "${changed[*]}"
+}
+
+##
+# Turn on Dependabot alerts.
+#
+# The read succeeds with no body when the alerts are on, and answers 404 when
+# they are off.
+#
+github_apply_dependabot_alerts() {
+  local label="Dependabot alerts"
+  local slug="${github_owner}/${github_repo}"
+  local output=""
+
+  # A dry run that would create the repository has no setting to read.
+  if [ "${github_repo_exists}" != "n" ]; then
+    if output="$(gh_run api "repos/${slug}/vulnerability-alerts" 2>&1)"; then
+      echo "  ${label}: unchanged"
+      return 0
+    fi
+
+    if [[ ${output} != *"HTTP 404"* ]]; then
+      github_section_error "${label}" "Administration: read" "${output}"
+      return $?
+    fi
+  fi
+
+  github_call "${label}" "Administration: write" api --method PUT "repos/${slug}/vulnerability-alerts" --silent || return $?
+  github_report "${label}" "would enable" "enabled"
+}
+
+##
+# Turn on private vulnerability reporting.
+#
+# GitHub offers it only on public repositories, so a private one is skipped.
+#
+github_apply_vulnerability_reporting() {
+  local label="Private vulnerability reporting"
+  local slug="${github_owner}/${github_repo}"
+  local output=""
+
+  if github_is_private; then
+    echo "  ${label}: skipped (needs a public repository)"
+    return 0
+  fi
+
+  # A dry run that would create the repository has no setting to read.
+  if [ "${github_repo_exists}" != "n" ]; then
+    if ! output="$(gh_run api "repos/${slug}/private-vulnerability-reporting" --jq .enabled 2>&1)"; then
+      github_section_error "${label}" "Administration: read" "${output}"
+      return $?
+    fi
+
+    if [ "${output}" = "true" ]; then
+      echo "  ${label}: unchanged"
+      return 0
+    fi
+  fi
+
+  github_call "${label}" "Administration: write" api --method PUT "repos/${slug}/private-vulnerability-reporting" --silent || return $?
+  github_report "${label}" "would enable" "enabled"
+}
+
+##
+# Make the default GITHUB_TOKEN of workflows read-only.
+#
+github_apply_workflow_token() {
+  local label="Workflow token"
+  local slug="${github_owner}/${github_repo}"
+  local output=""
+
+  # A dry run that would create the repository has no setting to read.
+  if [ "${github_repo_exists}" != "n" ]; then
+    if ! output="$(gh_run api "repos/${slug}/actions/permissions/workflow" --jq .default_workflow_permissions 2>&1)"; then
+      github_section_error "${label}" "Administration: read" "${output}"
+      return $?
+    fi
+
+    if [ "${output}" = "read" ]; then
+      echo "  ${label}: unchanged"
+      return 0
+    fi
+  fi
+
+  github_call "${label}" "Administration: write" api --method PUT "repos/${slug}/actions/permissions/workflow" --silent -f default_workflow_permissions=read || return $?
+  github_report "${label}" "would set to read-only" "set to read-only"
+}
+
+##
+# Print the body of the tag ruleset.
+#
+# Releases run on any tag push, so only the maintain (actor 2) and admin
+# (actor 5) repository roles may create, move or delete tags.
+#
+# @param $1 string Extra rules as comma-separated JSON objects (optional)
+# @param $2 string Extra bypass actors as comma-separated JSON objects
+#                  (optional)
+#
+github_tag_ruleset_body() {
+  local rules='{"type": "creation"}, {"type": "update"}, {"type": "deletion"}'
+  local actors='{"actor_id": 2, "actor_type": "RepositoryRole", "bypass_mode": "always"}, {"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}'
+
+  [ -z "${1:-}" ] || rules="${rules}, ${1}"
+  [ -z "${2:-}" ] || actors="${actors}, ${2}"
+
+  cat <<JSON
+{
+  "name": "${GITHUB_TAG_RULESET_NAME}",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": {"ref_name": {"include": ["~ALL"], "exclude": []}},
+  "rules": [${rules}],
+  "bypass_actors": [${actors}]
+}
+JSON
+}
+
+##
+# Create the tag ruleset, or update it when it exists.
+#
+github_apply_tag_ruleset() {
+  github_upsert_ruleset "Tag ruleset" "${GITHUB_TAG_RULESET_NAME}" "tag" github_tag_ruleset_body '.type != "creation" and .type != "update" and .type != "deletion"' '(.actor_type == "RepositoryRole" and (.actor_id == 2 or .actor_id == 5)) | not' "${GITHUB_TAG_RULESET_NAME}"
+}
+
+##
+# Apply the security settings.
+#
+# A setting skipped on a 403 does not stop the others.
+#
+# @return int 1 when any setting failed.
+#
+github_apply_security() {
+  local failed=0
+  local setting
+
+  for setting in github_apply_secret_scanning github_apply_dependabot_alerts github_apply_vulnerability_reporting github_apply_workflow_token github_apply_tag_ruleset; do
+    github_run_section "${setting}" || failed=1
+  done
+
+  return "${failed}"
+}
+
+##
 # Read whether releases of the repository are immutable.
 #
 # Prints "ENABLED ENFORCED_BY_OWNER", e.g. "true false".
@@ -1627,11 +1834,18 @@ github_immutable_releases_status() {
 # cannot change.
 #
 # GitHub can still read the setting as off right after a successful write, so
-# it is read back and written once more when it did not take.
+# it is read back and written once more when it did not take. A published
+# immutable release takes no assets, so a project whose release workflow
+# attaches them after publishing is skipped.
 #
 github_apply_immutable_releases() {
   local slug="${github_owner}/${github_repo}"
   local output=""
+
+  if [ -f "${GITHUB_POST_PUBLISH_WORKFLOW}" ]; then
+    echo "  Immutable releases: skipped (${GITHUB_POST_PUBLISH_WORKFLOW##*/} attaches assets after the release is published)"
+    return 0
+  fi
 
   # A dry run that would create the repository has no setting to read.
   if [ "${github_repo_exists}" != "n" ]; then
@@ -1706,44 +1920,52 @@ JSON
 }
 
 ##
-# Create the default branch ruleset, or update it when it exists.
+# Create a ruleset, or update the one with the same name and target.
 #
-# The update body replaces the rules and bypass actors, so the ones this script
-# does not manage are read and sent back. A given required status checks rule
-# replaces the existing one; without it, the existing one is kept.
+# The update body replaces the rules and bypass actors, so the ones the caller
+# does not manage are read and sent back.
 #
-# @param $1 string Required status checks rule as a JSON object (optional)
+# @param $1 string Section label, e.g. "Ruleset"
+# @param $2 string Ruleset name
+# @param $3 string Ruleset target: "branch" or "tag"
+# @param $4 string Function that prints the body, given extra rules and extra
+#                  bypass actors as comma-separated JSON objects
+# @param $5 string jq condition that holds for each rule to keep
+# @param $6 string jq condition that holds for each bypass actor to keep
+# @param $7 string Details for the report
+# @param $8 string Rules to add as comma-separated JSON objects (optional)
 #
-github_apply_ruleset() {
-  local checks_rule="${1:-}"
+github_upsert_ruleset() {
+  local label="${1}"
+  local name="${2}"
+  local target="${3}"
+  local body="${4}"
+  local keep_rule="${5}"
+  local keep_actor="${6}"
+  local details="${7}"
+  local added="${8:-}"
   local slug="${github_owner}/${github_repo}"
   local output=""
-  local details="${GITHUB_RULESET_NAME}"
-
-  [ -z "${checks_rule}" ] || details="${details} with required checks"
 
   # A dry run that would create the repository has no rulesets to read.
-  if [ "${github_repo_exists}" != "n" ] && ! output="$(gh_run api "repos/${slug}/rulesets" --paginate --jq ".[] | select(.name == \"${GITHUB_RULESET_NAME}\" and .source_type == \"Repository\") | .id" 2>&1)"; then
-    github_section_error "Ruleset" "Administration: read" "${output}"
+  if [ "${github_repo_exists}" != "n" ] && ! output="$(gh_run api "repos/${slug}/rulesets" --paginate --jq ".[] | select(.name == \"${name}\" and .target == \"${target}\" and .source_type == \"Repository\") | .id" 2>&1)"; then
+    github_section_error "${label}" "Administration: read" "${output}"
     return $?
   fi
 
   local id="${output%%$'\n'*}"
 
   if [ -z "${id}" ]; then
-    github_call "Ruleset" "Administration: write" api --method POST "repos/${slug}/rulesets" --silent --input - <<<"$(github_ruleset_body "${checks_rule}")" || return $?
-    github_report "Ruleset" "would create" "created" "${details}"
+    github_call "${label}" "Administration: write" api --method POST "repos/${slug}/rulesets" --silent --input - <<<"$("${body}" "${added}")" || return $?
+    github_report "${label}" "would create" "created" "${details}"
     return 0
   fi
 
-  local managed='.type != "deletion" and .type != "non_fast_forward"'
-  [ -z "${checks_rule}" ] || managed="${managed} and .type != \"required_status_checks\""
-
-  # Prints the unmanaged rules on line 1 and the unmanaged actors on line 2.
-  local jq_kept="([.rules[]? | select(${managed}) | tojson] | join(\", \")), ([.bypass_actors[]? | select((.actor_type == \"RepositoryRole\" and .actor_id == 5) | not) | tojson] | join(\", \"))"
+  # Prints the kept rules on line 1 and the kept actors on line 2.
+  local jq_kept="([.rules[]? | select(${keep_rule}) | tojson] | join(\", \")), ([.bypass_actors[]? | select(${keep_actor}) | tojson] | join(\", \"))"
 
   if ! output="$(gh_run api "repos/${slug}/rulesets/${id}" --jq "${jq_kept}" 2>&1)"; then
-    github_section_error "Ruleset" "Administration: read" "${output}"
+    github_section_error "${label}" "Administration: read" "${output}"
     return $?
   fi
 
@@ -1751,12 +1973,31 @@ github_apply_ruleset() {
   local kept_actors=""
   [[ ${output} != *$'\n'* ]] || kept_actors="${output#*$'\n'}"
 
+  [ -z "${added}" ] || kept_rules="${kept_rules:+${kept_rules}, }${added}"
+
+  github_call "${label}" "Administration: write" api --method PUT "repos/${slug}/rulesets/${id}" --silent --input - <<<"$("${body}" "${kept_rules}" "${kept_actors}")" || return $?
+  github_report "${label}" "would update" "updated" "${details}"
+}
+
+##
+# Create the default branch ruleset, or update it when it exists.
+#
+# A given required status checks rule replaces the existing one; without it,
+# the existing one is kept.
+#
+# @param $1 string Required status checks rule as a JSON object (optional)
+#
+github_apply_ruleset() {
+  local checks_rule="${1:-}"
+  local details="${GITHUB_RULESET_NAME}"
+  local keep_rule='.type != "deletion" and .type != "non_fast_forward"'
+
   if [ -n "${checks_rule}" ]; then
-    kept_rules="${kept_rules:+${kept_rules}, }${checks_rule}"
+    details="${details} with required checks"
+    keep_rule="${keep_rule} and .type != \"required_status_checks\""
   fi
 
-  github_call "Ruleset" "Administration: write" api --method PUT "repos/${slug}/rulesets/${id}" --silent --input - <<<"$(github_ruleset_body "${kept_rules}" "${kept_actors}")" || return $?
-  github_report "Ruleset" "would update" "updated" "${details}"
+  github_upsert_ruleset "Ruleset" "${GITHUB_RULESET_NAME}" "branch" github_ruleset_body "${keep_rule}" '(.actor_type == "RepositoryRole" and .actor_id == 5) | not' "${details}" "${checks_rule}"
 }
 
 ##
@@ -2314,6 +2555,10 @@ configure_github() {
     github_run_section github_apply_labels || failed=1
   fi
 
+  if [ "${github_security}" = "y" ]; then
+    github_apply_security || failed=1
+  fi
+
   if [ "${github_immutable_releases}" = "y" ]; then
     github_run_section github_apply_immutable_releases || failed=1
   fi
@@ -2375,6 +2620,8 @@ github_collect_interactive() {
   if [ "${github_labels}" = "y" ]; then
     github_labels_prune="$(ask_yesno "    Delete labels not in the list" "N")"
   fi
+
+  github_security="$(ask_yesno "  Apply security settings")"
 
   github_immutable_releases="$(ask_yesno "  Make published releases immutable")"
 
@@ -2541,9 +2788,17 @@ GitHub repository (needs GitHub CLI and SCAFFOLD_GITHUB_TOKEN):
                                  Labels (default: on).
   --github-labels-prune, --no-github-labels-prune
                                  Delete labels not in the list (default: off).
+  --github-security, --no-github-security
+                                 Security settings: secret scanning, push
+                                 protection, Dependabot alerts, private
+                                 vulnerability reporting, a read-only workflow
+                                 token and a tag ruleset that limits tags to
+                                 the maintain and admin roles (default: on).
+                                 The token needs Administration: write.
   --github-immutable-releases, --no-github-immutable-releases
                                  Make published releases immutable
-                                 (default: on).
+                                 (default: on). Skipped when release-php.yml
+                                 attaches assets after publishing.
   --github-ruleset, --no-github-ruleset
                                  Default branch ruleset (default: on).
   --github-required-checks, --no-github-required-checks
@@ -2687,6 +2942,8 @@ parse_args() {
       --no-github-labels) github_labels="n" ;;
       --github-labels-prune) github_labels_prune="y" ;;
       --no-github-labels-prune) github_labels_prune="n" ;;
+      --github-security) github_security="y" ;;
+      --no-github-security) github_security="n" ;;
       --github-immutable-releases) github_immutable_releases="y" ;;
       --no-github-immutable-releases) github_immutable_releases="n" ;;
       --github-ruleset) github_ruleset="y" ;;
@@ -2889,6 +3146,7 @@ print_summary() {
     echo "  General settings               : ${github_settings}"
     echo "  Labels                         : ${github_labels}"
     echo "    Delete labels not in list    : ${github_labels_prune}"
+    echo "  Security settings              : ${github_security}"
     echo "  Immutable releases             : ${github_immutable_releases}"
     echo "  Default branch ruleset         : ${github_ruleset}"
     if [ "${github_ruleset}" = "y" ] && [ "${github_create}" = "y" ]; then
@@ -2974,6 +3232,7 @@ print_reproduce_command() {
     [ -z "${github_description}" ] || [ "${github_description}" = "$(github_state description)" ] || args+=("--github-description=${github_description}")
     [ "${github_labels}" = "y" ] || args+=("--no-github-labels")
     [ "${github_labels_prune}" != "y" ] || args+=("--github-labels-prune")
+    [ "${github_security}" = "y" ] || args+=("--no-github-security")
     [ "${github_immutable_releases}" = "y" ] || args+=("--no-github-immutable-releases")
     [ "${github_ruleset}" = "y" ] || args+=("--no-github-ruleset")
     [ "${github_ruleset}" != "y" ] || [ "${github_create}" != "y" ] || [ "${github_wait_checks}" = "y" ] || args+=("--no-github-wait-checks")

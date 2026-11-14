@@ -2,11 +2,11 @@
 #
 # Unit tests for the GitHub repository configuration in install.sh.
 #
-# 'gh' and 'has_command' are replaced with functions. Calls that pass '--jq'
-# or a '-H' header are reads and land in GH_READS; every other call is a write
-# and lands in GH_WRITES together with any request body, so the tests assert
-# the exact writes of each section. 'git push' is replaced too and logs to
-# GH_WRITES; every other git command runs for real.
+# 'gh' and 'has_command' are replaced with functions. Calls that pass '--jq',
+# and 'api' calls without '--method', are reads and land in GH_READS; every
+# other call is a write and lands in GH_WRITES together with any request body,
+# so the tests assert the exact writes of each section. 'git push' is replaced
+# too and logs to GH_WRITES; every other git command runs for real.
 #
 # Variables under test are assigned by the sourced install.sh, which shellcheck
 # does not follow (SC2034, SC2153, SC2154). Each test runs in its own subshell,
@@ -20,11 +20,17 @@ load "../../../install.sh"
 gh() {
   echo "${GH_TOKEN-}|${GITHUB_TOKEN-}" >>"${GH_ENV}"
 
-  if [[ " $* " == *" --jq "* ]] || [ "${2:-}" = "-H" ]; then
+  local body=""
+
+  if [[ " $* " == *" --jq "* ]] || { [ "${1:-}" = "api" ] && [[ " $* " != *" --method "* ]]; }; then
     echo "gh $*" >>"${GH_READS}"
   else
     echo "gh $*" >>"${GH_WRITES}"
-    [[ " $* " != *" --input - "* ]] || cat >>"${GH_WRITES}"
+
+    if [[ " $* " == *" --input - "* ]]; then
+      body="$(cat)"
+      echo "${body}" >>"${GH_WRITES}"
+    fi
   fi
 
   # shellcheck disable=SC2053
@@ -37,6 +43,7 @@ gh() {
 
   case "$*" in
     "api user --jq .login") echo "${GH_LOGIN}" ;;
+    "api repos/acme/app --jq "*security_and_analysis*) echo "${GH_SECRET_SCANNING}" ;;
     "api repos/acme/app --jq "*)
       if [ "${GH_MISSING}" = "1" ] && [ ! -f "${GH_CREATED}" ]; then
         echo "gh: Not Found (HTTP 404)" >&2
@@ -57,10 +64,23 @@ gh() {
       fi
       if [ "${count}" -gt "${GH_IMMUTABLE_IGNORED_PUTS}" ]; then echo "true false"; else echo "${GH_IMMUTABLE}"; fi
       ;;
+    "api repos/acme/app/vulnerability-alerts")
+      if [ "${GH_DEPENDABOT}" != "1" ]; then
+        echo "gh: Not Found (HTTP 404)" >&2
+        return 1
+      fi
+      ;;
+    "api repos/acme/app/private-vulnerability-reporting --jq "*) echo "${GH_VULN_REPORTING}" ;;
+    "api repos/acme/app/actions/permissions/workflow --jq "*) echo "${GH_WORKFLOW_PERMISSIONS}" ;;
+    "api repos/acme/app/rulesets --paginate "*'"tags"'*)
+      if [ -f "${GH_TAG_RULESET_CREATED}" ]; then echo "9"; else echo "${GH_TAG_RULESET_ID}"; fi
+      ;;
     "api repos/acme/app/rulesets --paginate "*)
       if [ -f "${GH_RULESET_CREATED}" ]; then echo "7"; else echo "${GH_RULESET_ID}"; fi
       ;;
-    "api --method POST repos/acme/app/rulesets "*) touch "${GH_RULESET_CREATED}" ;;
+    "api --method POST repos/acme/app/rulesets "*)
+      if [[ ${body} == *'"target": "tag"'* ]]; then touch "${GH_TAG_RULESET_CREATED}"; else touch "${GH_RULESET_CREATED}"; fi
+      ;;
     "api repos/acme/app/rulesets/"*" --jq "*) echo "${GH_RULESET_KEPT}" ;;
     "api repos/acme/app/commits/"*"/check-runs "*) printf '%s' "${GH_CHECK_RUNS}" ;;
     "api repos/acme/app/actions/runs?check_suite_id="*)
@@ -158,6 +178,12 @@ github_setup() {
   GH_IMMUTABLE="true false"
   GH_IMMUTABLE_IGNORED_PUTS=0
   GH_IMMUTABLE_REREAD_FAIL=0
+  GH_SECRET_SCANNING="enabled enabled"
+  GH_DEPENDABOT=1
+  GH_VULN_REPORTING="true"
+  GH_WORKFLOW_PERMISSIONS="read"
+  GH_TAG_RULESET_ID=""
+  GH_TAG_RULESET_CREATED="${BATS_TEST_TMPDIR}/gh.tag-ruleset-created"
   GH_RULESET_ID=""
   GH_RULESET_KEPT=""
   GH_FAIL_MATCH=""
@@ -171,8 +197,11 @@ github_setup() {
   GH_RUN_LISTS=()
   GH_RUN_LIST_COUNT="${BATS_TEST_TMPDIR}/gh.run-list-count"
   GIT_PUSH_STATUS=0
-  rm -f "${GH_CREATED}" "${GH_RULESET_CREATED}" "${GH_RUN_LIST_COUNT}"
+  rm -f "${GH_CREATED}" "${GH_RULESET_CREATED}" "${GH_TAG_RULESET_CREATED}" "${GH_RUN_LIST_COUNT}"
   mkdir -p "${GH_WORKFLOWS}"
+
+  # The tests run in the template, which ships the PHP release workflow.
+  GITHUB_POST_PUBLISH_WORKFLOW="${BATS_TEST_TMPDIR}/release-php.yml"
 
   # Commits need an identity, and the developer's own git config stays out.
   export GIT_CONFIG_GLOBAL="${BATS_TEST_TMPDIR}/gitconfig"
@@ -905,6 +934,337 @@ gh api --method PUT repos/acme/app/immutable-releases --silent"
   assert_output ""
 }
 
+@test "github_apply_immutable_releases skips a project whose release workflow attaches assets after publishing" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  touch "${GITHUB_POST_PUBLISH_WORKFLOW}"
+
+  run github_apply_immutable_releases
+  assert_success
+  assert_output "  Immutable releases: skipped (release-php.yml attaches assets after the release is published)"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output ""
+}
+
+#-------------------------------------------------------------------------------
+# Security settings
+#-------------------------------------------------------------------------------
+
+@test "github_apply_secret_scanning leaves enabled scanning unchanged" {
+  github_setup
+
+  run github_apply_secret_scanning
+  assert_success
+  assert_output "  Secret scanning: unchanged"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output 'gh api repos/acme/app --jq "\(.security_and_analysis.secret_scanning.status // "") \(.security_and_analysis.secret_scanning_push_protection.status // "")"'
+}
+
+@test "github_apply_secret_scanning enables only the features that are off" {
+  # Statuses read, expected report, expected request body.
+  local cases=(
+    "enabled disabled" "secret_scanning_push_protection" '{"security_and_analysis": {"secret_scanning_push_protection": {"status": "enabled"}}}'
+    "disabled enabled" "secret_scanning" '{"security_and_analysis": {"secret_scanning": {"status": "enabled"}}}'
+    " " "secret_scanning secret_scanning_push_protection" '{"security_and_analysis": {"secret_scanning": {"status": "enabled"}, "secret_scanning_push_protection": {"status": "enabled"}}}'
+  )
+  local i
+
+  for ((i = 0; i < ${#cases[@]}; i += 3)); do
+    github_setup
+    GH_SECRET_SCANNING="${cases[i]}"
+
+    run github_apply_secret_scanning
+    assert_success
+    assert_output "  Secret scanning: enabled ${cases[i + 1]}"
+
+    run cat "${GH_WRITES}"
+    assert_output "gh api --method PATCH repos/acme/app --silent --input -
+${cases[i + 2]}"
+  done
+}
+
+@test "github_apply_secret_scanning and github_apply_vulnerability_reporting skip a private repository" {
+  github_setup
+  GH_SECRET_SCANNING=" "
+  GH_VULN_REPORTING="false"
+  github_repo_state="private=true"
+
+  run github_apply_secret_scanning
+  assert_success
+  assert_output "  Secret scanning: skipped (needs a public repository)"
+
+  run github_apply_vulnerability_reporting
+  assert_success
+  assert_output "  Private vulnerability reporting: skipped (needs a public repository)"
+
+  assert_no_writes
+  run cat "${GH_READS}"
+  assert_output ""
+}
+
+@test "github_apply_secret_scanning skips on a 403 and reports any other failure" {
+  github_setup
+  GH_SECRET_SCANNING="disabled disabled"
+  GH_FAIL_MATCH="api --method PATCH *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+
+  run github_apply_secret_scanning
+  assert_status 2
+  assert_output "  Secret scanning: skipped (token lacks Administration: write)"
+
+  GH_FAIL_MATCH="api repos/acme/app --jq *"
+  GH_FAIL_OUTPUT="gh: Server Error (HTTP 500)"
+
+  run github_apply_secret_scanning
+  assert_status 1
+  assert_output "  Secret scanning: failed (gh: Server Error (HTTP 500))"
+}
+
+@test "github_apply_secret_scanning prints the call under --dry-run" {
+  github_setup
+  GH_SECRET_SCANNING="disabled enabled"
+  dry_run=1
+
+  run github_apply_secret_scanning
+  assert_success
+  assert_output '  [dry-run] gh api --method PATCH repos/acme/app --silent --input -
+    {"security_and_analysis": {"secret_scanning": {"status": "enabled"}}}
+  Secret scanning: would enable secret_scanning'
+  assert_no_writes
+}
+
+@test "github_apply_dependabot_alerts leaves enabled alerts unchanged" {
+  github_setup
+
+  run github_apply_dependabot_alerts
+  assert_success
+  assert_output "  Dependabot alerts: unchanged"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output "gh api repos/acme/app/vulnerability-alerts"
+}
+
+@test "github_apply_dependabot_alerts enables alerts that read as not found" {
+  github_setup
+  GH_DEPENDABOT=0
+
+  run github_apply_dependabot_alerts
+  assert_success
+  assert_output "  Dependabot alerts: enabled"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/vulnerability-alerts --silent"
+}
+
+@test "github_apply_dependabot_alerts skips on a 403 and reports any other failure" {
+  github_setup
+  GH_DEPENDABOT=0
+  GH_FAIL_MATCH="api --method PUT *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+
+  run github_apply_dependabot_alerts
+  assert_status 2
+  assert_output "  Dependabot alerts: skipped (token lacks Administration: write)"
+
+  GH_FAIL_MATCH="api repos/acme/app/vulnerability-alerts"
+  GH_FAIL_OUTPUT="gh: Server Error (HTTP 500)"
+
+  run github_apply_dependabot_alerts
+  assert_status 1
+  assert_output "  Dependabot alerts: failed (gh: Server Error (HTTP 500))"
+}
+
+@test "github_apply_vulnerability_reporting leaves enabled reporting unchanged" {
+  github_setup
+
+  run github_apply_vulnerability_reporting
+  assert_success
+  assert_output "  Private vulnerability reporting: unchanged"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output "gh api repos/acme/app/private-vulnerability-reporting --jq .enabled"
+}
+
+@test "github_apply_vulnerability_reporting enables reporting" {
+  github_setup
+  GH_VULN_REPORTING="false"
+
+  run github_apply_vulnerability_reporting
+  assert_success
+  assert_output "  Private vulnerability reporting: enabled"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/private-vulnerability-reporting --silent"
+}
+
+@test "github_apply_vulnerability_reporting skips on a 403 when reading" {
+  github_setup
+  GH_FAIL_MATCH="api repos/acme/app/private-vulnerability-reporting *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+
+  run github_apply_vulnerability_reporting
+  assert_status 2
+  assert_output "  Private vulnerability reporting: skipped (token lacks Administration: read)"
+  assert_no_writes
+}
+
+@test "github_apply_workflow_token leaves a read-only token unchanged" {
+  github_setup
+
+  run github_apply_workflow_token
+  assert_success
+  assert_output "  Workflow token: unchanged"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output "gh api repos/acme/app/actions/permissions/workflow --jq .default_workflow_permissions"
+}
+
+@test "github_apply_workflow_token makes a write token read-only" {
+  github_setup
+  GH_WORKFLOW_PERMISSIONS="write"
+
+  run github_apply_workflow_token
+  assert_success
+  assert_output "  Workflow token: set to read-only"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/actions/permissions/workflow --silent -f default_workflow_permissions=read"
+}
+
+@test "github_apply_workflow_token skips on a 403 and reports any other failure" {
+  github_setup
+  GH_WORKFLOW_PERMISSIONS="write"
+  GH_FAIL_MATCH="api --method PUT *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+
+  run github_apply_workflow_token
+  assert_status 2
+  assert_output "  Workflow token: skipped (token lacks Administration: write)"
+
+  GH_FAIL_MATCH="api repos/acme/app/actions/permissions/workflow *"
+  GH_FAIL_OUTPUT="gh: Server Error (HTTP 500)"
+
+  run github_apply_workflow_token
+  assert_status 1
+  assert_output "  Workflow token: failed (gh: Server Error (HTTP 500))"
+}
+
+# Expected tag ruleset body, with extra rules ($1) and extra bypass actors ($2).
+tag_ruleset_body() {
+  cat <<JSON
+{
+  "name": "tags",
+  "target": "tag",
+  "enforcement": "active",
+  "conditions": {"ref_name": {"include": ["~ALL"], "exclude": []}},
+  "rules": [{"type": "creation"}, {"type": "update"}, {"type": "deletion"}${1:+, ${1}}],
+  "bypass_actors": [{"actor_id": 2, "actor_type": "RepositoryRole", "bypass_mode": "always"}, {"actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always"}${2:+, ${2}}]
+}
+JSON
+}
+
+@test "github_apply_tag_ruleset creates the tag ruleset when it is missing" {
+  github_setup
+
+  run github_apply_tag_ruleset
+  assert_success
+  assert_output "  Tag ruleset: created tags"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method POST repos/acme/app/rulesets --silent --input -
+$(tag_ruleset_body)"
+
+  run cat "${GH_READS}"
+  assert_output 'gh api repos/acme/app/rulesets --paginate --jq .[] | select(.name == "tags" and .target == "tag" and .source_type == "Repository") | .id'
+}
+
+@test "github_apply_tag_ruleset updates the tag ruleset and keeps the rules and actors it does not manage" {
+  github_setup
+  GH_TAG_RULESET_ID="43"
+  local rules='{"type":"required_signatures"}'
+  local actors='{"actor_id":1,"actor_type":"Integration","bypass_mode":"always"}'
+  GH_RULESET_KEPT="${rules}"$'\n'"${actors}"
+
+  run github_apply_tag_ruleset
+  assert_success
+  assert_output "  Tag ruleset: updated tags"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/rulesets/43 --silent --input -
+$(tag_ruleset_body "${rules}" "${actors}")"
+
+  run grep -F 'select((.actor_type == "RepositoryRole" and (.actor_id == 2 or .actor_id == 5)) | not)' "${GH_READS}"
+  assert_success
+}
+
+@test "github_apply_security applies every setting" {
+  github_setup
+  GH_SECRET_SCANNING="disabled disabled"
+  GH_DEPENDABOT=0
+  GH_VULN_REPORTING="false"
+  GH_WORKFLOW_PERMISSIONS="write"
+
+  run github_apply_security
+  assert_success
+  assert_output "  Secret scanning: enabled secret_scanning secret_scanning_push_protection
+  Dependabot alerts: enabled
+  Private vulnerability reporting: enabled
+  Workflow token: set to read-only
+  Tag ruleset: created tags"
+}
+
+@test "github_apply_security keeps going after a skipped or failed setting" {
+  github_setup
+  GH_DEPENDABOT=0
+  GH_FAIL_MATCH="api --method PUT repos/acme/app/vulnerability-alerts *"
+  GH_FAIL_OUTPUT="gh: Resource not accessible by personal access token (HTTP 403)"
+
+  run github_apply_security
+  assert_success
+  assert_output_contains "  Dependabot alerts: skipped (token lacks Administration: write)"
+  assert_output_contains "  Tag ruleset: created tags"
+
+  GH_FAIL_MATCH="api repos/acme/app/private-vulnerability-reporting *"
+  GH_FAIL_OUTPUT="gh: Server Error (HTTP 500)"
+
+  run github_apply_security
+  assert_failure
+  assert_output_contains "  Private vulnerability reporting: failed (gh: Server Error (HTTP 500))"
+  assert_output_contains "  Workflow token: unchanged"
+}
+
+@test "github_apply_security reads nothing for a repository a dry run would create" {
+  github_setup
+  github_repo_exists="n"
+  dry_run=1
+
+  run github_apply_security
+  assert_success
+  assert_output_contains "  Secret scanning: would enable secret_scanning secret_scanning_push_protection"
+  assert_output_contains "  Dependabot alerts: would enable"
+  assert_output_contains "  Private vulnerability reporting: would enable"
+  assert_output_contains "  Workflow token: would set to read-only"
+  assert_output_contains "  Tag ruleset: would create tags"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output ""
+
+  github_visibility="private"
+
+  run github_apply_security
+  assert_success
+  assert_output_contains "  Secret scanning: skipped (needs a public repository)"
+  assert_output_contains "  Private vulnerability reporting: skipped (needs a public repository)"
+}
+
 #-------------------------------------------------------------------------------
 # Ruleset
 #-------------------------------------------------------------------------------
@@ -935,7 +1295,7 @@ JSON
 $(ruleset_body)"
 
   run cat "${GH_READS}"
-  assert_output 'gh api repos/acme/app/rulesets --paginate --jq .[] | select(.name == "default-branch" and .source_type == "Repository") | .id'
+  assert_output 'gh api repos/acme/app/rulesets --paginate --jq .[] | select(.name == "default-branch" and .target == "branch" and .source_type == "Repository") | .id'
 }
 
 @test "github_apply_ruleset updates the ruleset and keeps the rules and actors it does not manage" {
@@ -1031,12 +1391,15 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_STATE="$(state_new)"
   GH_LABELS=""
   GH_IMMUTABLE="false false"
+  GH_WORKFLOW_PERMISSIONS="write"
 
   run configure_github
   assert_success
   assert_output_contains "Configuring GitHub repository acme/app"
   assert_output_contains "  General settings: updated"
   assert_output_contains "  Labels: 12 created, 0 updated, 0 unchanged"
+  assert_output_contains "  Workflow token: set to read-only"
+  assert_output_contains "  Tag ruleset: created tags"
   assert_output_contains "  Immutable releases: enabled"
   assert_output_contains "  Ruleset: created default-branch"
   assert_output_contains "GitHub repository settings complete."
@@ -1047,12 +1410,15 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_STATE="$(state_new)"
   github_settings="n"
   github_labels="n"
+  github_security="n"
   github_immutable_releases="n"
 
   run configure_github
   assert_success
   assert_output_not_contains "  General settings:"
   assert_output_not_contains "  Labels:"
+  assert_output_not_contains "  Secret scanning:"
+  assert_output_not_contains "  Tag ruleset:"
   assert_output_not_contains "  Immutable releases:"
   assert_output_contains "  Ruleset: created default-branch"
 }
@@ -1105,6 +1471,8 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_output_contains "  Dry run: nothing is changed."
   assert_output_contains "  General settings: would update"
   assert_output_contains "  Labels: 12 to create, 0 to update, 0 unchanged"
+  assert_output_contains "  Secret scanning: unchanged"
+  assert_output_contains "  Tag ruleset: would create tags"
   assert_output_contains "  Immutable releases: would enable"
   assert_output_contains "  Ruleset: would create default-branch"
   assert_no_writes
@@ -1163,15 +1531,17 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   interactive=0
   github_settings=""
   github_labels=""
+  github_security=""
   github_immutable_releases=""
   github_ruleset=""
-  parse_args --no-github-settings --no-github-immutable-releases --no-github-ruleset --github-labels-prune
+  parse_args --no-github-settings --no-github-security --no-github-immutable-releases --no-github-ruleset --github-labels-prune
   github_apply_defaults
 
   run github_main
   assert_success
   assert_output_not_contains "  General settings:"
   assert_output_contains "  Labels: 0 created, 0 updated, 12 unchanged, 0 deleted"
+  assert_output_not_contains "  Secret scanning:"
   assert_output_not_contains "  Immutable releases:"
   assert_output_not_contains "  Ruleset:"
 }
@@ -1193,12 +1563,13 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_LABELS=""
   interactive=1
 
-  # Owner, repository, general settings, description, labels, prune,
+  # Owner, repository, general settings, description, labels, prune, security,
   # immutable releases, ruleset.
-  run github_main <<<"$(printf 'acme\napp\ny\nNew description\ny\nn\nn\nn\n')"
+  run github_main <<<"$(printf 'acme\napp\ny\nNew description\ny\nn\nn\nn\nn\n')"
   assert_success
   assert_output_contains "  General settings: updated"
   assert_output_contains "  Labels: 12 created, 0 updated, 0 unchanged"
+  assert_output_not_contains "  Secret scanning:"
   assert_output_not_contains "  Immutable releases:"
   assert_output_not_contains "  Ruleset:"
   assert_file_contains "${GH_WRITES}" "-f description=New description"
@@ -1208,9 +1579,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_setup
   interactive=1
 
-  # Owner, repository, general settings, description, labels, immutable
-  # releases, ruleset.
-  github_collect_interactive <<<"$(printf '\n\ny\n\nn\nn\nn\n')"
+  # Owner, repository, general settings, description, labels, security,
+  # immutable releases, ruleset.
+  github_collect_interactive <<<"$(printf '\n\ny\n\nn\nn\nn\nn\n')"
 
   assert_equal "${github_owner}" "acme"
   assert_equal "${github_repo}" "app"
@@ -1218,6 +1589,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_equal "${github_description}" "Acme app"
   assert_equal "${github_labels}" "n"
   assert_equal "${github_labels_prune}" "n"
+  assert_equal "${github_security}" "n"
   assert_equal "${github_immutable_releases}" "n"
   assert_equal "${github_ruleset}" "n"
 }
@@ -1241,12 +1613,13 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_FAIL_OUTPUT="gh: Not Found (HTTP 404)"
 
   # Owner, repository, create, visibility, settings, description, labels,
-  # prune, immutable releases, ruleset, wait for CI.
-  github_collect_interactive <<<"$(printf 'acme\napp\ny\nprivate\ny\nAcme\ny\nn\ny\ny\nn\n')"
+  # prune, security, immutable releases, ruleset, wait for CI.
+  github_collect_interactive <<<"$(printf 'acme\napp\ny\nprivate\ny\nAcme\ny\nn\ny\ny\ny\nn\n')"
 
   assert_equal "${github_create}" "y"
   assert_equal "${github_visibility}" "private"
   assert_equal "${github_description}" "Acme"
+  assert_equal "${github_security}" "y"
   assert_equal "${github_immutable_releases}" "y"
   assert_equal "${github_wait_checks}" "n"
   assert_equal "${github_required_checks}" "y"
@@ -1256,9 +1629,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_setup
   github_create="y"
 
-  # Owner, repository, settings, labels, immutable releases, ruleset, required
-  # checks.
-  run github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\ny\nn\n')"
+  # Owner, repository, settings, labels, security, immutable releases, ruleset,
+  # required checks.
+  run github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\ny\ny\nn\n')"
   assert_success
   assert_output_contains "acme/app already exists, so only its settings are applied."
 }
@@ -1266,9 +1639,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
 @test "github_collect_interactive asks for the latest CI checks on an existing repository" {
   github_setup
 
-  # Owner, repository, settings, labels, immutable releases, ruleset, required
-  # checks.
-  github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\ny\nn\n')"
+  # Owner, repository, settings, labels, security, immutable releases, ruleset,
+  # required checks.
+  github_collect_interactive <<<"$(printf 'acme\napp\nn\nn\ny\ny\ny\nn\n')"
 
   assert_equal "${github_create}" "n"
   assert_equal "${github_required_checks}" "n"
@@ -1283,8 +1656,8 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   GH_LOGIN="acme"
 
   # Configure, owner, repository, settings, description, labels, prune,
-  # immutable releases, ruleset.
-  collect_github_interactive <<<"$(printf 'y\n\n\ny\n\ny\ny\ny\ny\n')"
+  # security, immutable releases, ruleset.
+  collect_github_interactive <<<"$(printf 'y\n\n\ny\n\ny\ny\ny\ny\ny\n')"
 
   assert_equal "${use_github}" "y"
   assert_equal "${github_owner}" "acme"
@@ -1322,6 +1695,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   github_settings=""
   github_labels=""
   github_labels_prune=""
+  github_security=""
   github_immutable_releases=""
   github_ruleset=""
   GH_LOGIN="acme"
@@ -1333,6 +1707,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_output_contains "  Repository                     : acme/app"
   assert_output_contains "  General settings               : y"
   assert_output_contains "  Labels                         : n"
+  assert_output_contains "  Security settings              : y"
   assert_output_contains "  Immutable releases             : y"
   assert_output_contains "  Default branch ruleset         : y"
 }
@@ -1352,7 +1727,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
 #-------------------------------------------------------------------------------
 
 @test "parse_args sets the GitHub options" {
-  parse_args --github --github-owner=acme --github-repo=app --no-github-settings --github-description="Acme app" --github-merge=merge,squash --no-github-labels --github-labels-prune --no-github-immutable-releases --no-github-ruleset --dry-run
+  parse_args --github --github-owner=acme --github-repo=app --no-github-settings --github-description="Acme app" --github-merge=merge,squash --no-github-labels --github-labels-prune --no-github-security --no-github-immutable-releases --no-github-ruleset --dry-run
 
   assert_equal "${use_github}" "y"
   assert_equal "${github_owner}" "acme"
@@ -1362,6 +1737,7 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_equal "${github_merge}" "merge,squash"
   assert_equal "${github_labels}" "n"
   assert_equal "${github_labels_prune}" "y"
+  assert_equal "${github_security}" "n"
   assert_equal "${github_immutable_releases}" "n"
   assert_equal "${github_ruleset}" "n"
   assert_equal "${dry_run}" "1"
@@ -1369,12 +1745,13 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
 }
 
 @test "parse_args sets the negated and positive GitHub toggles" {
-  parse_args --no-github --github-settings --github-labels --no-github-labels-prune --github-immutable-releases --github-ruleset
+  parse_args --no-github --github-settings --github-labels --no-github-labels-prune --github-security --github-immutable-releases --github-ruleset
 
   assert_equal "${use_github}" "n"
   assert_equal "${github_settings}" "y"
   assert_equal "${github_labels}" "y"
   assert_equal "${github_labels_prune}" "n"
+  assert_equal "${github_security}" "y"
   assert_equal "${github_immutable_releases}" "y"
   assert_equal "${github_ruleset}" "y"
 }
@@ -1399,6 +1776,9 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_output_contains "./install.sh github [OPTIONS]"
   assert_output_contains "SCAFFOLD_GITHUB_TOKEN"
   assert_output_contains "--dry-run"
+  assert_output_contains "--github-security, --no-github-security"
+  assert_output_contains "The token needs"
+  assert_output_contains "Administration: write."
 }
 
 @test "every prompt has an option in parse_args and a line in usage" {
@@ -1557,11 +1937,12 @@ default_answers() {
   github_description="New description"
   github_labels="n"
   github_labels_prune="y"
+  github_security="n"
   github_immutable_releases="n"
   github_ruleset="n"
 
   run print_reproduce_command
-  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-owner=other --github-repo=repo --no-github-settings --github-description=New\ description --no-github-labels --github-labels-prune --no-github-immutable-releases --no-github-ruleset'
+  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-owner=other --github-repo=repo --no-github-settings --github-description=New\ description --no-github-labels --github-labels-prune --no-github-security --no-github-immutable-releases --no-github-ruleset'
 }
 
 #-------------------------------------------------------------------------------
@@ -2060,8 +2441,8 @@ git push https://github.com/acme/app.git HEAD:refs/heads/main [token=test-token 
   GH_LOGIN="acme"
 
   # Create, owner, repository, visibility, settings, description, labels,
-  # prune, immutable releases, ruleset, wait for CI.
-  collect_github_interactive <<<"$(printf 'y\n\n\n\ny\n\ny\nn\ny\ny\ny\n')"
+  # prune, security, immutable releases, ruleset, wait for CI.
+  collect_github_interactive <<<"$(printf 'y\n\n\n\ny\n\ny\nn\ny\ny\ny\ny\n')"
 
   assert_equal "${use_github}" "y"
   assert_equal "${github_create}" "y"
