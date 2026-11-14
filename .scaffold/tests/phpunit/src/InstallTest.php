@@ -823,7 +823,7 @@ final class InstallTest extends UnitTestCase {
   }
 
   /**
-   * Composer lock file maintenance merges on its own; npm lock file maintenance is off.
+   * Composer lock file maintenance merges on its own, and npm's is off.
    *
    * @param list<string> $arguments
    *   Command-line arguments passed to install.sh.
