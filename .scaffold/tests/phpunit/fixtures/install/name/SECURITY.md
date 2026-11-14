@@ -1,8 +1,10 @@
-@@ -11,7 +11,7 @@
+@@ -10,8 +10,8 @@
+ 
  Report a vulnerability privately, so it stays hidden until a fix is out. Use either channel:
  
- - On the repository's **Security** tab, click **Report a vulnerability**.
+-- Open a [private security advisory](https://github.com/yodashut/force-crystal/security/advisories/new). The same form opens from **Report a vulnerability** on the repository's **Security** tab.
 -- Email force-crystal@yodashut.com.
++- Open a [private security advisory](https://github.com/jeditemple/star-forge/security/advisories/new). The same form opens from **Report a vulnerability** on the repository's **Security** tab.
 +- Email star-forge@jeditemple.com.
  
  Keep the details out of public issues, pull requests and discussions.
