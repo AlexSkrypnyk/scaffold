@@ -102,7 +102,8 @@ jobs:
         shell: bash
 
       - name: Post coverage summary as PR comment
-        if: github.event_name == 'pull_request'
+        # A fork pull request gets a read-only token, so the comment would fail.
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3
         with:
           header: coverage-scaffold-shell
