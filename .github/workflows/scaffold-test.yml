@@ -23,6 +23,7 @@ jobs:
 
     permissions:
       contents: read
+      pull-requests: write # Post the coverage summary as a PR comment.
 
     steps:
       - name: Checkout code
@@ -83,9 +84,36 @@ jobs:
         run: |
           kcov \
             --include-pattern=.sh,.bash \
+            --include-path="$(pwd)/install.sh,$(pwd)/.scaffold/installer" \
             --bash-parse-files-in-dir=. \
-            --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests,*/entrypoint.sh,entrypoint.sh \
+            --exclude-pattern=vendor,node_modules,.coverage-html,.scaffold-coverage-html,docs,tests \
             "$(pwd)"/.scaffold-coverage-html ./.scaffold/tests/bats/node_modules/.bin/bats .scaffold/tests/bats
+
+      - name: Generate code coverage summary
+        run: |
+          jq -r --arg root "${GITHUB_WORKSPACE}/" '
+            ["File", "% Lines", "Lines"],
+            ["All files", .percent_covered, "\(.covered_lines)/\(.total_lines)"],
+            (.files | sort_by(.file)[] | [(.file | ltrimstr($root)), .percent_covered, "\(.covered_lines)/\(.total_lines)"])
+            | @tsv
+          ' .scaffold-coverage-html/bats/coverage.json | column -t -s $'\t' > .scaffold-coverage.txt
+          cat .scaffold-coverage.txt
+          { echo "COVERAGE_CONTENT<<EOF"; cat .scaffold-coverage.txt; echo "EOF"; } >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Post coverage summary as PR comment
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3
+        with:
+          header: coverage-scaffold-shell
+          message: |
+            **Scaffold shell code coverage**
+
+            ```
+            ${{ env.COVERAGE_CONTENT }}
+            ```
+          # Post a new comment every time to keep the coverage history.
+          hide_and_recreate: true
 
       - name: Upload coverage report as an artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
