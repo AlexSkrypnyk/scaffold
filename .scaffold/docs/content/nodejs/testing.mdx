@@ -32,8 +32,9 @@ Each example test file uses 1 of the helpers:
 
 - [`script.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.test.js) is a unit test. It calls `main()` through `runMain()` with different arguments and options.
 - [`script.functional.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.functional.test.js) is a functional test. It runs the script through `runScript()` the way your script's users run it.
+- [`script.property.test.js`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/nodejs/script.property.test.js) is a property-based test. [fast-check](https://fast-check.dev) generates 100 argument lists per test, and each list goes to `main()` through `runMain()`.
 
-Each example test file registers 1 test for every entry in its `cases` array. To add a test, copy an entry and change its values.
+The unit and functional test files register 1 test for every entry in their `cases` array. To add a test, copy an entry and change its values. To add a property, write a `fc.property()` whose assertion holds for every generated input.
 
 ## Coverage
 
