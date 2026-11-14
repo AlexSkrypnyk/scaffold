@@ -1,7 +1,7 @@
 ---
 title: Introduction
 sidebar_position: 1
-cspell: ignore yournamespace yourproject getscaffold Skrypnyk
+cspell: ignore yournamespace yourproject getscaffold Skrypnyk intoto
 ---
 
 import AsciinemaPlayer from '@site/src/components/AsciinemaPlayer';
@@ -56,13 +56,14 @@ To start from a tag, branch or commit in place of the latest release, add `--ref
 
 ## Verify the install script
 
-The install script runs on your machine with your permissions, so you can check it before it runs. getscaffold.dev/install.sh serves the `install.sh` attached to the latest GitHub release, so the file you check is the file the one-line command runs. Each release attaches 3 files:
+The install script runs on your machine with your permissions, so you can check it before it runs. getscaffold.dev/install.sh serves the `install.sh` attached to the latest GitHub release, so the file you check is the file the one-line command runs. From 1.6.0, each release attaches 4 installer files:
 
 - `install.sh`, the install script of that release
 - `SHA256SUMS`, the SHA-256 checksum of `install.sh`
 - `SHA256SUMS.asc`, a GPG signature of `SHA256SUMS`
+- `scaffold-installer-TAG.intoto.jsonl`, the build attestation of `install.sh` and `SHA256SUMS`, where `TAG` is the release's tag
 
-GitHub Actions also records a build attestation for `install.sh` and `SHA256SUMS`. The attestation ties each file to the commit and the workflow run that built it.
+The attestation ties each file to the commit and the workflow run that built it. GitHub Actions also records it in the repository's attestations, where `gh attestation verify` finds it.
 
 To verify the install script with the [GitHub CLI](https://cli.github.com), then run it:
 

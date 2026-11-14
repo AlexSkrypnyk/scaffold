@@ -28,7 +28,7 @@
         "phpstan/phpstan": "^2.1.41",
         "phpunit/phpunit": "^11.5.55",
         "rector/rector": "^2.3.9",
-        "symfony/filesystem": "^7.4.6",
+        "symfony/filesystem": "^7.4.23",
         "symfony/finder": "^7.4.6",
         "symfony/process": "^7.4.5"
     },
