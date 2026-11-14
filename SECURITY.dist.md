@@ -10,7 +10,7 @@ Security fixes go into the latest release only. Before you report an issue, conf
 
 Report a vulnerability privately, so it stays hidden until a fix is out. Use either channel:
 
-- On the repository's **Security** tab, click **Report a vulnerability**.
+- Open a [private security advisory](https://github.com/yournamespace/yourproject/security/advisories/new). The same form opens from **Report a vulnerability** on the repository's **Security** tab.
 - Email yourproject@yournamespace.com.
 
 Keep the details out of public issues, pull requests and discussions.
