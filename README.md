@@ -10,6 +10,7 @@
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/AlexSkrypnyk/scaffold.svg)](https://github.com/AlexSkrypnyk/scaffold/pulls)
 [![Test Scaffold](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold-test.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold-test.yml)
 [![codecov](https://codecov.io/gh/AlexSkrypnyk/scaffold/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/scaffold)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AlexSkrypnyk/scaffold/badge)](https://scorecard.dev/viewer/?uri=github.com/AlexSkrypnyk/scaffold)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/scaffold?label=License)
 ![Release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/scaffold?label=Release)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot&label=Renovate)
@@ -166,6 +167,16 @@ In a clone, the same prompt applies the settings, labels, security settings, imm
 ![An interactive install.sh github run that configures an existing repository](.scaffold/assets/github.svg)
 
 The [GitHub repository setup](https://getscaffold.dev/github) page lists the token permissions and every option.
+
+## Security
+
+`install.sh` runs on your machine with your permissions. It reads only its options and your answers to the prompts:
+
+- Piped from `curl` into an empty directory, it downloads the Scaffold archive over HTTPS from github.com and extracts it into that directory. It stops when the directory holds any file or directory, hidden ones included.
+- In the project directory, it rewrites the template files and removes the features you leave out.
+- The GitHub step calls the GitHub API with the token in `SCAFFOLD_GITHUB_TOKEN` only, so it ignores the account `gh` is logged in to.
+
+To check the install script before it runs, expand **Verify the install script before you run it** in [Create a project](#create-a-project). To report a vulnerability, follow the [security policy](SECURITY.md).
 
 ## Update a generated project
 

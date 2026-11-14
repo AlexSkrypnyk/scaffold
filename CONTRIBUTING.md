@@ -56,3 +56,24 @@ The fixtures live in `.scaffold/tests/phpunit/fixtures/install`. When a change a
    ```
 
 4. In `.scaffold/tests/phpunit`, run `composer test` again. Confirm that every test passes.
+
+## Submit a change
+
+Every change reaches `main` through a pull request. The pull request merges after its required checks pass and its branch is up to date with `main`.
+
+1. Fork the repository, or create a branch if you have write access.
+2. Make your change. Add or update tests for every new feature and every bug fix, in the suite that covers the code you changed.
+3. Run the lint and test commands from [Local development](#local-development) for every suite your change touches. The linters check the coding standard. Confirm that each command exits with code `0`.
+4. Open a pull request against `main`, and fill in the pull request template.
+5. Confirm that the required checks pass. The `main` ruleset requires the following checks:
+
+   | Area | Checks |
+   |---|---|
+   | PHP | `PHP VERSION, Deps lowest, OS` and `PHP VERSION, Deps normal, OS` for PHP 8.3, 8.4 and 8.5 on `ubuntu-latest` and `windows-latest` |
+   | PHAR | `Build PHAR` |
+   | Shell | `Shell, ubuntu-latest`, `Shell, ubuntu-24.04`, `Shell, macos-latest`, `Shell, macos-15` and `Shell, windows-latest` |
+   | Node.js | `Node.js VERSION, OS` for Node.js 20, 22 and 24 on `ubuntu-latest` and `windows-latest` |
+   | Docker | `Docker` |
+   | Documentation | `Test documentation` and `Test Scaffold documentation` |
+   | Workflows | `Test Actions` |
+   | Template | `Test Scaffold` |
