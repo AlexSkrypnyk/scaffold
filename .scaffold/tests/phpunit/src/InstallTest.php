@@ -50,7 +50,7 @@ final class InstallTest extends UnitTestCase {
     if (!is_string(self::$fixtures)) {
       throw new \RuntimeException('Fixtures directory is not set.');
     }
-    $this->assertSnapshotMatchesBaseline(self::$sut, $baseline, self::$fixtures);
+    $this->assertSnapshotMatchesBaseline($baseline, self::$fixtures, self::$sut);
 
     if ($after instanceof SerializableClosure) {
       $after = self::cu($after);
@@ -252,7 +252,7 @@ final class InstallTest extends UnitTestCase {
     $baseline = File::dir($fixtures_install . DIRECTORY_SEPARATOR . self::BASELINE_DIR);
     $diffs = File::dir($fixtures_install . DIRECTORY_SEPARATOR . $diffs_name);
 
-    $this->assertSnapshotMatchesBaseline(self::$sut, $baseline, $diffs);
+    $this->assertSnapshotMatchesBaseline($baseline, $diffs, self::$sut);
   }
 
   public static function dataProviderInstallNonInteractive(): \Iterator {
