@@ -703,7 +703,7 @@ enter_repo() {
 
   run github_apply_labels
   assert_success
-  assert_output "  Labels: 0 created, 0 updated, 12 unchanged"
+  assert_output "  Labels: 0 created, 0 updated, 12 unchanged, 0 deleted"
   assert_no_writes
 }
 
@@ -713,7 +713,7 @@ enter_repo() {
 
   run github_apply_labels
   assert_success
-  assert_output "  Labels: 12 created, 0 updated, 0 unchanged"
+  assert_output "  Labels: 12 created, 0 updated, 0 unchanged, 0 deleted"
 
   run cat "${GH_WRITES}"
   assert_equal "${lines[0]}" "gh label create AUTOMERGE --repo acme/app --color 934BF4 --description Pull request has been approved and set to automerge --force"
@@ -730,7 +730,7 @@ enter_repo() {
 
   run github_apply_labels
   assert_success
-  assert_output "  Labels: 0 created, 2 updated, 10 unchanged"
+  assert_output "  Labels: 0 created, 2 updated, 10 unchanged, 0 deleted"
 
   run cat "${GH_WRITES}"
   assert_output "gh label create AUTOMERGE --repo acme/app --color 934BF4 --description Pull request has been approved and set to automerge --force
@@ -739,6 +739,7 @@ gh label create URGENT --repo acme/app --color D93F0B --description Pull request
 
 @test "github_apply_labels keeps other labels without pruning" {
   github_setup
+  github_labels_prune="n"
   GH_LABELS="$(labels_applied)"$'\n'"bug"$'\t'"d73a4a"$'\t'"Something isn't working"
 
   run github_apply_labels
@@ -1605,6 +1606,22 @@ $(ruleset_body "${cases[i + 1]}" "${cases[i + 2]}")"
   assert_equal "${github_ruleset}" "n"
 }
 
+@test "github_collect_interactive and the defaults delete labels not in the list" {
+  github_setup
+  interactive=1
+
+  # Owner, repository, general settings, labels, prune, security, immutable
+  # releases, ruleset.
+  github_collect_interactive <<<"$(printf 'acme\napp\nn\ny\n\nn\nn\nn\n')"
+
+  assert_equal "${github_labels_prune}" "y"
+
+  github_labels_prune=""
+  github_apply_defaults
+
+  assert_equal "${github_labels_prune}" "y"
+}
+
 @test "github_collect_interactive stops when a missing repository is not created" {
   github_setup
   GH_FAIL_MATCH="api repos/acme/app --jq *"
@@ -1947,13 +1964,18 @@ default_answers() {
   github_settings="n"
   github_description="New description"
   github_labels="n"
-  github_labels_prune="y"
+  github_labels_prune="n"
   github_security="n"
   github_immutable_releases="n"
   github_ruleset="n"
 
   run print_reproduce_command
-  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-owner=other --github-repo=repo --no-github-settings --github-description=New\ description --no-github-labels --github-labels-prune --no-github-security --no-github-immutable-releases --no-github-ruleset'
+  assert_equal "${lines[1]}" '  ./install.sh --namespace=AcmeApp --name=acme-app --author=Jane\ Doe --github --github-owner=other --github-repo=repo --no-github-settings --github-description=New\ description --no-github-labels --no-github-security --no-github-immutable-releases --no-github-ruleset'
+
+  github_labels="y"
+
+  run print_reproduce_command
+  assert_output_contains " --no-github-labels-prune "
 }
 
 #-------------------------------------------------------------------------------

@@ -1324,7 +1324,7 @@ github_default_identity() {
 github_apply_defaults() {
   : "${github_settings:=y}"
   : "${github_labels:=y}"
-  : "${github_labels_prune:=n}"
+  : "${github_labels_prune:=y}"
   : "${github_security:=y}"
   : "${github_immutable_releases:=y}"
   : "${github_ruleset:=y}"
@@ -2622,7 +2622,7 @@ github_collect_interactive() {
   github_labels="$(ask_yesno "  Apply labels")"
   github_labels_prune="n"
   if [ "${github_labels}" = "y" ]; then
-    github_labels_prune="$(ask_yesno "    Delete labels not in the list" "N")"
+    github_labels_prune="$(ask_yesno "    Delete labels not in the list")"
   fi
 
   github_security="$(ask_yesno "  Apply security settings")"
@@ -2791,7 +2791,7 @@ GitHub repository (needs GitHub CLI and SCAFFOLD_GITHUB_TOKEN):
   --github-labels, --no-github-labels
                                  Labels (default: on).
   --github-labels-prune, --no-github-labels-prune
-                                 Delete labels not in the list (default: off).
+                                 Delete labels not in the list (default: on).
   --github-security, --no-github-security
                                  Security settings: secret scanning, push
                                  protection, Dependabot alerts, private
@@ -3236,7 +3236,7 @@ print_reproduce_command() {
     [ "${github_settings}" = "y" ] || args+=("--no-github-settings")
     [ -z "${github_description}" ] || [ "${github_description}" = "$(github_state description)" ] || args+=("--github-description=${github_description}")
     [ "${github_labels}" = "y" ] || args+=("--no-github-labels")
-    [ "${github_labels_prune}" != "y" ] || args+=("--github-labels-prune")
+    [ "${github_labels_prune}" = "y" ] || [ "${github_labels}" != "y" ] || args+=("--no-github-labels-prune")
     [ "${github_security}" = "y" ] || args+=("--no-github-security")
     [ "${github_immutable_releases}" = "y" ] || args+=("--no-github-immutable-releases")
     [ "${github_ruleset}" = "y" ] || args+=("--no-github-ruleset")
