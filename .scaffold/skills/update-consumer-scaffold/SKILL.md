@@ -245,6 +245,8 @@ Use `git status` and `git diff` to review everything. Pay attention to:
   only until it has classes of its own.
 - **README.md**: re-apply any structural changes from the template while keeping
   the project's own content.
+- **SECURITY.md**: the template ships a fresh security policy. Keep the
+  project's own contact email, supported versions and response time.
 - **Workflows and jobs**: mark new workflow files as intent-to-add with
   `git add -N .github/workflows`, because `git diff` skips untracked files. Then
   list what changed under `.github/workflows` with
