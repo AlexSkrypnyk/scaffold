@@ -1,4 +1,4 @@
-@@ -13,37 +13,19 @@
+@@ -13,26 +13,16 @@
      },
      "packageRules": [
          {
@@ -23,6 +23,10 @@
 -            "minimumReleaseAge": null
 -        },
 -        {
+             "matchManagers": ["npm"],
+             "matchUpdateTypes": ["lockFileMaintenance"],
+             "enabled": false
+@@ -41,14 +31,6 @@
              "matchPackageNames": ["*"],
              "groupName": "all dependencies",
              "groupSlug": "all"

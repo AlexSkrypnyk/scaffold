@@ -33,6 +33,11 @@
             "minimumReleaseAge": null
         },
         {
+            "matchManagers": ["npm"],
+            "matchUpdateTypes": ["lockFileMaintenance"],
+            "enabled": false
+        },
+        {
             "matchPackageNames": ["*"],
             "groupName": "all dependencies",
             "groupSlug": "all"
