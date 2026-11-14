@@ -16,6 +16,10 @@
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
 ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/yodashut/force-crystal/badge)](https://scorecard.dev/viewer/?uri=github.com/yodashut/force-crystal)
+<!-- To show the OpenSSF Best Practices badge, register the project at https://www.bestpractices.dev, replace PROJECT_ID with its ID and move the badge out of this comment.
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/PROJECT_ID/badge)](https://www.bestpractices.dev/projects/PROJECT_ID)
+-->
 
 </div>
 
@@ -86,9 +90,13 @@ Run the shell script:
 
 [`CONTRIBUTING.md`](CONTRIBUTING.md) lists the commands that install the dependencies and run the linters and tests.
 
+## Security
+
+To report a vulnerability privately, follow [`SECURITY.md`](SECURITY.md). It also lists the versions that get security fixes.
+
 ## Configure the GitHub repository
 
-To apply the Scaffold repository settings, labels and default branch ruleset to this project's GitHub repository, run the following command in the project's root directory:
+To apply the Scaffold repository settings, labels, security settings and rulesets to this project's GitHub repository, run the following command in the project's root directory:
 
 ```bash
 curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github

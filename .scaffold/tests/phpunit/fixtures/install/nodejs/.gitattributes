@@ -1,4 +1,4 @@
-@@ -6,11 +6,6 @@
+@@ -5,10 +5,5 @@
  /.gitignore      export-ignore
  /docs            export-ignore
  /logo.png        export-ignore
@@ -9,4 +9,3 @@
 -/rector.php      export-ignore
  /.npmignore      export-ignore
  /.npmrc          export-ignore
- /renovate.json   export-ignore

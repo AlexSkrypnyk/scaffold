@@ -6,7 +6,7 @@
  </p>
  
  <h1 align="center">Few lines describing your project</h1>
-@@ -7,14 +7,14 @@
+@@ -7,16 +7,16 @@
  
  <div align="center">
  
@@ -27,9 +27,12 @@
 +![GitHub release (latest by date)](https://img.shields.io/github/v/release/jeditemple/star-forge)
 +![LICENSE](https://img.shields.io/github/license/jeditemple/star-forge)
  ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)
- 
- </div>
-@@ -33,25 +33,25 @@
+-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/yodashut/force-crystal/badge)](https://scorecard.dev/viewer/?uri=github.com/yodashut/force-crystal)
++[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/jeditemple/star-forge/badge)](https://scorecard.dev/viewer/?uri=github.com/jeditemple/star-forge)
+ <!-- To show the OpenSSF Best Practices badge, register the project at https://www.bestpractices.dev, replace PROJECT_ID with its ID and move the badge out of this comment.
+ [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/PROJECT_ID/badge)](https://www.bestpractices.dev/projects/PROJECT_ID)
+ -->
+@@ -37,25 +37,25 @@
  Install the PHP package with Composer:
  
  ```bash
@@ -60,7 +63,7 @@
  ```
  
  ## Usage
-@@ -59,7 +59,7 @@
+@@ -63,7 +63,7 @@
  Run the PHP command that Composer installs:
  
  ```bash
@@ -69,7 +72,7 @@
  ```
  
  The command takes the following arguments and options:
-@@ -79,7 +79,7 @@
+@@ -83,7 +83,7 @@
  Run the shell script:
  
  ```bash

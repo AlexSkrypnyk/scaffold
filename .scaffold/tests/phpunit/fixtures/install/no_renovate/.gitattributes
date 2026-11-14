@@ -1,5 +1,0 @@
-@@ -13,4 +13,3 @@
- /rector.php      export-ignore
- /.npmignore      export-ignore
- /.npmrc          export-ignore
--/renovate.json   export-ignore
