@@ -189,3 +189,7 @@ You can pull later template changes into a project generated from Scaffold and k
 4. Reconcile the differences.
 
 The generated project's [`AGENTS.md`](AGENTS.md) holds these instructions, so any AI agent can follow them. A project generated with `--no-ai` has no `AGENTS.md`, so it can't update this way.
+
+## Contributing
+
+To report a bug or request a feature, open an [issue](https://github.com/AlexSkrypnyk/scaffold/issues). To submit a change, follow the [contributing guide](CONTRIBUTING.md).
