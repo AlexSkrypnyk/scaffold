@@ -56,7 +56,7 @@ jobs:
           RENOVATE_IGNORE_PR_AUTHOR: 'true'
           # Lift the schedule and rate limits, and leave the Renovate app's
           # Dependency Dashboard issue to the app.
-          RENOVATE_FORCE: '{"schedule": [], "prHourlyLimit": 0, "prConcurrentLimit": 0, "branchConcurrentLimit": 0, "dependencyDashboard": false}'
+          RENOVATE_FORCE: '{"schedule": [], "prHourlyLimit": 0, "prConcurrentLimit": 0, "branchConcurrentLimit": 0, "dependencyDashboard": {"enabled": false}}'
           RENOVATE_DEPENDENCY_DASHBOARD_TITLE: 'Dependency Dashboard (Update dependencies workflow)'
           RENOVATE_DRY_RUN: ${{ inputs.dry_run && 'full' || '' }}
           LOG_LEVEL: ${{ inputs.debug && 'debug' || 'info' }}

@@ -57,7 +57,7 @@ create_renovate_json() {
     "extends": ["config:recommended"],
     "automerge": true,
     "rangeStrategy": "bump",
-    "dependencyDashboard": true,
+    "dependencyDashboard": {"enabled": true},
     "pinDigests": true,
     "branchPrefix": "deps/",
     "packageRules": [

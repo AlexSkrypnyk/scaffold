@@ -2,7 +2,9 @@
     "extends": ["config:recommended"],
     "automerge": true,
     "rangeStrategy": "bump",
-    "dependencyDashboard": true,
+    "dependencyDashboard": {
+        "enabled": true
+    },
     "pinDigests": true,
     "branchPrefix": "deps/",
     "minimumReleaseAge": "7 days",

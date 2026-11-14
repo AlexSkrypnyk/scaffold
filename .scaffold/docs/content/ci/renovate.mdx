@@ -18,7 +18,7 @@ The following table lists the top-level settings in `renovate.json`:
 | `extends` | `config:recommended` | Inherits Renovate's recommended base configuration. |
 | `automerge` | `true` | If true, Renovate merges a pull request after all its checks pass. |
 | `rangeStrategy` | `bump` | Renovate raises the version constraint to the new version, such as `^2.3.1` to `^2.3.2`. |
-| `dependencyDashboard` | `true` | If true, Renovate opens the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/), a GitHub issue that lists pending updates, updates scheduled for later and failed updates. |
+| `dependencyDashboard` | `enabled` | Renovate opens the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/), a GitHub issue that lists pending updates, updates scheduled for later and failed updates. |
 | `pinDigests` | `true` | If true, Renovate pins Docker images and GitHub Actions to exact digests, so their versions are reproducible. |
 | `branchPrefix` | `deps/` | Renovate starts every branch name with `deps/`. |
 | `minimumReleaseAge` | `7 days` | Renovate offers a version 7 days after its release, so a broken or compromised release can be withdrawn before it reaches your project. |
