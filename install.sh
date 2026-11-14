@@ -759,6 +759,7 @@ remove_shell() {
 remove_docker() {
   rm -f Dockerfile || true
   rm -f entrypoint.sh || true
+  rm -f tests/bats/entrypoint.bats || true
 
   rm -f .github/workflows/test-docker.yml || true
   rm -f .github/workflows/release-docker.yml || true

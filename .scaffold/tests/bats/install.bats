@@ -449,6 +449,28 @@ AGENTS
   assert_file_not_exists "${tmpdir}/zizmor.yml"
 }
 
+@test "remove_docker removes the image files, the entrypoint test and the workflows" {
+  local tmpdir="${BATS_TEST_TMPDIR}/remove_docker"
+  mkdir -p "${tmpdir}/.github/workflows" "${tmpdir}/tests/bats"
+  touch "${tmpdir}/Dockerfile"
+  touch "${tmpdir}/entrypoint.sh"
+  touch "${tmpdir}/tests/bats/entrypoint.bats"
+  touch "${tmpdir}/tests/bats/shell-command.bats"
+  touch "${tmpdir}/.github/workflows/test-docker.yml"
+  touch "${tmpdir}/.github/workflows/release-docker.yml"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_docker
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/Dockerfile"
+  assert_file_not_exists "${tmpdir}/entrypoint.sh"
+  assert_file_not_exists "${tmpdir}/tests/bats/entrypoint.bats"
+  assert_file_exists "${tmpdir}/tests/bats/shell-command.bats"
+  assert_file_not_exists "${tmpdir}/.github/workflows/test-docker.yml"
+  assert_file_not_exists "${tmpdir}/.github/workflows/release-docker.yml"
+}
+
 @test "remove_audit removes the workflow and the audit token blocks" {
   local tmpdir="${BATS_TEST_TMPDIR}/remove_audit"
   mkdir -p "${tmpdir}/.github/workflows"

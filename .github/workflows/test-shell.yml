@@ -75,6 +75,13 @@ jobs:
         run: npm ci --ignore-scripts
         working-directory: tests/bats
 
+      # yamllint disable-line #;< META
+      - name: Install Scaffold BATS dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: npm ci --ignore-scripts
+        working-directory: .scaffold/tests/bats
+
+      # yamllint disable-line #;> META
       - name: Install Kcov
         run: |
           KCOV_VERSION=v43 && \
@@ -89,7 +96,11 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           mkdir -p "$(pwd)"/.logs/.coverage-html
-          kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.logs,docs,tests "$(pwd)"/.logs/.coverage-html ./tests/bats/node_modules/.bin/bats tests/bats
+          bats_dirs=(tests/bats)
+          #;< META
+          bats_dirs+=(.scaffold/tests/bats)
+          #;> META
+          kcov --include-pattern=.sh,.bash --bash-parse-files-in-dir=. --exclude-pattern=vendor,node_modules,.logs,docs,tests "$(pwd)"/.logs/.coverage-html ./tests/bats/node_modules/.bin/bats "${bats_dirs[@]}"
         shell: bash
         continue-on-error: ${{ vars.CI_TEST_IGNORE_FAILURE == '1' }}
 

@@ -195,8 +195,11 @@ its extension.
 
 3. **BATS Tests** - Test shell scripts
   - Location: `tests/bats/`
-  - Purpose: Validate `shell-command.sh` functionality
+  - Purpose: Validate `shell-command.sh` and, with Docker, `entrypoint.sh`
   - Includes: TUI testing helpers, mocking system via `steps_run()`
+  - In the template repo, the `Test shell` kcov step also runs
+    `.scaffold/tests/bats` inside a `META` block, so the Shell coverage comment
+    reports `install.sh` and `verify-release.sh` too
 
 ### Rules for Template Changes
 

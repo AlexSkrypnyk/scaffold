@@ -40,6 +40,8 @@ To run the tests from your project root:
 - A sides answer with a leading zero, read as a base-10 number
 - Sides answers outside 2-100 or not whole numbers, so the script exits with an error
 
+In a project with Docker support, [`entrypoint.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/entrypoint.bats) tests `entrypoint.sh`. It runs `entrypoint.sh` from your working copy, so it needs no commit. Its tests check the startup line, the command passed with its arguments and that command's exit code.
+
 `shell-command.bats` loads [`_helper.bash`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/_helper.bash), which sets up every test:
 
 - It stops the run unless you start BATS from the project root.
