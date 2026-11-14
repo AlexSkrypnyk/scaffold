@@ -64,8 +64,8 @@ jobs:
         run: |
           KCOV_VERSION=v43 && \
           sudo apt update && sudo apt install -y binutils-dev build-essential cmake git libcurl4-openssl-dev libdw-dev libiberty-dev libssl-dev python3 zlib1g-dev && \
-          git clone https://github.com/SimonKagstrom/kcov.git "${RUNNER_TEMP}/kcov" && \
-          cd "${RUNNER_TEMP}/kcov" && git checkout ${KCOV_VERSION} && mkdir build && cd build && \
+          git clone https://github.com/SimonKagstrom/kcov.git && \
+          cd kcov && git checkout ${KCOV_VERSION} && mkdir build && cd build && \
           cmake .. && make && sudo make install && \
           kcov --version
         if: matrix.os == 'ubuntu-latest'
@@ -91,9 +91,8 @@ jobs:
           { echo "COVERAGE_CONTENT<<EOF"; cat .logs/coverage.txt; echo "EOF"; } >> "$GITHUB_ENV"
         shell: bash
 
-      # Fork and Dependabot pull requests get a read-only token.
       - name: Post coverage summary as PR comment
-        if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@__HASH__ # __VERSION__
         with:
           header: coverage-shell
