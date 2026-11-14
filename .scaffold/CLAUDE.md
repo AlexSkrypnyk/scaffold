@@ -391,6 +391,20 @@ npm run spellcheck # CSpell validation
 npm run build # Build static site
 ```
 
+### npm overrides
+
+`docs/package.json` and `.scaffold/docs/package.json` carry the same 5 `overrides`. Each one replaces a vulnerable package that its parent, at its latest release, still pins to a range without the fix:
+
+| Override | Parent's range | Runs in |
+|---|---|---|
+| `@docusaurus/core` > `tinypool` `^2.1.2` | `^1.0.2` | Every build |
+| `copy-webpack-plugin` > `serialize-javascript` `^7.1.3` | `^6.0.0` | Every build |
+| `css-minimizer-webpack-plugin` > `serialize-javascript` `^7.1.3` | `^6.0.1` | Every build |
+| `sockjs` > `uuid` `^11.1.1` | `^8.3.2` | Nothing by default: the dev server uses `ws` |
+| `@ai-sdk/provider-utils` > `undici` `^7.30.2` | `^5.29.0` | Nothing: both sites search with `@easyops-cn/docusaurus-search-local`, so DocSearch stays inactive |
+
+Renovate updates the parents but leaves the overrides in place. To check whether an override is still needed, remove it in both files, then run `npm install --package-lock-only --ignore-scripts` and `npm audit --package-lock-only` in each docs directory. Drop the override when the audit reports no advisory for its package.
+
 ## Terminal recordings
 
 The `install.sh` walkthroughs shown in `README.md` and on the getscaffold.dev site
