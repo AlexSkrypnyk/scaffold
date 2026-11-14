@@ -11,8 +11,8 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Checks the workflows that upload release assets.
  *
- * An immutable release takes no assets once published, so each such workflow
- * runs on a pushed tag only and attaches its assets to the draft. It also
+ * Each such workflow runs on a pushed tag only, so a release event or a manual
+ * run can't attach assets to a release outside the tag's flow. It also
  * attaches its attestation bundle, as Scorecard reads provenance from release
  * assets only.
  */
@@ -134,8 +134,8 @@ final class ReleaseWorkflowTest extends UnitTestCase {
       $env = is_array($step['env'] ?? NULL) ? $step['env'] : [];
       $run = is_string($step['run'] ?? NULL) ? $step['run'] : '';
 
-      foreach ($attest_ids as $id) {
-        if (in_array(sprintf('${{ steps.%s.outputs.bundle-path }}', $id), $env, TRUE) && str_contains($run, '.intoto.jsonl')) {
+      foreach ($attest_ids as $attest_id) {
+        if (in_array(sprintf('${{ steps.%s.outputs.bundle-path }}', $attest_id), $env, TRUE) && str_contains($run, '.intoto.jsonl')) {
           return $violations;
         }
       }
@@ -158,7 +158,11 @@ final class ReleaseWorkflowTest extends UnitTestCase {
     $jobs = is_array($workflow['jobs'] ?? NULL) ? $workflow['jobs'] : [];
 
     foreach ($jobs as $job) {
-      if (!is_array($job) || !is_array($job['steps'] ?? NULL)) {
+      if (!is_array($job)) {
+        continue;
+      }
+
+      if (!is_array($job['steps'] ?? NULL)) {
         continue;
       }
 

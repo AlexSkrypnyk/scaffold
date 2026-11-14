@@ -170,9 +170,9 @@ The [GitHub repository setup](https://getscaffold.dev/github) page lists the tok
 
 ## Security
 
-`install.sh` runs on your machine with your permissions. It reads only its options and your answers to the prompts:
+`install.sh` runs on your machine with your permissions. It reads its options, your answers to the prompts and 2 environment variables, `SCAFFOLD_ARCHIVE_URL` and `SCAFFOLD_GITHUB_TOKEN`:
 
-- Piped from `curl` into an empty directory, it downloads the Scaffold archive over HTTPS from github.com and extracts it into that directory. It stops when the directory holds any file or directory, hidden ones included.
+- Piped from `curl` into an empty directory, it downloads the Scaffold archive over HTTPS from github.com and extracts it into that directory. `SCAFFOLD_ARCHIVE_URL` replaces that download URL. It stops when the directory holds any file or directory, hidden ones included.
 - In the project directory, it rewrites the template files and removes the features you leave out.
 - The GitHub step calls the GitHub API with the token in `SCAFFOLD_GITHUB_TOKEN` only, so it ignores the account `gh` is logged in to.
 
