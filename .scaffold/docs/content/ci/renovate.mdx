@@ -23,9 +23,11 @@ The following table lists the top-level settings in `renovate.json`:
 | `branchPrefix` | `deps/` | Renovate starts every branch name with `deps/`. |
 | `minimumReleaseAge` | `7 days` | Renovate offers a version 7 days after its release, so a broken or compromised release can be withdrawn before it reaches your project. |
 | `internalChecksFilter` | `strict` | Renovate opens no pull request for a version younger than `minimumReleaseAge`. If an older version has passed the wait, Renovate offers that version. |
-| `lockFileMaintenance` | `enabled`, `automerge` | Every Monday before 4 AM, Renovate regenerates every `composer.lock` and `package-lock.json` in the repository and merges the pull request after all its checks pass. A class library has no lock file, so nothing changes there. |
+| `lockFileMaintenance` | `enabled`, `automerge` | Every Monday before 4 AM, Renovate regenerates every `composer.lock` in the repository and merges the pull request after all its checks pass. A class library has no lock file, so nothing changes there. |
 
-Lock file maintenance has no release dates for Renovate to check. Composer applies the 7-day wait itself, through the `cooldown` policy in `composer.json` described in [Composer](../php/composer.mdx#dependency-policy-composer-211). A rule in `packageRules` sets `minimumReleaseAge` to `null` for Composer lock file maintenance, so Renovate doesn't hold that pull request back. npm lock file maintenance has no such rule, so Renovate can hold its pull request as pending.
+Lock file maintenance has no release dates for Renovate to check. Composer applies the 7-day wait itself, through the `cooldown` policy in `composer.json` described in [Composer](../php/composer.mdx#dependency-policy-composer-211). A rule in `packageRules` sets `minimumReleaseAge` to `null` for Composer lock file maintenance, so Renovate doesn't hold that pull request back.
+
+npm has no such policy, so a second rule turns off lock file maintenance for `package-lock.json`. Renovate still updates the packages in `package.json` and their entries in `package-lock.json`. To refresh the rest of `package-lock.json`, run `npm update`.
 
 ## Update rules
 
@@ -79,9 +81,9 @@ A Node.js library gets the same rule for the `dependencies` of the root `package
 | Stacks selected | Changes to `renovate.json` |
 |---|---|
 | PHP and Node.js | None |
-| PHP only | Removes the `node`/`yarn` rule, the npm runtime rule and `"npm"` from the rule that blocks major updates |
+| PHP only | Removes the `node`/`yarn` rule, the npm runtime and lock file maintenance rules, and `"npm"` from the rule that blocks major updates |
 | Node.js only | Removes the `php` rule, the Composer runtime and lock file maintenance rules, and `"composer"` from the rule that blocks major updates |
-| Neither PHP nor Node.js | Removes the language rules, the runtime rules, the Composer lock file maintenance rule and the rule that blocks major updates |
+| Neither PHP nor Node.js | Removes the language rules, the runtime rules, the lock file maintenance rules and the rule that blocks major updates |
 | PHP class library | Adds the [class library rule](#class-library-rule) |
 
 To leave Renovate out of a new project, answer no to the `install.sh` prompt **Use Renovate** or pass `--no-renovate`. `install.sh` then deletes `renovate.json` and the `update-dependencies.yml` workflow.

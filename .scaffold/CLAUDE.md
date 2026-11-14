@@ -216,10 +216,15 @@ timestamps, so Composer enforces the 7-day age itself:
 `composer.json` makes Composer skip young releases. Renovate does not integrate
 with the Composer cooldown, so a `packageRules` entry sets `minimumReleaseAge`
 to `null` for Composer lock file maintenance, or the branch would stay pending.
-npm lock file maintenance has no such rule, so Renovate can hold it as pending.
-Keep `minimumReleaseAgePackageManagerSync` and the object form of
-`dependencyDashboard` out of `renovate.json`: the Renovate app rejects both and
-stops opening pull requests.
+npm has no cooldown setting, so another `packageRules` entry turns off npm lock
+file maintenance. Without it, the npm update would wait on `minimumReleaseAge`
+indefinitely and hold back the shared lock file maintenance branch.
+
+Renovate's `minimumReleaseAgePackageManagerSync` passes the 7-day age to npm as
+`--before`, which would let npm lock file maintenance run. The Renovate app runs
+an older Renovate whose validator rejects that option and the object form of
+`dependencyDashboard`, and it opens no pull requests while either is set. Check
+the app's validator before adding either back.
 The cooldown needs Composer 2.11, hence `"composer": ">=2.11.0"`, and it also
 holds back releases younger than 7 days during a manual `composer update`.
 
