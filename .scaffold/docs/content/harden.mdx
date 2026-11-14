@@ -71,7 +71,6 @@ A project created from Scaffold already holds the evidence for the following cri
 | `build`, `build_common_tools`, `build_floss_tools`, `test`, `test_invocation`, `warnings`, `warnings_strict` | The commands for each stack in `CONTRIBUTING.md` |
 | `test_continuous_integration` | The `test-*.yml` workflows in `.github/workflows` |
 | `static_analysis`, `static_analysis_common_vulnerabilities`, `static_analysis_often` | `.github/workflows/audit.yml`, whose CodeQL and Semgrep scans run on every pull request and push to `main` |
-| `no_leaked_credentials` | The secret scanning and push protection that `install.sh github` turns on |
 | `delivery_mitm`, `delivery_unsigned` | The GitHub release assets, which GitHub serves over HTTPS |
 
 When you replace one of these files, such as `LICENSE`, update the answers that link it.
@@ -88,6 +87,7 @@ The following criteria depend on the project's own code, history or people:
 | `release_notes_vulns` | Whether each release's notes name the vulnerabilities it fixes |
 | `tests_are_added`, `warnings_fixed`, `static_analysis_fixed`, `dynamic_analysis_fixed` | Whether your recent changes added tests and fixed what the linters and scans found |
 | `vulnerabilities_fixed_60_days`, `vulnerabilities_critical_fixed` | Your time to fix known vulnerabilities. [Renovate](ci/renovate.mdx) raises the dependency updates. |
+| `no_leaked_credentials` | Whether the repository holds valid credentials. The secret scanning that `install.sh github` turns on lists the credentials it finds on the **Security** tab. Revoke each one before you answer. |
 | `know_secure_design`, `know_common_errors` | Whether a developer on the project knows secure design and the common errors for its kind of software |
 | `crypto_published`, `crypto_call`, `crypto_floss`, `crypto_keylength`, `crypto_working`, `crypto_weaknesses`, `crypto_pfs`, `crypto_password_storage`, `crypto_random` | Any cryptography the project adds. Answer N/A when it adds none. |
 | `dynamic_analysis`, `dynamic_analysis_unsafe`, `dynamic_analysis_enable_assertions` | Any dynamic analysis you run, such as fuzzing |
