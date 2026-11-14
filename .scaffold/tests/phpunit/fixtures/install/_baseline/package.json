@@ -37,6 +37,7 @@
         "c8": "__VERSION__",
         "eslint": "__VERSION__",
         "eslint-config-prettier": "__VERSION__",
+        "fast-check": "__VERSION__",
         "globals": "__VERSION__",
         "prettier": "__VERSION__"
     },
