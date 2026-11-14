@@ -31,7 +31,7 @@ case "$*" in
     echo "https://github.com/${slug}"
     ;;
   "api --method PATCH repos/${slug} "*) ;;
-  "label create "*" --repo ${slug} "*) ;;
+  "label create "*" --repo ${slug} "* | "label delete "*" --repo ${slug} "*) ;;
   "api repos/${slug}/labels "*)
     printf 'bug\td73a4a\tSomething is not working\n'
     ;;

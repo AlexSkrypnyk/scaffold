@@ -98,7 +98,17 @@ To configure the repository of a project that already exists, run the `github` c
 curl -fsSL https://getscaffold.dev/install.sh | bash -s -- github
 ```
 
-The `github` command leaves the project files untouched and needs no template. With no other options, it prompts for the owner, the repository and each section. Any option turns off the prompts and applies every section that isn't turned off:
+The `github` command leaves the project files untouched and needs no template. With no other options, it prompts for the owner, the repository and each section. The following recording shows the `github` command in a project whose repository already exists:
+
+<AsciinemaPlayer
+  src="/img/github.cast"
+  autoPlay={false}
+  loop={false}
+  controls={true}
+  terminalLineHeight={1.1}
+/>
+
+Any option turns off the prompts and applies every section that isn't turned off:
 
 ```bash
 curl -fsSL https://getscaffold.dev/install.sh | \
@@ -161,7 +171,7 @@ General settings go to GitHub in 1 request:
 | `UPSTREAM` | `#FBCA04` | Issue or pull request is related to an upstream project |
 | `URGENT` | `#D93F0B` | Pull request needs to be urgently reviewed |
 
-Names match without regard to case, as they do on GitHub. Other labels stay in place. To delete them, pass `--github-labels-prune`.
+Names match without regard to case, as they do on GitHub. `install.sh` deletes every other label, such as the `bug` and `enhancement` labels GitHub adds to a new repository. To keep the other labels, pass `--no-github-labels-prune`.
 
 ### Security settings
 
@@ -256,7 +266,7 @@ These options control the GitHub step. Each one also works with the `github` com
 | `--github-description=VALUE` | Unchanged | Sets the repository description. |
 | `--github-merge=VALUE` | `squash,rebase` | Sets the allowed merge methods: `merge`, `squash` and `rebase`. |
 | `--github-labels`, `--no-github-labels` | On | Applies the labels. |
-| `--github-labels-prune`, `--no-github-labels-prune` | Off | Deletes labels that aren't in the list. |
+| `--github-labels-prune`, `--no-github-labels-prune` | On | Deletes labels that aren't in the list. |
 | `--github-security`, `--no-github-security` | On | Applies the security settings. |
 | `--github-immutable-releases`, `--no-github-immutable-releases` | On | Makes published releases immutable. |
 | `--github-ruleset`, `--no-github-ruleset` | On | Applies the default branch ruleset. |

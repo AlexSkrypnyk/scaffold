@@ -394,12 +394,15 @@ npm run build # Build static site
 ## Terminal recordings
 
 The `install.sh` walkthroughs shown in `README.md` and on the getscaffold.dev site
-are 2 asciinema recordings, each rendered two ways by
+are 3 asciinema recordings, each rendered two ways by
 `.scaffold/assets/update-assets.php`:
 
 - `install` declines the **Create a GitHub repository** prompt.
 - `install-github` accepts it and walks through repository creation, the
   settings and the CI wait.
+- `github` runs `./install.sh github` in an existing project, a git repository
+  whose `origin` remote names a repository the `gh` stand-in reports as
+  existing, and applies every section.
 
 Each recording produces:
 
@@ -411,11 +414,11 @@ Each recording produces:
 
 The recorded shell puts `.scaffold/assets/record-bin/` first on `PATH`. Its
 `gh` stand-in answers every call the GitHub step makes, and its `git` wrapper
-turns `push` into a no-op, so neither recording reaches GitHub. A new `gh` call
+turns `push` into a no-op, so no recording reaches GitHub. A new `gh` call
 in `install.sh` needs a matching case in the stand-in, or the recording shows
 the call failing.
 
-Regenerate both after changing `install.sh` or its prompts:
+Regenerate all 3 after changing `install.sh` or its prompts:
 
 ```bash
 php .scaffold/assets/update-assets.php
