@@ -61,7 +61,7 @@ The following table lists which jobs run each check:
 | Tests with coverage through `npm run test-coverage` | All |
 | Line coverage of at least the [`CI_CODE_COVERAGE_THRESHOLD`](#repository-variables) value | `Node.js 24, ubuntu-latest` |
 
-Every job uploads the `.logs` directory as an artifact.
+Every job uploads the `.logs` directory as an artifact. For the coverage comment and the Codecov upload, see [Code coverage](#code-coverage).
 
 [//]: # (#;> NODEJS)
 
@@ -79,7 +79,7 @@ The following table lists which jobs run each check:
 | BATS tests, with coverage measured by kcov | `Shell, ubuntu-latest` |
 | BATS tests | Every other runner |
 
-The `Shell, ubuntu-latest` job uploads the coverage report as an artifact.
+The `Shell, ubuntu-latest` job uploads the `.logs` directory as an artifact. For the coverage comment and the Codecov upload, see [Code coverage](#code-coverage).
 
 [//]: # (#;> SHELL)
 
@@ -117,7 +117,13 @@ The following table lists the job in each workflow that reports coverage:
 | `Test Node.js` | `Node.js 24, ubuntu-latest` | `.logs/cobertura-coverage.xml` |
 | `Test shell` | `Shell, ubuntu-latest` | `.logs/.coverage-html` |
 
-On a pull request, the PHP job posts the summary from `.logs/coverage.txt` as a new comment and hides the previous one. The following screenshot shows that comment on an example [pull request](https://github.com/AlexSkrypnyk/scaffold/pull/39):
+On a pull request, each of these jobs posts the summary from `.logs/coverage.txt` as a new comment and hides its own previous one. Each comment holds the summary for 1 stack:
+
+- **PHP code coverage** holds the PHPUnit text report.
+- **Node.js code coverage** holds the c8 text report.
+- **Shell code coverage** lists the line coverage that kcov measured for each script.
+
+The following screenshot shows the PHP comment on an example [pull request](https://github.com/AlexSkrypnyk/scaffold/pull/39):
 
 ![The coverage summary that the Test PHP workflow posts as a pull request comment](/img/coverage.png)
 

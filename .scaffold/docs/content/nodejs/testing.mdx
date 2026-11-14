@@ -53,4 +53,4 @@ With the settings in [`.c8rc.json`](https://github.com/AlexSkrypnyk/scaffold/blo
 | LCOV | `.logs/lcov.info` and an HTML report in `.logs/lcov-report` |
 | Cobertura | `.logs/cobertura-coverage.xml` |
 
-In the [Test](../ci/test.mdx) workflow, the Node.js 24 job reads the Cobertura report and fails when line coverage is less than 80%. To change the threshold, set the `CI_CODE_COVERAGE_THRESHOLD` repository variable. When the `CODECOV_TOKEN` secret is set, the job also uploads the report to Codecov.
+In the [Test](../ci/test.mdx) workflow, the Node.js 24 job reads the Cobertura report and fails when line coverage is less than 80%. To change the threshold, set the `CI_CODE_COVERAGE_THRESHOLD` repository variable. On a pull request, the job posts the c8 text report as a comment. When the `CODECOV_TOKEN` secret is set, the job also uploads the report to Codecov.

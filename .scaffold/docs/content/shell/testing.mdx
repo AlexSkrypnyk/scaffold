@@ -49,4 +49,4 @@ To run the tests from your project root:
 
 ## Coverage
 
-In CI, the [Test shell workflow](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml) runs the tests under kcov on the `ubuntu-latest` runner to measure coverage. It writes HTML and Cobertura (`cobertura.xml`) reports to `.logs/.coverage-html` and uploads that directory as a build artifact. When the `CODECOV_TOKEN` secret is set, it also uploads the reports to [Codecov](https://codecov.io/).
+In CI, the [Test shell workflow](https://github.com/AlexSkrypnyk/scaffold/blob/main/.github/workflows/test-shell.yml) runs the tests under kcov on the `ubuntu-latest` runner to measure coverage. It writes HTML and Cobertura (`cobertura.xml`) reports to `.logs/.coverage-html`. It also writes the line coverage of each script to `.logs/coverage.txt` and posts that summary as a comment on a pull request. The job uploads the `.logs` directory as a build artifact. When the `CODECOV_TOKEN` secret is set, it also uploads the reports to [Codecov](https://codecov.io/).
