@@ -91,7 +91,10 @@ jobs:
         if: matrix.php-versions == '8.4' && matrix.deps == 'normal' && matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@__HASH__ # __VERSION__
         with:
+          header: coverage-php
           message: |
+            **PHP code coverage**
+
             ```
             ${{ env.COVERAGE_CONTENT }}
             ```

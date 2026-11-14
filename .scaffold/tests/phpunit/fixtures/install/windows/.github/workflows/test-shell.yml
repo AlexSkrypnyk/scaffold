@@ -6,8 +6,8 @@
      runs-on: ${{ matrix.os }}
  
      permissions:
-@@ -34,6 +35,10 @@
-       contents: read
+@@ -35,6 +36,10 @@
+       pull-requests: write # Post the coverage summary as a PR comment.
  
      steps:
 +      - name: Keep LF line endings on Windows
