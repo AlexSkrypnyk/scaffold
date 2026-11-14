@@ -191,7 +191,7 @@ npx --yes npm-check-updates@latest --enginesNode -u
 ```
 
 ```bash
-npm install --ignore-scripts
+npm update --ignore-scripts
 ```
 
 ```bash
@@ -209,14 +209,14 @@ npx --yes npm-check-updates@latest --cwd tests/bats --enginesNode -u
 ```
 
 ```bash
-npm install --ignore-scripts --prefix tests/bats
+npm update --ignore-scripts --prefix tests/bats
 ```
 
 ```bash
 ./tests/bats/node_modules/.bin/bats tests/bats
 ```
 
-Repeat the update and install for `.scaffold/tests/bats`. Commit:
+Repeat npm-check-updates and `npm update` for `.scaffold/tests/bats`. `npm update` also moves transitive packages in each lock to the newest versions their ranges allow. Commit:
 
 ```bash
 git add package.json tests/bats/package.json tests/bats/package-lock.json .scaffold/tests/bats/package.json .scaffold/tests/bats/package-lock.json
@@ -244,10 +244,10 @@ git diff --no-index docs/package.json .scaffold/docs/package.json
 
 All `@docusaurus/*` packages move together. Some are pinned exactly (`3.10.2`) and some with a caret, so keep each one's style and give them all the same version.
 
-Refresh both locks, then build and test both sites the way `test-docs.yml` does:
+Refresh both locks with `npm update`, which also moves transitive packages to the newest versions their ranges allow. Then build and test both sites the way `test-docs.yml` does:
 
 ```bash
-npm install --ignore-scripts --prefix .scaffold/docs
+npm update --ignore-scripts --prefix .scaffold/docs
 ```
 
 ```bash
