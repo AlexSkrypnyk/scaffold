@@ -167,19 +167,32 @@ jobs:
             gh run watch "${run}" > /dev/null || true
           done
 
-          if ! state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' 2> "${RUNNER_TEMP}/release-view.log")"; then
-            if ! grep -q 'release not found' "${RUNNER_TEMP}/release-view.log"; then
-              cat "${RUNNER_TEMP}/release-view.log"
-              echo "::error::Could not read release '${TAG}'."
-              exit 1
+          # Prints 'draft', 'published' or 'none'.
+          release_state() {
+            local state
+            if ! state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' 2> "${RUNNER_TEMP}/release-view.log")"; then
+              if ! grep -q 'release not found' "${RUNNER_TEMP}/release-view.log"; then
+                cat "${RUNNER_TEMP}/release-view.log" >&2
+                echo "::error::Could not read release '${TAG}'." >&2
+                return 1
+              fi
+              state='none'
             fi
-            state='none'
-          fi
+            echo "${state}"
+          }
+
+          state="$(release_state)"
 
           # A published release comes from an earlier run of this job or from
           # the Publish release button.
           if [ "${state}" = 'published' ]; then
-            if [ "$(gh release view "${TAG}" --json assets --jq 'any(.assets[]; .name == "install.sh")')" = 'true' ]; then
+            names="$(gh release view "${TAG}" --json assets --jq '.assets[].name')"
+            complete='true'
+            for asset in install.sh SHA256SUMS SHA256SUMS.asc "scaffold-installer-${TAG}.intoto.jsonl"; do
+              grep -qxF "${asset}" <<< "${names}" || complete='false'
+            done
+
+            if [ "${complete}" = 'true' ]; then
               mkdir -p "${RUNNER_TEMP}/published"
               gh release download "${TAG}" --dir "${RUNNER_TEMP}/published" --pattern install.sh
               if cmp -s "${RUNNER_TEMP}/published/install.sh" .release/install.sh; then
@@ -205,6 +218,9 @@ jobs:
             echo "::error::The 'Release PHP' run for '${TAG}' failed, so the release is not published."
             exit 1
           fi
+
+          # 'Release PHP' can retag Release Drafter's draft while this job waits.
+          state="$(release_state)"
 
           # The button already set the release's notes, 'latest' and
           # 'prerelease' flags, so only the assets are added.
