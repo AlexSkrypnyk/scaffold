@@ -516,7 +516,7 @@ function installSvgTerm(string $assets_dir): void {
   }
 
   verbose('Installing svg-term...');
-  shell_exec(sprintf('npm install --prefix %s svg-term@1.3.1 2>&1', escapeshellarg($assets_dir)));
+  shell_exec(sprintf('npm install --prefix %s svg-term@2.0.3 2>&1', escapeshellarg($assets_dir)));
 
   if (!is_dir($assets_dir . '/node_modules/svg-term')) {
     throw new \RuntimeException('Failed to install svg-term.');
