@@ -211,12 +211,20 @@ so a lock refreshed on a newer PHP still installs on the 8.3 CI jobs.
 
 `renovate.json` enables `lockFileMaintenance` with automerge, so Renovate
 regenerates every lock file weekly. Lock file maintenance has no release
-timestamps, so each package manager enforces the 7-day age itself:
-`minimumReleaseAgePackageManagerSync` makes Renovate pass `--before` to npm,
-and `config.policy.cooldown.period` in the root and maintenance-suite
+timestamps, so Composer enforces the 7-day age itself:
+`config.policy.cooldown.period` in the root and maintenance-suite
 `composer.json` makes Composer skip young releases. Renovate does not integrate
 with the Composer cooldown, so a `packageRules` entry sets `minimumReleaseAge`
 to `null` for Composer lock file maintenance, or the branch would stay pending.
+npm has no cooldown setting, so another `packageRules` entry turns off npm lock
+file maintenance. Without it, the npm update would wait on `minimumReleaseAge`
+indefinitely and hold back the shared lock file maintenance branch.
+
+Renovate's `minimumReleaseAgePackageManagerSync` passes the 7-day age to npm as
+`--before`, which would let npm lock file maintenance run. The Renovate app runs
+an older Renovate whose validator rejects that option and the object form of
+`dependencyDashboard`, and it opens no pull requests while either is set. Check
+the app's validator before adding either back.
 The cooldown needs Composer 2.11, hence `"composer": ">=2.11.0"`, and it also
 holds back releases younger than 7 days during a manual `composer update`.
 
@@ -464,15 +472,19 @@ npm run build # Build static site
 
 ### npm overrides
 
-`docs/package.json` and `.scaffold/docs/package.json` carry the same 5 `overrides`. Each one replaces a vulnerable package that its parent, at its latest release, still pins to a range without the fix:
+`docs/package.json` and `.scaffold/docs/package.json` carry the same 9 `overrides`. Each one replaces a vulnerable package that its parent, at its latest release, still pins to a range without the fix:
 
 | Override | Parent's range | Runs in |
 |---|---|---|
-| `@docusaurus/core` > `tinypool` `^2.1.2` | `^1.0.2` | Every build |
-| `copy-webpack-plugin` > `serialize-javascript` `^7.1.3` | `^6.0.0` | Every build |
-| `css-minimizer-webpack-plugin` > `serialize-javascript` `^7.1.3` | `^6.0.1` | Every build |
+| `@docusaurus/core` > `tinypool` `^2.2.0` | `^1.0.2` | Every build |
+| `copy-webpack-plugin` > `serialize-javascript` `^7.1.4` | `^6.0.0` | Every build |
+| `css-minimizer-webpack-plugin` > `serialize-javascript` `^7.1.4` | `^6.0.1` | Every build |
 | `sockjs` > `uuid` `^11.1.1` | `^8.3.2` | Nothing by default: the dev server uses `ws` |
 | `@ai-sdk/provider-utils` > `undici` `^7.30.2` | `^5.29.0` | Nothing: both sites search with `@easyops-cn/docusaurus-search-local`, so DocSearch stays inactive |
+| `@jest/reporters` > `glob` `^14.0.2` | `^13.0.6` | Every Jest run |
+| `jest-config` > `glob` `^14.0.2` | `^13.0.6` | Every Jest run |
+| `jest-runtime` > `glob` `^14.0.2` | `^13.0.6` | Every Jest run |
+| `test-exclude` > `glob` `^14.0.2` and `minimatch` `^11.0.1` | `^10.4.1` and `^10.2.2` | `npm run test:coverage` |
 
 Renovate updates the parents but leaves the overrides in place. To check whether an override is still needed, remove it in both files, then run `npm install --package-lock-only --ignore-scripts` and `npm audit --package-lock-only` in each docs directory. Drop the override when the audit reports no advisory for its package.
 

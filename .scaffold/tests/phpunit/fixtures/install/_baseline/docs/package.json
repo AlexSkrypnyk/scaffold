@@ -50,14 +50,27 @@
     "@docusaurus/core": {
       "tinypool": "__VERSION__"
     },
+    "@jest/reporters": {
+      "glob": "__VERSION__"
+    },
     "copy-webpack-plugin": {
       "serialize-javascript": "__VERSION__"
     },
     "css-minimizer-webpack-plugin": {
       "serialize-javascript": "__VERSION__"
     },
+    "jest-config": {
+      "glob": "__VERSION__"
+    },
+    "jest-runtime": {
+      "glob": "__VERSION__"
+    },
     "sockjs": {
       "uuid": "__VERSION__"
+    },
+    "test-exclude": {
+      "glob": "__VERSION__",
+      "minimatch": "__VERSION__"
     }
   },
   "browserslist": {
