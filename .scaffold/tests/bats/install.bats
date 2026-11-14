@@ -468,6 +468,74 @@ mock_composer() {
   assert_file_not_exists "${tmpdir}/composer.lock"
 }
 
+@test "remove_composer_cooldown_exemption drops the exemption and keeps the period" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cooldown_period_first"
+  mkdir -p "${tmpdir}"
+  cat >"${tmpdir}/composer.json" <<'COMPOSER'
+{
+    "config": {
+        "policy": {
+            "cooldown": {
+                "period": "7 days",
+                "ignore": {
+                    "alexskrypnyk/*": "Released by the Scaffold maintainer"
+                }
+            }
+        },
+        "sort-packages": true
+    }
+}
+COMPOSER
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_cooldown_exemption
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/composer.json" '"ignore"'
+  assert_file_not_contains "${tmpdir}/composer.json" 'alexskrypnyk'
+  assert_file_contains "${tmpdir}/composer.json" '                "period": "7 days"'
+  assert_file_not_contains "${tmpdir}/composer.json" '"period": "7 days",'
+  assert_file_contains "${tmpdir}/composer.json" '"sort-packages": true'
+}
+
+@test "remove_composer_cooldown_exemption handles the exemption before the period" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cooldown_ignore_first"
+  mkdir -p "${tmpdir}"
+  cat >"${tmpdir}/composer.json" <<'COMPOSER'
+{
+    "config": {
+        "policy": {
+            "cooldown": {
+                "ignore": {
+                    "alexskrypnyk/*": "Released by the Scaffold maintainer"
+                },
+                "period": "7 days"
+            }
+        }
+    }
+}
+COMPOSER
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_cooldown_exemption
+  popd >/dev/null || return 1
+
+  assert_file_not_contains "${tmpdir}/composer.json" '"ignore"'
+  assert_file_contains "${tmpdir}/composer.json" '                "period": "7 days"'
+  assert_file_contains "${tmpdir}/composer.json" '            }'
+}
+
+@test "remove_composer_cooldown_exemption is a no-op without a composer.json" {
+  local tmpdir="${BATS_TEST_TMPDIR}/cooldown_no_composer"
+  mkdir -p "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  remove_composer_cooldown_exemption
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/composer.json"
+}
+
 create_nodejs_project() {
   mkdir -p "${1}/.github/workflows"
   printf '/node_modules\n#;< NODEJS_LIBRARY\n# /package-lock.json\n#;> NODEJS_LIBRARY\n/.logs\n' >"${1}/.gitignore"

@@ -998,6 +998,19 @@ remove_nodejs_library() {
 }
 
 ##
+# Remove the template's cooldown exemption for its maintainer's packages.
+#
+remove_composer_cooldown_exemption() {
+  [ -f composer.json ] || return 0
+
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+  # The exemption is the only "ignore" object in the template's
+  # 'composer.json', and "period" is the last key of "cooldown" without it.
+  sed "${sed_opts[@]}" -e '/^ *"ignore": {$/,/^ *},\{0,1\}$/d' -e 's/^\( *"period": "[^"]*"\),$/\1/' composer.json
+}
+
+##
 # Refresh the lock file hash after the changes to 'composer.json'.
 #
 # Updating only the 'php' platform package keeps every locked version, drops
@@ -3707,6 +3720,8 @@ process_project() {
   process_contributing
 
   process_security
+
+  remove_composer_cooldown_exemption
 
   process_internal "${namespace}" "${project}" "${author}" "${project_pascalcase}"
 

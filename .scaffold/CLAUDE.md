@@ -227,6 +227,12 @@ release ages. `composer update` and `composer bump` under the cooldown pick
 such floors on their own, so never raise a floor by hand or with
 `--no-cooldown`.
 
+The root and maintenance-suite `composer.json` exempt `alexskrypnyk/*` from the
+cooldown, so the template adopts its maintainer's packages as they ship.
+`remove_composer_cooldown_exemption()` drops the exemption from a generated
+project, so a floor raised to a fresh `alexskrypnyk/*` release fails that
+project's resolving runs until the release is 7 days old.
+
 After a dependency change in the root manifests, regenerate the lock files with
 `composer update --no-install --no-scripts` and
 `npm install --package-lock-only --ignore-scripts`, then run
