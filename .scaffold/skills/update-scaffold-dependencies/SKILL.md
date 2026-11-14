@@ -236,13 +236,15 @@ Update `.scaffold/docs` first:
 npx --yes npm-check-updates@latest --cwd .scaffold/docs --enginesNode -u
 ```
 
-Then copy its `dependencies` and `devDependencies` blocks into `docs/package.json` unchanged, leaving the `name`, `scripts` and `engines` of each file alone. Compare the 2 files; the only differences left should be the `name` and the `scripts`:
+Then copy its `dependencies`, `devDependencies` and `overrides` blocks into `docs/package.json` unchanged, leaving the `name`, `scripts` and `engines` of each file alone. Compare the 2 files; the only differences left should be the `name` and the `scripts`:
 
 ```bash
 git diff --no-index docs/package.json .scaffold/docs/package.json
 ```
 
 All `@docusaurus/*` packages move together. Some are pinned exactly (`3.10.2`) and some with a caret, so keep each one's style and give them all the same version.
+
+npm-check-updates leaves `overrides` alone. Each one patches a vulnerable package that its parent pins to an old range, and a parent's new major can ship the fix. For each override, follow the check in "npm overrides" in `.scaffold/CLAUDE.md`: remove the override from both files, then run `npm install --package-lock-only --ignore-scripts` and `npm audit --package-lock-only` in each docs directory. Drop the override when the audit reports no advisory for its package. Otherwise restore it and raise its version to the newest fixed release, then update the table in `.scaffold/CLAUDE.md` to match.
 
 Refresh both locks with `npm update`, which also moves transitive packages to the newest versions their ranges allow. Then build and test both sites the way `test-docs.yml` does:
 
@@ -261,7 +263,7 @@ npm test --prefix .scaffold/docs
 Repeat the 3 commands for `docs`. CI builds only `docs/` on pull requests, so the local build is the only check `.scaffold/docs` gets before a release. `npm test` also runs cspell, so a cspell major can flag new words; add them to the site's `cspell.json` rather than rewording. Commit both sites together:
 
 ```bash
-git add docs/package.json docs/package-lock.json docs/cspell.json .scaffold/docs/package.json .scaffold/docs/package-lock.json .scaffold/docs/cspell.json
+git add docs/package.json docs/package-lock.json docs/cspell.json .scaffold/docs/package.json .scaffold/docs/package-lock.json .scaffold/docs/cspell.json .scaffold/CLAUDE.md
 ```
 
 ```bash
