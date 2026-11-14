@@ -195,8 +195,10 @@ its extension.
 
 3. **BATS Tests** - Test shell scripts
   - Location: `tests/bats/`
-  - Purpose: Validate `shell-command.sh` functionality
+  - Purpose: Validate `shell-command.sh` and, with Docker, `entrypoint.sh`
   - Includes: TUI testing helpers, mocking system via `steps_run()`
+  - In the template repo, a `META` block in the `Test shell` kcov step excludes
+    `install.sh` and `.scaffold/` from the **Shell code coverage** comment
 
 ### Rules for Template Changes
 
@@ -551,6 +553,10 @@ The `scaffold-test.yml` workflow validates initialization:
 2. Verifies string replacements
 3. Confirms token removal
 4. Tests that generated project passes linting/tests
+
+It also runs `.scaffold/tests/bats` under kcov, limited to `install.sh` and
+`.scaffold/installer`, and posts the per-file summary on a pull request as the
+**Scaffold shell code coverage** comment.
 
 ## Adding New Template Features
 

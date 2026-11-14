@@ -20,3 +20,7 @@ The workflow's `Docker` job runs the following steps:
 3. Runs a container from the image. The step fails when `entrypoint.sh` exits with an error.
 
 On a push to `main`, after the `Docker` job passes, the `Docker canary` job publishes a `canary` image. See [Publishing](./publishing.mdx).
+
+## Entrypoint tests
+
+In a project with shell support, [`entrypoint.bats`](https://github.com/AlexSkrypnyk/scaffold/blob/main/tests/bats/entrypoint.bats) tests `entrypoint.sh` outside a container. The [Test shell](../ci/test.mdx#test-shell) workflow runs it with the other BATS tests and measures its coverage. To run it locally, see [Shell testing](../shell/testing.mdx#run-the-tests).
