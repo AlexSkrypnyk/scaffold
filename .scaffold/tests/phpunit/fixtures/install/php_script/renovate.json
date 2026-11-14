@@ -1,4 +1,4 @@
-@@ -19,12 +19,7 @@
+@@ -21,12 +21,7 @@
              "enabled": false
          },
          {
@@ -12,7 +12,7 @@
              "matchUpdateTypes": ["major"],
              "enabled": false
          },
-@@ -42,14 +37,6 @@
+@@ -44,14 +39,6 @@
              "matchManagers": ["composer"],
              "matchFileNames": ["composer.json"],
              "matchDepTypes": ["require"],
