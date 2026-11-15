@@ -54,7 +54,7 @@
       "tinypool": "^2.2.0"
     },
     "@jest/reporters": {
-      "glob": "^14.0.2"
+      "glob": "^14.0.4"
     },
     "copy-webpack-plugin": {
       "serialize-javascript": "^7.1.4"
@@ -63,17 +63,17 @@
       "serialize-javascript": "^7.1.4"
     },
     "jest-config": {
-      "glob": "^14.0.2"
+      "glob": "^14.0.4"
     },
     "jest-runtime": {
-      "glob": "^14.0.2"
+      "glob": "^14.0.4"
     },
     "sockjs": {
       "uuid": "^11.1.1"
     },
     "test-exclude": {
-      "glob": "^14.0.2",
-      "minimatch": "^11.0.1"
+      "glob": "^14.0.4",
+      "minimatch": "^11.0.5"
     }
   },
   "browserslist": {
