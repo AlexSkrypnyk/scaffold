@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions to Scaffold are welcome. Follow this guide to run the checks that cover your change before you open a pull request.
+Contributions to Scaffold are welcome. Follow this guide to run the checks that cover your change before you open a pull request. To release a version, follow [`RELEASING.md`](RELEASING.md).
 
 Scaffold is a multi-stack project template. The `.scaffold/` directory holds the template's own infrastructure, and [`install.sh`](install.sh) removes it from generated projects. Before you change template files, read the maintenance guide in [`.scaffold/CLAUDE.md`](.scaffold/CLAUDE.md). It documents the template architecture, the `install.sh` token system and the test and fixture workflow.
 

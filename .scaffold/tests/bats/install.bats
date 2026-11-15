@@ -1675,6 +1675,90 @@ SETTINGS
   assert_file_not_contains "${tmpdir}/SECURITY.md" "Scaffold policy"
 }
 
+@test "process_releasing replaces Scaffold's release guide with the distributable one" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_releasing"
+  mkdir -p "${tmpdir}"
+  echo "Scaffold release guide" >"${tmpdir}/RELEASING.md"
+  echo "Project release guide" >"${tmpdir}/RELEASING.dist.md"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_releasing
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/RELEASING.dist.md"
+  assert_file_contains "${tmpdir}/RELEASING.md" "Project release guide"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Scaffold release guide"
+}
+
+create_releasing_dist() {
+  cat >"${1}/RELEASING.dist.md" <<'RELEASING'
+Intro
+[//]: # (#;< NODEJS)
+Run npm version
+[//]: # (#;> NODEJS)
+[//]: # (#;< !NODEJS)
+Click Publish release
+[//]: # (#;> !NODEJS)
+Outro
+RELEASING
+}
+
+@test "process_project keeps only the Node.js release steps when Node.js is selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_releasing_nodejs"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  create_releasing_dist "${tmpdir}"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_nodejs="y"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/RELEASING.dist.md"
+  assert_file_contains "${tmpdir}/RELEASING.md" "Run npm version"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Click Publish release"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "#;"
+  assert_file_contains "${tmpdir}/RELEASING.md" "Outro"
+}
+
+@test "process_project keeps only the Releases page steps when Node.js is not selected" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_releasing_no_nodejs"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  create_releasing_dist "${tmpdir}"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_nodejs="n"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/RELEASING.dist.md"
+  assert_file_contains "${tmpdir}/RELEASING.md" "Click Publish release"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Run npm version"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "#;"
+  assert_file_contains "${tmpdir}/RELEASING.md" "Outro"
+}
+
 @test "process_project runs the full flow and promotes the dist docs" {
   local tmpdir="${BATS_TEST_TMPDIR}/process_project"
   mkdir -p "${tmpdir}"
@@ -1683,6 +1767,8 @@ SETTINGS
   echo "Contributing dist content" >"${tmpdir}/CONTRIBUTING.dist.md"
   echo "Scaffold policy" >"${tmpdir}/SECURITY.md"
   echo "Security dist content" >"${tmpdir}/SECURITY.dist.md"
+  echo "Scaffold release guide" >"${tmpdir}/RELEASING.md"
+  echo "Releasing dist content" >"${tmpdir}/RELEASING.dist.md"
 
   namespace="AcmeApp"
   project="acme-app"
@@ -1703,6 +1789,8 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/CONTRIBUTING.dist.md"
   assert_file_contains "${tmpdir}/SECURITY.md" "Security dist content"
   assert_file_not_exists "${tmpdir}/SECURITY.dist.md"
+  assert_file_contains "${tmpdir}/RELEASING.md" "Releasing dist content"
+  assert_file_not_exists "${tmpdir}/RELEASING.dist.md"
 }
 
 @test "process_project keeps the audit workflow when the audit is selected" {

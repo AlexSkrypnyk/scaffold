@@ -75,7 +75,8 @@ Content blocks can be conditionally included/excluded using special tokens:
   suppression entries and these blocks for the two modes that release no asset: a
   class library, and a command app built without a PHAR
 - `SHELL` - Shell script features
-- `NODEJS` - NodeJS features
+- `NODEJS` - NodeJS features; `!NODEJS` marks what applies only without NodeJS,
+  such as the **Publish release** steps of `RELEASING.dist.md`
 - `NODEJS_LIBRARY` - The commented `/package-lock.json` rule in `.gitignore`,
   uncommented for a NodeJS library (`--nodejs-library`) and removed for an
   application
@@ -593,39 +594,8 @@ project, so a workflow for the template alone takes the `scaffold-` prefix.
 
 getscaffold.dev/install.sh and /init.sh serve the `install.sh` attached to the latest release, so a release build of the docs site holds no `install.sh` or `init.sh`. `.scaffold/docs/scripts/copy-installer.js` removes both when `RELEASE_VERSION` is set, and `scaffold-release-docs.yml` fails when either is in the build. Every other build copies the repository-root `install.sh` to both paths, so the Netlify development site (`scaffold-docs.netlify.app`, the `main` branch) and local builds serve the `dev` installer.
 
-`scaffold-release-installer.yml` runs when a version tag is pushed:
+[`RELEASING.md`](../RELEASING.md) describes the release procedure, the steps of `scaffold-release-installer.yml` and the `install-key.asc` signing key. `process_internal()` removes `install-key.asc` from generated projects, and `process_releasing()` replaces `RELEASING.md` with `RELEASING.dist.md`.
 
-1. Checks that the tag is a version on `main`, then stamps `SCAFFOLD_VERSION="dev"` in `install.sh` with the tag.
-2. Pipes the stamped installer into `bash` in an empty directory, so it bootstraps and initializes the tag's template.
-3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, and `GPG_PASSPHRASE` when the key has one. Both are secrets of the `release` environment.
-4. Checks the signature against `install-key.asc` and its pinned fingerprint with `.scaffold/installer/verify-release.sh`.
-5. Attests `install.sh` and `SHA256SUMS`, and saves the attestation bundle as `scaffold-installer-TAG.intoto.jsonl`.
-6. Waits for the tag's `Release PHP` run, which attaches its assets to the draft release. Then it uploads the 4 installer files to the draft, publishes the release and verifies the uploaded copies.
-7. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer.
-
-Steps 1-5 run in the `build` job, which reads the repository only. Steps 6-7 run in the `publish` job, which writes the release.
-
-Publish a release only by pushing its tag. A release published with the **Publish release** button gets the installer only while releases are mutable. On an immutable release, `Release PHP` and this workflow both fail, and the fix is a new version with a tag push. A re-run on a published release that already holds the same `install.sh` succeeds without uploading. The workflow also rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
-
-Push 1 version tag at a time. The `publish` jobs share the `scaffold-release` concurrency group, which keeps 1 run waiting and cancels the one it replaces. Re-run a canceled `Publish Scaffold release` job.
-
-`install-key.asc` in the repository root is the public half of the `Scaffold Release Signing` key, fingerprint `86F0 77A2 E806 67D7 CF4A 3320 EDEA F2FC D434 756C`. It expires on 2028-11-08. `process_internal()` removes it from generated projects.
-
-To extend the key before it expires, run `gpg --quick-set-expire 86F077A2E80667D7CF4A3320EDEAF2FCD434756C 2y`, then export the public half again. The fingerprint stays the same:
-
-```bash
-gpg --armor --output install-key.asc --export 86F077A2E80667D7CF4A3320EDEAF2FCD434756C
-```
-
-A new key needs a new `install-key.asc`, the new fingerprint in `verify-release.sh` and in the "Verify the installer" section of `.scaffold/docs/content/README.mdx`, and a note in the release notes.
-
-To give the workflow the signing key, create the `release` environment, then store the private key and its passphrase there:
-
-```bash
-gh api -X PUT repos/AlexSkrypnyk/scaffold/environments/release
-gpg --armor --export-secret-keys 86F077A2E80667D7CF4A3320EDEAF2FCD434756C | gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold
-gh secret set GPG_PASSPHRASE --env release --repo AlexSkrypnyk/scaffold
-```
 
 ### Testing `install.sh`
 
@@ -716,12 +686,9 @@ composer build
 
 ## Template Release Process
 
-1. Update version references if needed
-2. Run full test suite: `composer test && composer lint`
-3. Merge to `main`. Release Drafter keeps a draft release with notes from the PR labels.
-4. Push a version tag from `main`, such as `git tag 1.2.3` and then `git push origin 1.2.3`.
-5. `Release PHP` attaches the PHAR and the PHP script to the draft. `Release Scaffold installer` then attaches the installer files and publishes the release.
-6. `Release Scaffold docs` deploys getscaffold.dev to GitHub Pages from the tag, in parallel with the release workflows.
+When asked to release Scaffold, follow [`RELEASING.md`](../RELEASING.md).
+
+The consumer release guide lives in `RELEASING.dist.md`. It carries the `PHP_RELEASE`, `NODEJS`, `!NODEJS`, `DOCKER`, `DOCS` and `RELEASEDRAFTER` blocks, so update it with any change to a release workflow.
 
 ## Key Differences from User Projects
 

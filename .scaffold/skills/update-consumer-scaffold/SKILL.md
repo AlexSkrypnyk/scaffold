@@ -273,6 +273,9 @@ Use `git status` and `git diff` to review everything. Pay attention to:
   the project's own content.
 - **SECURITY.md**: the template ships a fresh security policy. Keep the
   project's own contact email, supported versions and response time.
+- **RELEASING.md**: the template ships a fresh release guide. Re-apply the
+  template's changes to the steps of the shipped release workflows, and keep the
+  project's own release steps, assets and setup.
 - **Workflows and jobs**: mark new workflow files as intent-to-add with
   `git add -N .github/workflows`, because `git diff` skips untracked files. Then
   list what changed under `.github/workflows` with

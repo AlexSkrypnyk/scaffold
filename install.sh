@@ -991,6 +991,13 @@ process_nodejs_library() {
 }
 
 ##
+# Remove the notes that apply only to a project without NodeJS.
+#
+remove_non_nodejs() {
+  remove_tokens_with_content "!NODEJS"
+}
+
+##
 # Remove the notes that apply only to a NodeJS library.
 #
 remove_nodejs_library() {
@@ -1101,6 +1108,13 @@ process_contributing() {
 #
 process_security() {
   mv -f SECURITY.dist.md "SECURITY.md" >/dev/null 2>&1 || true
+}
+
+##
+# Replace Scaffold's own release guide with the distributable one.
+#
+process_releasing() {
+  mv -f RELEASING.dist.md "RELEASING.md" >/dev/null 2>&1 || true
 }
 
 ##
@@ -3672,10 +3686,13 @@ process_project() {
 
   if [ "${use_nodejs}" != "y" ]; then
     remove_nodejs
-  elif [ "${use_nodejs_library:-n}" = "y" ]; then
-    process_nodejs_library
   else
-    remove_nodejs_library
+    remove_non_nodejs
+    if [ "${use_nodejs_library:-n}" = "y" ]; then
+      process_nodejs_library
+    else
+      remove_nodejs_library
+    fi
   fi
 
   if [ "${use_shell}" = "y" ]; then
@@ -3720,6 +3737,8 @@ process_project() {
   process_contributing
 
   process_security
+
+  process_releasing
 
   remove_composer_cooldown_exemption
 
