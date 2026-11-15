@@ -1,4 +1,4 @@
-@@ -13,50 +13,9 @@
+@@ -13,45 +13,9 @@
      },
      "packageRules": [
          {
@@ -17,14 +17,9 @@
 -            "enabled": false
 -        },
 -        {
--            "matchManagers": ["composer"],
+-            "matchManagers": ["npm", "composer"],
 -            "matchUpdateTypes": ["lockFileMaintenance"],
 -            "minimumReleaseAge": null
--        },
--        {
--            "matchManagers": ["npm"],
--            "matchUpdateTypes": ["lockFileMaintenance"],
--            "enabled": false
 -        },
 -        {
              "matchPackageNames": ["*"],
