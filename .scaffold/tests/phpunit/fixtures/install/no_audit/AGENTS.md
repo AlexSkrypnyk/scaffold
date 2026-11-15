@@ -1,5 +1,5 @@
-@@ -224,13 +224,6 @@
- - `.github/workflows/release-nodejs.yml` - Runs on the tag that `npm version` creates: checks it matches `package.json`, publishes to npm with provenance, then attaches the script, its checksum and its provenance attestation to the release and publishes it
+@@ -231,13 +231,6 @@
+ workflow.
  
  
 -## Security audit

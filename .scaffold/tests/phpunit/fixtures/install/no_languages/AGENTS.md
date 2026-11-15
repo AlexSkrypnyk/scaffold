@@ -1,7 +1,8 @@
-@@ -11,219 +11,6 @@
+@@ -10,219 +10,6 @@
+ for Shell scripts, PHP CLI applications, and/or NodeJS projects with integrated
  testing, code quality tools, and CI/CD workflows.
  
- 
+-
 -## PHP Application Architecture
 -
 -
@@ -214,7 +215,6 @@
 -- `.github/workflows/test-nodejs.yml` - NodeJS testing
 -- `.github/workflows/release-nodejs.yml` - Runs on the tag that `npm version` creates: checks it matches `package.json`, publishes to npm with provenance, then attaches the script, its checksum and its provenance attestation to the release and publishes it
 -
--
- ## Security audit
+ ## Releasing
  
- `.github/workflows/audit.yml` runs OpenSSF Scorecard, CodeQL and, on PHP
+ `RELEASING.md` describes how to release the project: where a release starts,

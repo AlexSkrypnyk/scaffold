@@ -88,7 +88,7 @@ Run the shell script:
 
 ## Contribute
 
-[`CONTRIBUTING.md`](CONTRIBUTING.md) lists the commands that install the dependencies and run the linters and tests.
+[`CONTRIBUTING.md`](CONTRIBUTING.md) lists the commands that install the dependencies and run the linters and tests. [`RELEASING.md`](RELEASING.md) lists the steps to release a version.
 
 ## Security
 
