@@ -1,4 +1,4 @@
-@@ -18,12 +18,7 @@
+@@ -18,17 +18,12 @@
              "enabled": false
          },
          {
@@ -12,19 +12,13 @@
              "matchUpdateTypes": ["major"],
              "enabled": false
          },
-@@ -33,11 +28,6 @@
+         {
+-            "matchManagers": ["npm", "composer"],
++            "matchManagers": ["composer"],
+             "matchUpdateTypes": ["lockFileMaintenance"],
              "minimumReleaseAge": null
          },
-         {
--            "matchManagers": ["npm"],
--            "matchUpdateTypes": ["lockFileMaintenance"],
--            "enabled": false
--        },
--        {
-             "matchPackageNames": ["*"],
-             "groupName": "all dependencies",
-             "groupSlug": "all"
-@@ -46,14 +36,6 @@
+@@ -41,14 +36,6 @@
              "matchManagers": ["composer"],
              "matchFileNames": ["composer.json"],
              "matchDepTypes": ["require"],

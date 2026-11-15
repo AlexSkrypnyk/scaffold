@@ -28,14 +28,9 @@
             "enabled": false
         },
         {
-            "matchManagers": ["composer"],
+            "matchManagers": ["npm", "composer"],
             "matchUpdateTypes": ["lockFileMaintenance"],
             "minimumReleaseAge": null
-        },
-        {
-            "matchManagers": ["npm"],
-            "matchUpdateTypes": ["lockFileMaintenance"],
-            "enabled": false
         },
         {
             "matchPackageNames": ["*"],
