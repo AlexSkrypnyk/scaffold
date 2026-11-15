@@ -823,13 +823,15 @@ final class InstallTest extends UnitTestCase {
   }
 
   /**
-   * Composer lock file maintenance merges on its own, and npm's is off.
+   * Lock file maintenance merges on its own for every selected manager.
    *
    * @param list<string> $arguments
    *   Command-line arguments passed to install.sh.
+   * @param list<string>|null $managers
+   *   Managers the lock file maintenance rule matches, or NULL for no rule.
    */
   #[DataProvider('dataProviderInstallRenovateLockFileMaintenance')]
-  public function testInstallRenovateLockFileMaintenance(array $arguments, bool $composer_rule, bool $npm_rule): void {
+  public function testInstallRenovateLockFileMaintenance(array $arguments, ?array $managers): void {
     self::$fixtures = NULL;
 
     $this->processRun(self::$sut . DIRECTORY_SEPARATOR . 'install.sh', array_merge(['--namespace=AcmeApp', '--name=acme-app', '--author=Jane Doe'], $arguments));
@@ -844,20 +846,19 @@ final class InstallTest extends UnitTestCase {
     $this->assertSame('7 days', $config['minimumReleaseAge'] ?? NULL);
     $this->assertIsArray($config['packageRules']);
 
-    $rule = ['matchManagers' => ['composer'], 'matchUpdateTypes' => ['lockFileMaintenance'], 'minimumReleaseAge' => NULL];
-    $this->assertSame($composer_rule, in_array($rule, $config['packageRules'], TRUE));
-
-    $rule = ['matchManagers' => ['npm'], 'matchUpdateTypes' => ['lockFileMaintenance'], 'enabled' => FALSE];
-    $this->assertSame($npm_rule, in_array($rule, $config['packageRules'], TRUE));
+    $is_lock_rule = fn(mixed $rule): bool => is_array($rule) && ($rule['matchUpdateTypes'] ?? NULL) === ['lockFileMaintenance'];
+    $rules = array_values(array_filter($config['packageRules'], $is_lock_rule));
+    $expected = $managers === NULL ? [] : [['matchManagers' => $managers, 'matchUpdateTypes' => ['lockFileMaintenance'], 'minimumReleaseAge' => NULL]];
+    $this->assertSame($expected, $rules);
   }
 
   public static function dataProviderInstallRenovateLockFileMaintenance(): \Iterator {
-    yield 'php and nodejs' => [[], TRUE, TRUE];
-    yield 'php only' => [['--no-nodejs'], TRUE, FALSE];
-    yield 'php library' => [['--no-php-command', '--no-php-script'], TRUE, TRUE];
-    yield 'nodejs only' => [['--no-php'], FALSE, TRUE];
-    yield 'nodejs library' => [['--no-php', '--nodejs-library'], FALSE, TRUE];
-    yield 'no languages' => [['--no-php', '--no-nodejs'], FALSE, FALSE];
+    yield 'php and nodejs' => [[], ['npm', 'composer']];
+    yield 'php only' => [['--no-nodejs'], ['composer']];
+    yield 'php library' => [['--no-php-command', '--no-php-script'], ['npm', 'composer']];
+    yield 'nodejs only' => [['--no-php'], ['npm']];
+    yield 'nodejs library' => [['--no-php', '--nodejs-library'], ['npm']];
+    yield 'no languages' => [['--no-php', '--no-nodejs'], NULL];
   }
 
   /**
