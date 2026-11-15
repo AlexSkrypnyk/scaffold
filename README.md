@@ -11,6 +11,7 @@
 [![Test Scaffold](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold-test.yml/badge.svg)](https://github.com/AlexSkrypnyk/scaffold/actions/workflows/scaffold-test.yml)
 [![codecov](https://codecov.io/gh/AlexSkrypnyk/scaffold/graph/badge.svg?token=7WEB1IXBYT)](https://codecov.io/gh/AlexSkrypnyk/scaffold)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/AlexSkrypnyk/scaffold/badge)](https://scorecard.dev/viewer/?uri=github.com/AlexSkrypnyk/scaffold)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/16713/badge)](https://www.bestpractices.dev/projects/16713)
 ![LICENSE](https://img.shields.io/github/license/AlexSkrypnyk/scaffold?label=License)
 ![Release (latest by date)](https://img.shields.io/github/v/release/AlexSkrypnyk/scaffold?label=Release)
 ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot&label=Renovate)
