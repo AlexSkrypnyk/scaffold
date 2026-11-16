@@ -60,7 +60,7 @@ Pushing the tag starts 4 workflows:
 4. Checks the signature against `install-key.asc` and its pinned fingerprint with `.scaffold/installer/verify-release.sh`.
 5. Attests `install.sh` and `SHA256SUMS`, and saves the attestation bundle as `scaffold-installer-TAG.intoto.jsonl`.
 6. Waits for the tag's `Release PHP` run. Then it uploads the 4 installer files to the draft, publishes the release and verifies the uploaded copies.
-7. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer.
+7. For the latest release, checks that `releases/latest/download/install.sh` and getscaffold.dev/install.sh both serve the uploaded installer.
 
 Steps 1-5 run in the `Build Scaffold installer` job, which reads the repository only. Steps 6-7 run in the `Publish Scaffold release` job, which writes the release.
 
