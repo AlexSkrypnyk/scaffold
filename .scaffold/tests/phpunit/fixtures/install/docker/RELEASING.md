@@ -7,7 +7,7 @@
 +- `Release Docker` pushes the `yodashut/force-crystal` image to Docker Hub, tagged with the version and `latest`.
  - `Release docs` deploys the documentation site to GitHub Pages.
  
- `TAG` in a filename is the version tag. [`SECURITY.md`](SECURITY.md) shows how anyone can verify a downloaded asset with its checksum and attestation files.
+ `TAG` in a filename is the version tag. A release of a private repository carries no `.intoto.jsonl` file, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud. [`SECURITY.md`](SECURITY.md) shows how anyone can verify a downloaded asset with its checksum and attestation files.
 @@ -22,23 +21,16 @@
  
  Each release workflow needs settings that only the repository owner can add. Set them up before the first version tag.

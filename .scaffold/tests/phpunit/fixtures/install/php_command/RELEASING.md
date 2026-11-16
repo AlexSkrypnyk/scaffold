@@ -5,7 +5,7 @@
 -- `Release Node.js` publishes the package to npm and attaches `nodejs-script` to the release, with `force-crystal-nodejs-TAG.sha256` and `force-crystal-nodejs-TAG.intoto.jsonl`. Then it publishes the release.
  - `Release docs` deploys the documentation site to GitHub Pages.
  
- `TAG` in a filename is the version tag. [`SECURITY.md`](SECURITY.md) shows how anyone can verify a downloaded asset with its checksum and attestation files.
+ `TAG` in a filename is the version tag. A release of a private repository carries no `.intoto.jsonl` file, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud. [`SECURITY.md`](SECURITY.md) shows how anyone can verify a downloaded asset with its checksum and attestation files.
 @@ -22,23 +21,10 @@
  
  Each release workflow needs settings that only the repository owner can add. Set them up before the first version tag.
