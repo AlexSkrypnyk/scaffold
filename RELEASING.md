@@ -10,13 +10,16 @@ Make sure you have the following:
 
 - Write access to `AlexSkrypnyk/scaffold`
 - A `main` with every change of the release merged and every required check passing
-- The signing key stored in the `release` environment of the repository, as [Manage the signing key](#manage-the-signing-key) describes
+- The signing key stored in `release`, the GitHub Actions environment that holds the signing secrets, as [Store the signing key](#store-the-signing-key) describes
 
 ## Release a version
 
-A version tag is 3 numbers with an optional suffix, such as `1.2.3` or `1.2.3-rc.1`, with no `v`. The `Draft release notes` workflow, which runs Release Drafter, keeps a draft release with notes for the pull requests merged into `main`.
+You release a version by pushing its tag. Pushing the tag starts the release workflows, which attach the assets to the draft release and then publish it. The `Draft release notes` workflow runs Release Drafter to update that draft, with notes for the pull requests merged into `main`.
 
-Publish a release only by pushing its tag. Never click **Publish release** on the draft. An immutable release accepts no assets after it's published, so `Release PHP` and `Release Scaffold installer` both fail on it, and the fix is a new version with a tag push.
+A version tag is 3 numbers with an optional suffix, such as `1.2.3` or `1.2.3-rc.1`, with no `v`. Follow 2 rules for every release:
+
+- Release only by pushing the tag. With immutable releases turned on, GitHub accepts no new assets on a published release. Clicking **Publish release** on the draft then makes `Release PHP` and `Release Scaffold installer` fail, and the only fix is a new version.
+- Push 1 version tag at a time. The `Publish Scaffold release` job of `Release Scaffold installer` handles 1 tag at a time, and each newly waiting run cancels the run that waited before it.
 
 To release a version:
 
@@ -28,55 +31,95 @@ To release a version:
    git push origin 1.2.3
    ```
 
-3. On the **Actions** tab, open the `Release PHP`, `Release Scaffold installer` and `Release Scaffold docs` runs for the tag. Confirm that they pass.
-4. Open the release. Confirm that it's published with the PHAR, the PHP script, `install.sh`, `SHA256SUMS`, `SHA256SUMS.asc` and `scaffold-installer-TAG.intoto.jsonl`.
+3. On the **Actions** tab, open the `Release PHP`, `Release Scaffold installer`, `Release Scaffold docs` and `Release Docker` runs for the tag. Confirm that all 4 pass.
+4. Open the release. Confirm that it's published with these assets, where `TAG` is the version tag:
+   - `php-command.phar` and `php-script`, with `scaffold-php-TAG.sha256` and `scaffold-php-TAG.intoto.jsonl`
+   - `install.sh`, `SHA256SUMS`, `SHA256SUMS.asc` and `scaffold-installer-TAG.intoto.jsonl`
 
-Push 1 version tag at a time. The `Publish Scaffold release` job of `Release Scaffold installer` runs for 1 tag at a time, and GitHub keeps only the newest waiting run. Re-run each canceled `Publish Scaffold release` job from the **Actions** tab.
+## Fix a failed release run
+
+Re-run a canceled or failed job from the **Actions** tab. When the published release already holds the same `install.sh`, a re-run of `Publish Scaffold release` skips the upload and passes.
+
+`Release Scaffold installer` rejects a tag whose `install.sh` has no `SCAFFOLD_VERSION="dev"` line.
 
 ## What the tag starts
 
-The tag starts 3 workflows:
+Pushing the tag starts 4 workflows:
 
 - `Release PHP` attaches the PHAR and the PHP script to the draft release.
 - `Release Scaffold installer` attaches the installer files and publishes the release.
-- `Release Scaffold docs` deploys getscaffold.dev to GitHub Pages from the tag, in parallel with the other 2.
+- `Release Scaffold docs` deploys getscaffold.dev to GitHub Pages from the tag.
+- `Release Docker` builds the example Docker image and pushes it to Docker Hub, under the name in the `DOCKER_IMAGE` repository variable.
 
-`scaffold-release-installer.yml` runs these steps:
+`Release Scaffold installer`, defined in `scaffold-release-installer.yml`, runs these steps:
 
-1. Checks that the tag is a version on `main`, then stamps `SCAFFOLD_VERSION="dev"` in `install.sh` with the tag.
+1. Checks that the tag is a version on `main`. Then it replaces `dev` in the `SCAFFOLD_VERSION="dev"` line of `install.sh` with the tag.
 2. Pipes the stamped installer into `bash` in an empty directory, so it bootstraps and initializes the tag's template.
-3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, and `GPG_PASSPHRASE` when the key has one. Both are secrets of the `release` environment.
+3. Writes `SHA256SUMS` and signs it as `SHA256SUMS.asc` with `GPG_PRIVATE_KEY`, and with `GPG_PASSPHRASE` when the key has one. Both are secrets of the `release` environment.
 4. Checks the signature against `install-key.asc` and its pinned fingerprint with `.scaffold/installer/verify-release.sh`.
 5. Attests `install.sh` and `SHA256SUMS`, and saves the attestation bundle as `scaffold-installer-TAG.intoto.jsonl`.
-6. Waits for the tag's `Release PHP` run, which attaches its assets to the draft release. Then it uploads the 4 installer files to the draft, publishes the release and verifies the uploaded copies.
+6. Waits for the tag's `Release PHP` run. Then it uploads the 4 installer files to the draft, publishes the release and verifies the uploaded copies.
 7. For the latest release, checks that `releases/latest/download/install.sh`, getscaffold.dev/install.sh and getscaffold.dev/init.sh all serve the uploaded installer.
 
-Steps 1-5 run in the `Build Scaffold installer` job, which reads the repository only. Steps 6-7 run in the `Publish Scaffold release` job, which writes the release. `TAG` in a filename is the version tag.
-
-A re-run on a published release that already holds the same `install.sh` succeeds without uploading. The workflow rejects a tag whose installer has no `SCAFFOLD_VERSION="dev"` line.
+Steps 1-5 run in the `Build Scaffold installer` job, which reads the repository only. Steps 6-7 run in the `Publish Scaffold release` job, which writes the release.
 
 ## Manage the signing key
 
-`install-key.asc` in the repository root is the public half of the `Scaffold Release Signing` key, fingerprint `86F0 77A2 E806 67D7 CF4A 3320 EDEA F2FC D434 756C`. It expires on 2028-11-08.
+`install-key.asc` in the repository root is the public half of the `Scaffold Release Signing` key, fingerprint `86F0 77A2 E806 67D7 CF4A 3320 EDEA F2FC D434 756C`. It expires on 2028-11-08. The workflow signs with the private half, which it reads from the `GPG_PRIVATE_KEY` secret.
 
-To give the workflow the signing key, create the `release` environment, then store the private key and its passphrase there:
+### Store the signing key
 
-```bash
-gh api -X PUT repos/AlexSkrypnyk/scaffold/environments/release
-gpg --armor --export-secret-keys 86F077A2E80667D7CF4A3320EDEAF2FCD434756C | gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold
-gh secret set GPG_PASSPHRASE --env release --repo AlexSkrypnyk/scaffold
-```
+To store the private key and its passphrase in the `release` environment:
 
-To extend the key before it expires, run `gpg --quick-set-expire 86F077A2E80667D7CF4A3320EDEAF2FCD434756C 2y`, then export the public half again and commit it. The fingerprint stays the same:
+1. Create the `release` environment:
 
-```bash
-gpg --armor --output install-key.asc --export 86F077A2E80667D7CF4A3320EDEAF2FCD434756C
-```
+   ```bash
+   gh api -X PUT repos/AlexSkrypnyk/scaffold/environments/release
+   ```
 
-The workflow signs with the private key stored in `GPG_PRIVATE_KEY`, which keeps the old expiry date. Store the extended private key again:
+2. Store the private key as `GPG_PRIVATE_KEY`:
 
-```bash
-gpg --armor --export-secret-keys 86F077A2E80667D7CF4A3320EDEAF2FCD434756C | gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold
-```
+   ```bash
+   gpg --armor --export-secret-keys 86F077A2E80667D7CF4A3320EDEAF2FCD434756C | gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold
+   ```
 
-To replace the key, commit a new `install-key.asc` and store the new private key in the `release` environment. Put the new fingerprint in `verify-release.sh` and in the "Verify the installer" section of `.scaffold/docs/content/README.mdx`. Add a note about the new key to the release notes.
+3. Store the passphrase as `GPG_PASSPHRASE`. The command prompts for its value:
+
+   ```bash
+   gh secret set GPG_PASSPHRASE --env release --repo AlexSkrypnyk/scaffold
+   ```
+
+### Extend the signing key
+
+Extend the key before it expires. The fingerprint stays the same, so `verify-release.sh` needs no change.
+
+To extend the key by 2 years:
+
+1. Set the new expiry date:
+
+   ```bash
+   gpg --quick-set-expire 86F077A2E80667D7CF4A3320EDEAF2FCD434756C 2y
+   ```
+
+2. Export the public half, then commit `install-key.asc`:
+
+   ```bash
+   gpg --armor --output install-key.asc --export 86F077A2E80667D7CF4A3320EDEAF2FCD434756C
+   ```
+
+3. Store the extended private key again. `GPG_PRIVATE_KEY` still holds the copy with the old expiry date:
+
+   ```bash
+   gpg --armor --export-secret-keys 86F077A2E80667D7CF4A3320EDEAF2FCD434756C | gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold
+   ```
+
+4. Update the expiry date in [Manage the signing key](#manage-the-signing-key).
+
+### Replace the signing key
+
+To replace the key with a new one:
+
+1. Commit the new key's public half as `install-key.asc`.
+2. Store the new private key, as [Store the signing key](#store-the-signing-key) describes.
+3. Put the new fingerprint in `.scaffold/installer/verify-release.sh`, in the "Verify the installer" section of `.scaffold/docs/content/README.mdx` and in [Manage the signing key](#manage-the-signing-key).
+4. Add a note about the new key to the release notes of the next version.
