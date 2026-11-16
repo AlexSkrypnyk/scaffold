@@ -11,6 +11,7 @@ Make sure you have the following:
 - Write access to `AlexSkrypnyk/scaffold`
 - A `main` with every change of the release merged and every required check passing
 - The signing key stored in `release`, the GitHub Actions environment that holds the signing secrets, as [Store the signing key](#store-the-signing-key) describes
+- The `DOCKER_USER` and `DOCKER_PASS` repository secrets, which `Release Docker` signs in to Docker Hub with
 
 ## Release a version
 
@@ -49,7 +50,7 @@ Pushing the tag starts 4 workflows:
 - `Release PHP` attaches the PHAR and the PHP script to the draft release.
 - `Release Scaffold installer` attaches the installer files and publishes the release.
 - `Release Scaffold docs` deploys getscaffold.dev to GitHub Pages from the tag.
-- `Release Docker` builds the example Docker image and pushes it to Docker Hub, under the name in the `DOCKER_IMAGE` repository variable.
+- `Release Docker` builds the example Docker image and pushes it to Docker Hub. The optional `DOCKER_IMAGE` repository variable sets the image name, and the workflow falls back to `yournamespace/yourdockerimage` without it.
 
 `Release Scaffold installer`, defined in `scaffold-release-installer.yml`, runs these steps:
 
@@ -120,6 +121,6 @@ To extend the key by 2 years:
 To replace the key with a new one:
 
 1. Commit the new key's public half as `install-key.asc`.
-2. Store the new private key, as [Store the signing key](#store-the-signing-key) describes.
+2. Store the new private key with the commands in [Store the signing key](#store-the-signing-key). Put the new key's fingerprint in place of `86F077A2E80667D7CF4A3320EDEAF2FCD434756C` before you run them.
 3. Put the new fingerprint in `.scaffold/installer/verify-release.sh`, in the "Verify the installer" section of `.scaffold/docs/content/README.mdx` and in [Manage the signing key](#manage-the-signing-key).
 4. Add a note about the new key to the release notes of the next version.
