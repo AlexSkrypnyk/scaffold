@@ -1,6 +1,6 @@
 @@ -8,8 +8,6 @@
  
- A version tag is 3 numbers with an optional suffix, such as `__VERSION__` or `__VERSION__`, with no `v`. The release workflows start on the version tag. They stop when the tag isn't a version or when the tagged commit isn't on `main`, so nothing gets published from that tag.
+ A version tag is 3 numbers with an optional suffix, such as `__VERSION__` or `__VERSION__`, with no `v`. A pushed tag starts the release workflows. Each workflow that publishes an asset checks the tag first. It stops when the tag isn't a version or the tagged commit isn't on `main`, so nothing gets published from that tag.
  
 -The `Draft release notes` workflow keeps a draft release with notes for every pull request merged into `main`.
 -

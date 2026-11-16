@@ -2,11 +2,11 @@
 
 Follow this guide to release a new version of this project. It's for maintainers with write access to the repository. It covers what a release publishes, the one-time setup and the steps to publish a version. To change the code, follow [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-The process in this guide matches the release workflows the project started with. This project owns its release process, so change it to fit the project, as [Change the release process](#change-the-release-process) describes.
+The process in this guide matches the release workflows the project started with. The maintainers own this project's release process, so change it to fit the project, as [Change the release process](#change-the-release-process) describes.
 
 ## What a release publishes
 
-A version tag is 3 numbers with an optional suffix, such as `__VERSION__` or `__VERSION__`, with no `v`. The release workflows start on the version tag. They stop when the tag isn't a version or when the tagged commit isn't on `main`, so nothing gets published from that tag.
+A version tag is 3 numbers with an optional suffix, such as `__VERSION__` or `__VERSION__`, with no `v`. A pushed tag starts the release workflows. Each workflow that publishes an asset checks the tag first. It stops when the tag isn't a version or the tagged commit isn't on `main`, so nothing gets published from that tag.
 
 The `Draft release notes` workflow keeps a draft release with notes for every pull request merged into `main`.
 
@@ -69,7 +69,7 @@ To release a version:
 
 4. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that the release lists the assets from [What a release publishes](#what-a-release-publishes).
 
-A version with a suffix, such as `__VERSION__`, goes to npm under the `next` dist-tag and becomes a GitHub pre-release. Push 1 version tag at a time, because GitHub starts no workflow for a push that holds more than 3 tags.
+A version with a suffix, such as `__VERSION__`, goes to npm under the `next` dist-tag and becomes a GitHub pre-release. Push 1 version tag at a time. Release runs for different tags publish 1 at a time, and GitHub cancels every waiting run except the newest. Re-run each canceled run from the **Actions** tab.
 
 ## Change the release process
 

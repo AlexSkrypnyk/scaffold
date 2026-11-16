@@ -60,7 +60,7 @@
 -
 -4. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that the release lists the assets from [What a release publishes](#what-a-release-publishes).
 -
--A version with a suffix, such as `__VERSION__`, goes to npm under the `next` dist-tag and becomes a GitHub pre-release. Push 1 version tag at a time, because GitHub starts no workflow for a push that holds more than 3 tags.
+-A version with a suffix, such as `__VERSION__`, goes to npm under the `next` dist-tag and becomes a GitHub pre-release. Push 1 version tag at a time. Release runs for different tags publish 1 at a time, and GitHub cancels every waiting run except the newest. Re-run each canceled run from the **Actions** tab.
 +1. On the **Releases** page, click **Edit** on the draft release and edit its notes if they need it. Without a draft, click **Draft a new release** and enter a new version tag, such as `__VERSION__`.
 +2. Click **Publish release**. GitHub creates the tag.
 +3. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that the release lists the assets from [What a release publishes](#what-a-release-publishes).
