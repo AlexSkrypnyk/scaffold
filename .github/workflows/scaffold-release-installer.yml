@@ -302,7 +302,7 @@ jobs:
             echo "Release ${RELEASE_VERSION} is not the latest release (${latest}), so the latest download is not checked."
             exit 0
           fi
-          for url in "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/install.sh" https://getscaffold.dev/install.sh https://getscaffold.dev/init.sh; do
+          for url in "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/install.sh" https://getscaffold.dev/install.sh; do
             curl -fsSL "${url}" -o latest-install.sh
             cmp latest-install.sh .release/install.sh || { echo "::error::${url} does not serve the uploaded installer."; exit 1; }
             echo "${url} serves the uploaded installer."
