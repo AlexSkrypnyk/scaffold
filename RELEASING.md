@@ -120,7 +120,8 @@ To extend the key by 2 years:
 
 To replace the key with a new one:
 
-1. Commit the new key's public half as `install-key.asc`.
-2. Store the new private key with the commands in [Store the signing key](#store-the-signing-key). Put the new key's fingerprint in place of `86F077A2E80667D7CF4A3320EDEAF2FCD434756C` before you run them.
-3. Put the new fingerprint in `.scaffold/installer/verify-release.sh`, in the "Verify the installer" section of `.scaffold/docs/content/README.mdx` and in [Manage the signing key](#manage-the-signing-key).
-4. Add a note about the new key to the release notes of the next version.
+1. Create the new key as a primary key that signs, with no signing subkey. `verify-release.sh` checks the fingerprint of the key that made the signature, so a signature from a subkey fails.
+2. Commit the new key's public half as `install-key.asc`.
+3. Store the new private key with the commands in [Store the signing key](#store-the-signing-key). Put the new key's fingerprint in place of `86F077A2E80667D7CF4A3320EDEAF2FCD434756C` before you run them.
+4. Put the new fingerprint in `.scaffold/installer/verify-release.sh`, in the "Verify the installer" section of `.scaffold/docs/content/README.mdx` and in [Manage the signing key](#manage-the-signing-key).
+5. Add a note about the new key to the release notes of the next version.
