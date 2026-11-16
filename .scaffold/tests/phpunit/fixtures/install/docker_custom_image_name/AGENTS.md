@@ -1,29 +1,35 @@
-@@ -11,224 +11,42 @@
+@@ -10,232 +10,50 @@
+ for Shell scripts, PHP CLI applications, and/or NodeJS projects with integrated
  testing, code quality tools, and CI/CD workflows.
  
++## Releasing
  
 -## PHP Application Architecture
++`RELEASING.md` describes how to release the project: where a release starts,
++what each release workflow publishes and the setup it needs. When asked to
++release a version, follow it. Update it in the same change as any release
++workflow.
+ 
+ 
+-### Symfony Console Application
 +## Security audit
  
+-Multi-command CLI application structure:
 +`.github/workflows/audit.yml` runs OpenSSF Scorecard, CodeQL and, on PHP
 +projects, Semgrep. The results appear under **Security > Code scanning** in the
 +GitHub repository.
- 
--### Symfony Console Application
- 
--Multi-command CLI application structure:
-+## Docker
  
 -- **Location:** `src/Command/` directory
 -- **Entry point:** `bin/force-crystal`
 -- **Use for:** Complex applications with multiple commands, shared logic, OOP
 -  architecture
-+### Building
  
 -### Adding New Commands
--
++## Docker
+ 
 -To add a Symfony Console command:
--
++### Building
+ 
 -1. Create class in `src/Command/YourCommand.php` extending
 -   `Symfony\Component\Console\Command\Command`
 -2. Register in `bin/force-crystal`: `$application->add(new YourCommand());`
@@ -232,6 +238,13 @@
 -
 -- `.github/workflows/test-nodejs.yml` - NodeJS testing
 -- `.github/workflows/release-nodejs.yml` - Runs on the tag that `npm version` creates: checks it matches `package.json`, publishes to npm with provenance, then attaches the script, its checksum and its provenance attestation to the release and publishes it
+-
+-## Releasing
+-
+-`RELEASING.md` describes how to release the project: where a release starts,
+-what each release workflow publishes and the setup it needs. When asked to
+-release a version, follow it. Update it in the same change as any release
+-workflow.
 -
 -
 -## Security audit

@@ -56,7 +56,7 @@ The template holds every feature, and `install.sh` removes the ones you don't se
   - [GitHub Actions linting](.github/workflows/test-actions.yml) with yamllint, actionlint and zizmor, off by default
   - [Security audit](.github/workflows/audit.yml) with OpenSSF Scorecard, CodeQL and, for PHP, Semgrep
 - **Documentation**
-  - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md), a [security policy](SECURITY.dist.md) and a [generated logo](logo.png)
+  - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md), a [release guide](RELEASING.dist.md), a [security policy](SECURITY.dist.md) and a [generated logo](logo.png)
   - A [documentation site](docs) built with [Docusaurus](https://docusaurus.io/)
   - Spell check with [CSpell](https://cspell.org/)
   - An [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component, and the [terminal recorder](.scaffold/assets/update-assets.php) that renders Scaffold's `install.sh` walkthrough as an animated SVG
@@ -193,4 +193,4 @@ The generated project's [`AGENTS.md`](AGENTS.md) holds these instructions, so an
 
 ## Contributing
 
-To report a bug or request a feature, open an [issue](https://github.com/AlexSkrypnyk/scaffold/issues). To submit a change, follow the [contributing guide](CONTRIBUTING.md).
+To report a bug or request a feature, open an [issue](https://github.com/AlexSkrypnyk/scaffold/issues). To submit a change, follow the [contributing guide](CONTRIBUTING.md). Maintainers release Scaffold with the [release guide](RELEASING.md).

@@ -1,6 +1,6 @@
 @@ -2,43 +2,6 @@
  
- Thank you for considering a contribution to this project. Follow this guide to install the dependencies and run the same linters and tests that CI runs on your pull request. Run the section for each stack your change touches, from the repository root.
+ Thank you for considering a contribution to this project. Follow this guide to install the dependencies and run the same linters and tests that CI runs on your pull request. Run the section for each stack your change touches, from the repository root. To release a version, follow [`RELEASING.md`](RELEASING.md).
  
 -## PHP
 -

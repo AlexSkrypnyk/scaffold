@@ -307,6 +307,13 @@ Key workflows:
 - `.github/workflows/release-nodejs.yml` - Runs on the tag that `npm version` creates: checks it matches `package.json`, publishes to npm with provenance, then attaches the script, its checksum and its provenance attestation to the release and publishes it
 
 [//]: # (#;> NODEJS)
+## Releasing
+
+`RELEASING.md` describes how to release the project: where a release starts,
+what each release workflow publishes and the setup it needs. When asked to
+release a version, follow it. Update it in the same change as any release
+workflow.
+
 [//]: # (#;< AUDIT)
 
 ## Security audit
