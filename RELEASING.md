@@ -73,4 +73,10 @@ To extend the key before it expires, run `gpg --quick-set-expire 86F077A2E80667D
 gpg --armor --output install-key.asc --export 86F077A2E80667D7CF4A3320EDEAF2FCD434756C
 ```
 
+The workflow signs with the private key stored in `GPG_PRIVATE_KEY`, which keeps the old expiry date. Store the extended private key again:
+
+```bash
+gpg --armor --export-secret-keys 86F077A2E80667D7CF4A3320EDEAF2FCD434756C | gh secret set GPG_PRIVATE_KEY --env release --repo AlexSkrypnyk/scaffold
+```
+
 To replace the key, commit a new `install-key.asc` and store the new private key in the `release` environment. Put the new fingerprint in `verify-release.sh` and in the "Verify the installer" section of `.scaffold/docs/content/README.mdx`. Add a note about the new key to the release notes.
