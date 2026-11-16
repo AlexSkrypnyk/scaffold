@@ -1731,6 +1731,34 @@ RELEASING
   assert_file_contains "${tmpdir}/RELEASING.md" "Outro"
 }
 
+@test "process_project keeps only the Node.js release steps for a Node.js library" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_releasing_nodejs_library"
+  mkdir -p "${tmpdir}"
+  printf '# /.editorconfig   export-ignore\n' >"${tmpdir}/.gitattributes"
+  echo "README dist content" >"${tmpdir}/README.dist.md"
+  echo '{}' >"${tmpdir}/package-lock.json"
+  create_releasing_dist "${tmpdir}"
+
+  namespace="AcmeApp"
+  project="acme-app"
+  author="Jane Doe"
+  project_pascalcase="AcmeApp"
+  remove_self="n"
+  use_nodejs="y"
+  use_nodejs_library="y"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_not_exists "${tmpdir}/package-lock.json"
+  assert_file_contains "${tmpdir}/RELEASING.md" "Run npm version"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Click Publish release"
+}
+
 @test "process_project keeps only the Releases page steps when Node.js is not selected" {
   local tmpdir="${BATS_TEST_TMPDIR}/process_project_releasing_no_nodejs"
   mkdir -p "${tmpdir}"
