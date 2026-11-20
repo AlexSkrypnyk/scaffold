@@ -42,7 +42,7 @@
     },
     "overrides": {
         "test-exclude": {
-            "glob": "^14.0.4",
+            "glob": "^14.0.6",
             "minimatch": "^11.0.8"
         }
     },
