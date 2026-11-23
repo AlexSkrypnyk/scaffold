@@ -223,7 +223,7 @@ during a manual `composer update`.
 
 The Renovate app treats an unknown setting as an invalid config and stops
 opening pull requests. `minimumReleaseAgePackageManagerSync` needs Renovate
-44.236 and the object form of `dependencyDashboard` needs 44.231. Push a
+44.236 and the object form of `dependencyDashboard` needs 44.232. Push a
 setting that needs a newer Renovate to a `deps/reconfigure` branch before
 merging it. The app validates the config there and reports a
 `renovate/config-validation` status.
