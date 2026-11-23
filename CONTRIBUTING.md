@@ -69,7 +69,7 @@ Every change reaches `main` through a pull request. The pull request merges afte
 
    | Area | Checks |
    |---|---|
-   | PHP | `PHP VERSION, Deps lowest, OS` and `PHP VERSION, Deps normal, OS` for PHP 8.3, 8.4 and 8.5 on `ubuntu-latest` and `windows-latest` |
+   | PHP | `PHP VERSION, Deps lowest, OS` and `PHP VERSION, Deps normal, OS` for PHP 8.3, 8.4, 8.5 and 8.6 on `ubuntu-latest` and `windows-latest` |
    | PHAR | `Build PHAR` |
    | Shell | `Shell, ubuntu-latest`, `Shell, ubuntu-24.04`, `Shell, macos-latest`, `Shell, macos-15` and `Shell, windows-latest` |
    | Node.js | `Node.js VERSION, OS` for Node.js 20, 22 and 24 on `ubuntu-latest` and `windows-latest` |

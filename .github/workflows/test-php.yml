@@ -33,7 +33,7 @@ jobs:
           # yamllint disable-line #;< WINDOWS
           - windows-latest
           # yamllint disable-line #;> WINDOWS
-        php-versions: ['8.3', '8.4', '8.5']
+        php-versions: ['8.3', '8.4', '8.5', '8.6']
         deps: ['normal', 'lowest']
 
     steps:
@@ -65,9 +65,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.deps }}" == "lowest" ]]; then
-            composer update --no-scripts --prefer-lowest --prefer-stable ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+            composer update --no-scripts --prefer-lowest --prefer-stable ${{ (matrix.php-versions == '8.5' || matrix.php-versions == '8.6') && '--ignore-platform-reqs' || '' }}
           else
-            composer install --no-scripts ${{ matrix.php-versions == '8.5' && '--ignore-platform-reqs' || '' }}
+            composer install --no-scripts ${{ (matrix.php-versions == '8.5' || matrix.php-versions == '8.6') && '--ignore-platform-reqs' || '' }}
           fi
 
       - name: Validate composer.json
