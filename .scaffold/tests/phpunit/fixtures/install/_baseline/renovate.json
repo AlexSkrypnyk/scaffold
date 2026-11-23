@@ -2,10 +2,13 @@
     "extends": ["config:recommended"],
     "automerge": true,
     "rangeStrategy": "bump",
-    "dependencyDashboard": true,
+    "dependencyDashboard": {
+        "enabled": true
+    },
     "pinDigests": true,
     "branchPrefix": "deps/",
     "minimumReleaseAge": "7 days",
+    "minimumReleaseAgePackageManagerSync": true,
     "internalChecksFilter": "strict",
     "lockFileMaintenance": {
         "enabled": true,
@@ -28,7 +31,7 @@
             "enabled": false
         },
         {
-            "matchManagers": ["npm", "composer"],
+            "matchManagers": ["composer"],
             "matchUpdateTypes": ["lockFileMaintenance"],
             "minimumReleaseAge": null
         },
