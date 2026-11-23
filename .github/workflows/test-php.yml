@@ -65,9 +65,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.deps }}" == "lowest" ]]; then
-            composer update --no-scripts --prefer-lowest --prefer-stable ${{ (matrix.php-versions == '8.5' || matrix.php-versions == '8.6') && '--ignore-platform-reqs' || '' }}
+            composer update --no-scripts --prefer-lowest --prefer-stable ${{ (matrix.php-versions == '8.5' || matrix.php-versions == '8.6') && '--ignore-platform-req=php+' || '' }}
           else
-            composer install --no-scripts ${{ (matrix.php-versions == '8.5' || matrix.php-versions == '8.6') && '--ignore-platform-reqs' || '' }}
+            composer install --no-scripts ${{ (matrix.php-versions == '8.5' || matrix.php-versions == '8.6') && '--ignore-platform-req=php+' || '' }}
           fi
 
       - name: Validate composer.json
