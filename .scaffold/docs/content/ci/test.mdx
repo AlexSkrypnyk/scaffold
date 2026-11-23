@@ -30,7 +30,7 @@ To remove Windows from an existing project, delete the `windows-latest` matrix e
 
 ## Test PHP
 
-The `Test PHP` workflow runs 6 jobs on `ubuntu-latest`: PHP 8.3, 8.4 and 8.5, each with 2 dependency sets. `Deps normal` installs the versions in `composer.lock`, and `Deps lowest` installs the lowest versions `composer.json` allows. A class library has no `composer.lock`, so its `Deps normal` jobs install the latest allowed versions. Composer installs with `--no-scripts`, and on PHP 8.5 also with `--ignore-platform-reqs`. With [Windows](#windows) on, the same 6 jobs also run on `windows-latest`.
+The `Test PHP` workflow runs 8 jobs on `ubuntu-latest`: PHP 8.3, 8.4, 8.5 and 8.6, each with 2 dependency sets. `Deps normal` installs the versions in `composer.lock`, and `Deps lowest` installs the lowest versions `composer.json` allows. A class library has no `composer.lock`, so its `Deps normal` jobs install the latest allowed versions. Composer installs with `--no-scripts`, and on PHP 8.5 and 8.6 also with `--ignore-platform-req=php+`, which ignores only the upper PHP version bound. With [Windows](#windows) on, the same 8 jobs also run on `windows-latest`.
 
 The following table lists which jobs run each check:
 
