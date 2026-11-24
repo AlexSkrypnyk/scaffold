@@ -212,21 +212,25 @@ so a lock refreshed on a newer PHP still installs on the 8.3 CI jobs.
 
 `renovate.json` enables `lockFileMaintenance` with automerge, so Renovate
 regenerates every lock file weekly. Lock file maintenance has no release
-timestamps, so a `packageRules` entry sets `minimumReleaseAge` to `null` for npm
-and Composer lock file maintenance, or the branch would stay pending. Composer
-enforces the 7-day age itself: `config.policy.cooldown.period` in the root and
-maintenance-suite `composer.json` makes Composer skip young releases. The
-cooldown needs Composer 2.11, hence `"composer": ">=2.11.0"`, and it also holds
-back releases younger than 7 days during a manual `composer update`. npm has no
-such setting, so npm lock file maintenance takes transitive versions without
-the 7-day wait.
+timestamps, so each package manager enforces the 7-day age itself. npm
+enforces it through `min-release-age=7` in `.npmrc`, which needs npm 11.10.0,
+hence `"npm": ">=11.10.0"` in `engines`. With
+`minimumReleaseAgePackageManagerSync`, Renovate skips its own wait for npm lock
+file maintenance only while `engines` allows no older npm, so keep that floor.
+For a `package-lock.json` with no `.npmrc` beside it, such as the docs site's,
+Renovate passes the age to npm as `--before`. Composer enforces it through `config.policy.cooldown.period` in the root and
+maintenance-suite `composer.json`, so a `packageRules` entry sets
+`minimumReleaseAge` to `null` for Composer lock file maintenance, or the branch
+would stay pending. The cooldown needs Composer 2.11, hence
+`"composer": ">=2.11.0"`, and it also holds back releases younger than 7 days
+during a manual `composer update`.
 
-`renovate.json` targets Renovate 44.228, the version the Renovate app runs. The
-app treats an unknown setting as an invalid config and stops opening pull
-requests, so keep `minimumReleaseAgePackageManagerSync` (Renovate 44.236) and
-the object form of `dependencyDashboard` (Renovate 44.231) out until the app
-runs a newer Renovate. `minimumReleaseAgePackageManagerSync` passes the 7-day
-age to npm as `--before`, which brings the wait to npm lock file maintenance.
+The Renovate app treats an unknown setting as an invalid config and stops
+opening pull requests. `minimumReleaseAgePackageManagerSync` needs Renovate
+44.236 and the object form of `dependencyDashboard` needs 44.232. Push a
+setting that needs a newer Renovate to a `deps/reconfigure` branch before
+merging it. The app validates the config there and reports a
+`renovate/config-validation` status.
 
 Keep every third-party constraint floor at a release outside the cooldown. A
 floor that only a younger release satisfies fails every resolving run, such as
