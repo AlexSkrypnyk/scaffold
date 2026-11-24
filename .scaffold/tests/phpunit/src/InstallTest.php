@@ -865,7 +865,10 @@ final class InstallTest extends UnitTestCase {
     $package = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'package.json'), TRUE, 512, JSON_THROW_ON_ERROR);
     $this->assertIsArray($package);
     $this->assertIsArray($package['engines'] ?? NULL);
-    $this->assertSame('>=11.10.0', $package['engines']['npm'] ?? NULL);
+    $this->assertIsString($package['engines']['npm'] ?? NULL);
+    $npm = $package['engines']['npm'];
+    File::getReplacer()->addVersionReplacements()->replace($npm);
+    $this->assertSame('>=__VERSION__', $npm);
   }
 
   public static function dataProviderInstallRenovateLockFileMaintenance(): \Iterator {
