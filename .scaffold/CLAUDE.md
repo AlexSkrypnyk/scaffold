@@ -476,21 +476,22 @@ npm run build # Build static site
 
 ### npm overrides
 
-`docs/package.json` and `.scaffold/docs/package.json` carry the same 9 `overrides`. Each one replaces a vulnerable package that its parent, at its latest release, still pins to a range without the fix:
+`docs/package.json` and `.scaffold/docs/package.json` carry the same 8 `overrides`. Each one replaces a vulnerable package that its parent, at its latest release, still pins to a range without the fix. Renovate keeps the forced ranges current, so the table lists only the parent's range:
 
 | Override | Parent's range | Runs in |
 |---|---|---|
-| `@docusaurus/core` > `tinypool` `^2.2.0` | `^1.0.2` | Every build |
-| `copy-webpack-plugin` > `serialize-javascript` `^7.1.4` | `^6.0.0` | Every build |
-| `css-minimizer-webpack-plugin` > `serialize-javascript` `^7.1.4` | `^6.0.1` | Every build |
-| `sockjs` > `uuid` `^11.1.1` | `^8.3.2` | Nothing by default: the dev server uses `ws` |
-| `@ai-sdk/provider-utils` > `undici` `^7.30.2` | `^5.29.0` | Nothing: both sites search with `@easyops-cn/docusaurus-search-local`, so DocSearch stays inactive |
-| `@jest/reporters` > `glob` `^14.0.2` | `^13.0.6` | Every Jest run |
-| `jest-config` > `glob` `^14.0.2` | `^13.0.6` | Every Jest run |
-| `jest-runtime` > `glob` `^14.0.2` | `^13.0.6` | Every Jest run |
-| `test-exclude` > `glob` `^14.0.2` and `minimatch` `^11.0.1` | `^10.4.1` and `^10.2.2` | `npm run test:coverage` |
+| `@docusaurus/core` > `tinypool` | `^1.0.2` | Every build |
+| `copy-webpack-plugin` > `serialize-javascript` | `^6.0.0` | Every build |
+| `css-minimizer-webpack-plugin` > `serialize-javascript` | `^6.0.1` | Every build |
+| `sockjs` > `uuid` | `^8.3.2` | Nothing by default: the dev server uses `ws` |
+| `@jest/reporters` > `glob` | `^13.0.6` | Every Jest run |
+| `jest-config` > `glob` | `^13.0.6` | Every Jest run |
+| `jest-runtime` > `glob` | `^13.0.6` | Every Jest run |
+| `test-exclude` > `glob` and `minimatch` | `^10.4.1` and `^10.2.2` | `npm run test:coverage` |
 
-Renovate updates the parents but leaves the overrides in place. To check whether an override is still needed, remove it in both files, then run `npm install --package-lock-only --ignore-scripts` and `npm audit --package-lock-only` in each docs directory. Drop the override when the audit reports no advisory for its package.
+Renovate updates the parents but leaves the overrides in place. To check whether an override is still needed, remove it in both files, then run `npm install --package-lock-only --ignore-scripts` and `npm audit --package-lock-only` in each docs directory. Drop the override when the audit reports no advisory for its package and `npm view <parent> dependencies` shows a fixed range.
+
+A clean audit alone is not enough. npm applies an override to the whole subtree under its parent, so `jest-runtime`, which `jest-config` reaches through `jest-circus`, audits clean without its own override while it still declares `glob` `^13.0.6`.
 
 ## Terminal recordings
 
