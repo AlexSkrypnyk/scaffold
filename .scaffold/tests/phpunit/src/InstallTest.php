@@ -867,6 +867,7 @@ final class InstallTest extends UnitTestCase {
     $this->assertIsArray($package['engines'] ?? NULL);
     $this->assertIsString($package['engines']['npm'] ?? NULL);
     $npm = $package['engines']['npm'];
+    $this->assertTrue(version_compare(ltrim($npm, '>='), '11.10.0', '>='), sprintf('npm floor "%s" is below 11.10.0.', $npm));
     File::getReplacer()->addVersionReplacements()->replace($npm);
     $this->assertSame('>=__VERSION__', $npm);
   }

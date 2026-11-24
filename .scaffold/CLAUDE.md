@@ -489,7 +489,7 @@ npm run build # Build static site
 | `jest-runtime` > `glob` | `^13.0.6` | Every Jest run |
 | `test-exclude` > `glob` and `minimatch` | `^10.4.1` and `^10.2.2` | `npm run test:coverage` |
 
-Renovate updates the parents but leaves the overrides in place. To check whether an override is still needed, remove it in both files, then run `npm install --package-lock-only --ignore-scripts` and `npm audit --package-lock-only` in each docs directory. Drop the override when the audit reports no advisory for its package and `npm view <parent> dependencies` shows a fixed range.
+Renovate updates the parents but leaves the overrides in place. To check whether an override is still needed, remove it in both files, then run `npm install --package-lock-only --ignore-scripts` and `npm audit --package-lock-only` in each docs directory. Drop the override when the audit reports no advisory for its package and `npm view <parent> dependencies` shows a fixed range or no longer lists the package. Drop it as well when the parent has left the tree, which `npm ls <parent> --package-lock-only` shows as empty.
 
 A clean audit alone is not enough. npm applies an override to the whole subtree under its parent, so `jest-runtime`, which `jest-config` reaches through `jest-circus`, audits clean without its own override while it still declares `glob` `^13.0.6`.
 
