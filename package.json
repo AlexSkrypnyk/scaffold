@@ -28,7 +28,7 @@
         "reset": "rm -Rf node_modules package-lock.json"
     },
     "engines": {
-        "npm": ">=8.19.4",
+        "npm": ">=11.10.0",
         "node": "^20.20.1 || ^22.13.0 || >=24"
     },
     "dependencies": {},

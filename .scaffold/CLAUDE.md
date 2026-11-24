@@ -212,9 +212,13 @@ so a lock refreshed on a newer PHP still installs on the 8.3 CI jobs.
 
 `renovate.json` enables `lockFileMaintenance` with automerge, so Renovate
 regenerates every lock file weekly. Lock file maintenance has no release
-timestamps, so each package manager enforces the 7-day age itself.
-`minimumReleaseAgePackageManagerSync` passes the age to npm as `--before`.
-Composer enforces it through `config.policy.cooldown.period` in the root and
+timestamps, so each package manager enforces the 7-day age itself. npm
+enforces it through `min-release-age=7` in `.npmrc`, which needs npm 11.10.0,
+hence `"npm": ">=11.10.0"` in `engines`. With
+`minimumReleaseAgePackageManagerSync`, Renovate skips its own wait for npm lock
+file maintenance only while `engines` allows no older npm, so keep that floor.
+For a `package-lock.json` with no `.npmrc` beside it, such as the docs site's,
+Renovate passes the age to npm as `--before`. Composer enforces it through `config.policy.cooldown.period` in the root and
 maintenance-suite `composer.json`, so a `packageRules` entry sets
 `minimumReleaseAge` to `null` for Composer lock file maintenance, or the branch
 would stay pending. The cooldown needs Composer 2.11, hence

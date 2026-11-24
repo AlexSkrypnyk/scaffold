@@ -22,11 +22,11 @@ The following table lists the top-level settings in `renovate.json`:
 | `pinDigests` | `true` | If true, Renovate pins Docker images and GitHub Actions to exact digests, so their versions are reproducible. |
 | `branchPrefix` | `deps/` | Renovate starts every branch name with `deps/`. |
 | `minimumReleaseAge` | `7 days` | Renovate offers a version 7 days after its release, so a broken or compromised release can be withdrawn before it reaches your project. |
-| `minimumReleaseAgePackageManagerSync` | `true` | Renovate passes `minimumReleaseAge` to npm as `--before`, so npm also skips versions younger than 7 days among the dependencies of your dependencies. |
+| `minimumReleaseAgePackageManagerSync` | `true` | Renovate reads `min-release-age` from the `.npmrc` next to a `package-lock.json`. Where no `.npmrc` sets it, Renovate passes `minimumReleaseAge` to npm as `--before`. Either way, npm also skips versions younger than 7 days among the dependencies of your dependencies. |
 | `internalChecksFilter` | `strict` | Renovate opens no pull request for a version younger than `minimumReleaseAge`. If an older version has passed the wait, Renovate offers that version. |
 | `lockFileMaintenance` | `enabled`, `automerge` | Every Monday before 4 AM, Renovate regenerates every `composer.lock` and `package-lock.json` in the repository and merges the pull request after all its checks pass. A class library has no lock file, so nothing changes there. |
 
-Lock file maintenance has no release dates for Renovate to check, so each package manager applies the 7-day wait itself. npm gets it from Renovate through `minimumReleaseAgePackageManagerSync`. Composer gets it from the `cooldown` policy in `composer.json`, described in [Composer](../php/composer.mdx#dependency-policy-composer-211). A rule in `packageRules` sets `minimumReleaseAge` to `null` for Composer lock file maintenance, so Renovate doesn't hold that pull request back.
+Lock file maintenance has no release dates for Renovate to check, so each package manager applies the 7-day wait itself. For the root `package-lock.json`, npm gets it from `min-release-age=7` in [`.npmrc`](../dotfiles.mdx#npmrc). For any other `package-lock.json`, such as the documentation site's, Renovate passes it to npm as `--before`. Composer gets it from the `cooldown` policy in `composer.json`, described in [Composer](../php/composer.mdx#dependency-policy-composer-211). A rule in `packageRules` sets `minimumReleaseAge` to `null` for Composer lock file maintenance, so Renovate doesn't hold that pull request back.
 
 ## Update rules
 
