@@ -178,8 +178,8 @@ jobs:
           fi
 
           gh release upload "${TAG}" .release/* --clobber
-
       # yamllint disable-line #;< !NODEJS
+
       - name: Publish the release
         #;< META
         # 'Release Scaffold installer' publishes Scaffold's own releases.
