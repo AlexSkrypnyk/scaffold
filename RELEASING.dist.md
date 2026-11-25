@@ -28,7 +28,7 @@ In asset names, `TAG` is the version tag. A `.sha256` file holds the checksum of
 [//]: # (#;> PHP_SCRIPT)
 [//]: # (#;< PHP_RELEASE)
 [//]: # (#;< !NODEJS)
-`Release PHP` attaches the assets after the release is published, so leave **Enable release immutability** off under **Settings > General > Releases**. GitHub accepts no new assets on an immutable release.
+Then the workflow publishes the release.
 
 [//]: # (#;> !NODEJS)
 [//]: # (#;> PHP_RELEASE)
@@ -108,6 +108,28 @@ To release a pre-release, set a version with a suffix, such as `npm version 1.2.
 
 [//]: # (#;> NODEJS)
 [//]: # (#;< !NODEJS)
+[//]: # (#;< PHP_RELEASE)
+A release of this project starts on your machine, with a version tag. Follow 2 rules for every release:
+
+- Release only by pushing the tag. `Release PHP` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
+- Push 1 version tag at a time. `Release PHP` publishes 1 tag at a time, and each newly waiting run cancels the run that waited before it.
+
+To release a version:
+
+1. Optional: On the repository's **Releases** page, open the draft release and edit its notes.
+2. On an up-to-date `main`, tag the commit and push the tag:
+
+   ```bash
+   git tag 1.2.3
+   git push origin 1.2.3
+   ```
+
+3. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that everything in [What a release publishes](#what-a-release-publishes) is published. Re-run a canceled or failed run from the same tab.
+
+To release a pre-release, tag a version with a suffix, such as `1.2.3-rc.1`. `Release PHP` marks its GitHub release as a pre-release.
+
+[//]: # (#;> PHP_RELEASE)
+[//]: # (#;< !PHP_RELEASE)
 A release of this project starts on the repository's **Releases** page. Publishing a release creates its tag, and the tag starts the release workflows.
 
 To release a version:
@@ -118,6 +140,7 @@ To release a version:
 4. Click **Publish release**. GitHub creates the tag.
 5. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that everything in [What a release publishes](#what-a-release-publishes) is published.
 
+[//]: # (#;> !PHP_RELEASE)
 [//]: # (#;> !NODEJS)
 ## Change the release process
 

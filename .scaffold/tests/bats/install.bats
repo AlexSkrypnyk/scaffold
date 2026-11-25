@@ -1758,7 +1758,12 @@ Intro
 Run npm version
 [//]: # (#;> NODEJS)
 [//]: # (#;< !NODEJS)
+[//]: # (#;< PHP_RELEASE)
+Push the tag
+[//]: # (#;> PHP_RELEASE)
+[//]: # (#;< !PHP_RELEASE)
 Click Publish release
+[//]: # (#;> !PHP_RELEASE)
 [//]: # (#;> !NODEJS)
 Outro
 RELEASING
@@ -1785,6 +1790,7 @@ RELEASING
   assert_file_not_exists "${tmpdir}/RELEASING.dist.md"
   assert_file_contains "${tmpdir}/RELEASING.md" "Run npm version"
   assert_file_not_contains "${tmpdir}/RELEASING.md" "Click Publish release"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Push the tag"
   assert_file_not_contains "${tmpdir}/RELEASING.md" "#;"
   assert_file_contains "${tmpdir}/RELEASING.md" "Outro"
 }
@@ -1835,8 +1841,75 @@ RELEASING
   assert_file_not_exists "${tmpdir}/RELEASING.dist.md"
   assert_file_contains "${tmpdir}/RELEASING.md" "Click Publish release"
   assert_file_not_contains "${tmpdir}/RELEASING.md" "Run npm version"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Push the tag"
   assert_file_not_contains "${tmpdir}/RELEASING.md" "#;"
   assert_file_contains "${tmpdir}/RELEASING.md" "Outro"
+}
+
+@test "process_project keeps only the tag push steps for a PHP script release without Node.js" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_releasing_php_script"
+  create_release_project "${tmpdir}"
+  create_releasing_dist "${tmpdir}"
+
+  use_nodejs="n"
+  use_php_command="n"
+  use_php_script="y"
+  php_script_name="acme-app"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/RELEASING.md" "Push the tag"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Click Publish release"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "#;"
+}
+
+@test "process_project keeps only the tag push steps for a PHAR release without Node.js" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_releasing_phar"
+  create_release_project "${tmpdir}"
+  create_releasing_dist "${tmpdir}"
+
+  use_nodejs="n"
+  use_php_command="y"
+  use_php_command_build="y"
+  php_command_name="acme-app"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/RELEASING.md" "Push the tag"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Click Publish release"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "#;"
+}
+
+@test "process_project keeps only the Releases page steps for a command app without a PHAR" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_project_releasing_no_phar"
+  create_release_project "${tmpdir}"
+  create_releasing_dist "${tmpdir}"
+
+  use_nodejs="n"
+  use_php_command="y"
+  use_php_command_build="n"
+  php_command_name="acme-app"
+
+  # Stub the placeholder-logo download so the flow never hits the network.
+  curl() { return 0; }
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_project
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/RELEASING.md" "Click Publish release"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "Push the tag"
+  assert_file_not_contains "${tmpdir}/RELEASING.md" "#;"
 }
 
 @test "process_project runs the full flow and promotes the dist docs" {

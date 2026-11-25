@@ -136,8 +136,6 @@ jobs:
           name: release-php
           path: .release
 
-      # Publishing stays with the maintainer, so the release is never published
-      # here.
       - name: Attach assets to the release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -149,7 +147,15 @@ jobs:
             gh run watch "${run}" > /dev/null || true
           done
 
-          if ! gh release view "${TAG}" > /dev/null 2>&1; then
+          state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' || echo 'none')"
+
+          # An immutable release takes no assets once published.
+          if [ "${state}" = 'published' ]; then
+            echo "::error::Release '${TAG}' is already published. Release with a tag push, not with the Publish release button."
+            exit 1
+          fi
+
+          if [ "${state}" = 'none' ]; then
             # Release Drafter names its draft after the version it guesses,
             # which can differ from the pushed tag. A draft whose tag exists
             # already belongs to another release.
@@ -172,3 +178,37 @@ jobs:
           fi
 
           gh release upload "${TAG}" .release/* --clobber
+
+      # yamllint disable-line #;< !NODEJS
+      - name: Publish the release
+        #;< META
+        # 'Release Scaffold installer' publishes Scaffold's own releases.
+        if: github.repository != 'AlexSkrypnyk/scaffold'
+        #;> META
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          prerelease='false'
+          if [[ "${TAG}" == *-* ]]; then
+            prerelease='true'
+          fi
+
+          # A release for an older version must not take "latest" from a newer one.
+          latest='false'
+          if [ "${prerelease}" = 'false' ]; then
+            if ! tags="$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName --jq '.[].tagName')"; then
+              echo '::error::Could not list the published releases.'
+              exit 1
+            fi
+            # Older releases can carry a 'v' prefix, which sorts after digits,
+            # or a tag that isn't a version at all.
+            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+            if [ "${highest}" = "${TAG}" ]; then
+              latest='true'
+            fi
+          fi
+
+          gh release edit "${TAG}" --draft=false --prerelease="${prerelease}" --latest="${latest}" --verify-tag
+      # yamllint disable-line #;> !NODEJS
