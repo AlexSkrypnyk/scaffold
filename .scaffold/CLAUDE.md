@@ -622,7 +622,7 @@ getscaffold.dev/install.sh and /init.sh serve the `install.sh` attached to the l
 
 [`RELEASING.md`](../RELEASING.md) describes the release procedure, the steps of `scaffold-release-installer.yml` and the signing key, which keys.openpgp.org publishes. `process_releasing()` replaces `RELEASING.md` with `RELEASING.dist.md`.
 
-The `Sign checksums` step of `release-php.yml`, `release-nodejs.yml` and `scaffold-release-installer.yml` signs a checksum file after it checks `GPG_PRIVATE_KEY` against the key keys.openpgp.org has confirmed for `RELEASE_GPG_KEY_EMAIL`. The step is inlined in each workflow, because zizmor flags a local `./` action and actionlint rejects the `$/` self-repository form. Keep the key check the same in all 3 copies. The installer's copy fails without a key, and the other 2 skip signing until the key is stored. `remove_unused_release_signing()` removes the `RELEASE_SIGNING` blocks from a project with neither PHP nor Node.js release workflow.
+The `Sign checksums` step of `release-php.yml`, `release-nodejs.yml` and `scaffold-release-installer.yml` signs a checksum file after it checks `GPG_PRIVATE_KEY` against the key keys.openpgp.org has confirmed for `RELEASE_GPG_KEY_EMAIL`. The step is inlined in each workflow, because zizmor flags a local `./` action and actionlint rejects the `$/` self-repository form. Keep the key check the same in all 3 copies. Each copy fails without the key, so a project that ships release assets always signs them. A project with no release asset has no copy, and `remove_unused_release_signing()` removes its signing documentation. `remove_unused_release_signing()` removes the `RELEASE_SIGNING` blocks from a project with neither PHP nor Node.js release workflow.
 
 
 ### Testing `install.sh`

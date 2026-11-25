@@ -1,7 +1,7 @@
 ---
 title: Release
 sidebar_position: 5
-cspell: ignore intoto openpgp
+cspell: ignore intoto openpgp gpgv
 ---
 
 # Release
@@ -69,7 +69,7 @@ On a private repository, the job skips the attestation and the bundle, because G
 
 The `Publish Node.js release` job has write access to the repository contents and runs in the `release` environment. It runs these steps:
 
-1. Signs `REPO-nodejs-TAG.sha256` as `REPO-nodejs-TAG.sha256.asc` when the environment holds a signing key, as [Signed checksums](../ci/release.mdx#signed-checksums) describes.
+1. Checks that the tag still points to the commit the assets were built from. Then it signs `REPO-nodejs-TAG.sha256` as `REPO-nodejs-TAG.sha256.asc`, as [Release signing](../ci/release.mdx#release-signing) describes.
 2. Publishes the package to npm with provenance. It skips npm when the version is already there, so a rerun doesn't fail.
 3. Waits for any running `Draft release notes` run, because that run sets the draft's tag back to its own guess.
 4. Renames the draft to the tag and fixes the version in its compare link. Without a draft, it creates a release with generated notes.
@@ -90,13 +90,14 @@ Anyone who downloads `nodejs-script` can confirm that your repository's release 
 
    On macOS, run `shasum -a 256 --check REPO-nodejs-TAG.sha256` instead.
 
-3. When the release lists `REPO-nodejs-TAG.sha256.asc`, download it and check the signature. `gpg` fetches the signing key from keys.openpgp.org:
+3. Download `REPO-nodejs-TAG.sha256.asc`. Check the signature against the key that keys.openpgp.org has confirmed for the project's signing address:
 
    ```bash
-   gpg --keyserver hkps://keys.openpgp.org --auto-key-retrieve --verify REPO-nodejs-TAG.sha256.asc REPO-nodejs-TAG.sha256
+   curl -fsSL https://keys.openpgp.org/vks/v1/by-email/SIGNING_ADDRESS | gpg --dearmor > release-key.gpg
+   gpgv --keyring ./release-key.gpg REPO-nodejs-TAG.sha256.asc REPO-nodejs-TAG.sha256
    ```
 
-   Confirm that `gpg` reports a good signature from a maintainer's address.
+   `gpgv` trusts only the key in `release-key.gpg`, so a signature by any other key fails.
 
 4. Check the attestation with [GitHub CLI](https://cli.github.com/):
 
@@ -104,4 +105,4 @@ Anyone who downloads `nodejs-script` can confirm that your repository's release 
    gh attestation verify nodejs-script --repo OWNER/REPO
    ```
 
-Replace `OWNER/REPO` with the repository and `TAG` with the release's tag. To check the attestation without reading it from GitHub, download `REPO-nodejs-TAG.intoto.jsonl` too and add `--bundle REPO-nodejs-TAG.intoto.jsonl` to the `gh attestation verify` command. For the npm package, run `npm audit signatures` in a project that installs it.
+Replace `OWNER/REPO` with the repository, `SIGNING_ADDRESS` with the address that `SECURITY.md` names and `TAG` with the release's tag. To check the attestation without reading it from GitHub, download `REPO-nodejs-TAG.intoto.jsonl` too and add `--bundle REPO-nodejs-TAG.intoto.jsonl` to the `gh attestation verify` command. For the npm package, run `npm audit signatures` in a project that installs it.

@@ -15,28 +15,56 @@ The `Draft release notes` workflow keeps a draft release, with notes for every p
 In asset names, `TAG` is the version tag. A `.sha256` file holds the checksum of an asset, and an `.intoto.jsonl` file holds its build attestation: a signed record of the workflow run that built it. A release of a private repository carries no `.intoto.jsonl` file, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud. [`SECURITY.md`](SECURITY.md) shows how to verify an asset with both files.
 
 [//]: # (#;< RELEASE_SIGNING)
-### Signed checksums
+### Release signing
 
-The release workflows sign each `.sha256` file with a GPG key and attach the signature as a `.sha256.asc` file. Signing starts after you store the key in the `release` environment. Until then, the workflows skip it and print a notice.
+The release workflows sign every release asset, so anyone can confirm that a download comes from this project's maintainers. Each workflow writes the asset's SHA-256 checksum to a `.sha256` file, then signs that file with the project's GPG key as a `.sha256.asc` file. The public half of the key lives on [keys.openpgp.org](https://keys.openpgp.org) under the project's signing address, and verifiers fetch it from there:
 
-Before it signs, a workflow fetches the key that [keys.openpgp.org](https://keys.openpgp.org) has confirmed for your release address. The release stops when that key isn't the signing key. keys.openpgp.org publishes an address only after its owner confirms it, so a swapped key can't pass this check without access to that mailbox.
+```mermaid
+sequenceDiagram
+    participant M as Maintainer
+    participant K as keys.openpgp.org
+    participant W as Release workflow
+    participant V as Verifier
+    M->>M: Create a key for the signing address
+    M->>K: Upload the public key
+    K-->>M: Email a confirmation link to the address
+    M->>K: Confirm the address
+    M->>W: Store the private key and the address as secrets
+    W->>W: Write the asset's .sha256 file
+    W->>K: Fetch the key confirmed for the address
+    W->>W: Stop unless it is the stored private key
+    W->>W: Sign the .sha256 file as .sha256.asc
+    W->>V: Publish the asset, .sha256 and .sha256.asc
+    V->>K: Fetch the key confirmed for the address
+    V->>V: Check the signature, then the checksum
+```
 
-To turn on signing:
+keys.openpgp.org publishes an address on a key only after the address owner confirms it from that mailbox. A verifier who fetches the key by the address gets the key the maintainers confirmed. Someone who changes the repository's secrets can't replace that key without access to the mailbox.
 
-1. Upload the public half of your signing key to keys.openpgp.org:
+The release workflows stop until signing is set up. keys.openpgp.org links each address to 1 key, so give each project its own signing address. Create a dedicated mailbox, or use plus addressing where your mail provider supports it, such as `you+yourproject@example.com`.
+
+To set up signing:
+
+1. Create a signing key for the address. `gpg` asks for a passphrase and prints the key's fingerprint:
+
+   ```bash
+   gpg --quick-generate-key "yourproject releases <SIGNING_ADDRESS>" ed25519 sign 2y
+   ```
+
+2. Upload the public key to keys.openpgp.org:
 
    ```bash
    gpg --export KEY_FINGERPRINT | curl -T - https://keys.openpgp.org
    ```
 
-2. Open the link that the upload prints, and request verification of your release address. Confirm the address from the email that keys.openpgp.org sends.
-3. Create the `release` environment:
+3. Open the link that the upload prints, and request verification of the address. Confirm it from the email that keys.openpgp.org sends.
+4. Create the `release` environment:
 
    ```bash
    gh api -X PUT repos/yournamespace/yourproject/environments/release
    ```
 
-4. Store the private key, the confirmed address and, for a key that has one, the passphrase. The last 2 commands prompt for their values:
+5. Store the private key, the signing address and the passphrase. The last 2 commands prompt for their values:
 
    ```bash
    gpg --armor --export-secret-keys KEY_FINGERPRINT | gh secret set GPG_PRIVATE_KEY --env release --repo yournamespace/yourproject
@@ -44,7 +72,11 @@ To turn on signing:
    gh secret set GPG_PASSPHRASE --env release --repo yournamespace/yourproject
    ```
 
-Replace `KEY_FINGERPRINT` with your key's fingerprint. Export only that key into `GPG_PRIVATE_KEY`, because the workflows stop on a secret that holds more than 1 key.
+6. In [`SECURITY.md`](SECURITY.md), replace `SIGNING_ADDRESS` with the signing address, so verifiers fetch the key by an address that the secrets can't change.
+
+Replace `SIGNING_ADDRESS` with the project's signing address and `KEY_FINGERPRINT` with the fingerprint from step 1. Export only that key into `GPG_PRIVATE_KEY`, because the workflows stop on a secret that holds more than 1 key.
+
+The key expires after 2 years. Before then, extend it with `gpg --quick-set-expire KEY_FINGERPRINT 2y`, upload it again as in step 2 and store it again as in step 5.
 
 To have a reviewer approve each release before a workflow reads the key, add **Required reviewers** to the `release` environment under **Settings > Environments**. If you limit the environment's deployment branches, allow the version tags.
 
@@ -120,7 +152,7 @@ A release of this project starts on your machine, with `npm version`. Follow 2 r
 - Release only by pushing the tag. `Release Node.js` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
 - Push 1 version tag at a time. `Release Node.js` publishes 1 tag at a time, and each newly waiting run cancels the run that waited before it.
 
-To release a version:
+Before the first release, set up [release signing](#release-signing). To release a version:
 
 1. Optional: On the repository's **Releases** page, open the draft release and edit its notes.
 2. On an up-to-date `main` with no uncommitted changes, set the version:
@@ -149,7 +181,7 @@ A release of this project starts on your machine, with a version tag. Follow 2 r
 - Release only by pushing the tag. `Release PHP` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
 - Push 1 version tag at a time. `Release PHP` publishes 1 tag at a time, and each newly waiting run cancels the run that waited before it.
 
-To release a version:
+Before the first release, set up [release signing](#release-signing). To release a version:
 
 1. Optional: On the repository's **Releases** page, open the draft release and edit its notes.
 2. On an up-to-date `main`, tag the commit and push the tag:

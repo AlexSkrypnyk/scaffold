@@ -937,7 +937,7 @@ gh api --method PUT repos/acme/app/immutable-releases --silent"
   GH_IMMUTABLE="false false"
   local project="${BATS_TEST_TMPDIR}/php-release-project"
   mkdir -p "${project}/.github/workflows"
-  touch "${project}/.github/workflows/release-php.yml"
+  echo 'gh release edit "${TAG}" --draft=false' >"${project}/.github/workflows/release-php.yml"
 
   pushd "${project}" >/dev/null || return 1
   run github_apply_immutable_releases
@@ -947,6 +947,39 @@ gh api --method PUT repos/acme/app/immutable-releases --silent"
 
   run cat "${GH_WRITES}"
   assert_output "gh api --method PUT repos/acme/app/immutable-releases --silent"
+}
+
+@test "github_apply_immutable_releases skips a PHP-only project whose release workflow never publishes the release" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  local project="${BATS_TEST_TMPDIR}/php-release-outdated"
+  mkdir -p "${project}/.github/workflows"
+  echo 'gh release upload "${TAG}" .release/* --clobber' >"${project}/.github/workflows/release-php.yml"
+
+  pushd "${project}" >/dev/null || return 1
+  run github_apply_immutable_releases
+  popd >/dev/null || return 1
+  assert_success
+  assert_output "  Immutable releases: skipped (release-php.yml attaches assets after the release is published; update the project from Scaffold first)"
+  assert_no_writes
+
+  run cat "${GH_READS}"
+  assert_output ""
+}
+
+@test "github_apply_immutable_releases enables releases when the Node.js release workflow publishes them" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  local project="${BATS_TEST_TMPDIR}/php-nodejs-release-project"
+  mkdir -p "${project}/.github/workflows"
+  echo 'gh release upload "${TAG}" .release/* --clobber' >"${project}/.github/workflows/release-php.yml"
+  touch "${project}/.github/workflows/release-nodejs.yml"
+
+  pushd "${project}" >/dev/null || return 1
+  run github_apply_immutable_releases
+  popd >/dev/null || return 1
+  assert_success
+  assert_output "  Immutable releases: enabled"
 }
 
 #-------------------------------------------------------------------------------

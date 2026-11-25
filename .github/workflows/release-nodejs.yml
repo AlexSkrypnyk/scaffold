@@ -129,6 +129,20 @@ jobs:
         with:
           name: release-nodejs
 
+      # Tags can move while the job waits for approval, and the assets must
+      # match the commit the tag points to.
+      - name: Check release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          tag_sha="$(gh api "repos/${GH_REPO}/commits/${TAG}" --jq .sha)"
+          if [ "${tag_sha}" != "${GITHUB_SHA}" ]; then
+            echo "::error::Tag '${TAG}' now points to ${tag_sha}, not to ${GITHUB_SHA}, which the assets were built from."
+            exit 1
+          fi
+
       # Signs before anything is published, so a key problem stops the release.
       # keys.openpgp.org publishes an address on a key only after its owner
       # confirms it, so the email lookup returns the key the maintainer
@@ -140,15 +154,8 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           RELEASE_GPG_KEY_EMAIL: ${{ secrets.RELEASE_GPG_KEY_EMAIL }}
         run: |
-          if [ -z "${GPG_PRIVATE_KEY}" ]; then
-            echo "::notice::GPG_PRIVATE_KEY is not set, so ${CHECKSUMS} is not signed."
-            exit 0
-          fi
-
-          if [ -z "${RELEASE_GPG_KEY_EMAIL}" ]; then
-            echo "::error::Set the RELEASE_GPG_KEY_EMAIL secret in the 'release' environment to the address keys.openpgp.org has confirmed for the signing key."
-            exit 1
-          fi
+          [ -n "${GPG_PRIVATE_KEY}" ] || { echo "::error::The GPG_PRIVATE_KEY secret of the 'release' environment is not set. RELEASING.md shows how to set up release signing."; exit 1; }
+          [ -n "${RELEASE_GPG_KEY_EMAIL}" ] || { echo "::error::The RELEASE_GPG_KEY_EMAIL secret of the 'release' environment is not set. RELEASING.md shows how to set up release signing."; exit 1; }
 
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --import
 
@@ -159,7 +166,8 @@ jobs:
           fi
           fingerprint="$(awk -F: '$1 == "fpr" { print $10; exit }' <<< "${secret_keys}")"
 
-          if ! curl -fsS --retry 3 -o "${RUNNER_TEMP}/release-key.asc" "https://keys.openpgp.org/vks/v1/by-email/${RELEASE_GPG_KEY_EMAIL}"; then
+          email_path="$(jq -rn --arg email "${RELEASE_GPG_KEY_EMAIL}" '$email | @uri')"
+          if ! curl -fsS --retry 3 -o "${RUNNER_TEMP}/release-key.asc" "https://keys.openpgp.org/vks/v1/by-email/${email_path}"; then
             echo "::error::keys.openpgp.org has no key confirmed for the RELEASE_GPG_KEY_EMAIL address. Upload signing key ${fingerprint} there and confirm the address."
             exit 1
           fi

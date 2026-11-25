@@ -1975,9 +1975,19 @@ github_immutable_releases_status() {
 # GitHub can still read the setting as off right after a successful write, so
 # it is read back and written once more when it did not take.
 #
+# A PHP-only 'release-php.yml' that never publishes the release attaches its
+# assets after the maintainer publishes, and an immutable release rejects
+# them, so such a project is skipped.
+#
 github_apply_immutable_releases() {
   local slug="${github_owner}/${github_repo}"
   local output=""
+  local workflow=".github/workflows/release-php.yml"
+
+  if [ -f "${workflow}" ] && [ ! -f .github/workflows/release-nodejs.yml ] && ! grep -q -- '--draft=false' "${workflow}"; then
+    echo "  Immutable releases: skipped (release-php.yml attaches assets after the release is published; update the project from Scaffold first)"
+    return 0
+  fi
 
   # A dry run that would create the repository has no setting to read.
   if [ "${github_repo_exists}" != "n" ]; then

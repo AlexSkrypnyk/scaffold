@@ -197,7 +197,7 @@ To skip the security settings, pass `--no-github-security`.
 
 `install.sh` leaves the setting alone when it's already on or the owner enforces it for every repository. After turning it on, `install.sh` reads it back, because GitHub can still report it as off. When it reads as off, `install.sh` turns it on 1 more time.
 
-A release workflow that changes a release after publishing it fails after this, such as one that uploads assets to a published release. Scaffold's release workflows attach every asset to the draft release before they publish it, so they work with the setting on. To keep releases editable, pass `--no-github-immutable-releases`.
+A release workflow that changes a release after publishing it fails after this, such as one that uploads assets to a published release. Scaffold's release workflows attach every asset to the draft release before they publish it, so they work with the setting on. A PHP project without Node.js can have a `release-php.yml` from an older Scaffold, which attaches the assets after you publish. `install.sh` skips the setting for that project until you [update it from Scaffold](ai-integration.mdx). To keep releases editable on any project, pass `--no-github-immutable-releases`.
 
 ### Default branch ruleset
 

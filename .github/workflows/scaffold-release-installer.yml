@@ -90,7 +90,8 @@ jobs:
           fi
           fingerprint="$(awk -F: '$1 == "fpr" { print $10; exit }' <<< "${secret_keys}")"
 
-          if ! curl -fsS --retry 3 -o "${RUNNER_TEMP}/release-key.asc" "https://keys.openpgp.org/vks/v1/by-email/${RELEASE_GPG_KEY_EMAIL}"; then
+          email_path="$(jq -rn --arg email "${RELEASE_GPG_KEY_EMAIL}" '$email | @uri')"
+          if ! curl -fsS --retry 3 -o "${RUNNER_TEMP}/release-key.asc" "https://keys.openpgp.org/vks/v1/by-email/${email_path}"; then
             echo "::error::keys.openpgp.org has no key confirmed for the RELEASE_GPG_KEY_EMAIL address. Upload signing key ${fingerprint} there and confirm the address."
             exit 1
           fi

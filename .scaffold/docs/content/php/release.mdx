@@ -1,7 +1,7 @@
 ---
 title: Release
 sidebar_position: 7
-cspell: ignore intoto openpgp
+cspell: ignore intoto openpgp gpgv
 ---
 
 # Release
@@ -12,7 +12,7 @@ The `Release PHP` workflow attaches your PHP command app's PHAR, or your single-
 
 On a project that also has Node.js, release with `npm version`, as [Node.js release](../nodejs/release.mdx) describes. `Release PHP` attaches the PHP assets to the draft, and `Release Node.js` publishes the release.
 
-On any other PHP project, a release starts with a version tag you push. `Release PHP` attaches the assets to the draft release and then publishes it. Every asset is in place before the release is published, so the release works with [immutable releases](../github.mdx#immutable-releases). With [Release Drafter](../ci/release-drafter.mdx), the draft already holds the notes for every pull request merged into `main`. Without a draft, the workflow creates a release with generated notes.
+On a command app with a PHAR or a single-file script without Node.js, a release starts with a version tag you push. A class library has no `Release PHP` workflow, so publish its draft on the **Releases** page. `Release PHP` attaches the assets to the draft release and then publishes it. Every asset is in place before the release is published, so the release works with [immutable releases](../github.mdx#immutable-releases). With [Release Drafter](../ci/release-drafter.mdx), the draft already holds the notes for every pull request merged into `main`. Without a draft, the workflow creates a release with generated notes.
 
 Release only by pushing the tag. `Release PHP` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
 
@@ -27,7 +27,7 @@ To publish a release:
    ```
 
 3. On the **Actions** tab, open the `Release PHP` run for the tag. Confirm that it passes.
-4. Open the release. Confirm that it's published and lists the PHAR or the script, `REPO-php-TAG.sha256` and `REPO-php-TAG.intoto.jsonl`.
+4. Open the release. Confirm that it's published and lists the PHAR or the script and `REPO-php-TAG.sha256`. On a public repository, confirm that it also lists `REPO-php-TAG.intoto.jsonl`.
 
 A version with a suffix, such as `1.4.0-rc.1`, becomes a GitHub pre-release.
 
@@ -47,8 +47,8 @@ On a private repository, the job skips the attestation and the bundle, because G
 
 The `Publish PHP release` job has write access to the repository contents and runs in the `release` environment. It runs these steps:
 
-1. Signs `REPO-php-TAG.sha256` as `REPO-php-TAG.sha256.asc` when the environment holds a signing key, as [Signed checksums](../ci/release.mdx#signed-checksums) describes.
-2. Stops with an error when the release for the tag is already published.
+1. Signs `REPO-php-TAG.sha256` as `REPO-php-TAG.sha256.asc`, as [Release signing](../ci/release.mdx#release-signing) describes.
+2. Stops with an error when the tag no longer points to the commit the assets were built from, or when the release for the tag is already published.
 3. Moves Release Drafter's draft to the tag. Without a draft, it creates a draft release with generated notes.
 4. Attaches the asset, the checksum file, the attestation bundle and any signature to the draft, replacing any asset of the same name.
 5. On a project without Node.js, publishes the release. A tag with a suffix becomes a pre-release, and only the highest version becomes the latest release.
@@ -66,13 +66,14 @@ Anyone who downloads the PHAR or the script can confirm that your repository's r
 
    On macOS, run `shasum -a 256 --check --ignore-missing REPO-php-TAG.sha256` instead.
 
-3. When the release lists `REPO-php-TAG.sha256.asc`, download it and check the signature. `gpg` fetches the signing key from keys.openpgp.org:
+3. Download `REPO-php-TAG.sha256.asc`. Check the signature against the key that keys.openpgp.org has confirmed for the project's signing address:
 
    ```bash
-   gpg --keyserver hkps://keys.openpgp.org --auto-key-retrieve --verify REPO-php-TAG.sha256.asc REPO-php-TAG.sha256
+   curl -fsSL https://keys.openpgp.org/vks/v1/by-email/SIGNING_ADDRESS | gpg --dearmor > release-key.gpg
+   gpgv --keyring ./release-key.gpg REPO-php-TAG.sha256.asc REPO-php-TAG.sha256
    ```
 
-   Confirm that `gpg` reports a good signature from a maintainer's address.
+   `gpgv` trusts only the key in `release-key.gpg`, so a signature by any other key fails.
 
 4. Check the attestation with [GitHub CLI](https://cli.github.com/):
 
@@ -80,4 +81,4 @@ Anyone who downloads the PHAR or the script can confirm that your repository's r
    gh attestation verify ASSET --repo OWNER/REPO
    ```
 
-Replace `OWNER/REPO` with the repository, `TAG` with the release's tag and `ASSET` with the downloaded filename. To check the attestation without reading it from GitHub, download `REPO-php-TAG.intoto.jsonl` too and add `--bundle REPO-php-TAG.intoto.jsonl` to the `gh attestation verify` command.
+Replace `OWNER/REPO` with the repository, `SIGNING_ADDRESS` with the address that `SECURITY.md` names, `TAG` with the release's tag and `ASSET` with the downloaded filename. To check the attestation without reading it from GitHub, download `REPO-php-TAG.intoto.jsonl` too and add `--bundle REPO-php-TAG.intoto.jsonl` to the `gh attestation verify` command.
