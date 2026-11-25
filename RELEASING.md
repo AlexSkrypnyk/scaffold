@@ -63,7 +63,7 @@ Pushing the tag starts 4 workflows:
 7. Waits for the tag's `Release PHP` run. Then it uploads the 4 installer files to the draft, publishes the release and verifies the uploaded copies.
 8. For the latest release, checks that `releases/latest/download/install.sh` and getscaffold.dev/install.sh both serve the uploaded installer.
 
-Steps 1-6 run in the `Build Scaffold installer` job, which reads the repository only. Steps 7-8 run in the `Publish Scaffold release` job, which writes the release. Step 4 is the `sign-checksums` action in `.github/actions`, which `Release PHP` runs on its own checksum file too.
+Steps 1-6 run in the `Build Scaffold installer` job, which reads the repository only. Steps 7-8 run in the `Publish Scaffold release` job, which writes the release. `Release PHP` runs the same key check and signing on its own checksum file.
 
 ## Manage the signing key
 

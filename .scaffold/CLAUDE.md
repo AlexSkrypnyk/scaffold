@@ -78,8 +78,8 @@ Content blocks can be conditionally included/excluded using special tokens:
   of `RELEASING.dist.md`, and `remove_non_php_release()` removes it when the
   workflow stays
 - `RELEASE_SIGNING` - Documentation of the checksum signing in the PHP and Node.js
-  release workflows, removed with the `sign-checksums` action by
-  `remove_unused_release_signing()` when neither workflow stays
+  release workflows, removed by `remove_unused_release_signing()` when neither
+  workflow stays
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features; `!NODEJS` marks what applies only without NodeJS,
   such as the `Release PHP` publish step and the tag-push steps of
@@ -622,7 +622,7 @@ getscaffold.dev/install.sh and /init.sh serve the `install.sh` attached to the l
 
 [`RELEASING.md`](../RELEASING.md) describes the release procedure, the steps of `scaffold-release-installer.yml` and the signing key, which keys.openpgp.org publishes. `process_releasing()` replaces `RELEASING.md` with `RELEASING.dist.md`.
 
-The `.github/actions/sign-checksums` composite action signs a checksum file after it checks `GPG_PRIVATE_KEY` against the key keys.openpgp.org has confirmed for `RELEASE_GPG_KEY_EMAIL`. `release-php.yml`, `release-nodejs.yml` and `scaffold-release-installer.yml` use it. In a generated project, signing is skipped until the key is stored. `remove_unused_release_signing()` removes the action and the `RELEASE_SIGNING` blocks from a project with neither PHP nor Node.js release workflow.
+The `Sign checksums` step of `release-php.yml`, `release-nodejs.yml` and `scaffold-release-installer.yml` signs a checksum file after it checks `GPG_PRIVATE_KEY` against the key keys.openpgp.org has confirmed for `RELEASE_GPG_KEY_EMAIL`. The step is inlined in each workflow, because zizmor flags a local `./` action and actionlint rejects the `$/` self-repository form. Keep the key check the same in all 3 copies. The installer's copy fails without a key, and the other 2 skip signing until the key is stored. `remove_unused_release_signing()` removes the `RELEASE_SIGNING` blocks from a project with neither PHP nor Node.js release workflow.
 
 
 ### Testing `install.sh`

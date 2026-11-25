@@ -2128,10 +2128,10 @@ create_release_project() {
   assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
 }
 
-@test "remove_unused_release_signing keeps the signing action while a release workflow uses it" {
+@test "remove_unused_release_signing keeps the signing notes while a release workflow signs checksums" {
   local tmpdir="${BATS_TEST_TMPDIR}/release_signing_used"
-  mkdir -p "${tmpdir}/.github/actions/sign-checksums" "${tmpdir}/.github/workflows"
-  touch "${tmpdir}/.github/actions/sign-checksums/action.yml"
+  mkdir -p "${tmpdir}/.github/workflows"
+  printf 'Intro\n[//]: # (#;< RELEASE_SIGNING)\nSign the checksums\n[//]: # (#;> RELEASE_SIGNING)\nOutro\n' >"${tmpdir}/RELEASING.dist.md"
 
   local workflow
   for workflow in release-php.yml release-nodejs.yml; do
@@ -2143,14 +2143,13 @@ create_release_project() {
     popd >/dev/null || return 1
 
     assert_success
-    assert_file_exists "${tmpdir}/.github/actions/sign-checksums/action.yml"
+    assert_file_contains "${tmpdir}/RELEASING.dist.md" "Sign the checksums"
   done
 }
 
-@test "remove_unused_release_signing removes the signing action when no release workflow uses it" {
+@test "remove_unused_release_signing removes the signing notes when no release workflow signs checksums" {
   local tmpdir="${BATS_TEST_TMPDIR}/release_signing_unused"
-  mkdir -p "${tmpdir}/.github/actions/sign-checksums" "${tmpdir}/.github/workflows"
-  touch "${tmpdir}/.github/actions/sign-checksums/action.yml"
+  mkdir -p "${tmpdir}/.github/workflows"
   touch "${tmpdir}/.github/workflows/release-docker.yml"
   printf 'Intro\n[//]: # (#;< RELEASE_SIGNING)\nSign the checksums\n[//]: # (#;> RELEASE_SIGNING)\nOutro\n' >"${tmpdir}/RELEASING.dist.md"
 
@@ -2159,7 +2158,6 @@ create_release_project() {
   popd >/dev/null || return 1
 
   assert_success
-  assert_dir_not_exists "${tmpdir}/.github/actions"
   assert_file_exists "${tmpdir}/.github/workflows/release-docker.yml"
   assert_file_not_contains "${tmpdir}/RELEASING.dist.md" "Sign the checksums"
   assert_file_contains "${tmpdir}/RELEASING.dist.md" "Outro"

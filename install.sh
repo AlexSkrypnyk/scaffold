@@ -665,14 +665,11 @@ remove_php_release() {
 }
 
 ##
-# Remove the checksum signing action when no release workflow uses it.
+# Remove the checksum signing notes when no release workflow signs checksums.
 #
 remove_unused_release_signing() {
   [ -f .github/workflows/release-php.yml ] && return 0
   [ -f .github/workflows/release-nodejs.yml ] && return 0
-
-  rm -Rf .github/actions/sign-checksums || true
-  rmdir .github/actions >/dev/null 2>&1 || true
 
   remove_tokens_with_content "RELEASE_SIGNING"
 }
