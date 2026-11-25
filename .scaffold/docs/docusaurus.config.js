@@ -10,7 +10,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'Scaffold',
   tagline: 'Scaffold documentation',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.svg',
 
   // Set the production url of your site here
   url: 'https://getscaffold.dev/',
@@ -86,12 +86,13 @@ const config = {
   /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/social-card.jpg',
+      image: 'img/social-card.png',
       navbar: {
         title: 'Scaffold',
         logo: {
           alt: 'Scaffold Logo',
-          src: 'img/logo.png',
+          src: 'img/logo.svg',
+          srcDark: 'img/logo-dark.svg',
         },
         items: [
           {

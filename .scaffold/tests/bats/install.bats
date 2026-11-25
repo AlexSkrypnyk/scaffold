@@ -1646,6 +1646,67 @@ SETTINGS
   assert_file_not_exists "${tmpdir}/.claude/settings.json"
 }
 
+copy_logos() {
+  local root="${BATS_TEST_DIRNAME}/../../.."
+
+  mkdir -p "${1}/docs/static/img"
+  cp "${root}/logo.svg" "${root}/logo-dark.svg" "${1}/"
+  cp "${root}/docs/static/img/logo.svg" "${root}/docs/static/img/logo-dark.svg" "${1}/docs/static/img/"
+}
+
+@test "process_logo fits the font size to the name and sets the initial" {
+  TEST_CASES=(
+    "app" 'font-size="40"' ">A</text>"
+    "yourproject" 'font-size="20"' ">Y</text>"
+    "my-very-long-project-name" 'font-size="8"' ">M</text>"
+    "9lives" 'font-size="36"' ">9</text>"
+    "$(printf 'a%.0s' {1..221})" 'font-size="1"' ">A</text>"
+  )
+
+  local i
+  for ((i = 0; i < ${#TEST_CASES[@]}; i += 3)); do
+    local tmpdir="${BATS_TEST_TMPDIR}/process_logo_${i}"
+    mkdir -p "${tmpdir}"
+    copy_logos "${tmpdir}"
+
+    pushd "${tmpdir}" >/dev/null || return 1
+    process_logo "${TEST_CASES[i]}"
+    popd >/dev/null || return 1
+
+    assert_file_contains "${tmpdir}/logo.svg" "${TEST_CASES[i + 1]}"
+    assert_file_contains "${tmpdir}/logo-dark.svg" "${TEST_CASES[i + 1]}"
+    assert_file_contains "${tmpdir}/docs/static/img/logo.svg" "${TEST_CASES[i + 2]}"
+    assert_file_contains "${tmpdir}/docs/static/img/logo-dark.svg" "${TEST_CASES[i + 2]}"
+  done
+}
+
+@test "process_logo keeps the font size of the docs site initial" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_logo_docs_only"
+  mkdir -p "${tmpdir}"
+  copy_logos "${tmpdir}"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  process_logo "app"
+  popd >/dev/null || return 1
+
+  assert_file_contains "${tmpdir}/docs/static/img/logo.svg" 'font-size="120"'
+}
+
+@test "process_logo succeeds without the docs site logos" {
+  local tmpdir="${BATS_TEST_TMPDIR}/process_logo_no_docs"
+  mkdir -p "${tmpdir}"
+  copy_logos "${tmpdir}"
+  rm -rf "${tmpdir}/docs"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run process_logo "app"
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_file_contains "${tmpdir}/logo.svg" 'font-size="40"'
+  assert_file_not_exists "${tmpdir}/docs/static/img/logo.svg"
+}
+
 @test "process_contributing promotes the distributable CONTRIBUTING file" {
   local tmpdir="${BATS_TEST_TMPDIR}/process_contributing"
   mkdir -p "${tmpdir}"
@@ -1717,9 +1778,6 @@ RELEASING
   remove_self="n"
   use_nodejs="y"
 
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
-
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
   popd >/dev/null || return 1
@@ -1747,9 +1805,6 @@ RELEASING
   use_nodejs="y"
   use_nodejs_library="y"
 
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
-
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
   popd >/dev/null || return 1
@@ -1772,9 +1827,6 @@ RELEASING
   project_pascalcase="AcmeApp"
   remove_self="n"
   use_nodejs="n"
-
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
 
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
@@ -1803,9 +1855,6 @@ RELEASING
   author="Jane Doe"
   project_pascalcase="AcmeApp"
   remove_self="n"
-
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
 
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
@@ -1837,9 +1886,6 @@ RELEASING
   use_nodejs="n"
   use_docs="n"
 
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
-
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
   popd >/dev/null || return 1
@@ -1865,9 +1911,6 @@ RELEASING
   remove_self="n"
   use_docker="y"
   docker_image_name="acme/api-image"
-
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
 
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
@@ -1905,9 +1948,6 @@ RELEASING
   use_php_command="n"
   use_php_script="n"
   use_renovate="y"
-
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
 
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
@@ -1979,9 +2019,6 @@ create_release_project() {
   use_php_command_build="n"
   php_command_name="acme-app"
 
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
-
   pushd "${tmpdir}" >/dev/null || return 1
   process_project
   popd >/dev/null || return 1
@@ -2004,9 +2041,6 @@ create_release_project() {
   use_php_command="n"
   use_php_script="y"
   php_script_name="acme-app"
-
-  # Stub the placeholder-logo download so the flow never hits the network.
-  curl() { return 0; }
 
   pushd "${tmpdir}" >/dev/null || return 1
   process_project

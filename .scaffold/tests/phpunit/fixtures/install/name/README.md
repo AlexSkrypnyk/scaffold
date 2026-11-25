@@ -1,12 +1,13 @@
-@@ -1,6 +1,6 @@
- <p align="center">
+@@ -2,7 +2,7 @@
    <a href="" rel="noopener">
--  <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=force-crystal&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="force-crystal logo"></a>
-+  <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=star-forge&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="star-forge logo"></a>
+   <picture>
+     <source media="(prefers-color-scheme: dark)" srcset="logo-dark.svg">
+-    <img width=200px height=200px src="logo.svg" alt="force-crystal logo">
++    <img width=200px height=200px src="logo.svg" alt="star-forge logo">
+   </picture></a>
  </p>
  
- <h1 align="center">Few lines describing your project</h1>
-@@ -7,16 +7,16 @@
+@@ -10,16 +10,16 @@
  
  <div align="center">
  
@@ -32,7 +33,7 @@
  <!-- To show the OpenSSF Best Practices badge, register the project at https://www.bestpractices.dev, replace PROJECT_ID with its ID and move the badge out of this comment.
  [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/PROJECT_ID/badge)](https://www.bestpractices.dev/projects/PROJECT_ID)
  -->
-@@ -37,25 +37,25 @@
+@@ -40,25 +40,25 @@
  Install the PHP package with Composer:
  
  ```bash
@@ -63,7 +64,7 @@
  ```
  
  ## Usage
-@@ -63,7 +63,7 @@
+@@ -66,7 +66,7 @@
  Run the PHP command that Composer installs:
  
  ```bash
@@ -72,7 +73,7 @@
  ```
  
  The command takes the following arguments and options:
-@@ -83,7 +83,7 @@
+@@ -86,7 +86,7 @@
  Run the shell script:
  
  ```bash

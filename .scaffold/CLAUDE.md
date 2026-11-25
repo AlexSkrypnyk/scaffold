@@ -546,6 +546,20 @@ The pure cast helpers are unit-tested in
 `AsciinemaPlayer` component stays byte-identical between `docs/` and
 `.scaffold/docs/`.
 
+## Logo and social card
+
+Scaffold's logo is `.scaffold/docs/static/img/logo.svg`, with `logo-dark.svg` for dark mode. The docs site navbar, the favicon and the `README.md` header use both files. The teal palette in `.scaffold/docs/src/css/custom.css` comes from the logo's colors.
+
+The getscaffold.dev social card is `.scaffold/docs/static/img/social-card.png`, which `docusaurus.config.js` sets as the site `image`. Its source is `.scaffold/assets/social-card.html`, a self-contained 1280x640 page. To change the card, edit the HTML and render it with `agent-browser`:
+
+```bash
+agent-browser set viewport 1280 640
+agent-browser open file://$PWD/.scaffold/assets/social-card.html
+agent-browser screenshot $PWD/.scaffold/docs/static/img/social-card.png
+```
+
+Upload the same PNG to the GitHub repository under **Settings > General > Social preview**, because GitHub has no API for it.
+
 ## CI/CD for the Template
 
 GitHub Actions workflows test the **scaffold template itself**:

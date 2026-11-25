@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="152" height="216" viewBox="-152 -216 304 432" role="img" aria-label="Scaffold logo">
+  <path d="M0 -214 -120 -124 -120 -15 0 75Z" fill="#4fd1c5"/>
+  <path d="M0 214 120 124 120 15 0 -75Z" fill="#4fd1c5"/>
+  <path d="M0 -75 -20 60 0 75Z" fill="#38a89d"/>
+  <path d="M0 -214 149 -75 0 -75Z" fill="#135e66"/>
+  <path d="M0 214 -149 75 0 75Z" fill="#135e66"/>
+  <path d="M0 -214 24 -75 0 -75Z" fill="#0b434a"/>
+  <path d="M0 214 -24 75 0 75Z" fill="#0b434a"/>
+</svg>

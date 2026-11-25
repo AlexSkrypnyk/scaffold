@@ -1,5 +1,9 @@
 <p align="center">
-  <a href="" rel="noopener"><img src=".scaffold/docs/static/img/logo.png" alt="Scaffold logo" height=100px/></a>
+  <a href="" rel="noopener">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".scaffold/docs/static/img/logo-dark.svg">
+    <img src=".scaffold/docs/static/img/logo.svg" alt="Scaffold logo" height=100px/>
+  </picture></a>
 </p>
 
 <h1 align="center">Generic project scaffold template</h1>
@@ -56,7 +60,7 @@ The template holds every feature, and `install.sh` removes the ones you don't se
   - [GitHub Actions linting](.github/workflows/test-actions.yml) with yamllint, actionlint and zizmor, off by default
   - [Security audit](.github/workflows/audit.yml) with OpenSSF Scorecard, CodeQL and, for PHP, Semgrep
 - **Documentation**
-  - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md), a [release guide](RELEASING.dist.md), a [security policy](SECURITY.dist.md) and a [generated logo](logo.png)
+  - [README with badges](README.dist.md), a [contributing guide](CONTRIBUTING.dist.md), a [release guide](RELEASING.dist.md), a [security policy](SECURITY.dist.md) and a [generated logo](logo.svg) with a [dark mode version](logo-dark.svg)
   - A [documentation site](docs) built with [Docusaurus](https://docusaurus.io/)
   - Spell check with [CSpell](https://cspell.org/)
   - An [`AsciinemaPlayer`](docs/src/components/AsciinemaPlayer) docs component, and the [terminal recorder](.scaffold/assets/update-assets.php) that renders Scaffold's `install.sh` walkthrough as an animated SVG
