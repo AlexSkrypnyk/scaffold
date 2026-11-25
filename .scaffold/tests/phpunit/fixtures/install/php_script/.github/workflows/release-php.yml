@@ -22,7 +22,7 @@
  
        - name: Generate checksums
          working-directory: .release
-@@ -171,3 +159,31 @@
+@@ -190,3 +178,31 @@
            fi
  
            gh release upload "${TAG}" .release/* --clobber

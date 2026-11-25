@@ -12,6 +12,39 @@ The `Draft release notes` workflow keeps a draft release, with notes for every p
 
 In asset names, `TAG` is the version tag. A `.sha256` file holds the checksum of an asset, and an `.intoto.jsonl` file holds its build attestation: a signed record of the workflow run that built it. A release of a private repository carries no `.intoto.jsonl` file, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud. [`SECURITY.md`](SECURITY.md) shows how to verify an asset with both files.
 
+### Signed checksums
+
+The release workflows sign each `.sha256` file with a GPG key and attach the signature as a `.sha256.asc` file. Signing starts after you store the key in the `release` environment. Until then, the workflows skip it and print a notice.
+
+Before it signs, a workflow fetches the key that [keys.openpgp.org](https://keys.openpgp.org) has confirmed for your release address. The release stops when that key isn't the signing key. keys.openpgp.org publishes an address only after its owner confirms it, so a swapped key can't pass this check without access to that mailbox.
+
+To turn on signing:
+
+1. Upload the public half of your signing key to keys.openpgp.org:
+
+   ```bash
+   gpg --export KEY_FINGERPRINT | curl -T - https://keys.openpgp.org
+   ```
+
+2. Open the link that the upload prints, and request verification of your release address. Confirm the address from the email that keys.openpgp.org sends.
+3. Create the `release` environment:
+
+   ```bash
+   gh api -X PUT repos/yodashut/force-crystal/environments/release
+   ```
+
+4. Store the private key, the confirmed address and, for a key that has one, the passphrase. The last 2 commands prompt for their values:
+
+   ```bash
+   gpg --armor --export-secret-keys KEY_FINGERPRINT | gh secret set GPG_PRIVATE_KEY --env release --repo yodashut/force-crystal
+   gh secret set RELEASE_GPG_KEY_EMAIL --env release --repo yodashut/force-crystal
+   gh secret set GPG_PASSPHRASE --env release --repo yodashut/force-crystal
+   ```
+
+Replace `KEY_FINGERPRINT` with your key's fingerprint. Export only that key into `GPG_PRIVATE_KEY`, because the workflows stop on a secret that holds more than 1 key.
+
+To have a reviewer approve each release before a workflow reads the key, add **Required reviewers** to the `release` environment under **Settings > Environments**. If you limit the environment's deployment branches, allow the version tags.
+
 ### PHP release asset
 
 `Release PHP` builds `force-crystal.phar` and attaches it to the release. Its checksum and attestation go in `force-crystal-php-TAG.sha256` and `force-crystal-php-TAG.intoto.jsonl`.

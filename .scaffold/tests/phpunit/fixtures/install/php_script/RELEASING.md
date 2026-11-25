@@ -1,4 +1,4 @@
-@@ -14,26 +14,10 @@
+@@ -47,26 +47,10 @@
  
  ### PHP release asset
  
@@ -27,7 +27,7 @@
  ### Documentation site
  
  `Release docs` deploys the documentation site to GitHub Pages. The deploy fails until GitHub Pages accepts a deploy from a tag.
-@@ -45,31 +29,24 @@
+@@ -78,31 +62,24 @@
  
  ## Release a version
  
