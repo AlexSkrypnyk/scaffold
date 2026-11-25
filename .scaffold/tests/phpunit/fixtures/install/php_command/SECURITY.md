@@ -1,10 +1,10 @@
-@@ -57,32 +57,3 @@
+@@ -78,33 +78,3 @@
  
  Replace `TAG` with the release's tag and `ASSET` with the downloaded filename. A release of a private repository carries no attestation, so skip step 4 for it.
  
 -## Verify a Node.js release
 -
--Each release carries a SHA-256 checksum file and a build provenance attestation for `nodejs-script`. To verify a downloaded script:
+-Each release carries a SHA-256 checksum file, its signature and a build provenance attestation for `nodejs-script`. To verify a downloaded script:
 -
 -1. From the release page, download `nodejs-script` and `force-crystal-nodejs-TAG.sha256`.
 -2. Check the checksum:
@@ -15,13 +15,14 @@
 -
 -   On macOS, run `shasum -a 256 --check force-crystal-nodejs-TAG.sha256` instead.
 -
--3. When the release lists `force-crystal-nodejs-TAG.sha256.asc`, download it and check the signature of the checksum file. `gpg` fetches the signing key from keys.openpgp.org:
+-3. Download `force-crystal-nodejs-TAG.sha256.asc`. Check the signature against the key that keys.openpgp.org has confirmed for SIGNING_ADDRESS:
 -
 -   ```bash
--   gpg --keyserver hkps://keys.openpgp.org --auto-key-retrieve --verify force-crystal-nodejs-TAG.sha256.asc force-crystal-nodejs-TAG.sha256
+-   curl -fsSL https://keys.openpgp.org/vks/v1/by-email/SIGNING_ADDRESS | gpg --dearmor > release-key.gpg
+-   gpgv --keyring ./release-key.gpg force-crystal-nodejs-TAG.sha256.asc force-crystal-nodejs-TAG.sha256
 -   ```
 -
--   Confirm that `gpg` reports a good signature from a maintainer's address. keys.openpgp.org publishes an address on a key only after its owner confirms it. `gpg` also warns that the key isn't certified with a trusted signature, which is expected for a key you haven't marked as trusted.
+-   `gpgv` trusts only the key in `release-key.gpg`, so a signature by any other key fails.
 -
 -4. Check the attestation with [GitHub CLI](https://cli.github.com/):
 -

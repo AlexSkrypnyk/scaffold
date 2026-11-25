@@ -1,4 +1,4 @@
-@@ -45,10 +45,6 @@
+@@ -77,10 +77,6 @@
  
  To have a reviewer approve each release before a workflow reads the key, add **Required reviewers** to the `release` environment under **Settings > Environments**. If you limit the environment's deployment branches, allow the version tags.
  

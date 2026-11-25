@@ -143,15 +143,8 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           RELEASE_GPG_KEY_EMAIL: ${{ secrets.RELEASE_GPG_KEY_EMAIL }}
         run: |
-          if [ -z "${GPG_PRIVATE_KEY}" ]; then
-            echo "::notice::GPG_PRIVATE_KEY is not set, so ${CHECKSUMS} is not signed."
-            exit 0
-          fi
-
-          if [ -z "${RELEASE_GPG_KEY_EMAIL}" ]; then
-            echo "::error::Set the RELEASE_GPG_KEY_EMAIL secret in the 'release' environment to the address keys.openpgp.org has confirmed for the signing key."
-            exit 1
-          fi
+          [ -n "${GPG_PRIVATE_KEY}" ] || { echo "::error::The GPG_PRIVATE_KEY secret of the 'release' environment is not set. RELEASING.md shows how to set up release signing."; exit 1; }
+          [ -n "${RELEASE_GPG_KEY_EMAIL}" ] || { echo "::error::The RELEASE_GPG_KEY_EMAIL secret of the 'release' environment is not set. RELEASING.md shows how to set up release signing."; exit 1; }
 
           echo "${GPG_PRIVATE_KEY}" | gpg --batch --import
 
@@ -162,7 +155,8 @@ jobs:
           fi
           fingerprint="$(awk -F: '$1 == "fpr" { print $10; exit }' <<< "${secret_keys}")"
 
-          if ! curl -fsS --retry 3 -o "${RUNNER_TEMP}/release-key.asc" "https://keys.openpgp.org/vks/v1/by-email/${RELEASE_GPG_KEY_EMAIL}"; then
+          email_path="$(jq -rn --arg email "${RELEASE_GPG_KEY_EMAIL}" '$email | @uri')"
+          if ! curl -fsS --retry 3 -o "${RUNNER_TEMP}/release-key.asc" "https://keys.openpgp.org/vks/v1/by-email/${email_path}"; then
             echo "::error::keys.openpgp.org has no key confirmed for the RELEASE_GPG_KEY_EMAIL address. Upload signing key ${fingerprint} there and confirm the address."
             exit 1
           fi
@@ -191,6 +185,14 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: |
+          # Tags can move while the job waits for approval, and the assets must
+          # match the commit the tag points to.
+          tag_sha="$(gh api "repos/${GH_REPO}/commits/${TAG}" --jq .sha)"
+          if [ "${tag_sha}" != "${GITHUB_SHA}" ]; then
+            echo "::error::Tag '${TAG}' now points to ${tag_sha}, not to ${GITHUB_SHA}, which the assets were built from."
+            exit 1
+          fi
+
           # A running Release Drafter sets its draft's tag back to its own guess.
           for run in $(gh run list --workflow draft-release-notes.yml --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' 2>/dev/null || true); do
             gh run watch "${run}" > /dev/null || true

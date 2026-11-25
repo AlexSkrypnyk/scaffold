@@ -1,4 +1,4 @@
-@@ -47,26 +47,10 @@
+@@ -79,26 +79,10 @@
  
  ### PHP release asset
  
@@ -27,7 +27,7 @@
  ### Documentation site
  
  `Release docs` deploys the documentation site to GitHub Pages. The deploy fails until GitHub Pages accepts a deploy from a tag.
-@@ -78,31 +62,24 @@
+@@ -110,31 +94,24 @@
  
  ## Release a version
  
@@ -39,7 +39,7 @@
 +- Release only by pushing the tag. `Release PHP` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
 +- Push 1 version tag at a time. `Release PHP` publishes 1 tag at a time, and each newly waiting run cancels the run that waited before it.
  
- To release a version:
+ Before the first release, set up [release signing](#release-signing). To release a version:
  
  1. Optional: On the repository's **Releases** page, open the draft release and edit its notes.
 -2. On an up-to-date `main` with no uncommitted changes, set the version:
