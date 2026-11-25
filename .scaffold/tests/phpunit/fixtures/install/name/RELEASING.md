@@ -1,4 +1,24 @@
-@@ -14,11 +14,11 @@
+@@ -30,15 +30,15 @@
+ 3. Create the `release` environment:
+ 
+    ```bash
+-   gh api -X PUT repos/yodashut/force-crystal/environments/release
++   gh api -X PUT repos/jeditemple/star-forge/environments/release
+    ```
+ 
+ 4. Store the private key, the confirmed address and, for a key that has one, the passphrase. The last 2 commands prompt for their values:
+ 
+    ```bash
+-   gpg --armor --export-secret-keys KEY_FINGERPRINT | gh secret set GPG_PRIVATE_KEY --env release --repo yodashut/force-crystal
+-   gh secret set RELEASE_GPG_KEY_EMAIL --env release --repo yodashut/force-crystal
+-   gh secret set GPG_PASSPHRASE --env release --repo yodashut/force-crystal
++   gpg --armor --export-secret-keys KEY_FINGERPRINT | gh secret set GPG_PRIVATE_KEY --env release --repo jeditemple/star-forge
++   gh secret set RELEASE_GPG_KEY_EMAIL --env release --repo jeditemple/star-forge
++   gh secret set GPG_PASSPHRASE --env release --repo jeditemple/star-forge
+    ```
+ 
+ Replace `KEY_FINGERPRINT` with your key's fingerprint. Export only that key into `GPG_PRIVATE_KEY`, because the workflows stop on a secret that holds more than 1 key.
+@@ -47,11 +47,11 @@
  
  ### PHP release asset
  
