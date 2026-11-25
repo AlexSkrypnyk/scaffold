@@ -19,6 +19,19 @@ You can reuse the configuration and structure of this site for your own project.
 
 [//]: # (#;> META)
 
+## Replace the logo
+
+`install.sh` writes placeholder logos as SVG files, each with a version for dark mode:
+
+| File | Shows | Used by |
+|---|---|---|
+| `logo.svg`, `logo-dark.svg` | The project name in a circle | The `<picture>` element at the top of `README.md` |
+| `docs/static/img/logo.svg`, `docs/static/img/logo-dark.svg` | The first letter of the project name in a circle | The `navbar.logo` setting and the `favicon` setting in `docs/docusaurus.config.js` |
+
+GitHub shows `logo-dark.svg` to readers who use a dark GitHub theme. The site shows `docs/static/img/logo-dark.svg` in dark mode, because `navbar.logo.srcDark` points to it.
+
+To use your own logo, overwrite each file with your artwork and keep each filename. When 1 image reads well on both light and dark backgrounds, delete the 2 `logo-dark.svg` files. Then remove the `<source>` line from `README.md` and the `srcDark` line from `docs/docusaurus.config.js`.
+
 ## Add a diagram
 
 The site renders [Mermaid](https://mermaid.js.org/) diagrams, because the configuration file sets `markdown.mermaid` and loads the `@docusaurus/theme-mermaid` theme. To add a diagram, write its Mermaid source in a code block tagged `mermaid`:

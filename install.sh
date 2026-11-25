@@ -1082,15 +1082,38 @@ process_readme() {
 
   mv README.dist.md "README.md" >/dev/null 2>&1 || true
 
-  # Update placeholder image URL and alt text in README.md
-  replace_string_content 'text=Yourproject' "text=${project// /+}"
   replace_string_content 'alt="Yourproject logo"' "alt=\"${project} logo\""
+}
 
-  curl -sS "https://placehold.jp/000000/ffffff/200x200.png?text=${project// /+}&css=%7B%22border-radius%22%3A%22%20100px%22%7D" >logo.tmp.png || true
-  if [ -s "logo.tmp.png" ]; then
-    mv logo.tmp.png "logo.png" >/dev/null 2>&1 || true
-  fi
-  rm -f logo.tmp.png || true
+##
+# Fit the project name into the placeholder logos.
+#
+# The README logos print the whole name in a 200px circle. A font size of
+# 220 / length keeps a name of the widest lowercase letter inside the circle.
+# The docs site logos print only the first letter, because the navbar draws
+# them 32px high.
+#
+# @param $1 string Project name
+#
+process_logo() {
+  local project="${1}"
+  local size initial file
+  local sed_opts
+  sed_opts=(-i) && [ "$(uname)" = "Darwin" ] && sed_opts=(-i '')
+
+  size=$((220 / ${#project}))
+  [ "${size}" -gt 40 ] && size=40
+  initial="$(echo "${project:0:1}" | tr '[:lower:]' '[:upper:]')"
+
+  for file in logo.svg logo-dark.svg; do
+    [ -f "${file}" ] && sed "${sed_opts[@]}" -e "s!font-size=\"20\"!font-size=\"${size}\"!" "${file}"
+  done
+
+  for file in docs/static/img/logo.svg docs/static/img/logo-dark.svg; do
+    [ -f "${file}" ] && sed "${sed_opts[@]}" -e "s!>Y</text>!>${initial}</text>!" "${file}"
+  done
+
+  return 0
 }
 
 ##
@@ -1176,7 +1199,8 @@ process_internal() {
   uncomment_line ".gitattributes" "\/.gitattributes"
   uncomment_line ".gitattributes" "\/.gitignore"
   uncomment_line ".gitattributes" "\/docs"
-  uncomment_line ".gitattributes" "\/logo.png"
+  uncomment_line ".gitattributes" "\/logo.svg"
+  uncomment_line ".gitattributes" "\/logo-dark.svg"
   uncomment_line ".gitattributes" "\/tests"
   uncomment_line ".gitattributes" "\/phpcs.xml"
   uncomment_line ".gitattributes" "\/phpstan.neon"
@@ -3733,6 +3757,8 @@ process_project() {
   remove_renovate_managers
 
   process_readme "${project}"
+
+  process_logo "${project}"
 
   process_contributing
 

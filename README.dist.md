@@ -1,6 +1,9 @@
 <p align="center">
   <a href="" rel="noopener">
-  <img width=200px height=200px src="https://placehold.jp/000000/ffffff/200x200.png?text=Yourproject&css=%7B%22border-radius%22%3A%22%20100px%22%7D" alt="Yourproject logo"></a>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="logo-dark.svg">
+    <img width=200px height=200px src="logo.svg" alt="Yourproject logo">
+  </picture></a>
 </p>
 
 <h1 align="center">Few lines describing your project</h1>
