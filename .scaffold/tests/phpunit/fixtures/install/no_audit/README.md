@@ -1,4 +1,4 @@
-@@ -16,7 +16,6 @@
+@@ -19,7 +19,6 @@
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
  ![Renovate](https://img.shields.io/badge/renovate-enabled-green?logo=renovatebot)

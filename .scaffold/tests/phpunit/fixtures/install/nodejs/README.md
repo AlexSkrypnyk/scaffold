@@ -1,4 +1,4 @@
-@@ -9,9 +9,7 @@
+@@ -12,9 +12,7 @@
  
  [![GitHub Issues](https://img.shields.io/github/issues/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/issues)
  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/pulls)
@@ -8,7 +8,7 @@
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
  ![LICENSE](https://img.shields.io/github/license/yodashut/force-crystal)
-@@ -34,12 +32,6 @@
+@@ -37,12 +35,6 @@
  
  ## Installation
  
@@ -21,7 +21,7 @@
  Install the Node.js package with npm:
  
  ```bash
-@@ -52,38 +44,12 @@
+@@ -55,38 +47,12 @@
  chmod +x nodejs-script
  ```
  

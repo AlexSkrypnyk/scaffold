@@ -10,7 +10,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'ForceCrystal',
   tagline: 'ForceCrystal documentation',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.svg',
 
   // Set the production url of your site here
   url: 'https://force-crystal.dev/',
@@ -84,6 +84,7 @@ const config = {
         logo: {
           alt: 'force-crystal Logo',
           src: 'img/logo.svg',
+          srcDark: 'img/logo-dark.svg',
         },
         items: [
           {

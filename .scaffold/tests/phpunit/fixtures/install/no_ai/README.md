@@ -1,4 +1,4 @@
-@@ -30,7 +30,6 @@
+@@ -33,7 +33,6 @@
  - Your first feature as a list item
  - Your second feature as a list item
  - Your third feature as a list item
@@ -6,7 +6,7 @@
  
  ## Installation
  
-@@ -105,10 +104,6 @@
+@@ -108,10 +107,6 @@
  The command needs [GitHub CLI](https://cli.github.com) and a GitHub token in `SCAFFOLD_GITHUB_TOKEN`. The [GitHub repository setup](https://getscaffold.dev/github) page lists the permissions the token needs.
  
  After the repository is configured, follow [Harden your project](https://getscaffold.dev/harden) for the security steps that only the project's owner can take, such as earning the OpenSSF Best Practices badge.

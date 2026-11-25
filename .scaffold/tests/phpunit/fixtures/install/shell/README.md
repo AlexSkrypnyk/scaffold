@@ -1,4 +1,4 @@
-@@ -9,8 +9,6 @@
+@@ -12,8 +12,6 @@
  
  [![GitHub Issues](https://img.shields.io/github/issues/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/issues)
  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yodashut/force-crystal.svg)](https://github.com/yodashut/force-crystal/pulls)
@@ -7,7 +7,7 @@
  [![Test Shell](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml/badge.svg)](https://github.com/yodashut/force-crystal/actions/workflows/test-shell.yml)
  [![codecov](https://codecov.io/gh/yodashut/force-crystal/graph/badge.svg)](https://codecov.io/gh/yodashut/force-crystal)
  ![GitHub release (latest by date)](https://img.shields.io/github/v/release/yodashut/force-crystal)
-@@ -34,24 +32,6 @@
+@@ -37,24 +35,6 @@
  
  ## Installation
  
@@ -32,7 +32,7 @@
  Copy the shell script, `force-crystal.sh`, from this repository and make it executable:
  
  ```bash
-@@ -59,26 +39,6 @@
+@@ -62,26 +42,6 @@
  ```
  
  ## Usage
