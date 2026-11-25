@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Scaffold logo">
+  <g fill="none" stroke-linecap="round">
+    <path d="M24 28 104 100M104 28 24 100" stroke="#bf7f4f" stroke-width="7"/>
+    <path d="M24 10v108M104 10v108M24 28h80M24 64h80M24 100h80" stroke="#ff8533" stroke-width="11"/>
+  </g>
+</svg>
