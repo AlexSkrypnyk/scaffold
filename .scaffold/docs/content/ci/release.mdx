@@ -1,7 +1,7 @@
 ---
 title: Release
 sidebar_position: 2
-cspell: ignore RELEASEDRAFTER
+cspell: ignore RELEASEDRAFTER openpgp keyserver gpgv
 ---
 
 # Release
@@ -34,6 +34,29 @@ A version tag is 3 numbers with an optional suffix, such as `1.4.0`, `26.5.1` or
 - The tagged commit is on the default branch.
 
 A tag that fails either check stops the workflow, so nothing gets published from it.
+
+## Signed checksums
+
+Release PHP and Release Node.js attach a `.sha256` checksum file for their assets. With a GPG key in place, each workflow also signs that file and attaches the signature as a `.sha256.asc` file. A signature ties the release to a key the maintainer holds. An attestation ties it only to the repository, so anyone who controls the repository can produce one.
+
+The workflows sign only after you store a key, and print a notice until then. Before a workflow signs, it checks the key with [keys.openpgp.org](https://keys.openpgp.org):
+
+1. It imports `GPG_PRIVATE_KEY` and stops unless the secret holds exactly 1 key.
+2. It fetches the key that keys.openpgp.org has confirmed for the `RELEASE_GPG_KEY_EMAIL` address. The keyserver publishes an address only after its owner confirms it from that mailbox.
+3. It stops the release when the 2 fingerprints differ.
+4. It signs the checksum file and checks the signature with `gpgv` against the keyserver's copy of the key, so a signature by any other key fails.
+
+A key swapped into the repository's secrets can't pass step 3 without access to the address's mailbox.
+
+The signing step runs in the `release` environment of each workflow's publish job. To set up signing, store these secrets in that environment:
+
+| Secret | Value |
+|---|---|
+| `GPG_PRIVATE_KEY` | The armored private key, from `gpg --armor --export-secret-keys KEY_FINGERPRINT` |
+| `RELEASE_GPG_KEY_EMAIL` | The address keys.openpgp.org has confirmed for the key |
+| `GPG_PASSPHRASE` | The key's passphrase, for a key that has one |
+
+Upload the public key to keys.openpgp.org and confirm the address before the first signed release. The generated project's `RELEASING.md` lists the commands. To have a reviewer approve each release before the job reads the key, add **Required reviewers** to the `release` environment.
 
 [//]: # (#;< RELEASEDRAFTER)
 

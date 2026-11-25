@@ -1,7 +1,7 @@
 ---
 title: Release
 sidebar_position: 7
-cspell: ignore intoto
+cspell: ignore intoto openpgp
 ---
 
 # Release
@@ -45,12 +45,13 @@ The `Build PHP release` job has read-only access to the repository contents. It 
 
 On a private repository, the job skips the attestation and the bundle, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud.
 
-The `Publish PHP release` job has write access to the repository contents. It runs these steps:
+The `Publish PHP release` job has write access to the repository contents and runs in the `release` environment. It runs these steps:
 
-1. Stops with an error when the release for the tag is already published.
-2. Moves Release Drafter's draft to the tag. Without a draft, it creates a draft release with generated notes.
-3. Attaches the asset and both files to the draft, replacing any asset of the same name.
-4. On a project without Node.js, publishes the release. A tag with a suffix becomes a pre-release, and only the highest version becomes the latest release.
+1. Signs `REPO-php-TAG.sha256` as `REPO-php-TAG.sha256.asc` when the environment holds a signing key, as [Signed checksums](../ci/release.mdx#signed-checksums) describes.
+2. Stops with an error when the release for the tag is already published.
+3. Moves Release Drafter's draft to the tag. Without a draft, it creates a draft release with generated notes.
+4. Attaches the asset, the checksum file, the attestation bundle and any signature to the draft, replacing any asset of the same name.
+5. On a project without Node.js, publishes the release. A tag with a suffix becomes a pre-release, and only the highest version becomes the latest release.
 
 ## Verify a release
 
@@ -65,7 +66,15 @@ Anyone who downloads the PHAR or the script can confirm that your repository's r
 
    On macOS, run `shasum -a 256 --check --ignore-missing REPO-php-TAG.sha256` instead.
 
-3. Check the attestation with [GitHub CLI](https://cli.github.com/):
+3. When the release lists `REPO-php-TAG.sha256.asc`, download it and check the signature. `gpg` fetches the signing key from keys.openpgp.org:
+
+   ```bash
+   gpg --keyserver hkps://keys.openpgp.org --auto-key-retrieve --verify REPO-php-TAG.sha256.asc REPO-php-TAG.sha256
+   ```
+
+   Confirm that `gpg` reports a good signature from a maintainer's address.
+
+4. Check the attestation with [GitHub CLI](https://cli.github.com/):
 
    ```bash
    gh attestation verify ASSET --repo OWNER/REPO

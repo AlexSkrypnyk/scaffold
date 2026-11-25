@@ -110,19 +110,17 @@ getscaffold.dev/install.sh serves the `install.sh` attached to the latest publis
 
    ```bash
    BASE=https://github.com/AlexSkrypnyk/scaffold/releases/latest/download
-   RAW=https://raw.githubusercontent.com/AlexSkrypnyk/scaffold/main
+   KEY=86F077A2E80667D7CF4A3320EDEAF2FCD434756C
 
    curl -fsSLO $BASE/SHA256SUMS
    curl -fsSLO $BASE/SHA256SUMS.asc
-   curl -fsSLO $RAW/install-key.asc
 
-   gpg --show-keys --with-fingerprint install-key.asc
-   gpg --import install-key.asc
+   gpg --keyserver hkps://keys.openpgp.org --recv-keys $KEY
    gpg --verify SHA256SUMS.asc SHA256SUMS
    sha256sum -c SHA256SUMS    # macOS: shasum -a 256 -c SHA256SUMS
    ```
 
-   Confirm that `gpg --verify` reports a good signature from the key with this fingerprint:
+   Confirm that `gpg --verify` reports a good signature from `alex+scaffold@drevops.com` and the key with this fingerprint:
 
    ```text
    86F0 77A2 E806 67D7 CF4A  3320 EDEA F2FC D434 756C

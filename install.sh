@@ -673,6 +673,8 @@ remove_unused_release_signing() {
 
   rm -Rf .github/actions/sign-checksums || true
   rmdir .github/actions >/dev/null 2>&1 || true
+
+  remove_tokens_with_content "RELEASE_SIGNING"
 }
 
 ##
