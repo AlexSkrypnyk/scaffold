@@ -10,18 +10,26 @@ The `Release PHP` workflow attaches your PHP command app's PHAR, or your single-
 
 ## Publish a release
 
-A project that also has Node.js releases with a version tag from `npm version`, as [Node.js release](../nodejs/release.mdx) describes, and the PHP assets go on the same release.
+On a project that also has Node.js, release with `npm version`, as [Node.js release](../nodejs/release.mdx) describes. `Release PHP` attaches the PHP assets to the draft, and `Release Node.js` publishes the release.
 
-Publishing a release on the **Releases** page creates its tag, and the tag starts the `Release PHP` workflow. With [Release Drafter](../ci/release-drafter.mdx), a draft release already holds the notes for every pull request merged into `main`.
+On any other PHP project, a release starts with a version tag you push. `Release PHP` attaches the assets to the draft release and then publishes it. Every asset is in place before the release is published, so the release works with [immutable releases](../github.mdx#immutable-releases). With [Release Drafter](../ci/release-drafter.mdx), the draft already holds the notes for every pull request merged into `main`. Without a draft, the workflow creates a release with generated notes.
+
+Release only by pushing the tag. `Release PHP` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
 
 To publish a release:
 
-1. On your repository's **Releases** page, click **Edit** on the draft release and edit its notes if they need it. Without a draft, click **Draft a new release** and enter a new version tag, such as `1.4.0`.
-2. Click **Publish release**. GitHub creates the tag.
-3. On the **Actions** tab, open the `Release PHP` run for the tag. Confirm that it passes.
-4. Open the release. Confirm that it lists the PHAR or the script, `REPO-php-TAG.sha256` and `REPO-php-TAG.intoto.jsonl`.
+1. Optional: On your repository's **Releases** page, open the draft release and edit its notes.
+2. On an up-to-date `main`, tag the commit with a new version and push the tag:
 
-The workflow attaches the assets after you publish, so leave immutable releases off. An immutable release accepts no assets after it's published. The [GitHub repository setup](../github.mdx#immutable-releases) skips the setting for a project with this workflow and no Node.js release.
+   ```bash
+   git tag 1.4.0
+   git push origin 1.4.0
+   ```
+
+3. On the **Actions** tab, open the `Release PHP` run for the tag. Confirm that it passes.
+4. Open the release. Confirm that it's published and lists the PHAR or the script, `REPO-php-TAG.sha256` and `REPO-php-TAG.intoto.jsonl`.
+
+A version with a suffix, such as `1.4.0-rc.1`, becomes a GitHub pre-release.
 
 ## What the workflow does
 
@@ -37,7 +45,12 @@ The `Build PHP release` job has read-only access to the repository contents. It 
 
 On a private repository, the job skips the attestation and the bundle, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud.
 
-The `Publish PHP release` job has write access to the repository contents. It attaches the asset and both files to the release for the tag, replacing any asset of the same name. A tag you push with `git push` has no release yet. For such a tag, the job moves the draft to the tag and leaves it as a draft for you to publish.
+The `Publish PHP release` job has write access to the repository contents. It runs these steps:
+
+1. Stops with an error when the release for the tag is already published.
+2. Moves Release Drafter's draft to the tag. Without a draft, it creates a draft release with generated notes.
+3. Attaches the asset and both files to the draft, replacing any asset of the same name.
+4. On a project without Node.js, publishes the release. A tag with a suffix becomes a pre-release, and only the highest version becomes the latest release.
 
 ## Verify a release
 

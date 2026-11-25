@@ -73,10 +73,14 @@ Content blocks can be conditionally included/excluded using special tokens:
 - `PHP_RELEASE` - Documentation of `release-php.yml`, which exists only to attach
   an asset to a tag. `remove_php_release()` deletes the workflow, its `zizmor.yml`
   suppression entries and these blocks for the two modes that release no asset: a
-  class library, and a command app built without a PHAR
+  class library, and a command app built without a PHAR. `!PHP_RELEASE` marks
+  what applies only without that workflow, such as the **Publish release** steps
+  of `RELEASING.dist.md`, and `remove_non_php_release()` removes it when the
+  workflow stays
 - `SHELL` - Shell script features
 - `NODEJS` - NodeJS features; `!NODEJS` marks what applies only without NodeJS,
-  such as the **Publish release** steps of `RELEASING.dist.md`
+  such as the `Release PHP` publish step and the tag-push steps of
+  `RELEASING.dist.md` for a PHP project
 - `NODEJS_LIBRARY` - The commented `/package-lock.json` rule in `.gitignore`,
   uncommented for a NodeJS library (`--nodejs-library`) and removed for an
   application
