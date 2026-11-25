@@ -109,6 +109,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
+    # The signing key is a secret of this environment, so its protection rules
+    # apply before the job can read the key.
+    environment: release
+
     permissions:
       actions: read # Wait for the other release runs.
       contents: write # Upload the assets and publish the release.
@@ -120,10 +124,26 @@ jobs:
       cancel-in-progress: false
 
     steps:
+      - name: Checkout the signing action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: .github/actions
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - name: Download release assets
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: release-nodejs
+
+      # Signs before anything is published, so a key problem stops the release.
+      - name: Sign checksums
+        uses: ./.github/actions/sign-checksums
+        with:
+          checksums: .release/${{ github.event.repository.name }}-nodejs-${{ github.ref_name }}.sha256
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          key-email: ${{ secrets.RELEASE_GPG_KEY_EMAIL }}
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7

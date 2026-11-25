@@ -24,21 +24,29 @@ gpg_signed_by() {
   GPG_FINGERPRINT="${1}"
   gpg() {
     case " $* " in
-      *" --import "*) echo "gpg import $*" >>"${BATS_TEST_TMPDIR}/gpg.log" ;;
+      *" --recv-keys "*) echo "gpg $*" >>"${BATS_TEST_TMPDIR}/gpg.log" ;;
       *" --verify "*) echo "[GNUPG:] VALIDSIG ${GPG_FINGERPRINT} 2026-11-10 1762732800 0 4 0 1 10 00 ${GPG_FINGERPRINT}" ;;
     esac
   }
 }
 
-@test "SCAFFOLD_PUBLIC_KEY points at the published key" {
-  assert_equal "${SCAFFOLD_PUBLIC_KEY}" "$(pwd)/install-key.asc"
-  assert_file_exists "${SCAFFOLD_PUBLIC_KEY}"
+@test "SCAFFOLD_KEYSERVER defaults to keys.openpgp.org" {
+  assert_equal "${SCAFFOLD_KEYSERVER}" "hkps://keys.openpgp.org"
 }
 
-@test "the published key has the pinned fingerprint" {
-  run gpg --show-keys --with-colons "${SCAFFOLD_PUBLIC_KEY}"
-  assert_success
-  assert_output_contains "fpr:::::::::${SCAFFOLD_SIGNING_KEY_FINGERPRINT}:"
+@test "main fails when the signing key cannot be fetched" {
+  local dir
+  dir="$(release_dir)"
+  gpg() {
+    case " $* " in
+      *" --recv-keys "*) return 2 ;;
+      *" --verify "*) echo "gpg --verify must not be called" ;;
+    esac
+  }
+  run main "${dir}"
+  assert_failure
+  assert_output_contains "Error: could not fetch the Scaffold signing key ${SCAFFOLD_SIGNING_KEY_FINGERPRINT} from hkps://keys.openpgp.org."
+  assert_output_not_contains "gpg --verify must not be called"
 }
 
 @test "the script runs main when executed" {
@@ -127,5 +135,5 @@ gpg_signed_by() {
   assert_success
   assert_output_contains "SHA256SUMS is signed by the Scaffold signing key ${SCAFFOLD_SIGNING_KEY_FINGERPRINT}."
   assert_output_contains "install.sh: OK (in ${dir})"
-  assert_file_contains "${BATS_TEST_TMPDIR}/gpg.log" "--import ${SCAFFOLD_PUBLIC_KEY}"
+  assert_file_contains "${BATS_TEST_TMPDIR}/gpg.log" "--keyserver hkps://keys.openpgp.org --recv-keys ${SCAFFOLD_SIGNING_KEY_FINGERPRINT}"
 }

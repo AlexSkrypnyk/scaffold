@@ -68,27 +68,17 @@ jobs:
         working-directory: .release
         run: sha256sum install.sh > SHA256SUMS
 
-      - name: Import GPG key
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        run: |
-          [ -n "${GPG_PRIVATE_KEY}" ] || { echo "::error::The GPG_PRIVATE_KEY secret of the 'release' environment is not set."; exit 1; }
-          echo "${GPG_PRIVATE_KEY}" | gpg --batch --import
-
-      # GPG_PASSPHRASE is needed only for a key that has a passphrase.
       - name: Sign checksums
-        working-directory: .release
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          if [ -n "${GPG_PASSPHRASE}" ]; then
-            echo "${GPG_PASSPHRASE}" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --detach-sign --armor SHA256SUMS
-          else
-            gpg --batch --yes --detach-sign --armor SHA256SUMS
-          fi
+        uses: ./.github/actions/sign-checksums
+        with:
+          checksums: .release/SHA256SUMS
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          key-email: ${{ secrets.RELEASE_GPG_KEY_EMAIL }}
+          required: 'true'
 
-      # 'gpg --verify' accepts any key in the keyring, so the signature must
-      # come from the fingerprint of the published key.
+      # The signature must also come from the fingerprint that installer users
+      # pin.
       - name: Verify signature
         run: .scaffold/installer/verify-release.sh .release
 

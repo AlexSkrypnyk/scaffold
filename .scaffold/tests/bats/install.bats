@@ -2128,6 +2128,40 @@ create_release_project() {
   assert_file_contains "${tmpdir}/zizmor.yml" "release-php.yml"
 }
 
+@test "remove_unused_release_signing keeps the signing action while a release workflow uses it" {
+  local tmpdir="${BATS_TEST_TMPDIR}/release_signing_used"
+  mkdir -p "${tmpdir}/.github/actions/sign-checksums" "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/actions/sign-checksums/action.yml"
+
+  local workflow
+  for workflow in release-php.yml release-nodejs.yml; do
+    rm -f "${tmpdir}/.github/workflows/"release-*.yml
+    touch "${tmpdir}/.github/workflows/${workflow}"
+
+    pushd "${tmpdir}" >/dev/null || return 1
+    run remove_unused_release_signing
+    popd >/dev/null || return 1
+
+    assert_success
+    assert_file_exists "${tmpdir}/.github/actions/sign-checksums/action.yml"
+  done
+}
+
+@test "remove_unused_release_signing removes the signing action when no release workflow uses it" {
+  local tmpdir="${BATS_TEST_TMPDIR}/release_signing_unused"
+  mkdir -p "${tmpdir}/.github/actions/sign-checksums" "${tmpdir}/.github/workflows"
+  touch "${tmpdir}/.github/actions/sign-checksums/action.yml"
+  touch "${tmpdir}/.github/workflows/release-docker.yml"
+
+  pushd "${tmpdir}" >/dev/null || return 1
+  run remove_unused_release_signing
+  popd >/dev/null || return 1
+
+  assert_success
+  assert_dir_not_exists "${tmpdir}/.github/actions"
+  assert_file_exists "${tmpdir}/.github/workflows/release-docker.yml"
+}
+
 @test "collect_interactive declines both entry points without asking for a script name" {
   run collect_interactive <<<"$(printf 'AcmeApp\nacme-app\nJane Doe\ny\nn\nn\n')"
 

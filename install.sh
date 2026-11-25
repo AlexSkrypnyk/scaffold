@@ -665,6 +665,17 @@ remove_php_release() {
 }
 
 ##
+# Remove the checksum signing action when no release workflow uses it.
+#
+remove_unused_release_signing() {
+  [ -f .github/workflows/release-php.yml ] && return 0
+  [ -f .github/workflows/release-nodejs.yml ] && return 0
+
+  rm -Rf .github/actions/sign-checksums || true
+  rmdir .github/actions >/dev/null 2>&1 || true
+}
+
+##
 # Remove the notes that apply only to a project without a PHP release asset.
 #
 remove_non_php_release() {
@@ -1174,7 +1185,6 @@ process_internal() {
 
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
-  rm -f install-key.asc || true
   rm -Rf ".scaffold" || true
 
   remove_scaffold_workflows
@@ -3715,6 +3725,8 @@ process_project() {
       remove_nodejs_library
     fi
   fi
+
+  remove_unused_release_signing
 
   if [ "${use_shell}" = "y" ]; then
     replace_string_content "shell-command.sh" "${shell_command_name}.sh"
