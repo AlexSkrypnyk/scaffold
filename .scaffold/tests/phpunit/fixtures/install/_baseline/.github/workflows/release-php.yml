@@ -129,8 +129,6 @@ jobs:
           name: release-php
           path: .release
 
-      # Publishing stays with the maintainer, so the release is never published
-      # here.
       - name: Attach assets to the release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -142,7 +140,15 @@ jobs:
             gh run watch "${run}" > /dev/null || true
           done
 
-          if ! gh release view "${TAG}" > /dev/null 2>&1; then
+          state="$(gh release view "${TAG}" --json isDraft --jq 'if .isDraft then "draft" else "published" end' || echo 'none')"
+
+          # An immutable release takes no assets once published.
+          if [ "${state}" = 'published' ]; then
+            echo "::error::Release '${TAG}' is already published. Release with a tag push, not with the Publish release button."
+            exit 1
+          fi
+
+          if [ "${state}" = 'none' ]; then
             # Release Drafter names its draft after the version it guesses,
             # which can differ from the pushed tag. A draft whose tag exists
             # already belongs to another release.
@@ -165,3 +171,4 @@ jobs:
           fi
 
           gh release upload "${TAG}" .release/* --clobber
+
