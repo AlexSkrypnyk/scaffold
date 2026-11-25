@@ -6,7 +6,7 @@
 -  tagline: 'ForceCrystal documentation',
 +  title: 'StarForge',
 +  tagline: 'StarForge documentation',
-   favicon: 'img/favicon.ico',
+   favicon: 'img/logo.svg',
  
    // Set the production url of your site here
 -  url: 'https://force-crystal.dev/',
@@ -32,14 +32,16 @@
          },
          blog: false,
          theme: {
-@@ -82,18 +82,18 @@
+@@ -82,7 +82,7 @@
        image: 'img/social-card.jpg',
        navbar: {
          logo: {
 -          alt: 'force-crystal Logo',
 +          alt: 'star-forge Logo',
            src: 'img/logo.svg',
+           srcDark: 'img/logo-dark.svg',
          },
+@@ -89,12 +89,12 @@
          items: [
            {
              label: 'Download',
@@ -54,7 +56,7 @@
              label: 'GitHub',
              position: 'right',
              title: 'View source on GitHub',
-@@ -109,10 +109,10 @@
+@@ -110,10 +110,10 @@
          links: [
            {
              label: 'GitHub',
