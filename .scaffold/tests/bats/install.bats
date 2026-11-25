@@ -1660,6 +1660,7 @@ copy_logos() {
     "yourproject" 'font-size="20"' ">Y</text>"
     "my-very-long-project-name" 'font-size="8"' ">M</text>"
     "9lives" 'font-size="36"' ">9</text>"
+    "$(printf 'a%.0s' {1..221})" 'font-size="1"' ">A</text>"
   )
 
   local i

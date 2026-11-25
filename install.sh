@@ -1103,6 +1103,7 @@ process_logo() {
 
   size=$((220 / ${#project}))
   [ "${size}" -gt 40 ] && size=40
+  [ "${size}" -lt 1 ] && size=1
   initial="$(echo "${project:0:1}" | tr '[:lower:]' '[:upper:]')"
 
   for file in logo.svg logo-dark.svg; do
