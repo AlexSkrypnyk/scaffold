@@ -1,4 +1,4 @@
-@@ -14,26 +14,10 @@
+@@ -79,26 +79,10 @@
  
  ### PHP release asset
  
@@ -6,7 +6,7 @@
 +`Release PHP` builds `star-forge.phar` and attaches it to the release. Its checksum and attestation go in `force-crystal-php-TAG.sha256` and `force-crystal-php-TAG.intoto.jsonl`.
  
 -### npm package
-+`Release PHP` attaches the assets after the release is published, so leave **Enable release immutability** off under **Settings > General > Releases**. GitHub accepts no new assets on an immutable release.
++Then the workflow publishes the release.
  
 -`Release Node.js` publishes the package to npm and attaches `nodejs-script` to the release. Its checksum and attestation go in `force-crystal-nodejs-TAG.sha256` and `force-crystal-nodejs-TAG.intoto.jsonl`. Then the workflow publishes the release.
 -
@@ -27,27 +27,33 @@
  ### Documentation site
  
  `Release docs` deploys the documentation site to GitHub Pages. The deploy fails until GitHub Pages accepts a deploy from a tag.
-@@ -45,31 +29,15 @@
+@@ -110,31 +94,24 @@
  
  ## Release a version
  
 -A release of this project starts on your machine, with `npm version`. Follow 2 rules for every release:
-+A release of this project starts on the repository's **Releases** page. Publishing a release creates its tag, and the tag starts the release workflows.
++A release of this project starts on your machine, with a version tag. Follow 2 rules for every release:
  
 -- Release only by pushing the tag. `Release Node.js` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
 -- Push 1 version tag at a time. `Release Node.js` publishes 1 tag at a time, and each newly waiting run cancels the run that waited before it.
--
- To release a version:
++- Release only by pushing the tag. `Release PHP` stops on a published release, so clicking **Publish release** on the draft leaves the release without its assets.
++- Push 1 version tag at a time. `Release PHP` publishes 1 tag at a time, and each newly waiting run cancels the run that waited before it.
  
--1. Optional: On the repository's **Releases** page, open the draft release and edit its notes.
+ Before the first release, set up [release signing](#release-signing). To release a version:
+ 
+ 1. Optional: On the repository's **Releases** page, open the draft release and edit its notes.
 -2. On an up-to-date `main` with no uncommitted changes, set the version:
--
--   ```bash
++2. On an up-to-date `main`, tag the commit and push the tag:
+ 
+    ```bash
 -   npm version __VERSION__
--   ```
--
++   git tag __VERSION__
++   git push origin __VERSION__
+    ```
+ 
 -   `npm version` sets the version in `package.json`, commits the change and tags the commit `__VERSION__`. The project's `.npmrc` sets the commit message to `Released __VERSION__.` and drops the `v` from the tag.
--
++3. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that everything in [What a release publishes](#what-a-release-publishes) is published. Re-run a canceled or failed run from the same tab.
+ 
 -3. Push the commit and the tag:
 -
 -   ```bash
@@ -57,11 +63,7 @@
 -4. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that everything in [What a release publishes](#what-a-release-publishes) is published. Re-run a canceled or failed run from the same tab.
 -
 -To release a pre-release, set a version with a suffix, such as `npm version __VERSION__`. `Release Node.js` publishes it under the `next` npm dist-tag and marks its GitHub release as a pre-release.
-+1. On the **Releases** page, click **Edit** on the draft release. Without a draft, click **Draft a new release**.
-+2. Set the tag to the new version, such as `__VERSION__`.
-+3. Optional: Edit the release notes.
-+4. Click **Publish release**. GitHub creates the tag.
-+5. On the **Actions** tab, open each release workflow's run for the tag. Confirm that every run passes and that everything in [What a release publishes](#what-a-release-publishes) is published.
++To release a pre-release, tag a version with a suffix, such as `__VERSION__`. `Release PHP` marks its GitHub release as a pre-release.
  
  ## Change the release process
  

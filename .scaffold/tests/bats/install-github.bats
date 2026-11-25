@@ -200,10 +200,6 @@ github_setup() {
   rm -f "${GH_CREATED}" "${GH_RULESET_CREATED}" "${GH_TAG_RULESET_CREATED}" "${GH_RUN_LIST_COUNT}"
   mkdir -p "${GH_WORKFLOWS}"
 
-  # The tests run in the template, which ships both release workflows.
-  GITHUB_POST_PUBLISH_WORKFLOW="${BATS_TEST_TMPDIR}/release-php.yml"
-  GITHUB_PUBLISH_WORKFLOW="${BATS_TEST_TMPDIR}/release-nodejs.yml"
-
   # Commits need an identity, and the developer's own git config stays out.
   export GIT_CONFIG_GLOBAL="${BATS_TEST_TMPDIR}/gitconfig"
   export GIT_CONFIG_NOSYSTEM=1
@@ -936,14 +932,35 @@ gh api --method PUT repos/acme/app/immutable-releases --silent"
   assert_output ""
 }
 
-@test "github_apply_immutable_releases skips a project whose release workflow attaches assets after publishing" {
+@test "github_apply_immutable_releases enables releases on a project that releases PHP assets only" {
   github_setup
   GH_IMMUTABLE="false false"
-  touch "${GITHUB_POST_PUBLISH_WORKFLOW}"
+  local project="${BATS_TEST_TMPDIR}/php-release-project"
+  mkdir -p "${project}/.github/workflows"
+  echo 'gh release edit TAG --draft=false' >"${project}/.github/workflows/release-php.yml"
 
+  pushd "${project}" >/dev/null || return 1
   run github_apply_immutable_releases
+  popd >/dev/null || return 1
   assert_success
-  assert_output "  Immutable releases: skipped (release-php.yml attaches assets after the release is published)"
+  assert_output "  Immutable releases: enabled"
+
+  run cat "${GH_WRITES}"
+  assert_output "gh api --method PUT repos/acme/app/immutable-releases --silent"
+}
+
+@test "github_apply_immutable_releases skips a PHP-only project whose release workflow never publishes the release" {
+  github_setup
+  GH_IMMUTABLE="false false"
+  local project="${BATS_TEST_TMPDIR}/php-release-outdated"
+  mkdir -p "${project}/.github/workflows"
+  echo 'gh release upload TAG .release/* --clobber' >"${project}/.github/workflows/release-php.yml"
+
+  pushd "${project}" >/dev/null || return 1
+  run github_apply_immutable_releases
+  popd >/dev/null || return 1
+  assert_success
+  assert_output "  Immutable releases: skipped (release-php.yml attaches assets after the release is published; update the project from Scaffold first)"
   assert_no_writes
 
   run cat "${GH_READS}"
@@ -953,9 +970,14 @@ gh api --method PUT repos/acme/app/immutable-releases --silent"
 @test "github_apply_immutable_releases enables releases when the Node.js release workflow publishes them" {
   github_setup
   GH_IMMUTABLE="false false"
-  touch "${GITHUB_POST_PUBLISH_WORKFLOW}" "${GITHUB_PUBLISH_WORKFLOW}"
+  local project="${BATS_TEST_TMPDIR}/php-nodejs-release-project"
+  mkdir -p "${project}/.github/workflows"
+  echo 'gh release upload TAG .release/* --clobber' >"${project}/.github/workflows/release-php.yml"
+  touch "${project}/.github/workflows/release-nodejs.yml"
 
+  pushd "${project}" >/dev/null || return 1
   run github_apply_immutable_releases
+  popd >/dev/null || return 1
   assert_success
   assert_output "  Immutable releases: enabled"
 }

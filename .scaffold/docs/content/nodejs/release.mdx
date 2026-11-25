@@ -1,7 +1,7 @@
 ---
 title: Release
 sidebar_position: 5
-cspell: ignore intoto
+cspell: ignore intoto openpgp gpgv
 ---
 
 # Release
@@ -67,12 +67,13 @@ The `Build Node.js release` job has read-only access to the repository contents.
 
 On a private repository, the job skips the attestation and the bundle, because GitHub offers attestations for private repositories only on GitHub Enterprise Cloud.
 
-The `Publish Node.js release` job has write access to the repository contents. It runs these steps:
+The `Publish Node.js release` job has write access to the repository contents and runs in the `release` environment. It runs these steps:
 
-1. Publishes the package to npm with provenance. It skips npm when the version is already there, so a rerun doesn't fail.
-2. Waits for any running `Draft release notes` run, because that run sets the draft's tag back to its own guess.
-3. Renames the draft to the tag and fixes the version in its compare link. Without a draft, it creates a release with generated notes.
-4. Attaches `nodejs-script` and both files, then publishes the release.
+1. Checks that the tag still points to the commit the assets were built from. Then it signs `REPO-nodejs-TAG.sha256` as `REPO-nodejs-TAG.sha256.asc`, as [Release signing](../ci/release.mdx#release-signing) describes.
+2. Publishes the package to npm with provenance. It skips npm when the version is already there, so a rerun doesn't fail.
+3. Waits for any running `Draft release notes` run, because that run sets the draft's tag back to its own guess.
+4. Renames the draft to the tag and fixes the version in its compare link. Without a draft, it creates a release with generated notes.
+5. Attaches `nodejs-script`, the checksum file, the attestation bundle and any signature, then publishes the release.
 
 A release becomes the latest GitHub release only when no published release has a higher version. Push 1 version tag at a time. GitHub starts no workflow for a push that holds more than 3 tags. Release runs for different tags publish 1 at a time. When 2 or more runs wait behind a running release, GitHub cancels every waiting run except the newest, so re-run each canceled release from the **Actions** tab.
 
@@ -89,10 +90,19 @@ Anyone who downloads `nodejs-script` can confirm that your repository's release 
 
    On macOS, run `shasum -a 256 --check REPO-nodejs-TAG.sha256` instead.
 
-3. Check the attestation with [GitHub CLI](https://cli.github.com/):
+3. Download `REPO-nodejs-TAG.sha256.asc`. Check the signature against the key that keys.openpgp.org has confirmed for the project's signing address:
+
+   ```bash
+   curl -fsSL https://keys.openpgp.org/vks/v1/by-email/SIGNING_ADDRESS | gpg --dearmor > release-key.gpg
+   gpgv --keyring ./release-key.gpg REPO-nodejs-TAG.sha256.asc REPO-nodejs-TAG.sha256
+   ```
+
+   `gpgv` trusts only the key in `release-key.gpg`, so a signature by any other key fails.
+
+4. Check the attestation with [GitHub CLI](https://cli.github.com/):
 
    ```bash
    gh attestation verify nodejs-script --repo OWNER/REPO
    ```
 
-Replace `OWNER/REPO` with the repository and `TAG` with the release's tag. To check the attestation without reading it from GitHub, download `REPO-nodejs-TAG.intoto.jsonl` too and add `--bundle REPO-nodejs-TAG.intoto.jsonl` to the `gh attestation verify` command. For the npm package, run `npm audit signatures` in a project that installs it.
+Replace `OWNER/REPO` with the repository, `SIGNING_ADDRESS` with the address that `SECURITY.md` names and `TAG` with the release's tag. To check the attestation without reading it from GitHub, download `REPO-nodejs-TAG.intoto.jsonl` too and add `--bundle REPO-nodejs-TAG.intoto.jsonl` to the `gh attestation verify` command. For the npm package, run `npm audit signatures` in a project that installs it.

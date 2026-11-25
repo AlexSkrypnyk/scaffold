@@ -160,12 +160,6 @@ GITHUB_RULESET_NAME="default-branch"
 # Ruleset that limits who can create, move and delete tags.
 GITHUB_TAG_RULESET_NAME="tags"
 
-# Release workflow that attaches its assets after the release is published.
-GITHUB_POST_PUBLISH_WORKFLOW=".github/workflows/release-php.yml"
-
-# Release workflow that publishes the release once every asset is attached.
-GITHUB_PUBLISH_WORKFLOW=".github/workflows/release-nodejs.yml"
-
 # Ref (tag, branch, or commit) to bootstrap the template from when the script is
 # run without the template present. Empty means "use the release of
 # SCAFFOLD_VERSION", or the default branch for "dev".
@@ -668,6 +662,23 @@ remove_php_release() {
   remove_zizmor_entry "release-php.yml"
 
   remove_tokens_with_content "PHP_RELEASE"
+}
+
+##
+# Remove the checksum signing notes when no release workflow signs checksums.
+#
+remove_unused_release_signing() {
+  [ -f .github/workflows/release-php.yml ] && return 0
+  [ -f .github/workflows/release-nodejs.yml ] && return 0
+
+  remove_tokens_with_content "RELEASE_SIGNING"
+}
+
+##
+# Remove the notes that apply only to a project without a PHP release asset.
+#
+remove_non_php_release() {
+  remove_tokens_with_content "!PHP_RELEASE"
 }
 
 remove_php_script() {
@@ -1173,7 +1184,6 @@ process_internal() {
 
   namespace_lowercase="$(to_lowercase "${namespace}")"
 
-  rm -f install-key.asc || true
   rm -Rf ".scaffold" || true
 
   remove_scaffold_workflows
@@ -1963,17 +1973,19 @@ github_immutable_releases_status() {
 # cannot change.
 #
 # GitHub can still read the setting as off right after a successful write, so
-# it is read back and written once more when it did not take. A published
-# immutable release takes no assets, so a project whose release workflow
-# attaches them after publishing is skipped. With both workflows, the
-# publishing one waits for the other's assets.
+# it is read back and written once more when it did not take.
+#
+# A PHP-only 'release-php.yml' that never publishes the release attaches its
+# assets after the maintainer publishes, and an immutable release rejects
+# them, so such a project is skipped.
 #
 github_apply_immutable_releases() {
   local slug="${github_owner}/${github_repo}"
   local output=""
+  local workflow=".github/workflows/release-php.yml"
 
-  if [ -f "${GITHUB_POST_PUBLISH_WORKFLOW}" ] && [ ! -f "${GITHUB_PUBLISH_WORKFLOW}" ]; then
-    echo "  Immutable releases: skipped (${GITHUB_POST_PUBLISH_WORKFLOW##*/} attaches assets after the release is published)"
+  if [ -f "${workflow}" ] && [ ! -f .github/workflows/release-nodejs.yml ] && ! grep -q -- '--draft=false' "${workflow}"; then
+    echo "  Immutable releases: skipped (release-php.yml attaches assets after the release is published; update the project from Scaffold first)"
     return 0
   fi
 
@@ -3689,6 +3701,8 @@ process_project() {
       if [ "${use_php_command_build:-n}" != "y" ]; then
         remove_php_command_build
         remove_php_release
+      else
+        remove_non_php_release
       fi
 
       replace_string_content "php-command" "${php_command_name}"
@@ -3700,6 +3714,7 @@ process_project() {
       remove_php_command_build
       remove_php_classes
       remove_php_library
+      remove_non_php_release
       replace_string_content "php-script" "${php_script_name}"
       mv "php-script" "${php_script_name}" >/dev/null 2>&1 || true
     else
@@ -3719,6 +3734,8 @@ process_project() {
       remove_nodejs_library
     fi
   fi
+
+  remove_unused_release_signing
 
   if [ "${use_shell}" = "y" ]; then
     replace_string_content "shell-command.sh" "${shell_command_name}.sh"

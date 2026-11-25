@@ -4,7 +4,7 @@
 #
 # Passes when 'SHA256SUMS.asc' is a valid signature of 'SHA256SUMS' made with
 # the Scaffold signing key, and every file that 'SHA256SUMS' names matches its
-# checksum. The key comes from 'install-key.asc' in the repository root.
+# checksum. The key comes from keys.openpgp.org.
 #
 # @usage:
 # .scaffold/installer/verify-release.sh <directory>
@@ -16,7 +16,7 @@ set -euo pipefail
 # signing key is pinned by fingerprint.
 SCAFFOLD_SIGNING_KEY_FINGERPRINT="86F077A2E80667D7CF4A3320EDEAF2FCD434756C"
 
-SCAFFOLD_PUBLIC_KEY="${SCAFFOLD_PUBLIC_KEY:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/install-key.asc}"
+SCAFFOLD_KEYSERVER="${SCAFFOLD_KEYSERVER:-hkps://keys.openpgp.org}"
 
 main() {
   local dir="${1:-}"
@@ -34,7 +34,10 @@ main() {
     fi
   done
 
-  gpg --batch --quiet --import "${SCAFFOLD_PUBLIC_KEY}"
+  if ! gpg --batch --quiet --keyserver "${SCAFFOLD_KEYSERVER}" --recv-keys "${SCAFFOLD_SIGNING_KEY_FINGERPRINT}"; then
+    echo "Error: could not fetch the Scaffold signing key ${SCAFFOLD_SIGNING_KEY_FINGERPRINT} from ${SCAFFOLD_KEYSERVER}." >&2
+    return 1
+  fi
 
   local status
   status="$(gpg --batch --status-fd 1 --verify "${dir}/SHA256SUMS.asc" "${dir}/SHA256SUMS" 2>/dev/null || true)"

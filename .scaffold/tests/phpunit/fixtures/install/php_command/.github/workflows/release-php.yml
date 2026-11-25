@@ -15,3 +15,35 @@
  
        - name: Generate checksums
          working-directory: .release
+@@ -229,3 +229,31 @@
+           fi
+ 
+           gh release upload "${TAG}" .release/* --clobber
++
++      - name: Publish the release
++        env:
++          GH_TOKEN: ${{ github.token }}
++          GH_REPO: ${{ github.repository }}
++          TAG: ${{ github.ref_name }}
++        run: |
++          prerelease='false'
++          if [[ "${TAG}" == *-* ]]; then
++            prerelease='true'
++          fi
++
++          # A release for an older version must not take "latest" from a newer one.
++          latest='false'
++          if [ "${prerelease}" = 'false' ]; then
++            if ! tags="$(gh release list --exclude-drafts --exclude-pre-releases --limit 1000 --json tagName --jq '.[].tagName')"; then
++              echo '::error::Could not list the published releases.'
++              exit 1
++            fi
++            # Older releases can carry a 'v' prefix, which sorts after digits,
++            # or a tag that isn't a version at all.
++            highest="$(printf '%s\n%s\n' "${tags}" "${TAG}" | sed 's/^v//' | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
++            if [ "${highest}" = "${TAG}" ]; then
++              latest='true'
++            fi
++          fi
++
++          gh release edit "${TAG}" --draft=false --prerelease="${prerelease}" --latest="${latest}" --verify-tag

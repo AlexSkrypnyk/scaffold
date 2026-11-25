@@ -289,7 +289,7 @@ Key workflows:
 
 - `.github/workflows/test-php.yml` - PHP testing
 [//]: # (#;< PHP_RELEASE)
-- `.github/workflows/release-php.yml` - Runs on the tag that publishing the draft release creates: checks it, then attaches the asset, its checksum and its provenance attestation to the release
+- `.github/workflows/release-php.yml` - Runs on a pushed version tag: checks it, then attaches the asset, its checksum and its provenance attestation to the draft release before the release is published
 [//]: # (#;< PHP_PHAR)
   - Builds the PHAR to attach
 [//]: # (#;> PHP_PHAR)
