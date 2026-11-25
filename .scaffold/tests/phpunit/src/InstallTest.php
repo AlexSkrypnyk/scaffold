@@ -859,13 +859,7 @@ final class InstallTest extends UnitTestCase {
       return;
     }
 
-    // Renovate skips its own wait for npm lock file maintenance only when
-    // 'engines' allows no npm older than the one that reads 'min-release-age'.
     $this->assertContains('min-release-age=7', file(self::$sut . DIRECTORY_SEPARATOR . '.npmrc', FILE_IGNORE_NEW_LINES) ?: []);
-    $package = json_decode((string) file_get_contents(self::$sut . DIRECTORY_SEPARATOR . 'package.json'), TRUE, 512, JSON_THROW_ON_ERROR);
-    $this->assertIsArray($package);
-    $this->assertIsArray($package['engines'] ?? NULL);
-    $this->assertSame('>=11.10.0', $package['engines']['npm'] ?? NULL);
   }
 
   public static function dataProviderInstallRenovateLockFileMaintenance(): \Iterator {

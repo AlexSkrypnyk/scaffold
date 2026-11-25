@@ -44,9 +44,6 @@
     "jest-environment-jsdom": "__VERSION__"
   },
   "overrides": {
-    "@ai-sdk/provider-utils": {
-      "undici": "__VERSION__"
-    },
     "@docusaurus/core": {
       "tinypool": "__VERSION__"
     },

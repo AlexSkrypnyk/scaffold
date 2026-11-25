@@ -47,9 +47,6 @@
     "jest-environment-jsdom": "^30.5.2"
   },
   "overrides": {
-    "@ai-sdk/provider-utils": {
-      "undici": "^7.30.2"
-    },
     "@docusaurus/core": {
       "tinypool": "^2.2.0"
     },
